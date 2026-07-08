@@ -38,11 +38,12 @@ v3 implemented on 2026-07-07:
 | File | Purpose |
 |---|---|
 | `00_FILE_STRUCTURE.md` | Repository map for app, scanner, local server, tests, and documentation |
-| `ROADMAP.md` | Phase-level project roadmap and current project-foundation status |
+| `ROADMAP.md` | Phase-level project roadmap and current phase status |
 | `CURRENT_PROJECT_AUDIT.md` | Verified repository, runtime, command, and risk evidence |
 | `AI_STEP_VERIFICATION_CHECKLIST.md` | Required checks before claiming code or documentation work is complete |
 | `CONTEXT.md` | Canonical terms and boundary rules for live/static scanning |
-| `phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Current Phase 1 plan for users, workflows, data sources, AI use cases, and acceptance criteria |
+| `phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 plan for users, workflows, data sources, AI use cases, and acceptance criteria |
+| `phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Current Phase 2 plan for the project brief/report data contract, module boundaries, API surface, ranking rules, and Phase 3 readiness |
 | `01-doc-conventions-analysis.md` | How the user's documentation system works and parsing signals table |
 | `02-dashboard-data-model.md` | Proposed JSON data model for scanner output |
 | `03-status-rules.md` | Status derivation rules |

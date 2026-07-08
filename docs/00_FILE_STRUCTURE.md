@@ -59,7 +59,8 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/planning/` | Cross-phase planning notes and decision drafts |
 | `docs/audits/` | Focused audit reports |
 | `docs/phases/` | Detailed phase plans and templates |
-| `docs/phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Current Phase 1 discovery and requirements plan |
+| `docs/phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 discovery and requirements plan |
+| `docs/phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Current Phase 2 architecture and data model plan for the project brief/report workflow |
 | `docs/handoffs/` | Bounded task handoffs to Claude |
 | `docs/superpowers/specs/` | Approved design specs produced by the brainstorming workflow |
 | `docs/superpowers/plans/` | Implementation plans produced by the writing-plans workflow |

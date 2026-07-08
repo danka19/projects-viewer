@@ -2,7 +2,7 @@
 
 Status: active.
 
-Last updated: 2026-07-08.
+Last updated: 2026-07-09.
 
 ## Repository Baseline
 
@@ -50,12 +50,13 @@ Last updated: 2026-07-08.
 | Phase 1 AI workflow/review policy | Work item 1.3 ranked daily/weekly brief first, accepted AI preflight and reviewer/checker workflows as review support, defined finding review-state meanings, and recorded rejected/deferred AI behaviors on 2026-07-08 |
 | Phase 1 OpenSpec conversion | Work item 1.4 created proposed change `openspec/changes/add-project-brief-report/` with proposal, design, delta spec, and tasks for the daily/weekly project brief/report workflow on 2026-07-08 |
 | Phase 1 first-workflow selection | Work item 1.5 selected local daily/weekly project brief as API/report JSON first, dashboard UI later, and set Phase 2 architecture targets for the report contract, composition module, API surface, ranking rules, and storage boundaries on 2026-07-08 |
+| Phase 2 planning | Human owner approved moving into Phase 2 on 2026-07-09; `docs/phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` now defines the architecture work items for `add-project-brief-report` |
 
 ## Known Risks And Gaps
 
 | ID | Risk | Owner | Status |
 |---|---|---|---|
-| AUDIT-001 | Phase 1 discovery decisions are documented; next risk is entering Phase 2 without a focused architecture plan for `add-project-brief-report`. | Phase 2 | open |
+| AUDIT-001 | Phase 2 must resolve the project brief/report data contract, module boundary, local API surface, ranking rules, and baseline behavior before Phase 3 implementation starts. | Phase 2 | open |
 | AUDIT-002 | Environment and verification commands are recorded in README and this audit; keep them current as scripts change. | Phase 0 | monitored |
 | AUDIT-003 | Architecture decisions are partially documented in README/docs, but no ADR/OpenSpec exists for server/API/watcher contracts. | Phase 1/2 | open |
 | AUDIT-004 | Local branch had commits ahead of GitHub remote during early foundation work; `main` later matched `origin/main` before Phase 1 planning. | Human owner | closed 2026-07-08 |

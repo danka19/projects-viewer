@@ -4,7 +4,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Current Roadmap Validation
 
-- Current phase: Phase 1 Discovery And Requirements.
+- Current phase: Phase 2 Architecture And Data Model.
 - Planning from this roadmap alone is forbidden. Detailed phase plans must reconcile roadmap intent, current docs, current implementation, environment evidence, audit findings, and human decisions.
 - Product behavior, requirements, proposed changes, and acceptance criteria belong in OpenSpec artifacts under `openspec/` when SDD applies.
 - New ideas during active phase work must go through change intake before they alter scope or plans.
@@ -32,7 +32,7 @@ Evidence:
 
 ## Phase 1. Discovery And Requirements
 
-Status: gate decisions documented; pending human approval to move into Phase 2.
+Status: accepted and closed on 2026-07-09.
 
 Goal: identify users, workflows, data sources, constraints, and first acceptance criteria.
 
@@ -40,11 +40,18 @@ Detailed plan: `docs/phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md`.
 
 Selected first workflow: local daily/weekly project brief as API/report JSON first, dashboard UI later. Proposed OpenSpec change: `openspec/changes/add-project-brief-report/`.
 
+Evidence:
+
+- Phase 1 plan records primary users, data/trust boundaries, AI workflow/review policy, OpenSpec conversion, and first workflow selection.
+- Human owner approved moving into Phase 2 on 2026-07-09.
+
 ## Phase 2. Architecture And Data Model
 
-Status: not planned in detail yet.
+Status: planned; ready for architecture work item execution.
 
 Goal: define the first stable architecture, data contract, report composition module boundary, local API surface, ranking rules, storage boundaries, and integration contracts for the selected project brief/report workflow.
+
+Detailed plan: `docs/phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md`.
 
 ## Phase 3. First Usable Workflow
 

@@ -1,6 +1,6 @@
 # Phase 1. Discovery And Requirements
 
-Status: in progress.
+Status: accepted and closed on 2026-07-09.
 
 ## Goal
 
@@ -478,4 +478,4 @@ Phase 3 implementation target:
 - Decision: Phase 3 should optimize first for a daily/weekly project brief built from AI context and findings.
 - Decision: The first surface should be API/report JSON, then dashboard UI or Markdown rendering after the review policy and report contract are validated.
 - Decision: Tracked-project configuration remains single-user local-only through Phase 3.
-- Remaining human confirmation before implementation: approve moving from Phase 1 discovery into Phase 2 architecture planning for `add-project-brief-report`.
+- Decision: Human owner approved moving from Phase 1 discovery into Phase 2 architecture planning for `add-project-brief-report` on 2026-07-09.
