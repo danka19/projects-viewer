@@ -222,6 +222,7 @@ export interface WorkspaceConfig {
   path: string;
   enabled: boolean;
   discoveryDepth: 1 | 2 | 3;
+  allowNestedProjects: boolean;
 }
 
 export interface ProjectConfigSettings {
@@ -240,6 +241,14 @@ export interface DiscoveredProjectCandidate {
   name: string;
   path: string;
   reasons: string[];
+  confidence: 'high' | 'medium' | 'low';
+  badges: string[];
+  isNested?: boolean;
+}
+
+export interface SkippedInternalFolder {
+  path: string;
+  reason: string;
 }
 
 export type TabId =

@@ -91,6 +91,7 @@ export function normalizeProjectConfig(input = {}, { now = () => new Date() } = 
         path: path.resolve(workspace.path),
         enabled: workspace.enabled !== false,
         discoveryDepth: normalizeDiscoveryDepth(workspace.discoveryDepth),
+        allowNestedProjects: normalizeAllowNestedProjects(workspace.allowNestedProjects),
       };
     });
 
@@ -196,6 +197,7 @@ export async function addWorkspace(input, options = {}) {
     path: resolved,
     enabled: true,
     discoveryDepth: normalizeDiscoveryDepth(input?.discoveryDepth),
+    allowNestedProjects: normalizeAllowNestedProjects(input?.allowNestedProjects),
   };
   const saved = await writeProjectConfig({ ...config, workspaces: [...config.workspaces, workspace] }, options);
   return {
@@ -240,7 +242,11 @@ function stableId(name, existingIds = new Set()) {
 }
 
 function normalizeDiscoveryDepth(value) {
-  return [1, 2, 3].includes(Number(value)) ? Number(value) : 2;
+  return [1, 2, 3].includes(Number(value)) ? Number(value) : 1;
+}
+
+function normalizeAllowNestedProjects(value) {
+  return value === true;
 }
 
 function normalizeTags(tags) {

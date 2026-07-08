@@ -133,8 +133,23 @@ Tracked projects are stored in `app-data/projects.config.json`, so they remain a
 1. Open **Manage Projects**.
 2. Click **Browse** to choose a folder that contains multiple projects, or paste an absolute folder path manually.
 3. Enter a display name.
-4. Choose discovery depth `1`, `2`, or `3`.
-5. Click **Discover projects**.
+4. Keep discovery depth at `1` for normal workspace roots.
+5. Enable nested project discovery only when the workspace intentionally contains real projects below the first child level.
+6. Click **Discover projects**.
+
+A **workspace root** is the parent folder where Projects Viewer looks for projects, for example `C:\Users\me\Documents\projects`. The workspace root is not tracked as a project by discovery.
+
+A **discovered project** is a candidate folder found inside a workspace root. By default, discovery inspects only immediate child folders (`discoveryDepth: 1`), so `C:\Users\me\Documents\projects\ExampleProject` can be offered while `C:\Users\me\Documents\projects\ExampleProject\docs` is skipped.
+
+A **tracked project** is a discovered or manually added project that you explicitly confirmed. Selecting rows in **Discovered Projects** does not track them until you click **Track selected**.
+
+An **internal folder** is a folder inside a project that discovery must never offer as a separate project. Internal folders can still be read later by the scanner when they contain documentation for a tracked project.
+
+Discovery requires project-root signals. Strong signals include `.git`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, `CLAUDE.md`, `AGENTS.md`, `README.md` plus `CLAUDE.md`, `README.md` plus `AGENTS.md`, or `README.md` plus a `docs` directory. `README.md` alone is a weak signal and is not enough for internal folder names.
+
+Ignored/internal discovery folder names are: `node_modules`, `.git`, `.pytest_cache`, `__pycache__`, `.next`, `dist`, `build`, `coverage`, `vendor`, `docs`, `doc`, `documentation`, `specs`, `spec`, `openspec`, `.openspec`, `src`, `test`, `tests`, `web`, `api`, `frontend`, `backend`, `public`, `assets`, `static`.
+
+Nested projects are disabled by default with `allowNestedProjects: false`. To enable them, turn on **Allow nested projects** in **Manage Projects** or set `"allowNestedProjects": true` in the workspace config. Nested candidates still need strong project-root signals, ignored/internal folders remain excluded, and nested rows are marked with a `nested project` badge.
 
 ### Track discovered projects
 
@@ -143,7 +158,7 @@ Tracked projects are stored in `app-data/projects.config.json`, so they remain a
 3. Click **Track selected**.
 4. The selected projects are saved to `app-data/projects.config.json`.
 
-Discovery returns detected reasons such as `README.md`, `package.json`, `docs/`, `.openspec/`, or `.git/`. It does not automatically track every candidate.
+Discovery returns detected reasons, confidence, and badges such as `git`, `package.json`, `CLAUDE.md`, `AGENTS.md`, `docs`, `SDD`, and `roadmap`. It does not automatically track every candidate.
 
 ### Disable a project without deleting it
 
@@ -165,7 +180,8 @@ Manual editing is optional; the dashboard UI is the preferred path. The **Browse
       "name": "Local Projects",
       "path": "C:\\Users\\me\\Documents\\projects",
       "enabled": true,
-      "discoveryDepth": 2
+      "discoveryDepth": 1,
+      "allowNestedProjects": false
     }
   ],
   "projects": [
@@ -193,6 +209,11 @@ Manual editing is optional; the dashboard UI is the preferred path. The **Browse
 - `tags` — optional labels shown in project management UI.
 - `settings.activeDays` (optional, default 14) — how recent a doc change must be for a project with open work to count as **active** instead of **stalled**.
 - `settings.watchDocs` (optional, default true in local server mode) — set to `false` to disable automatic watcher rescans.
+
+Workspace config fields:
+
+- `discoveryDepth` - workspace discovery depth. Default is `1`, which means immediate child folders only.
+- `allowNestedProjects` - set to `true` only when nested real projects should be discoverable; default is `false`.
 
 Generated scan results are stored separately in `app-data/projects.generated.json`. The static fallback file `src/data/projects.json` remains available for browser-only static mode and build compatibility.
 

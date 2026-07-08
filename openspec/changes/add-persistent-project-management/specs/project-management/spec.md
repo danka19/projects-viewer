@@ -39,7 +39,7 @@ Projects Viewer SHALL never write, delete, move, or reformat files inside tracke
 
 ### Requirement: Workspace Discovery
 
-Projects Viewer SHALL discover candidate projects only inside saved workspace folders with depth caps and exclusion rules.
+Projects Viewer SHALL treat a saved workspace folder as a workspace root, discover real project candidates separately from tracked projects, and keep internal project folders out of selectable discovery results.
 
 #### Scenario: Discover candidates without tracking all
 
@@ -47,6 +47,27 @@ Projects Viewer SHALL discover candidate projects only inside saved workspace fo
 - **WHEN** the user runs discovery
 - **THEN** the API returns candidates with detected reasons
 - **AND** none are tracked until the user selects them
+
+#### Scenario: Default discovery inspects immediate children only
+
+- **GIVEN** a workspace root contains a project with internal folders such as `docs`, `.pytest_cache`, `openspec`, `web`, or `src`
+- **WHEN** discovery runs with default settings
+- **THEN** only immediate child project roots with enough project-root signals are returned
+- **AND** internal folders are returned only as skipped debug entries
+
+#### Scenario: Nested discovery is explicit
+
+- **GIVEN** a saved workspace has `allowNestedProjects: false`
+- **WHEN** discovery runs
+- **THEN** nested folders are not returned as project candidates
+- **AND** when `allowNestedProjects: true`, nested candidates still require strong project-root signals and ignored/internal folder names remain excluded
+
+#### Scenario: Track selected validates candidates before writing config
+
+- **GIVEN** the user selected discovered project paths
+- **WHEN** the user clicks Track selected
+- **THEN** each selected path is validated for existence, workspace membership, ignored/internal folder names, duplicate tracked projects, nested project rules, and project-root signals
+- **AND** invalid selections are rejected without partially adding projects
 
 ### Requirement: Enabled Project Scan Boundary
 

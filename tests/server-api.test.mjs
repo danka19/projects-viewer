@@ -60,8 +60,12 @@ test('workspace discovery API returns candidates and track-discovered persists s
   const appDataDir = path.join(tmp, 'app-data');
   const workspaceRoot = path.join(tmp, 'workspace');
   const candidateRoot = path.join(workspaceRoot, 'candidate');
+  const docsRoot = path.join(candidateRoot, 'docs');
   await fs.mkdir(candidateRoot, { recursive: true });
+  await fs.mkdir(docsRoot, { recursive: true });
   await fs.writeFile(path.join(candidateRoot, 'README.md'), '# Candidate');
+  await fs.writeFile(path.join(candidateRoot, 'AGENTS.md'), '# Agents');
+  await fs.writeFile(path.join(docsRoot, 'README.md'), '# Docs');
   const app = await createApp({
     appDataDir,
     legacyConfigPath: path.join(tmp, 'missing.json'),
@@ -83,8 +87,11 @@ test('workspace discovery API returns candidates and track-discovered persists s
       method: 'POST',
     });
     assert.equal(discoveryResponse.status, 200);
-    const { candidates } = await discoveryResponse.json();
+    const { discoveredProjects, candidates, internalFolders } = await discoveryResponse.json();
+    assert.equal(discoveredProjects.length, 1);
     assert.equal(candidates.length, 1);
+    assert.equal(candidates[0].name, 'candidate');
+    assert.ok(internalFolders.some((entry) => entry.path === docsRoot));
 
     const trackResponse = await fetch(`${server.url}/api/projects/track-discovered`, {
       method: 'POST',
@@ -94,6 +101,48 @@ test('workspace discovery API returns candidates and track-discovered persists s
     assert.equal(trackResponse.status, 201);
     const tracked = await trackResponse.json();
     assert.equal(tracked.projects.length, 1);
+  } finally {
+    await server.close();
+  }
+});
+
+test('track-discovered rejects internal folders without adding partial projects', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-track-invalid-api-'));
+  const appDataDir = path.join(tmp, 'app-data');
+  const workspaceRoot = path.join(tmp, 'workspace');
+  const projectRoot = path.join(workspaceRoot, 'candidate');
+  const docsRoot = path.join(projectRoot, 'docs');
+  await fs.mkdir(docsRoot, { recursive: true });
+  await fs.writeFile(path.join(projectRoot, 'package.json'), '{}');
+  await fs.writeFile(path.join(docsRoot, 'README.md'), '# Docs');
+  const app = await createApp({
+    appDataDir,
+    legacyConfigPath: path.join(tmp, 'missing.json'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const workspaceResponse = await fetch(`${server.url}/api/workspaces`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: workspaceRoot, name: 'Workspace' }),
+    });
+    assert.equal(workspaceResponse.status, 201);
+
+    const trackResponse = await fetch(`${server.url}/api/projects/track-discovered`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paths: [projectRoot, docsRoot] }),
+    });
+    assert.equal(trackResponse.status, 400);
+    const errorBody = await trackResponse.json();
+    assert.equal(errorBody.invalid[0].reason, 'internal documentation folder');
+
+    const configResponse = await fetch(`${server.url}/api/config`);
+    const config = await configResponse.json();
+    assert.equal(config.projects.length, 0);
   } finally {
     await server.close();
   }

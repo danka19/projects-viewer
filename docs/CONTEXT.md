@@ -9,8 +9,11 @@ This is the active glossary and domain-boundary file for Projects Viewer.
 | Scanned project | A configured local repository or folder whose documentation is read by Projects Viewer. | Paths come only from `app-data/projects.config.json`; browser requests must never provide arbitrary scan paths. |
 | Dashboard project | This repository: `projects-viewer`. | Runtime writes stay inside the dashboard project, primarily under `app-data/`. |
 | Canonical project config | `app-data/projects.config.json`, the local source of truth for tracked projects, workspaces, and settings. | The root `projects.config.json` is a legacy seed/example after migration. |
-| Workspace | A saved local root folder that may contain multiple projects. | Workspaces are discovery inputs only; candidates are not tracked until selected. |
-| Discovered project candidate | A folder found under a saved workspace because it has markers such as `README.md`, `package.json`, `docs/`, `.openspec/`, or `.git/`. | Candidate detection does not automatically add it to tracked projects. |
+| Workspace | A saved discovery input that points at a workspace root. | Workspaces are discovery inputs only, not scanned projects. |
+| Workspace root | A saved local parent folder where discovery looks for project folders. | Example: `C:\Users\me\Documents\projects`; the workspace root itself is not a discovered project. |
+| Discovered project candidate | A real project-root candidate found under a workspace root. | By default only immediate child folders are inspected; candidates are not tracked until selected and confirmed. |
+| Tracked project | A project entry explicitly saved in `app-data/projects.config.json`. | Manual project add and **Track selected** create tracked projects. |
+| Internal folder | A project subfolder such as `docs`, `openspec`, `src`, `tests`, `web`, `frontend`, or `backend` that discovery must never show as a project. | Scanner code may still read documentation inside internal folders after the parent project is tracked. |
 | Generated scan data | `app-data/projects.generated.json`, the live generated dashboard data written by scanner runs. | `src/data/projects.json` remains a static fallback artifact for browser-only mode. |
 | Disabled tracked project | A saved project with `enabled: false`. | It remains in config but is excluded from scanner, watcher, manual rescan, and interval rescan. |
 | Live mode | Browser connected to the local Express API from `server.mjs`. | Enables manual rescan, interval rescan, watcher status, and live data reloads. |

@@ -10,7 +10,6 @@ import { createScanController } from './server/scan-controller.mjs';
 import {
   addProject,
   addWorkspace,
-  assertPathInsideWorkspace,
   ensureProjectConfig,
   getConfigPaths,
   getEnabledProjects,
@@ -18,7 +17,10 @@ import {
   removeProject,
   updateProject,
 } from './server/project-config.mjs';
-import { discoverWorkspaceProjects } from './server/project-discovery.mjs';
+import {
+  discoverWorkspaceProjects,
+  validateDiscoveredProjectSelection,
+} from './server/project-discovery.mjs';
 import { browseFolder as defaultBrowseFolder } from './server/folder-picker.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -292,8 +294,8 @@ export async function createApp({
         err.statusCode = 404;
         throw err;
       }
-      const candidates = await discoverWorkspaceProjects(workspace);
-      res.json({ workspace, candidates });
+      const discovery = await discoverWorkspaceProjects(workspace);
+      res.json({ workspace, ...discovery, candidates: discovery.discoveredProjects });
     } catch (err) {
       sendError(res, err);
     }
@@ -308,10 +310,21 @@ export async function createApp({
         throw err;
       }
       const initialConfig = await readProjectConfig(configOptions);
+      const validation = await validateDiscoveredProjectSelection(
+        paths,
+        initialConfig.workspaces,
+        initialConfig.projects,
+      );
+      if (validation.invalid.length > 0) {
+        res.status(400).json({
+          error: 'Some selected project paths cannot be tracked.',
+          invalid: validation.invalid,
+        });
+        return;
+      }
       const projects = [];
-      for (const candidatePath of paths) {
-        const safePath = assertPathInsideWorkspace(candidatePath, initialConfig.workspaces);
-        const result = await addProject({ path: safePath }, configOptions);
+      for (const candidate of validation.valid) {
+        const result = await addProject({ path: candidate.path }, configOptions);
         projects.push(result.project);
       }
       await restartWatcher();

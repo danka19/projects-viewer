@@ -3,6 +3,7 @@ import type {
   DiscoveredProjectCandidate,
   ProjectConfig,
   ProjectData,
+  SkippedInternalFolder,
 } from '../types';
 import { formatDate } from '../statusMeta';
 
@@ -17,6 +18,7 @@ interface ManageProjectsProps {
 
 interface ApiError {
   error?: string;
+  invalid?: { path: string; reason: string }[];
 }
 
 export default function ManageProjects({
@@ -31,8 +33,10 @@ export default function ManageProjects({
   const [projectName, setProjectName] = useState('');
   const [workspacePath, setWorkspacePath] = useState('');
   const [workspaceName, setWorkspaceName] = useState('');
-  const [discoveryDepth, setDiscoveryDepth] = useState<1 | 2 | 3>(2);
+  const [discoveryDepth, setDiscoveryDepth] = useState<1 | 2 | 3>(1);
+  const [allowNestedProjects, setAllowNestedProjects] = useState(false);
   const [candidates, setCandidates] = useState<DiscoveredProjectCandidate[]>([]);
+  const [internalFolders, setInternalFolders] = useState<SkippedInternalFolder[]>([]);
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +57,16 @@ export default function ManageProjects({
       },
     });
     const body = (await response.json().catch(() => ({}))) as ApiError;
-    if (!response.ok) throw new Error(body.error ?? `Request failed: ${response.status}`);
+    if (!response.ok) {
+      const invalid = body.invalid
+        ?.map((entry) => `${entry.path}: ${entry.reason}`)
+        .join('; ');
+      throw new Error(
+        invalid
+          ? `${body.error ?? `Request failed: ${response.status}`} ${invalid}`
+          : body.error ?? `Request failed: ${response.status}`,
+      );
+    }
     return body as T;
   }
 
@@ -111,15 +124,22 @@ export default function ManageProjects({
           path: workspacePath,
           name: workspaceName || undefined,
           discoveryDepth,
+          allowNestedProjects,
         }),
       });
-      const result = await requestJson<{ candidates: DiscoveredProjectCandidate[] }>(
+      const result = await requestJson<{
+        discoveredProjects?: DiscoveredProjectCandidate[];
+        candidates?: DiscoveredProjectCandidate[];
+        internalFolders?: SkippedInternalFolder[];
+      }>(
         `/api/workspaces/${workspace.id}/discover`,
         { method: 'POST' },
       );
-      setCandidates(result.candidates);
+      const discoveredProjects = result.discoveredProjects ?? result.candidates ?? [];
+      setCandidates(discoveredProjects);
+      setInternalFolders(result.internalFolders ?? []);
       setSelectedPaths(new Set());
-      setMessage(`${result.candidates.length} candidate project(s) found.`);
+      setMessage(`${discoveredProjects.length} candidate project(s) found.`);
       await onConfigChanged();
     });
   }
@@ -131,6 +151,7 @@ export default function ManageProjects({
         body: JSON.stringify({ paths: [...selectedPaths] }),
       });
       setCandidates([]);
+      setInternalFolders([]);
       setSelectedPaths(new Set());
       setMessage('Selected projects tracked.');
       await onConfigChanged();
@@ -284,6 +305,15 @@ export default function ManageProjects({
                     <option value={3}>3</option>
                   </select>
                 </label>
+                <label className="flex items-center gap-2 text-xs text-mute">
+                  <input
+                    type="checkbox"
+                    checked={allowNestedProjects}
+                    onChange={(event) => setAllowNestedProjects(event.target.checked)}
+                    disabled={!liveMode || busy}
+                  />
+                  Allow nested projects
+                </label>
                 <button
                   type="button"
                   onClick={handleDiscoverWorkspace}
@@ -297,7 +327,7 @@ export default function ManageProjects({
           </section>
         </div>
 
-        {candidates.length > 0 && (
+        {(candidates.length > 0 || internalFolders.length > 0) && (
           <section className="mt-5 rounded-lg border border-line p-4">
             <div className="flex flex-wrap items-center gap-3">
               <h3 className="text-sm font-semibold text-ink">Discovered Projects</h3>
@@ -310,9 +340,12 @@ export default function ManageProjects({
                 Track selected
               </button>
             </div>
+            {candidates.length === 0 && (
+              <p className="mt-3 text-sm text-mute">No project candidates found.</p>
+            )}
             <div className="mt-3 divide-y divide-line">
               {candidates.map((candidate) => (
-                <label key={candidate.path} className="flex gap-3 py-3">
+                <label key={candidate.path} className="grid gap-3 py-3 sm:grid-cols-[auto_1fr]">
                   <input
                     type="checkbox"
                     checked={selectedPaths.has(candidate.path)}
@@ -321,7 +354,20 @@ export default function ManageProjects({
                     className="mt-1"
                   />
                   <span className="min-w-0">
-                    <span className="block text-sm font-medium text-ink">{candidate.name}</span>
+                    <span className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-medium text-ink">{candidate.name}</span>
+                      <span className="rounded border border-line px-2 py-0.5 font-mono text-[10px] uppercase text-faint">
+                        {candidate.confidence}
+                      </span>
+                      {(candidate.badges ?? []).map((badge) => (
+                        <span
+                          key={badge}
+                          className="rounded border border-emerald-300/25 bg-emerald-400/10 px-2 py-0.5 font-mono text-[10px] text-emerald-100"
+                        >
+                          {badge}
+                        </span>
+                      ))}
+                    </span>
                     <span className="block truncate font-mono text-[11px] text-faint">
                       {candidate.path}
                     </span>
@@ -332,6 +378,21 @@ export default function ManageProjects({
                 </label>
               ))}
             </div>
+            {internalFolders.length > 0 && (
+              <details className="mt-4 rounded-lg border border-line/70 px-3 py-2">
+                <summary className="cursor-pointer text-xs font-semibold text-mute">
+                  Skipped internal folders ({internalFolders.length})
+                </summary>
+                <div className="mt-2 divide-y divide-line/70">
+                  {internalFolders.map((folder) => (
+                    <div key={folder.path} className="py-2">
+                      <p className="truncate font-mono text-[11px] text-faint">{folder.path}</p>
+                      <p className="text-xs text-mute">{folder.reason}</p>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            )}
           </section>
         )}
 

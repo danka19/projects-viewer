@@ -101,6 +101,23 @@ test('addWorkspace validates directory and normalizes discovery depth', async ()
   );
 
   assert.equal(workspace.name, 'Local Projects');
-  assert.equal(workspace.discoveryDepth, 2);
+  assert.equal(workspace.discoveryDepth, 1);
+  assert.equal(workspace.allowNestedProjects, false);
   assert.equal(workspace.enabled, true);
+});
+
+test('addWorkspace preserves explicit nested project discovery setting', async () => {
+  const tmp = await makeTemp();
+  const appDataDir = path.join(tmp, 'app-data');
+  const workspaceRoot = path.join(tmp, 'projects');
+  await fs.mkdir(workspaceRoot, { recursive: true });
+  await ensureProjectConfig({ appDataDir, legacyConfigPath: path.join(tmp, 'missing.json') });
+
+  const { workspace } = await addWorkspace(
+    { path: workspaceRoot, name: 'Local Projects', discoveryDepth: 3, allowNestedProjects: true },
+    { appDataDir },
+  );
+
+  assert.equal(workspace.discoveryDepth, 3);
+  assert.equal(workspace.allowNestedProjects, true);
 });
