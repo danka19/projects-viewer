@@ -6,4 +6,4 @@
 - [x] Add Express management APIs.
 - [x] Add dashboard `Manage Projects` UI.
 - [x] Update docs, audit, and verification evidence.
-- [ ] Validate with tests, build, live API checks, restart persistence checks.
+- [x] Validate with tests, build, live API checks, restart persistence checks.
