@@ -1,6 +1,6 @@
 # Phase 0. Project Foundation
 
-Status: completed pending approval.
+Status: accepted and closed on 2026-07-08.
 
 ## Goal
 
@@ -40,7 +40,7 @@ Evidence:
 
 Approval status:
 
-- Completed pending human review.
+- Accepted by the human owner on 2026-07-08; Phase 1 planning may proceed.
 
 ## Change Intake
 

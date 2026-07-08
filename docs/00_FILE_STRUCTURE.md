@@ -59,6 +59,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/planning/` | Cross-phase planning notes and decision drafts |
 | `docs/audits/` | Focused audit reports |
 | `docs/phases/` | Detailed phase plans and templates |
+| `docs/phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Current Phase 1 discovery and requirements plan |
 | `docs/handoffs/` | Bounded task handoffs to Claude |
 | `docs/superpowers/specs/` | Approved design specs produced by the brainstorming workflow |
 | `docs/superpowers/plans/` | Implementation plans produced by the writing-plans workflow |

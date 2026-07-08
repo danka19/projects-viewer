@@ -4,7 +4,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Current Roadmap Validation
 
-- Current phase: Phase 0 Project Foundation.
+- Current phase: Phase 1 Discovery And Requirements.
 - Planning from this roadmap alone is forbidden. Detailed phase plans must reconcile roadmap intent, current docs, current implementation, environment evidence, audit findings, and human decisions.
 - Product behavior, requirements, proposed changes, and acceptance criteria belong in OpenSpec artifacts under `openspec/` when SDD applies.
 - New ideas during active phase work must go through change intake before they alter scope or plans.
@@ -12,7 +12,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Phase 0. Project Foundation
 
-Status: completed pending approval.
+Status: accepted and closed on 2026-07-08.
 
 Goal: prepare repository rules, documentation, environment notes, baseline product decisions, and verification habits.
 
@@ -27,14 +27,16 @@ Evidence:
 
 - `AGENTS.md`, `CLAUDE.md`, documentation map, roadmap, current audit, context, verification checklist, and phase template exist.
 - README records setup, commands, live/static mode, manual rescan, watcher behavior, interval rescan, and watcher disablement.
-- Current audit records git, runtime, tests, build, live server, production server, and watcher evidence.
-- Remaining approval: human owner review of this project-foundation documentation.
+- Current audit records git, runtime, tests, build, live server, production server, watcher, project-management, and AI context evidence.
+- Human owner accepted the foundation and approved starting Phase 1 on 2026-07-08.
 
 ## Phase 1. Discovery And Requirements
 
-Status: planned next.
+Status: planned and ready to execute.
 
 Goal: identify users, workflows, data sources, constraints, and first acceptance criteria.
+
+Detailed plan: `docs/phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md`.
 
 ## Phase 2. Architecture And Data Model
 
