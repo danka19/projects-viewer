@@ -1,0 +1,100 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import test from 'node:test';
+import { createApp } from '../server.mjs';
+
+async function startTestServer(app) {
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise((resolve) => server.once('listening', resolve));
+  const { port } = server.address();
+  return {
+    url: `http://127.0.0.1:${port}`,
+    close: () =>
+      new Promise((resolve, reject) => {
+        server.close((err) => (err ? reject(err) : resolve()));
+      }),
+  };
+}
+
+test('project management API persists added project and rejects missing path', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-api-'));
+  const appDataDir = path.join(tmp, 'app-data');
+  const projectRoot = path.join(tmp, 'sample');
+  await fs.mkdir(projectRoot, { recursive: true });
+  const app = await createApp({
+    appDataDir,
+    legacyConfigPath: path.join(tmp, 'missing.json'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const missing = await fetch(`${server.url}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: path.join(tmp, 'missing') }),
+    });
+    assert.equal(missing.status, 400);
+
+    const added = await fetch(`${server.url}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: projectRoot, name: 'Sample' }),
+    });
+    assert.equal(added.status, 201);
+
+    const configResponse = await fetch(`${server.url}/api/config`);
+    const config = await configResponse.json();
+    assert.equal(config.projects[0].name, 'Sample');
+    assert.equal(config.projects[0].enabled, true);
+  } finally {
+    await server.close();
+  }
+});
+
+test('workspace discovery API returns candidates and track-discovered persists selected paths', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-workspace-api-'));
+  const appDataDir = path.join(tmp, 'app-data');
+  const workspaceRoot = path.join(tmp, 'workspace');
+  const candidateRoot = path.join(workspaceRoot, 'candidate');
+  await fs.mkdir(candidateRoot, { recursive: true });
+  await fs.writeFile(path.join(candidateRoot, 'README.md'), '# Candidate');
+  const app = await createApp({
+    appDataDir,
+    legacyConfigPath: path.join(tmp, 'missing.json'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const workspaceResponse = await fetch(`${server.url}/api/workspaces`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: workspaceRoot, name: 'Workspace', discoveryDepth: 2 }),
+    });
+    assert.equal(workspaceResponse.status, 201);
+    const { workspace } = await workspaceResponse.json();
+
+    const discoveryResponse = await fetch(`${server.url}/api/workspaces/${workspace.id}/discover`, {
+      method: 'POST',
+    });
+    assert.equal(discoveryResponse.status, 200);
+    const { candidates } = await discoveryResponse.json();
+    assert.equal(candidates.length, 1);
+
+    const trackResponse = await fetch(`${server.url}/api/projects/track-discovered`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paths: [candidateRoot] }),
+    });
+    assert.equal(trackResponse.status, 201);
+    const tracked = await trackResponse.json();
+    assert.equal(tracked.projects.length, 1);
+  } finally {
+    await server.close();
+  }
+});
