@@ -1,0 +1,61 @@
+# 00. File Structure
+
+This document is the repository map for agents and humans. Keep it current whenever files or folders are added, removed, or repurposed.
+
+## Root
+
+| Path | Purpose |
+|---|---|
+| `AGENTS.md` | Canonical operating guide for Codex and future agents |
+| `CLAUDE.md` | Thin Claude entry point: read `AGENTS.md`, then the active handoff if listed |
+| `.env.example` | Versioned environment template with placeholders only |
+| `.gitignore` | Excludes secrets, local config, generated artifacts, and private data |
+| `README.md` | User-facing app overview, setup, commands, live/static mode, and troubleshooting |
+| `package.json` / `package-lock.json` | Node scripts and dependency lockfile |
+| `projects.config.json` | Local project list and watcher setting; only paths from this file are scanned |
+| `scan-projects.mjs` | Read-only scanner CLI and exported `runScan()` API |
+| `server.mjs` | Local Express dashboard server, API endpoints, Vite middleware, built frontend serving, and watcher setup |
+| `vite.config.ts` / `tsconfig.json` | Frontend build and TypeScript configuration |
+| `docs/` | Product, architecture, operations, roadmap, audit, glossary, and phase documentation |
+| `server/` | Server-side helper modules |
+| `src/` | React frontend, components, generated data fallback, and TypeScript types |
+| `tests/` | Node test suite for scanner and server behavior |
+
+## Application Code
+
+| Path | Purpose |
+|---|---|
+| `src/App.tsx` | App shell, live/static data loading, scan controls, search, layout, and drawer state |
+| `src/data/projects.json` | Generated static fallback data written by `npm run scan` and live server scans |
+| `src/types.ts` | Scanner output and UI data contracts |
+| `src/components/` | Dashboard panels, tabs, status badges, drawer, skeletons, and project views |
+| `server/scan-controller.mjs` | Single-flight scan controller with queue, delay, status, trigger, and throttle logic |
+
+## Documentation
+
+| Path | Purpose |
+|---|---|
+| `docs/README.md` | Documentation home and product overview |
+| `docs/00_FILE_STRUCTURE.md` | Repository and documentation map |
+| `docs/ROADMAP.md` | Phase-level roadmap and gates |
+| `docs/CURRENT_PROJECT_AUDIT.md` | Current setup/repository audit and known risks |
+| `docs/AI_STEP_VERIFICATION_CHECKLIST.md` | Mandatory self-check for AI agents |
+| `docs/CONTEXT.md` | Active glossary and domain boundaries |
+| `docs/planning/` | Cross-phase planning notes and decision drafts |
+| `docs/audits/` | Focused audit reports |
+| `docs/phases/` | Detailed phase plans and templates |
+| `docs/handoffs/` | Bounded task handoffs to Claude |
+
+## Local Runtime
+
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Start Express plus Vite middleware; performs startup scan and enables watcher |
+| `npm run scan` | Run one-time read-only scan into `src/data/projects.json` |
+| `npm run build` | Type-check and build static frontend |
+| `npm run server` | Serve built frontend with local API |
+| `npm test` | Run Node tests |
+
+## Skills
+
+Workflow skills are global (`~/.codex/skills`): architecture-planner, phase-planner, phase-step-runner, phase-full-runner, phase-change-intake, openspec-*, handoff-to-claude, session-report, doc-sync-audit. This repository intentionally has no `.codex/skills/` directory.

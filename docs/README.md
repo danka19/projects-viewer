@@ -1,18 +1,56 @@
 # projects-viewer Documentation
 
-Read-only dashboard over the user's local projects, driven entirely by their markdown documentation conventions (Codex phase system, OpenSpec, ADRs, plain READMEs). Nothing here writes to scanned projects.
+Projects Viewer is a local, read-only dashboard over documentation in configured local projects. It scans markdown conventions used in Codex/phase/OpenSpec-style repositories and presents project status, next actions, blockers, decisions, audits, documentation coverage, and recent activity.
 
 Repo: https://github.com/danka19/projects-viewer
+
+## Current State
+
+v4 implemented on 2026-07-08:
+
+- Local live dashboard server in `server.mjs`.
+- Express API endpoints: `GET /api/projects`, `GET /api/scan-status`, `POST /api/rescan`.
+- Vite middleware in development through `npm run dev`.
+- Built frontend serving through `npm run server` / `npm run preview`.
+- Manual **Rescan docs** UI control.
+- Live/static mode detection and static `src/data/projects.json` fallback.
+- Optional interval rescan, off by default.
+- Chokidar watcher for documentation-like markdown changes inside configured project paths.
+- Scanner exports reusable `runScan()` and keeps CLI support through `npm run scan`.
+
+v3 implemented on 2026-07-07:
+
+- Interactive project radar UI with metric bar, project sidebar, per-project summary panel, focus cards, tabs, right-side detail drawer, and global search.
+- Scanner intelligence for fuzzy doc categories, roadmap phases, specs, handoffs, decisions, blockers, risks, audits, documentation gaps, and health score.
 
 ## Documents
 
 | File | Purpose |
 |---|---|
-| `01-doc-conventions-analysis.md` | How the user's documentation system works (skills + AutoParts example); parsing signals table |
-| `02-dashboard-data-model.md` | Proposed JSON data model for the scanner output (`data/projects.json`) |
-| `03-status-rules.md` | Rules deriving active / stalled / done / needs attention / unknown, with thresholds |
-| `04-implementation-plan.md` | Short implementation plan, v1 acceptance criteria, open questions |
+| `00_FILE_STRUCTURE.md` | Repository map for app, scanner, local server, tests, and documentation |
+| `ROADMAP.md` | Phase-level project roadmap and current project-foundation status |
+| `CURRENT_PROJECT_AUDIT.md` | Verified repository, runtime, command, and risk evidence |
+| `AI_STEP_VERIFICATION_CHECKLIST.md` | Required checks before claiming code or documentation work is complete |
+| `CONTEXT.md` | Canonical terms and boundary rules for live/static scanning |
+| `01-doc-conventions-analysis.md` | How the user's documentation system works and parsing signals table |
+| `02-dashboard-data-model.md` | Proposed JSON data model for scanner output |
+| `03-status-rules.md` | Status derivation rules |
+| `04-implementation-plan.md` | Early implementation plan and v1 acceptance criteria |
 
-## Current State
+## Operations Summary
 
-v3 implemented (2026-07-07): interactive "project radar" UI with progressive disclosure — clickable metric bar, sidebar with health scores, per-project summary panel (health ring, current phase, next action, main blocker, recent decision), focus cards (max 3 items + View all), 8 tabs (Overview/Roadmap timeline/SDD-Specs/Tasks/Decisions/Audits/Documentation coverage map/Activity), right-side detail drawer with `file:line` + copy-path + related items, and global search across all item types (`/` shortcut). Scanner v3 adds: doc categories via fuzzy filename patterns (roadmap/spec/audit/decision/handoff), risks & open questions, audit docs with derived status, and a per-project summary object with a 0–100 health score. The v2 prose-status intelligence (phases, decisions, blockers with actor/conditional guards, handoff lifecycle, gaps) is unchanged underneath. See root `README.md` for the interaction model.
+- Development server: `npm run dev`, default URL `http://127.0.0.1:5173`.
+- Production-like local server: `npm run build`, then `npm run server`.
+- One-shot scan: `npm run scan`.
+- Tests: `npm test`.
+- Build verification: `npm run build`.
+- Current configured scanned project: `Example Project` at `C:\Users\danoc\Documents\projects\AutoParts`.
+
+## Safety Summary
+
+- The app is local-only.
+- Scanned projects are read-only inputs.
+- The browser never provides arbitrary project paths.
+- The API scans only paths from `projects.config.json`.
+- No cloud, auth, API keys, agent control, arbitrary shell commands, or whole-disk scanning are part of the current design.
+- Markdown files larger than 1 MB and unsafe folders such as `node_modules`, `.git`, `dist`, `build`, `.next`, `coverage`, and `vendor` are skipped.
