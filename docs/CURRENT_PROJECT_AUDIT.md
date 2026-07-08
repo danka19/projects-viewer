@@ -10,10 +10,10 @@ Last updated: 2026-07-09.
 |---|---|
 | Repository root | `C:\Users\danoc\Documents\projects\projects-viewer` |
 | Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer` |
-| Current branch | `main` |
+| Current branch | `phase-2/core-data-model` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Latest known commit before this audit update | `bc6877e Fix AI context changes snapshot comparison` |
-| Local divergence | `main` matched `origin/main` before Phase 1 planning documentation changes |
+| Latest known commit before this audit update | `e2d9d4e Define project brief ranking rules` |
+| Local divergence | `phase-2/core-data-model` tracks `origin/phase-2/core-data-model` |
 
 ## Useful Starting Points
 
@@ -51,12 +51,17 @@ Last updated: 2026-07-09.
 | Phase 1 OpenSpec conversion | Work item 1.4 created proposed change `openspec/changes/add-project-brief-report/` with proposal, design, delta spec, and tasks for the daily/weekly project brief/report workflow on 2026-07-08 |
 | Phase 1 first-workflow selection | Work item 1.5 selected local daily/weekly project brief as API/report JSON first, dashboard UI later, and set Phase 2 architecture targets for the report contract, composition module, API surface, ranking rules, and storage boundaries on 2026-07-08 |
 | Phase 2 planning | Human owner approved moving into Phase 2 on 2026-07-09; `docs/phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` now defines the architecture work items for `add-project-brief-report` |
+| Phase 2 work item 2.1 | Project brief/report JSON contract defined in `openspec/changes/add-project-brief-report/design.md`, sharpened in the delta spec, and recorded in the Phase 2 plan on 2026-07-09; `openspec list`, `openspec list --specs`, `openspec validate --all --strict`, and `git diff --check` passed |
+| Phase 2 work item 2.2 | Report composition module boundary defined on 2026-07-09: future `server/project-brief-report.mjs` is a pure deterministic composer over provided scan/config/findings/change inputs, while route IO, snapshot IO, findings persistence, and HTTP behavior stay outside the module |
+| Phase 2 work item 2.3 | Local API surface defined on 2026-07-09: future `GET /api/project-brief-report` returns report JSON, accepts only `since` and metadata-only `mode`, rejects unknown/path-like/repeated scalar query parameters, returns `404` for missing generated scan data, and does not write snapshot, findings, report-history, scanned-project, or external-action artifacts |
+| Phase 2 work item 2.4 | Ranking, empty-state, and baseline rules defined on 2026-07-09: report ranks review items deterministically without creating accepted decisions/actions, handles no-attention and missing-data states, and keeps report retrieval read-only for AI context snapshots and report history |
+| Phase 2 work item 2.5 | Phase 3 implementation plan created in `docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md` on 2026-07-09; plan maps `add-project-brief-report` OpenSpec tasks to shared types, pure report composition, local API route, focused tests, docs, final verification, and OpenSpec follow-through |
 
 ## Known Risks And Gaps
 
 | ID | Risk | Owner | Status |
 |---|---|---|---|
-| AUDIT-001 | Phase 2 must resolve the project brief/report data contract, module boundary, local API surface, ranking rules, and baseline behavior before Phase 3 implementation starts. | Phase 2 | open |
+| AUDIT-001 | Phase 2 architecture/data model planning is complete pending human acceptance; Phase 3 implementation must follow `docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md` before coding the project brief/report workflow. | Human owner / Phase 3 | monitored |
 | AUDIT-002 | Environment and verification commands are recorded in README and this audit; keep them current as scripts change. | Phase 0 | monitored |
 | AUDIT-003 | Architecture decisions are partially documented in README/docs, but no ADR/OpenSpec exists for server/API/watcher contracts. | Phase 1/2 | open |
 | AUDIT-004 | Local branch had commits ahead of GitHub remote during early foundation work; `main` later matched `origin/main` before Phase 1 planning. | Human owner | closed 2026-07-08 |

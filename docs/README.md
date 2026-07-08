@@ -43,7 +43,8 @@ v3 implemented on 2026-07-07:
 | `AI_STEP_VERIFICATION_CHECKLIST.md` | Required checks before claiming code or documentation work is complete |
 | `CONTEXT.md` | Canonical terms and boundary rules for live/static scanning |
 | `phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 plan for users, workflows, data sources, AI use cases, and acceptance criteria |
-| `phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Current Phase 2 plan for the project brief/report data contract, module boundaries, API surface, ranking rules, and Phase 3 readiness |
+| `phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Completed pending acceptance Phase 2 plan for the project brief/report data contract, module boundaries, API surface, ranking rules, and Phase 3 readiness |
+| `phases/PHASE_3_FIRST_USABLE_WORKFLOW.md` | Planned Phase 3 implementation plan for the JSON-first project brief/report API workflow |
 | `01-doc-conventions-analysis.md` | How the user's documentation system works and parsing signals table |
 | `02-dashboard-data-model.md` | Proposed JSON data model for scanner output |
 | `03-status-rules.md` | Status derivation rules |
