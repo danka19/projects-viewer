@@ -74,7 +74,7 @@ Verification evidence expected before completion:
 - Work items 3.2 and 3.3 completed: `server/project-brief-report.mjs` implements pure deterministic report composition, ranking, evidence aggregation, safe states, baseline state, derived labels, and advisory recommendation guards.
 - Work item 3.4 completed: `server.mjs` exposes `GET /api/project-brief-report`, validates only `mode` and `since`, rejects invalid/repeated/unknown/path-like parameters, reads existing findings state and snapshot state, and does not write report side effects.
 - `tests/project-brief-report.test.mjs` covers pure composition, ranking, safe states, missing generated data, module purity, API happy paths, invalid queries, missing scan data, no-attention reports, no snapshot write, no findings write, no report-history file, and unchanged scanned project sentinel files.
-- Implementation commits on branch `phase-3/first-usable-workflow`: `16af3e2` (shared types), `d119bf8` (composition module), and `e43fa6e` (API endpoint).
+- Implementation commits on branch `phase-3/first-usable-workflow`: `16af3e2` (shared types), `d119bf8` (composition module), `e43fa6e` (API endpoint), and `0cd3eb5` (post-review strict API validation for malformed generated scan data and ISO `since` parsing).
 - Phase gate verification passed on 2026-07-09: `npm test -- tests/project-brief-report.test.mjs` (7/7), `npm test` (38/38), `npm run build`, `openspec list`, `openspec list --specs`, `openspec validate --all --strict` (4/4), `git diff --check`, static forbidden-hook search, and local API smoke.
 
 ## Change Intake

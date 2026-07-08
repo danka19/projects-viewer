@@ -12,7 +12,7 @@ Last updated: 2026-07-09.
 | Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer\.worktrees\phase-3-first-usable-workflow` |
 | Current branch | `phase-3/first-usable-workflow` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Latest known commit before this audit update | `e43fa6e Add project brief report API` |
+| Latest known commit before this audit update | `0cd3eb5 Tighten project brief report API validation` |
 | Local divergence | Phase branch is local and not yet pushed during this audit update |
 
 ## Useful Starting Points
@@ -59,6 +59,7 @@ Last updated: 2026-07-09.
 | Phase 3 work item 3.1 | Shared `ProjectBriefReport` TypeScript contract types added to `src/types.ts`; `tests/project-brief-report-types.ts` contract check and `npm run build` passed on 2026-07-09 |
 | Phase 3 work items 3.2-3.3 | Pure `server/project-brief-report.mjs` composition module implemented with ranking, safe states, evidence, derived labels, and advisory recommendation guards; focused module tests and `npm test` passed on 2026-07-09 |
 | Phase 3 work item 3.4 | `GET /api/project-brief-report` implemented in `server.mjs`; API tests cover safe params, missing scan data, no arbitrary paths, no snapshot/finding/report-history writes, and unchanged scanned project sentinel files; `npm test` and `npm run build` passed on 2026-07-09 |
+| Phase 3 review fix | Independent review found invalid generated-scan JSON and loose parseable `since` values could violate the API contract; `0cd3eb5` added regression tests and fixed both boundaries on 2026-07-09 |
 
 ## Known Risks And Gaps
 
