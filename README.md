@@ -9,7 +9,7 @@ The main screen is deliberately calm — details are one click away (progressive
 - **Top metric bar** — total / active / needs-attention / stalled / done projects, open next actions, docs coverage. Every card is clickable: status cards filter the project list, "Next actions" opens the Tasks tab, "Docs coverage" opens the Documentation tab.
 - **Left sidebar** — compact project cards with status orb, health score (0–100), one-line status reason, and last update. Filter chips by status; click a card to select the project.
 - **Project radar panel** — the selected project's summary: health ring, current phase, next action, main blocker, recent decision, recent change, and a 5-slot doc-coverage strip. Every tile is clickable and jumps to the right tab or opens the detail drawer.
-- **Focus cards (Overview tab)** — max 3 items each for Next up, Blocked/gated, Needs attention, and Recent decisions, with "View all →" buttons.
+- **Focus cards (Overview tab)** — max 3 items each for Next up, Work constraints (Real blockers / Approval gates / Needs review / Paused), Needs attention, and Recent decisions, with "View all →" buttons.
 - **Tabs** — Overview · Roadmap · SDD/Specs (grouped by status) · Tasks · Decisions · Audits (grouped: attention/latest/recorded/archived) · Documentation (coverage map with per-category file lists and filename search) · Activity (change timeline). Only the selected tab renders its lists.
 - **Roadmap tab** — a segmented progress bar that separates fully-completed / pending-approval / in-progress / blocked-paused / planned phases (pending-approval work is deliberately *not* counted as finished), plus expandable phase cards. Collapsed: number, title, status badge, step-based progress %, confidence dot, source file. Expanded: a "Why this status?" panel (raw `Status:` text, matched parser rule, confidence, source `file:line`, suspected stale-doc warnings), detected steps with colored status dots and counts, and related decisions/audits. `npm run scan` also prints a **Roadmap Status Diagnostics** table per project with the same transparency data.
 - **Detail drawer** — click any phase, task, decision, blocker, audit, spec, or doc file to open a right-side drawer with its type, status, extracted text, `file:line` source, a copy-path button, and related items. Esc closes it.
@@ -155,7 +155,7 @@ Never scanned: `node_modules`, `.git`, `dist`, `build`, `.next`, `coverage`, `ve
 | Roadmap phases | `## Phase N. Name` sections in ROADMAP.md and `# Phase N - Name` plan files, with their prose `Status:` lines normalized to planned / in_progress / paused / blocked / completed / completed_pending_approval / pending_approval / needs_review / unknown — each with the matched parser rule, a confidence level (high/medium/low), and a suspected-issue flag when the docs contradict themselves (e.g. an early phase still marked "in progress" while later phases are completed) |
 | Phase steps | `### N.x Work Item` headings and checkboxes inside phase-plan files, classified by their section text (completed / pending / blocked / needs review / unknown) |
 | Decisions | lines with a date plus decision vocabulary (“Human decisions 2026-06-29: …”, “product decision”, “clarification”), bullets in `## Human/Key Decisions` sections, and `*DECISIONS*` files |
-| Blocked work | owner/human rejections and acceptance gaps, “must not start until / is blocked / blocked until” statements (conditional “if … blocked” gate language is ignored), paused work, and human-approval gates |
+| Work constraints | a two-step blocked/gated classifier first records raw candidates (`block`, `gate`, `pending approval`, review/validation wording, pause/defer wording), then includes only concrete project-work signals in status and health: real blockers, approval gates, needs review/validation, and paused/deferred work |
 | Specs & proposals | OpenSpec change folders (`proposal/design/tasks` artifacts with checkbox progress), handoff files with their `Status: Active/Done/Archived` lifecycle, `specs/` and `openapi/` files |
 | Documentation gaps | missing README/ROADMAP/CLAUDE.md/specs/audits, docs older than 30 days, and a CLAUDE.md “Active Handoff” pointer that references a missing or non-active handoff |
 | Risks & open questions | bullets under “Risks” / “Open Questions” headings, plus explicit “open question” lines |
@@ -163,14 +163,16 @@ Never scanned: `node_modules`, `.git`, `dist`, `build`, `.next`, `coverage`, `ve
 | Doc categories | every file is classified by fuzzy filename/path patterns into core / roadmap-planning (`*roadmap*`, `*plan*`, `*phase*`, `*milestone*`…) / SDD-specs (`*spec*`, `*design*`, `*architecture*`, `.openspec/`…) / audits-QA / decisions / handoffs / other |
 | Docs found | file list with size, category, per-file task counts, and modified date |
 
-Markdown table rows are skipped for decision/blocker detection — file inventories *describe* blockers, they aren't blockers. Every extracted item links back to its `file:line` source.
+Markdown table rows are skipped for decision/work-constraint detection — file inventories *describe* blockers, they aren't blockers. Every extracted item links back to its `file:line` source.
+
+Blocked/gated wording in agent rules, process policies, examples, templates, prompts, skills, and documentation instructions is filtered out of project status unless the nearby text clearly describes a concrete phase, task, implementation, feature, audit result, current status, or remaining project work. Filtered candidates stay visible in the collapsed **Constraint diagnostics** area with classification, confidence, matched keywords, reason, context, and source path.
 
 ## Status rules
 
 Evaluated top-down, first match wins:
 
 1. **unknown** — no documentation files found (or project path missing).
-2. **needs attention** — TODO/FIXME/BUG markers, owner rejections / acceptance gaps, or hard blocked-work statements.
+2. **needs attention** — TODO/FIXME/BUG markers, owner rejections / acceptance gaps, or hard real-blocker project signals.
 3. **active** — open tasks or an in-progress roadmap phase, with doc changes within `activeDays`.
 4. **stalled** — open work but no recent doc changes.
 5. **done** — no open work; completed tasks or finished phases exist.

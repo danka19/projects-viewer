@@ -1,5 +1,6 @@
 import type {
   AuditDoc,
+  BlockedGatedCandidate,
   BlockerItem,
   DecisionItem,
   DocFile,
@@ -90,6 +91,25 @@ export function blockerDrawer(b: BlockerItem, p: ProjectData): DrawerItem {
     text: b.text,
     file: b.file,
     line: b.line,
+    projectPath: p.path,
+  };
+}
+
+export function blockedGatedCandidateDrawer(c: BlockedGatedCandidate, p: ProjectData): DrawerItem {
+  return {
+    type: c.includedInProjectStatus ? 'Work constraint signal' : 'Filtered constraint candidate',
+    title: c.text.length > 80 ? c.text.slice(0, 80) + 'вЂ¦' : c.text,
+    status: `${c.classification} В· ${c.confidence}`,
+    statusChip: c.includedInProjectStatus
+      ? 'border-sky-400/30 bg-sky-400/10 text-sky-300'
+      : 'border-slate-500/30 bg-slate-500/10 text-slate-300',
+    text:
+      `${c.text}\n\nReason: ${c.reason}` +
+      `\nMatched keywords: ${c.matchedKeywords.join(', ')}` +
+      `\nIncluded in project status: ${c.includedInProjectStatus ? 'yes' : 'no'}` +
+      `\n\nNearby context: ${c.nearbyContext}`,
+    file: c.file,
+    line: c.line,
     projectPath: p.path,
   };
 }

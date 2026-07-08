@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DrawerItem, ProjectData, ProjectStatus, ScanOutput, TabId } from './types';
 import { formatDate } from './statusMeta';
 import {
+  blockedGatedCandidateDrawer,
   blockerDrawer,
   decisionDrawer,
   docDrawer,
@@ -235,6 +236,22 @@ function AppShell({
             project: p,
             tab: 'tasks',
             drawer: blockerDrawer(b, p),
+          });
+        }
+      }
+      for (const candidate of [
+        ...p.blockedGatedDiagnostics.filteredAgentRules,
+        ...p.blockedGatedDiagnostics.filteredProcessPolicies,
+        ...p.blockedGatedDiagnostics.filteredExamplesOrTemplates,
+      ]) {
+        if (candidate.text.toLowerCase().includes(q) || candidate.reason.toLowerCase().includes(q)) {
+          push({
+            kind: 'Diagnostic',
+            label: candidate.text.slice(0, 90),
+            sub: `${p.name} В· ${candidate.classification}`,
+            project: p,
+            tab: 'tasks',
+            drawer: blockedGatedCandidateDrawer(candidate, p),
           });
         }
       }

@@ -71,6 +71,7 @@ const LIMITS = {
   phases: 100,
   decisions: 150,
   blockers: 150,
+  blockedGatedCandidates: 500,
   risks: 80,
 };
 
@@ -153,11 +154,40 @@ const HARD_BLOCK_RE =
 // "if/when/may be ... blocked" is conditional gate language, not a live blocker.
 const CONDITIONAL_BLOCK_RE = /\b(if|when|whether|unless|may be|could be|might be)\b[^.]{0,60}blocked/i;
 const HUMAN_GATE_RE =
-  /approval pending|pending approval|requires (explicit )?(human |owner )?approval|requires [^.]{0,40}approval|merge[^.]{0,50}requires [^.]{0,30}approval|waiting for owner approval|completed but (requires|pending) approval|done\s*[-:]\s*approval pending|\bsdd gate\b|human acceptance/i;
+  /approval pending|pending approval|requires (explicit )?(human |owner )?approval|requires [^.]{0,40}approval|merge[^.]{0,50}requires [^.]{0,30}approval|waiting for (owner )?approval|completed but (requires|pending) approval|done\s*[-:]\s*approval pending|\bsdd gate\b|human acceptance|gated by [^.]{0,30}approval/i;
 const REVIEW_SIGNAL_RE =
-  /needs review|pending review|needs verification|requires validation|final review|human-reviewed sample pending|needs human review|awaiting review/i;
+  /needs review|requires review|pending review|needs verification|requires validation|waiting for validation|final review|human-reviewed sample pending|needs human review|awaiting review/i;
 const PAUSED_DEFERRED_RE = /\bpaused\b|on hold|\bdeferred\b|resume later|planned later/i;
 const ARCHIVED_DOC_RE = /superseded|historical (evidence|context|plan)|no longer (active|the active)/i;
+const BLOCKED_GATED_KEYWORDS = [
+  ['approval gate', /\bapproval gate(s)?\b/i],
+  ['pending approval', /\bpending approval\b/i],
+  ['requires approval', /\brequires [^.]{0,40}approval\b/i],
+  ['waiting for approval', /\bwaiting for (owner )?approval\b/i],
+  ['needs review', /\bneeds review\b/i],
+  ['requires review', /\brequires review\b/i],
+  ['needs verification', /\bneeds verification\b/i],
+  ['needs validation', /\bneeds validation\b/i],
+  ['waiting for validation', /\bwaiting for validation\b/i],
+  ['requires validation', /\brequires validation\b/i],
+  ['cannot continue', /\bcannot continue\b/i],
+  ['paused/deferred', /\bpaused\b|on hold|\bdeferred\b|resume later|planned later/i],
+  ['block', /\bblock(?:ed|er|ers|ing|s)?\b/i],
+  ['gate', /\bgate(?:d|s|way|keeping)?\b/i],
+];
+const PROJECT_SIGNAL_CONTEXT_RE =
+  /\b(phase|roadmap|task|work item|implementation|feature|bug|current status|progress|remaining work|next action|cannot continue|blocked by|waiting for|pending approval for this (phase|task|implementation)|validation of this feature|audit failed|acceptance failed|merge|implemented phase|current work)\b/i;
+const CONCRETE_PROJECT_CONTEXT_RE =
+  /\b(phase\s+\d|task\s+\d|work item\s+\d|implementation cannot continue|current work|current phase|this phase|this task|this implementation|audit failed|acceptance failed|blocked by)\b/i;
+const AGENT_RULE_CONTEXT_RE =
+  /\b(agent|agents|assistant|model|instruction|rule|policy|guideline|standard|must|should|never|always|how to|workflow rule|safety|guardrail|documentation rule|prompt|skill|unsafe action|bypass|execution)\b/i;
+const PROCESS_POLICY_CONTEXT_RE =
+  /\b(sdd|workflow|checkpoint|all merges|every [^.]{0,30}change|blocked state means|use blocked status|status when|review gate|approval gate is|required by process)\b/i;
+const EXAMPLE_TEMPLATE_CONTEXT_RE = /\b(example|template|format|sample|placeholder)\b/i;
+const AGENT_RULE_PATH_RE =
+  /(^|\/)(agents?|claude)\.md$|(^|\/)(\.claude|skills|\.skills|prompts|documentation-rules|agent-rules)(\/|$)|(^|\/)docs\/agents?\//i;
+const PROCESS_POLICY_PATH_RE = /(^|\/)docs\/(rules|process|standards|guidelines)\//i;
+const EXAMPLE_TEMPLATE_PATH_RE = /(^|\/)(templates?|examples?)(\/|$)|(^|\/)docs\/(templates?|examples?)\//i;
 
 // ------------------------------------------------------------------ walking
 
@@ -378,6 +408,86 @@ function readMultilineStatus(lines, i, firstPart) {
   // Truncate at a word boundary instead of mid-word.
   const cut = text.slice(0, 600);
   return cut.slice(0, cut.lastIndexOf(' ')) + ' …';
+}
+
+function matchedBlockedGatedKeywords(text) {
+  const found = [];
+  for (const [label, re] of BLOCKED_GATED_KEYWORDS) {
+    if (re.test(text)) found.push(label);
+  }
+  return found;
+}
+
+function pathBias(file) {
+  const f = file.toLowerCase();
+  if (EXAMPLE_TEMPLATE_PATH_RE.test(f)) return 'example_or_template';
+  if (AGENT_RULE_PATH_RE.test(f)) return 'agent_rule';
+  if (PROCESS_POLICY_PATH_RE.test(f)) return 'process_policy';
+  return null;
+}
+
+function classifyBlockedGatedCandidate({ text, file, line, section, nearbyContext }) {
+  const matchedKeywords = matchedBlockedGatedKeywords(text);
+  if (matchedKeywords.length === 0) return null;
+
+  const context = [section ?? '', nearbyContext ?? '', text].join(' ');
+  const hasConcreteProjectContext = CONCRETE_PROJECT_CONTEXT_RE.test(context);
+  const hasProjectContext = PROJECT_SIGNAL_CONTEXT_RE.test(context);
+  const hasAgentRuleContext = AGENT_RULE_CONTEXT_RE.test(context);
+  const hasProcessPolicyContext = PROCESS_POLICY_CONTEXT_RE.test(context);
+  const hasExampleTemplateContext = EXAMPLE_TEMPLATE_CONTEXT_RE.test(context);
+  const sourceBias = pathBias(file);
+
+  let classification = 'project_signal';
+  let confidence = hasConcreteProjectContext ? 'high' : 'medium';
+  let reason = hasConcreteProjectContext
+    ? 'concrete project-work context near blocked/gated wording'
+    : 'project-work context near blocked/gated wording';
+
+  if (hasExampleTemplateContext || sourceBias === 'example_or_template') {
+    classification = 'example_or_template';
+    confidence = hasConcreteProjectContext && !hasExampleTemplateContext ? 'medium' : 'high';
+    reason =
+      sourceBias === 'example_or_template'
+        ? 'template/example path defaults to diagnostic-only'
+        : 'example/template wording near blocked/gated candidate';
+  } else if ((hasAgentRuleContext || sourceBias === 'agent_rule') && !hasConcreteProjectContext) {
+    classification = 'agent_rule';
+    confidence = sourceBias === 'agent_rule' || hasAgentRuleContext ? 'high' : 'medium';
+    reason =
+      sourceBias === 'agent_rule'
+        ? 'agent-rule path defaults to diagnostic-only'
+        : 'agent/instruction/rule wording near blocked/gated candidate';
+  } else if ((hasProcessPolicyContext || sourceBias === 'process_policy') && !hasConcreteProjectContext) {
+    classification = 'process_policy';
+    confidence = sourceBias === 'process_policy' || hasProcessPolicyContext ? 'high' : 'medium';
+    reason =
+      sourceBias === 'process_policy'
+        ? 'process/rules path defaults to diagnostic-only'
+        : 'process/workflow policy wording near blocked/gated candidate';
+  } else if (!hasProjectContext) {
+    classification = sourceBias ?? 'process_policy';
+    confidence = sourceBias ? 'medium' : 'low';
+    reason = sourceBias
+      ? 'path indicates rule/policy/template content and no concrete project-work context was found'
+      : 'blocked/gated wording lacks concrete project-work context';
+  } else if (sourceBias && !hasConcreteProjectContext) {
+    classification = sourceBias;
+    confidence = 'medium';
+    reason = 'rule-like path requires clearer concrete project-work context';
+  }
+
+  return {
+    text,
+    file,
+    line,
+    classification,
+    includedInProjectStatus: classification === 'project_signal',
+    confidence,
+    reason,
+    matchedKeywords,
+    nearbyContext: (nearbyContext || text).slice(0, 500),
+  };
 }
 
 function classifyWorkSignal(line) {
@@ -658,13 +768,39 @@ function parseDoc(content, doc, acc) {
       }
     }
 
-    // Work status signals: real blockers are separate from normal approval,
-    // review, and pause/defer signals.
-    if (acc.workSignals.length < LIMITS.blockers) {
-      const signal = classifyWorkSignal(trimmed);
-      if (signal && !acc.seenWorkSignals.has(bulletText)) {
-        acc.seenWorkSignals.add(bulletText);
-        acc.workSignals.push({ ...signal, text: bulletText, file: doc.file, line: lineNo });
+    // Blocked/gated diagnostics are collected first, then only concrete
+    // project signals are allowed to affect status, health, and work panels.
+    if (acc.blockedGatedCandidates.length < LIMITS.blockedGatedCandidates) {
+      const nearbyContext = [lines[i - 1] ?? '', line, lines[i + 1] ?? '']
+        .map((x) => x.trim())
+        .filter(Boolean)
+        .join(' ');
+      let candidate = classifyBlockedGatedCandidate({
+        text: bulletText,
+        file: doc.file,
+        line: lineNo,
+        section,
+        nearbyContext,
+      });
+      const candidateKey = candidate ? `${candidate.file}:${candidate.line}:${candidate.text}` : null;
+      if (candidate && !acc.seenBlockedGatedCandidates.has(candidateKey)) {
+        const signal = candidate.includedInProjectStatus ? classifyWorkSignal(trimmed) : null;
+        if (candidate.includedInProjectStatus && !signal) {
+          candidate = {
+            ...candidate,
+            classification: 'process_policy',
+            includedInProjectStatus: false,
+            confidence: 'low',
+            reason:
+              'project-adjacent blocked/gated wording did not describe a concrete blocker, approval gate, review/validation item, or pause',
+          };
+        }
+        acc.seenBlockedGatedCandidates.add(candidateKey);
+        acc.blockedGatedCandidates.push(candidate);
+        if (signal && !acc.seenWorkSignals.has(bulletText)) {
+          acc.seenWorkSignals.add(bulletText);
+          acc.workSignals.push({ ...signal, ...candidate, text: bulletText, file: doc.file, line: lineNo });
+        }
       }
     }
 
@@ -730,6 +866,29 @@ function buildSignalGroups(workSignals) {
     approvalGates: workSignals.filter((s) => s.group === 'approvalGates'),
     needsReview: workSignals.filter((s) => s.group === 'needsReview'),
     pausedDeferred: workSignals.filter((s) => s.group === 'pausedDeferred'),
+  };
+}
+
+function buildBlockedGatedDiagnostics(candidates) {
+  const includedProjectSignals = candidates.filter((c) => c.classification === 'project_signal');
+  const filteredAgentRules = candidates.filter((c) => c.classification === 'agent_rule');
+  const filteredProcessPolicies = candidates.filter((c) => c.classification === 'process_policy');
+  const filteredExamplesOrTemplates = candidates.filter((c) => c.classification === 'example_or_template');
+  const filteredOutCount =
+    filteredAgentRules.length + filteredProcessPolicies.length + filteredExamplesOrTemplates.length;
+  return {
+    includedProjectSignals,
+    filteredAgentRules,
+    filteredProcessPolicies,
+    filteredExamplesOrTemplates,
+    summary: {
+      oldRawCandidateCount: candidates.length,
+      includedProjectSignalCount: includedProjectSignals.length,
+      filteredOutCount,
+      filteredAgentRuleCount: filteredAgentRules.length,
+      filteredProcessPolicyCount: filteredProcessPolicies.length,
+      filteredExampleOrTemplateCount: filteredExamplesOrTemplates.length,
+    },
   };
 }
 
@@ -1047,11 +1206,13 @@ async function scanProject(entry, activeDays) {
     decisions: [],
     blockers: [],
     workSignals: [],
+    blockedGatedCandidates: [],
     risks: [],
     specs: [],
     claudePointer: null,
     seenDecisions: new Set(),
     seenWorkSignals: new Set(),
+    seenBlockedGatedCandidates: new Set(),
     seenNext: new Set(),
     seenRisks: new Set(),
   };
@@ -1082,6 +1243,7 @@ async function scanProject(entry, activeDays) {
   attachSteps(acc.phases, acc.steps);
   flagOrderingContradictions(acc.phases);
   acc.decisions.sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''));
+  const blockedGatedDiagnostics = buildBlockedGatedDiagnostics(acc.blockedGatedCandidates);
   const signalGroups = buildSignalGroups(acc.workSignals);
   acc.blockers = signalGroups.realBlockers;
 
@@ -1122,6 +1284,7 @@ async function scanProject(entry, activeDays) {
     decisions: acc.decisions,
     blockers: acc.blockers,
     signalGroups,
+    blockedGatedDiagnostics,
     risks: acc.risks,
     specs: acc.specs,
     specFileCount,
@@ -1208,6 +1371,7 @@ export async function runScan(options = {}) {
       logger.log(
         `  ${publicResult.name}: ${publicResult.status} (health ${publicResult.summary.healthScore}) | ` +
           `docs ${publicResult.stats.docsCount} | phases ${publicResult.phases.length} | ` +
+          `raw constraints ${publicResult.blockedGatedDiagnostics.summary.oldRawCandidateCount} | ` +
           `next ${publicResult.nextTasks.length} | real blockers ${publicResult.signalGroups.realBlockers.length} | ` +
           `approval gates ${publicResult.signalGroups.approvalGates.length} | review ${publicResult.signalGroups.needsReview.length} | paused ${publicResult.signalGroups.pausedDeferred.length} | ` +
           `risks ${publicResult.risks.length} | audits ${publicResult.audits.length} | gaps ${publicResult.gaps.length}` +
@@ -1279,7 +1443,8 @@ async function main() {
     projects.push(result);
     console.log(
         `  ${result.name}: ${result.status} (health ${result.summary.healthScore}) | ` +
-          `docs ${result.stats.docsCount} | phases ${result.phases.length} | ` +
+        `docs ${result.stats.docsCount} | phases ${result.phases.length} | ` +
+        `raw constraints ${result.blockedGatedDiagnostics.summary.oldRawCandidateCount} | ` +
         `next ${result.nextTasks.length} | real blockers ${result.signalGroups.realBlockers.length} | ` +
         `approval gates ${result.signalGroups.approvalGates.length} | review ${result.signalGroups.needsReview.length} | paused ${result.signalGroups.pausedDeferred.length} | ` +
         `risks ${result.risks.length} | audits ${result.audits.length} | gaps ${result.gaps.length}` +

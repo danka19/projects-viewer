@@ -103,11 +103,44 @@ export interface BlockerItem {
   line: number;
 }
 
+export type BlockedGatedClassification =
+  | 'project_signal'
+  | 'agent_rule'
+  | 'process_policy'
+  | 'example_or_template';
+
+export interface BlockedGatedCandidate {
+  text: string;
+  file: string;
+  line: number;
+  classification: BlockedGatedClassification;
+  includedInProjectStatus: boolean;
+  confidence: Confidence;
+  reason: string;
+  matchedKeywords: string[];
+  nearbyContext: string;
+}
+
 export interface SignalGroups {
   realBlockers: BlockerItem[];
   approvalGates: BlockerItem[];
   needsReview: BlockerItem[];
   pausedDeferred: BlockerItem[];
+}
+
+export interface BlockedGatedDiagnostics {
+  includedProjectSignals: BlockedGatedCandidate[];
+  filteredAgentRules: BlockedGatedCandidate[];
+  filteredProcessPolicies: BlockedGatedCandidate[];
+  filteredExamplesOrTemplates: BlockedGatedCandidate[];
+  summary: {
+    oldRawCandidateCount: number;
+    includedProjectSignalCount: number;
+    filteredOutCount: number;
+    filteredAgentRuleCount: number;
+    filteredProcessPolicyCount: number;
+    filteredExampleOrTemplateCount: number;
+  };
 }
 
 export interface RiskItem {
@@ -202,6 +235,7 @@ export interface ProjectData {
   decisions: DecisionItem[];
   blockers: BlockerItem[];
   signalGroups: SignalGroups;
+  blockedGatedDiagnostics: BlockedGatedDiagnostics;
   risks: RiskItem[];
   specs: SpecItem[];
   specFileCount: number;

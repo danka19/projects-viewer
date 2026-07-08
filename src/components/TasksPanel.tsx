@@ -1,6 +1,12 @@
 import type { DrawerItem, ProjectData, TaskItem } from '../types';
 import { BLOCKER_META } from '../statusMeta';
-import { blockerDrawer, markerDrawer, riskDrawer, taskDrawer } from '../drawer';
+import {
+  blockedGatedCandidateDrawer,
+  blockerDrawer,
+  markerDrawer,
+  riskDrawer,
+  taskDrawer,
+} from '../drawer';
 import Section from './Section';
 
 interface Props {
@@ -39,6 +45,16 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
           empty="No open checkbox tasks found in documentation."
         />
       </Section>
+
+      <div className="flex items-baseline justify-between gap-3 px-1">
+        <h3 className="font-mono text-[11px] font-medium tracking-[0.18em] text-mute uppercase">
+          Work constraints
+        </h3>
+        <span className="font-mono text-[10px] text-faint">
+          {project.blockedGatedDiagnostics.summary.includedProjectSignalCount} included В·{' '}
+          {project.blockedGatedDiagnostics.summary.filteredOutCount} filtered
+        </span>
+      </div>
 
       <SignalSection
         title="Real blockers"
@@ -80,6 +96,8 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
         accent={groups.pausedDeferred.length > 0 ? 'text-slate-300' : 'text-mute'}
         empty="No paused or deferred work recorded."
       />
+
+      <ConstraintDiagnostics project={project} onOpenDrawer={onOpenDrawer} />
 
       <Section
         title="Risks & open questions"
@@ -207,6 +225,79 @@ function SignalSection({
         )}
       </div>
     </Section>
+  );
+}
+
+function ConstraintDiagnostics({
+  project,
+  onOpenDrawer,
+}: {
+  project: ProjectData;
+  onOpenDrawer: (item: DrawerItem) => void;
+}) {
+  const d = project.blockedGatedDiagnostics;
+  const groups = [
+    ['Included project signals', d.includedProjectSignals],
+    ['Filtered agent rules', d.filteredAgentRules],
+    ['Filtered process policies', d.filteredProcessPolicies],
+    ['Filtered examples/templates', d.filteredExamplesOrTemplates],
+  ] as const;
+  return (
+    <Section
+      title="Constraint diagnostics"
+      count={d.summary.oldRawCandidateCount}
+      accent={d.summary.filteredOutCount > 0 ? 'text-slate-300' : 'text-mute'}
+      defaultOpen={false}
+    >
+      <div className="mb-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+        <DiagnosticCount label="Raw" value={d.summary.oldRawCandidateCount} />
+        <DiagnosticCount label="Included" value={d.summary.includedProjectSignalCount} />
+        <DiagnosticCount label="Filtered" value={d.summary.filteredOutCount} />
+        <DiagnosticCount label="Agent rules" value={d.summary.filteredAgentRuleCount} />
+      </div>
+      <div className="space-y-3">
+        {groups.map(([label, items]) => (
+          <div key={label}>
+            <p className="mb-1.5 font-mono text-[10px] tracking-[0.16em] text-faint uppercase">
+              {label} В· {items.length}
+            </p>
+            {items.length === 0 ? (
+              <Empty text="No candidates in this bucket." />
+            ) : (
+              <ul className="space-y-1">
+                {items.slice(0, 40).map((item, i) => (
+                  <li key={`${item.file}:${item.line}:${i}`}>
+                    <button
+                      onClick={() => onOpenDrawer(blockedGatedCandidateDrawer(item, project))}
+                      className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
+                    >
+                      <span className="mt-0.5 rounded border border-slate-500/30 bg-slate-500/10 px-1.5 py-px font-mono text-[10px] whitespace-nowrap text-slate-300">
+                        {item.confidence}
+                      </span>
+                      <span className="min-w-0 text-sm leading-snug text-slate-300">
+                        <span className="line-clamp-2">{item.text}</span>
+                        <span className="mt-0.5 block font-mono text-[10px] text-faint">
+                          {item.file}:{item.line} В· {item.reason}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function DiagnosticCount({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg border border-line bg-void/30 px-2.5 py-2">
+      <p className="font-mono text-[10px] tracking-[0.14em] text-faint uppercase">{label}</p>
+      <p className="mt-1 font-display text-sm font-semibold text-slate-200">{value}</p>
+    </div>
   );
 }
 

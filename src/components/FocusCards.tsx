@@ -32,54 +32,66 @@ export default function FocusCards({ project, onOpenTab, onOpenDrawer }: Props) 
         }))}
         onViewAll={() => onOpenTab('tasks')}
       />
-      <FocusCard
-        title="Real blockers"
-        tooltip="Actual inability to continue: blocked, failing, missing required data, unavailable dependency, or an acceptance gap that prevents completion."
-        accent={realBlockers.length > 0 ? 'text-rose-300' : 'text-mute'}
-        total={groups.realBlockers.length}
-        empty="No real blockers detected."
-        items={realBlockers.map((b) => ({
-          text: b.text,
-          onClick: () => onOpenDrawer(blockerDrawer(b, project)),
-        }))}
-        onViewAll={() => onOpenTab('tasks')}
-      />
-      <FocusCard
-        title="Approval gates"
-        tooltip="Normal owner/SDD approval gates: pending approval, merge approval, or completed work waiting for approval."
-        accent={approvalGates.length > 0 ? 'text-violet-300' : 'text-mute'}
-        total={groups.approvalGates.length}
-        empty="No approval gates detected."
-        items={approvalGates.map((b) => ({
-          text: b.text,
-          onClick: () => onOpenDrawer(blockerDrawer(b, project)),
-        }))}
-        onViewAll={() => onOpenTab('tasks')}
-      />
-      <FocusCard
-        title="Needs review"
-        tooltip="Review or validation work: needs review, pending review, needs verification, requires validation, or final review."
-        accent={needsReview.length > 0 ? 'text-orange-300' : 'text-mute'}
-        total={groups.needsReview.length}
-        empty="No review items detected."
-        items={needsReview.map((b) => ({
-          text: b.text,
-          onClick: () => onOpenDrawer(blockerDrawer(b, project)),
-        }))}
-        onViewAll={() => onOpenTab('tasks')}
-      />
-      <FocusCard
-        title="Paused / deferred"
-        tooltip="Work intentionally paused, on hold, deferred, planned later, or marked resume later."
-        accent={pausedDeferred.length > 0 ? 'text-slate-300' : 'text-mute'}
-        total={groups.pausedDeferred.length}
-        empty="No paused or deferred items detected."
-        items={pausedDeferred.map((b) => ({
-          text: b.text,
-          onClick: () => onOpenDrawer(blockerDrawer(b, project)),
-        }))}
-        onViewAll={() => onOpenTab('tasks')}
-      />
+      <div className="space-y-3 lg:col-span-2">
+        <div className="flex items-baseline justify-between gap-3">
+          <h3 className="font-mono text-[11px] font-medium tracking-[0.18em] text-mute uppercase">
+            Work constraints
+          </h3>
+          <span className="font-mono text-[10px] text-faint">
+            filtered {project.blockedGatedDiagnostics.summary.filteredOutCount} rule/template candidates
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <FocusCard
+            title="Real blockers"
+            tooltip="Actual inability to continue: blocked, failing, missing required data, unavailable dependency, or an acceptance gap that prevents completion."
+            accent={realBlockers.length > 0 ? 'text-rose-300' : 'text-mute'}
+            total={groups.realBlockers.length}
+            empty="No real blockers detected."
+            items={realBlockers.map((b) => ({
+              text: b.text,
+              onClick: () => onOpenDrawer(blockerDrawer(b, project)),
+            }))}
+            onViewAll={() => onOpenTab('tasks')}
+          />
+          <FocusCard
+            title="Approval gates"
+            tooltip="Normal owner/SDD approval gates: pending approval, merge approval, or completed work waiting for approval."
+            accent={approvalGates.length > 0 ? 'text-violet-300' : 'text-mute'}
+            total={groups.approvalGates.length}
+            empty="No approval gates detected."
+            items={approvalGates.map((b) => ({
+              text: b.text,
+              onClick: () => onOpenDrawer(blockerDrawer(b, project)),
+            }))}
+            onViewAll={() => onOpenTab('tasks')}
+          />
+          <FocusCard
+            title="Needs review"
+            tooltip="Review or validation work: needs review, pending review, needs verification, requires validation, or final review."
+            accent={needsReview.length > 0 ? 'text-orange-300' : 'text-mute'}
+            total={groups.needsReview.length}
+            empty="No review items detected."
+            items={needsReview.map((b) => ({
+              text: b.text,
+              onClick: () => onOpenDrawer(blockerDrawer(b, project)),
+            }))}
+            onViewAll={() => onOpenTab('tasks')}
+          />
+          <FocusCard
+            title="Paused / deferred"
+            tooltip="Work intentionally paused, on hold, deferred, planned later, or marked resume later."
+            accent={pausedDeferred.length > 0 ? 'text-slate-300' : 'text-mute'}
+            total={groups.pausedDeferred.length}
+            empty="No paused or deferred items detected."
+            items={pausedDeferred.map((b) => ({
+              text: b.text,
+              onClick: () => onOpenDrawer(blockerDrawer(b, project)),
+            }))}
+            onViewAll={() => onOpenTab('tasks')}
+          />
+        </div>
+      </div>
       <FocusCard
         title="Needs attention"
         accent={attention.length > 0 ? 'text-amber-300' : 'text-mute'}
