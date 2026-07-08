@@ -34,6 +34,7 @@ This is the active glossary and domain-boundary file for Projects Viewer.
 | AI findings store | `app-data/ai.findings.generated.json`, the local findings and review-state store. | Review-required evidence only; `accepted` means accepted as a finding state, not accepted as a project decision. |
 | Static fallback data | `src/data/projects.json`, build/static-mode fallback data. | Not live source of truth when the local API is available. |
 | Accepted project decision | A decision recorded in accepted OpenSpec specs, phase plans, audit files, context docs, or another reviewed durable project document. | Generated runtime files cannot create accepted decisions on their own. |
+| Finding review state | The human-facing handling state for an AI finding: `new`, `accepted`, `dismissed`, or `stale`. | It describes handling of the finding record only; it does not approve implementation work or rewrite project truth. |
 
 ## Boundary Rules
 
@@ -49,3 +50,4 @@ This is the active glossary and domain-boundary file for Projects Viewer.
 - Runtime writes are limited to the dashboard project, especially `app-data/projects.config.json`, `app-data/projects.generated.json`, `app-data/ai.context.snapshot.json`, and `app-data/ai.findings.generated.json`.
 - `app-data/projects.generated.json`, AI context snapshots, and AI findings are derived from saved config and scanned documentation; they may guide review, but they must not replace source files or accepted project documents.
 - New data sources such as cloud sync, remote model providers, databases, task/calendar systems, or external issue trackers require explicit future design approval and OpenSpec coverage before implementation.
+- A finding review state can prioritize human attention, but it must not trigger implementation, task creation, commits, shell commands, external notifications, or scanned-project edits.

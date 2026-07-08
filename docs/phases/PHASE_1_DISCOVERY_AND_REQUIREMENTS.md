@@ -154,6 +154,58 @@ Phase 2 readiness decision:
 - No additional data source is needed before Phase 2. Phase 2 can start from the current source set: saved local config, raw scanned documentation, generated scan data, AI context snapshot, AI findings store, static fallback data, and accepted OpenSpec/docs records.
 - If Phase 2 proposes persistent architecture beyond local JSON files, the proposal must keep this trust split visible: raw inputs, derived interpretations, review-required records, and accepted decisions are separate categories.
 
+### 1.3 AI-Assisted Workflows And Review Policy
+
+Status: completed on 2026-07-08 for Phase 1 planning; user-visible brief/report behavior still needs an OpenSpec change before implementation.
+
+Source evidence:
+
+- Accepted `ai-context` requirements already support compact all-project and per-project preflight context, source evidence, changes-since, and local-only access.
+- Accepted `ai-findings` requirements already support review-required findings, source evidence, local runtime storage, human review states, and no automatic agent action.
+- Phase 1 discovery ranked daily/weekly project brief first because it combines human triage and AI assistance without giving AI control.
+- The trust inventory keeps raw scanned documentation, derived dashboard interpretations, review-required records, and accepted decisions separate.
+
+Accepted AI-assisted workflow direction:
+
+| Rank | Workflow | Primary user | Input data | Output | Phase 1 policy |
+|---|---|---|---|---|---|
+| 1 | Daily/weekly project brief | Human owner and future brief consumer | AI context, changes-since categories, unresolved findings, project status, blockers, review gates | A short prioritized report of changed projects, attention items, and recommended human decisions | Accepted as the recommended first Phase 3 value slice; requires a new OpenSpec change before implementation. |
+| 2 | AI-agent preflight | AI implementation agent | Per-project AI context, specs, phase plan, blockers, risks, findings summary, trust boundaries | Proceed, ask for a decision, or stop with a blocker before coding/planning | Accepted as workflow guidance for future phase work; agents must verify source files before acting. |
+| 3 | AI reviewer/checker pass | AI reviewer/checker agent | AI findings, evidence, audit/doc signals, missing verification, contradictions | Review-required observations with evidence and confidence | Accepted as review support only; findings remain proposals until human handling. |
+| 4 | Human dashboard triage | Human owner | Dashboard status, health score, blockers, next action, findings counts | A chosen next project or conscious defer decision | Accepted as existing core dashboard purpose; richer review UI is deferred until brief/report requirements are clear. |
+
+Rejected or deferred AI behaviors:
+
+| Behavior | Decision | Reason |
+|---|---|---|
+| Automatically create tasks, commits, shell commands, calendar items, Trello cards, or scanned-project edits from findings | Rejected for current roadmap | This would turn proposal evidence into agent control and violates local read-only boundaries. |
+| Use remote LLM providers, cloud sync, auth, API keys, or external issue trackers for the first AI workflow | Deferred and approval-required | Current accepted specs are local-only and deterministic; new integrations need explicit design approval and OpenSpec coverage. |
+| Treat health score, finding confidence, or AI summary as a code-quality judgment | Rejected | These are triage signals derived from documentation, not authoritative code review or project truth. |
+| Build a full findings-review UI before the first brief/report contract | Deferred | A review UI may be useful, but Phase 1 currently needs a minimal end-to-end workflow and acceptance criteria first. |
+
+Finding review policy:
+
+| Review state | Operational meaning | What it may do | What it must not do |
+|---|---|---|---|
+| `new` | Finding is unresolved and needs human attention. | Appear in unresolved findings, brief candidates, and AI reviewer/checker input. | Block work automatically unless a human or agent verifies the source evidence and records the blocker elsewhere. |
+| `accepted` | Human agrees the finding record is useful or true enough to track. | Stay visible as accepted review evidence and inform future planning or docs updates. | Become an accepted project decision, completed verification result, or implementation command by itself. |
+| `dismissed` | Human reviewed the finding and decided it is not useful now. | Stay in local review history and disappear from unresolved views unless evidence changes enough to create a new finding identity. | Delete source data or prevent future detection of materially different evidence. |
+| `stale` | Latest scan no longer supports the finding evidence. | Remain as history to avoid confusion and keep unresolved views clean. | Be shown as an active blocker or accepted decision. |
+
+Acceptance criteria for the recommended brief/report workflow:
+
+- The brief/report MUST be generated only from saved config, generated scan data, AI context changes, and findings review state.
+- It MUST identify changed projects, unresolved review-required findings, likely blockers, approval gates, and recommended human decisions.
+- It MUST label derived interpretations as derived and preserve source evidence where available.
+- It MUST separate "recommended human decision" from "action taken".
+- It MUST NOT run commands, modify scanned projects, create commits, create external tasks/calendar items, or call remote model providers.
+- It MUST degrade safely when generated scan data or the previous AI context snapshot is missing.
+
+OpenSpec decision:
+
+- Existing accepted specs are sufficient for the current implemented AI context/findings APIs.
+- A new OpenSpec change is required before implementing the brief/report artifact, any user-visible findings review surface, or any behavior that changes the AI data contract.
+
 ## Change Intake
 
 Record new ideas, fixes, scope changes, architecture notes, data contract changes, or verification requests that appear during the phase.
@@ -252,6 +304,8 @@ OpenSpec and acceptance evidence:
 - `ai-findings` requirements for runtime storage and no automatic agent action.
 
 ### 1.3 Define AI-Assisted Workflows And Review Policy
+
+Status: completed on 2026-07-08 for Phase 1 planning; future brief/report behavior requires an OpenSpec change before implementation.
 
 Objective:
 
