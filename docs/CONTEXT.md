@@ -6,10 +6,18 @@ This is the active glossary and domain-boundary file for Projects Viewer.
 
 | Term | Meaning | Notes |
 |---|---|---|
-| Scanned project | A configured local repository or folder whose documentation is read by Projects Viewer. | Paths come only from `projects.config.json`; browser requests must never provide arbitrary paths. |
-| Dashboard project | This repository: `projects-viewer`. | The only project the scanner writes inside is the dashboard project, to `src/data/projects.json`. |
+| Scanned project | A configured local repository or folder whose documentation is read by Projects Viewer. | Paths come only from `app-data/projects.config.json`; browser requests must never provide arbitrary scan paths. |
+| Dashboard project | This repository: `projects-viewer`. | Runtime writes stay inside the dashboard project, primarily under `app-data/`. |
+| Canonical project config | `app-data/projects.config.json`, the local source of truth for tracked projects, workspaces, and settings. | The root `projects.config.json` is a legacy seed/example after migration. |
+| Workspace | A saved discovery input that points at a workspace root. | Workspaces are discovery inputs only, not scanned projects. |
+| Workspace root | A saved local parent folder where discovery looks for project folders. | Example: `C:\Users\me\Documents\projects`; the workspace root itself is not a discovered project. |
+| Discovered project candidate | A real project-root candidate found under a workspace root. | By default only immediate child folders are inspected; candidates are not tracked until selected and confirmed. |
+| Tracked project | A project entry explicitly saved in `app-data/projects.config.json`. | Manual project add and **Track selected** create tracked projects. |
+| Internal folder | A project subfolder such as `docs`, `openspec`, `src`, `tests`, `web`, `frontend`, or `backend` that discovery must never show as a project. | Scanner code may still read documentation inside internal folders after the parent project is tracked. |
+| Generated scan data | `app-data/projects.generated.json`, the live generated dashboard data written by scanner runs. | `src/data/projects.json` remains a static fallback artifact for browser-only mode. |
+| Disabled tracked project | A saved project with `enabled: false`. | It remains in config but is excluded from scanner, watcher, manual rescan, and interval rescan. |
 | Live mode | Browser connected to the local Express API from `server.mjs`. | Enables manual rescan, interval rescan, watcher status, and live data reloads. |
-| Static mode | Browser using generated `src/data/projects.json` without local API access. | Rescan controls must be disabled because browser-only static pages cannot read local files or run Node code. |
+| Static mode | Browser using generated `src/data/projects.json` without local API access. | Rescan and project-management controls must be disabled because browser-only static pages cannot read or write local files. |
 | Manual rescan | User-triggered scan from the **Rescan docs** button. | Calls `POST /api/rescan`; respects single-flight and throttle rules. |
 | Watcher rescan | Chokidar-triggered scan after documentation file changes. | Watches only documentation-like markdown files under configured project paths. |
 | Interval rescan | Optional localStorage-backed fallback scan interval. | Off by default; minimum selectable interval is 5 minutes. |
@@ -18,8 +26,9 @@ This is the active glossary and domain-boundary file for Projects Viewer.
 ## Boundary Rules
 
 - Scanned projects are read-only inputs; do not write, move, delete, or reformat files inside them.
-- API endpoints must not accept project paths from the browser.
-- The scanner and watcher must use only paths from `projects.config.json`.
+- API endpoints may accept project/workspace paths only to validate and save them in canonical config; scan and watcher code must not use unsaved arbitrary request paths.
+- The scanner and watcher must use only enabled project paths from `app-data/projects.config.json`.
+- Removing a tracked project means removing only the config entry, never deleting the actual project folder.
 - No cloud, auth, API keys, agent control, arbitrary shell commands, or whole-disk scanning belongs in this app without an explicit future design decision.
 - Raw documentation text is source data. Derived statuses, health scores, blockers, risks, and summaries are dashboard interpretations.
 - Review-required proposals are not accepted decisions.

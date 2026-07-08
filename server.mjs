@@ -7,10 +7,23 @@ import { fileURLToPath } from 'node:url';
 import { createServer as createViteServer } from 'vite';
 import { runScan } from './scan-projects.mjs';
 import { createScanController } from './server/scan-controller.mjs';
+import {
+  addProject,
+  addWorkspace,
+  ensureProjectConfig,
+  getConfigPaths,
+  getEnabledProjects,
+  readProjectConfig,
+  removeProject,
+  updateProject,
+} from './server/project-config.mjs';
+import {
+  discoverWorkspaceProjects,
+  validateDiscoveredProjectSelection,
+} from './server/project-discovery.mjs';
+import { browseFolder as defaultBrowseFolder } from './server/folder-picker.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const CONFIG_PATH = path.join(__dirname, 'projects.config.json');
-const OUTPUT_PATH = path.join(__dirname, 'src', 'data', 'projects.json');
 const DIST_DIR = path.join(__dirname, 'dist');
 const PORT = Number(process.env.PORT ?? 5173);
 const HOST = process.env.HOST ?? '127.0.0.1';
@@ -64,35 +77,35 @@ const IGNORED_WATCH_PATTERNS = [
   '**/*.sqlite',
 ];
 
-async function readConfig() {
-  const raw = await fs.readFile(CONFIG_PATH, 'utf8');
+async function readConfig(configOptions = {}) {
+  return readProjectConfig(configOptions);
+}
+
+async function readProjectsOutput(configOptions = {}) {
+  const { generatedPath } = getConfigPaths(configOptions);
+  const raw = await fs.readFile(generatedPath, 'utf8');
   return JSON.parse(raw);
 }
 
-async function readProjectsOutput() {
-  const raw = await fs.readFile(OUTPUT_PATH, 'utf8');
-  return JSON.parse(raw);
-}
-
-function createDashboardRunScan() {
+function createDashboardRunScan(configOptions = {}) {
+  const { configPath, generatedPath } = getConfigPaths(configOptions);
   return async () =>
     runScan({
-      configPath: CONFIG_PATH,
-      outputPath: OUTPUT_PATH,
+      configPath,
+      outputPath: generatedPath,
       quiet: false,
       logger: console,
     });
 }
 
-async function createWatcher(controller) {
-  const config = await readConfig();
-  if (config.watchDocs === false) {
+async function createWatcher(controller, configOptions = {}) {
+  const config = await readConfig(configOptions);
+  if (config.settings?.watchDocs === false) {
     console.log('Documentation watcher disabled by projects.config.json');
     return null;
   }
 
-  const projects = Array.isArray(config.projects) ? config.projects : [];
-  const roots = projects
+  const roots = getEnabledProjects(config)
     .filter((project) => project?.path && typeof project.path === 'string')
     .map((project) => path.resolve(project.path));
   if (roots.length === 0) return null;
@@ -185,15 +198,145 @@ function watchPatternMatches(normalizedPath, pattern) {
   return false;
 }
 
-async function createApp() {
+export async function createApp({
+  appDataDir,
+  legacyConfigPath = path.join(__dirname, 'projects.config.json'),
+  skipStartupScan = false,
+  skipWatcher = false,
+  skipFrontend = false,
+  browseFolder = defaultBrowseFolder,
+  logger = console,
+} = {}) {
   const app = express();
-  const controller = createScanController({ runScan: createDashboardRunScan(), logger: console });
+  const configOptions = { appDataDir, legacyConfigPath };
+  await ensureProjectConfig(configOptions);
+  const controller = createScanController({ runScan: createDashboardRunScan(configOptions), logger });
+  let watcher = null;
 
   app.use(express.json({ limit: '16kb' }));
 
+  async function restartWatcher() {
+    if (skipWatcher) return;
+    if (watcher) await watcher.close();
+    watcher = await createWatcher(controller, configOptions);
+  }
+
+  function sendError(res, err) {
+    res.status(err.statusCode ?? 500).json({ error: err.message });
+  }
+
+  app.get('/api/config', async (_req, res) => {
+    try {
+      res.json(await readProjectConfig(configOptions));
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.post('/api/browse-folder', async (_req, res) => {
+    try {
+      const selectedPath = await browseFolder();
+      if (!selectedPath) {
+        res.status(204).end();
+        return;
+      }
+      res.json({ path: selectedPath });
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.post('/api/projects', async (req, res) => {
+    try {
+      const result = await addProject(req.body, configOptions);
+      await restartWatcher();
+      res.status(result.created ? 201 : 200).json(result);
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.patch('/api/projects/:id', async (req, res) => {
+    try {
+      const result = await updateProject(req.params.id, req.body, configOptions);
+      await restartWatcher();
+      res.json(result);
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.delete('/api/projects/:id', async (req, res) => {
+    try {
+      const result = await removeProject(req.params.id, configOptions);
+      await restartWatcher();
+      res.json(result);
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.post('/api/workspaces', async (req, res) => {
+    try {
+      const result = await addWorkspace(req.body, configOptions);
+      res.status(result.created ? 201 : 200).json(result);
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.post('/api/workspaces/:id/discover', async (req, res) => {
+    try {
+      const config = await readProjectConfig(configOptions);
+      const workspace = config.workspaces.find((entry) => entry.id === req.params.id);
+      if (!workspace) {
+        const err = new Error('Workspace not found.');
+        err.statusCode = 404;
+        throw err;
+      }
+      const discovery = await discoverWorkspaceProjects(workspace);
+      res.json({ workspace, ...discovery, candidates: discovery.discoveredProjects });
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.post('/api/projects/track-discovered', async (req, res) => {
+    try {
+      const paths = Array.isArray(req.body?.paths) ? req.body.paths : [];
+      if (paths.length === 0) {
+        const err = new Error('At least one discovered project path is required.');
+        err.statusCode = 400;
+        throw err;
+      }
+      const initialConfig = await readProjectConfig(configOptions);
+      const validation = await validateDiscoveredProjectSelection(
+        paths,
+        initialConfig.workspaces,
+        initialConfig.projects,
+      );
+      if (validation.invalid.length > 0) {
+        res.status(400).json({
+          error: 'Some selected project paths cannot be tracked.',
+          invalid: validation.invalid,
+        });
+        return;
+      }
+      const projects = [];
+      for (const candidate of validation.valid) {
+        const result = await addProject({ path: candidate.path }, configOptions);
+        projects.push(result.project);
+      }
+      await restartWatcher();
+      res.status(201).json({ projects, config: await readProjectConfig(configOptions) });
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
   app.get('/api/projects', async (_req, res) => {
     try {
-      res.json(await readProjectsOutput());
+      res.json(await readProjectsOutput(configOptions));
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -209,8 +352,12 @@ async function createApp() {
     res.status(status.status === 'error' ? 500 : 200).json(status);
   });
 
-  await controller.requestScan('startup');
-  await createWatcher(controller);
+  if (!skipStartupScan) await controller.requestScan('startup');
+  if (!skipWatcher) watcher = await createWatcher(controller, configOptions);
+
+  if (skipFrontend) {
+    return app;
+  }
 
   if (MODE === 'development') {
     const vite = await createViteServer({
@@ -228,13 +375,15 @@ async function createApp() {
   return app;
 }
 
-createApp()
-  .then((app) => {
-    app.listen(PORT, HOST, () => {
-      console.log(`Projects Viewer live dashboard: http://${HOST}:${PORT}`);
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  createApp()
+    .then((app) => {
+      app.listen(PORT, HOST, () => {
+        console.log(`Projects Viewer live dashboard: http://${HOST}:${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error(`Server failed: ${err.message}`);
+      process.exit(1);
     });
-  })
-  .catch((err) => {
-    console.error(`Server failed: ${err.message}`);
-    process.exit(1);
-  });
+}

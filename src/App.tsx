@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { DrawerItem, ProjectData, ProjectStatus, ScanOutput, TabId } from './types';
+import type { DrawerItem, ProjectConfig, ProjectData, ProjectStatus, ScanOutput, TabId } from './types';
 import { formatDate } from './statusMeta';
 import {
   blockedGatedCandidateDrawer,
@@ -17,6 +17,7 @@ import ProjectTabs from './components/ProjectTabs';
 import DetailDrawer from './components/DetailDrawer';
 import SkeletonShell from './components/Skeleton';
 import StatusOrb from './components/StatusOrb';
+import ManageProjects from './components/ManageProjects';
 
 export default function App() {
   const [data, setData] = useState<ScanOutput | null>(null);
@@ -24,6 +25,7 @@ export default function App() {
   const [liveMode, setLiveMode] = useState(false);
   const [scanStatus, setScanStatus] = useState<ScanStatus | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [config, setConfig] = useState<ProjectConfig | null>(null);
   const lastScannedRef = useRef<string | null>(null);
 
   const loadLiveData = useCallback(async () => {
@@ -48,6 +50,14 @@ export default function App() {
     return nextStatus;
   }, [loadLiveData]);
 
+  const loadConfig = useCallback(async () => {
+    const response = await fetch('/api/config', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Config unavailable: ${response.status}`);
+    const nextConfig = (await response.json()) as ProjectConfig;
+    setConfig(nextConfig);
+    return nextConfig;
+  }, []);
+
   useEffect(() => {
     let mounted = true;
     async function loadInitialData() {
@@ -56,7 +66,7 @@ export default function App() {
         if (!mounted) return;
         setLiveMode(true);
         lastScannedRef.current = liveData.generatedAt;
-        await loadScanStatus();
+        await Promise.all([loadScanStatus(), loadConfig()]);
       } catch {
         try {
           const m = await import('./data/projects.json');
@@ -73,7 +83,7 @@ export default function App() {
     return () => {
       mounted = false;
     };
-  }, [loadLiveData, loadScanStatus]);
+  }, [loadConfig, loadLiveData, loadScanStatus]);
 
   useEffect(() => {
     if (!liveMode) return;
@@ -117,6 +127,9 @@ export default function App() {
       scanStatus={scanStatus}
       statusMessage={statusMessage}
       onRescan={requestRescan}
+      config={config}
+      onRefreshConfig={loadConfig}
+      onRefreshData={loadLiveData}
     />
   );
 }
@@ -148,12 +161,18 @@ function AppShell({
   scanStatus,
   statusMessage,
   onRescan,
+  config,
+  onRefreshConfig,
+  onRefreshData,
 }: {
   data: ScanOutput;
   liveMode: boolean;
   scanStatus: ScanStatus | null;
   statusMessage: string | null;
   onRescan: (trigger?: 'manual' | 'interval') => Promise<void>;
+  config: ProjectConfig | null;
+  onRefreshConfig: () => Promise<ProjectConfig>;
+  onRefreshData: () => Promise<ScanOutput>;
 }) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
@@ -162,6 +181,7 @@ function AppShell({
   );
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [drawer, setDrawer] = useState<DrawerItem | null>(null);
+  const [manageOpen, setManageOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // "/" focuses search, Escape clears it (drawer handles its own Escape).
@@ -379,6 +399,14 @@ function AppShell({
             statusMessage={statusMessage}
             onRescan={onRescan}
           />
+          <button
+            type="button"
+            onClick={() => setManageOpen(true)}
+            title={liveMode ? 'Manage tracked projects' : 'Start local server to manage projects'}
+            className="rounded-md border border-line px-3 py-2 text-xs font-semibold text-mute transition hover:text-ink"
+          >
+            Manage Projects
+          </button>
         </div>
       </header>
 
@@ -442,6 +470,19 @@ function AppShell({
 
       {drawer && (
         <DetailDrawer item={drawer} onNavigate={setDrawer} onClose={() => setDrawer(null)} />
+      )}
+      {manageOpen && (
+        <ManageProjects
+          liveMode={liveMode}
+          config={config}
+          projects={data.projects}
+          onClose={() => setManageOpen(false)}
+          onConfigChanged={async () => {
+            await onRefreshConfig();
+            await onRefreshData();
+          }}
+          onRescan={() => onRescan('manual')}
+        />
       )}
     </div>
   );

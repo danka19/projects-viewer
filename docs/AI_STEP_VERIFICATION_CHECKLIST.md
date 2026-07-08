@@ -58,6 +58,7 @@ Whenever the human owner explains how the product should work, rejects behavior,
 - For SDD/OpenSpecs changes, run `openspec list`, `openspec list --specs`, and `openspec validate --all --strict`.
 - If a test or check cannot run, record the exact command and blocker.
 - If automated tests do not exist for the affected behavior, record manual verification steps and remaining manual-verification risk.
+- Do not stop the local dashboard server automatically after verification. Leave it running for the human unless a restart is required, and start it if the dashboard needs to be available but no server is running.
 - When the next step requires a human decision, explicitly state that it is a required decision and explain the question, why it matters, relevant options or tradeoffs, and the consequence of leaving it unresolved.
 - When the next step requires mandatory verification, explicitly state that it is required and describe exactly what must be checked, how to check it where known, expected evidence, and residual risk if it is not performed.
 

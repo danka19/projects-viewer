@@ -2,17 +2,18 @@
 /**
  * Read-only documentation scanner.
  *
- * Reads projects.config.json, scans ONLY documentation files inside each
- * configured project, and writes src/data/projects.json for the dashboard.
+ * Reads app-data/projects.config.json, scans ONLY documentation files inside
+ * each enabled configured project, and writes app-data/projects.generated.json
+ * for the live dashboard.
  * It never writes to, moves, or modifies any file in the scanned projects.
  *
  * Safety boundaries:
- * - visits only the project roots listed in projects.config.json;
+ * - visits only enabled project roots listed in the saved dashboard config;
  * - inside a root, enters only docs/, specs/, .openspec/, openapi/;
  * - never follows symlinks or junctions (no disk escape, no cycles);
  * - recursion depth and per-project file count are capped;
  * - reads only *.md files up to 1 MB; everything else is ignored;
- * - the only write is src/data/projects.json inside this dashboard folder.
+ * - the only scanner write is generated dashboard data inside this dashboard folder.
  *
  * Extraction layers:
  * 1. Checkbox tasks and TODO/FIXME/BUG/NEXT:/DONE: markers.
@@ -28,10 +29,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ensureProjectConfig } from './server/project-config.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DEFAULT_CONFIG_PATH = path.join(__dirname, 'projects.config.json');
-const DEFAULT_OUTPUT_PATH = path.join(__dirname, 'src', 'data', 'projects.json');
+const DEFAULT_APP_DATA_DIR = path.join(__dirname, 'app-data');
+const DEFAULT_CONFIG_PATH = path.join(DEFAULT_APP_DATA_DIR, 'projects.config.json');
+const DEFAULT_OUTPUT_PATH = path.join(DEFAULT_APP_DATA_DIR, 'projects.generated.json');
 const CONFIG_PATH = DEFAULT_CONFIG_PATH;
 const OUTPUT_PATH = DEFAULT_OUTPUT_PATH;
 
@@ -1328,26 +1331,36 @@ export async function runScan(options = {}) {
     logger = console,
   } = options;
   const startedAt = Date.now();
+  if (configPath === DEFAULT_CONFIG_PATH) {
+    await ensureProjectConfig({
+      appDataDir: path.dirname(DEFAULT_CONFIG_PATH),
+      legacyConfigPath: path.join(__dirname, 'projects.config.json'),
+    });
+  }
   let config;
   try {
     config = JSON.parse(await fs.readFile(configPath, 'utf8'));
   } catch (err) {
     throw new Error(`Cannot read ${configPath}: ${err.message}`);
   }
-  if (!Array.isArray(config.projects) || config.projects.length === 0) {
+  const configuredProjects = Array.isArray(config.projects) ? config.projects : [];
+  const projectsToScan = configuredProjects.filter((project) => project?.enabled !== false);
+  if (projectsToScan.length === 0) {
     throw new Error('projects.config.json must contain a non-empty "projects" array.');
   }
-  const activeDays = Number.isFinite(config.activeDays)
-    ? config.activeDays
-    : DEFAULT_ACTIVE_DAYS;
+  const activeDays = Number.isFinite(config.settings?.activeDays)
+    ? config.settings.activeDays
+    : Number.isFinite(config.activeDays)
+      ? config.activeDays
+      : DEFAULT_ACTIVE_DAYS;
 
-  if (!quiet) logger.log(`Scanning ${config.projects.length} project(s) from projects.config.json\n`);
+  if (!quiet) logger.log(`Scanning ${projectsToScan.length} enabled project(s) from projects.config.json\n`);
 
   const projects = [];
   let scannedFilesCount = 0;
   let skippedFilesCount = 0;
   const skippedFiles = [];
-  for (const entry of config.projects) {
+  for (const entry of projectsToScan) {
     if (!entry?.name || typeof entry.path !== 'string' || entry.path.trim() === '') {
       if (!quiet) logger.warn('  skipping config entry without a valid name/path:', JSON.stringify(entry));
       skippedFilesCount += 1;
@@ -1416,6 +1429,10 @@ export async function runScan(options = {}) {
 
 async function main() {
   const startedAt = Date.now();
+  await ensureProjectConfig({
+    appDataDir: path.dirname(CONFIG_PATH),
+    legacyConfigPath: path.join(__dirname, 'projects.config.json'),
+  });
   let config;
   try {
     config = JSON.parse(await fs.readFile(CONFIG_PATH, 'utf8'));
@@ -1423,18 +1440,22 @@ async function main() {
     console.error(`Cannot read ${CONFIG_PATH}: ${err.message}`);
     process.exit(1);
   }
-  if (!Array.isArray(config.projects) || config.projects.length === 0) {
+  const configuredProjects = Array.isArray(config.projects) ? config.projects : [];
+  const projectsToScan = configuredProjects.filter((project) => project?.enabled !== false);
+  if (projectsToScan.length === 0) {
     console.error('projects.config.json must contain a non-empty "projects" array.');
     process.exit(1);
   }
-  const activeDays = Number.isFinite(config.activeDays)
-    ? config.activeDays
-    : DEFAULT_ACTIVE_DAYS;
+  const activeDays = Number.isFinite(config.settings?.activeDays)
+    ? config.settings.activeDays
+    : Number.isFinite(config.activeDays)
+      ? config.activeDays
+      : DEFAULT_ACTIVE_DAYS;
 
-  console.log(`Scanning ${config.projects.length} project(s) from projects.config.json\n`);
+  console.log(`Scanning ${projectsToScan.length} enabled project(s) from projects.config.json\n`);
 
   const projects = [];
-  for (const entry of config.projects) {
+  for (const entry of projectsToScan) {
     if (!entry?.name || typeof entry.path !== 'string' || entry.path.trim() === '') {
       console.warn('  skipping config entry without a valid name/path:', JSON.stringify(entry));
       continue;

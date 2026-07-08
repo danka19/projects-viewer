@@ -12,7 +12,8 @@ This document is the repository map for agents and humans. Keep it current whene
 | `.gitignore` | Excludes secrets, local config, generated artifacts, and private data |
 | `README.md` | User-facing app overview, setup, commands, live/static mode, and troubleshooting |
 | `package.json` / `package-lock.json` | Node scripts and dependency lockfile |
-| `projects.config.json` | Local project list and watcher setting; only paths from this file are scanned |
+| `app-data/` | Ignored local runtime data folder for canonical config and generated live scan data |
+| `projects.config.json` | Legacy seed/example config; migrated to `app-data/projects.config.json` when canonical config is missing |
 | `scan-projects.mjs` | Read-only scanner CLI and exported `runScan()` API |
 | `server.mjs` | Local Express dashboard server, API endpoints, Vite middleware, built frontend serving, and watcher setup |
 | `vite.config.ts` / `tsconfig.json` | Frontend build and TypeScript configuration |
@@ -26,10 +27,20 @@ This document is the repository map for agents and humans. Keep it current whene
 | Path | Purpose |
 |---|---|
 | `src/App.tsx` | App shell, live/static data loading, scan controls, search, layout, and drawer state |
-| `src/data/projects.json` | Generated static fallback data written by `npm run scan` and live server scans |
+| `src/data/projects.json` | Static fallback data for browser-only mode |
 | `src/types.ts` | Scanner output and UI data contracts |
 | `src/components/` | Dashboard panels, tabs, status badges, drawer, skeletons, and project views |
+| `src/components/ManageProjects.tsx` | Live-mode tracked project/workspace management UI |
 | `server/scan-controller.mjs` | Single-flight scan controller with queue, delay, status, trigger, and throttle logic |
+| `server/project-config.mjs` | Canonical config path helpers, legacy migration, validation, project/workspace CRUD, enabled-project filtering |
+| `server/project-discovery.mjs` | Safe workspace candidate discovery with marker reasons, depth caps, and excluded folders |
+
+## Local Runtime Data
+
+| Path | Purpose |
+|---|---|
+| `app-data/projects.config.json` | Canonical local tracked project/workspace config; ignored by git |
+| `app-data/projects.generated.json` | Generated live scan output; ignored by git |
 
 ## Documentation
 
@@ -45,13 +56,16 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/audits/` | Focused audit reports |
 | `docs/phases/` | Detailed phase plans and templates |
 | `docs/handoffs/` | Bounded task handoffs to Claude |
+| `docs/superpowers/specs/` | Approved design specs produced by the brainstorming workflow |
+| `docs/superpowers/plans/` | Implementation plans produced by the writing-plans workflow |
+| `openspec/changes/add-persistent-project-management/` | Active OpenSpec change for persistent project/workspace management |
 
 ## Local Runtime
 
 | Command | Purpose |
 |---|---|
 | `npm run dev` | Start Express plus Vite middleware; performs startup scan and enables watcher |
-| `npm run scan` | Run one-time read-only scan into `src/data/projects.json` |
+| `npm run scan` | Run one-time read-only scan into `app-data/projects.generated.json` |
 | `npm run build` | Type-check and build static frontend |
 | `npm run server` | Serve built frontend with local API |
 | `npm test` | Run Node tests |

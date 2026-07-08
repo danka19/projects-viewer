@@ -44,6 +44,48 @@ Approval status:
 
 ## Change Intake
 
+### 2026-07-08 Local Server Lifecycle
+
+Idea:
+
+- After agent work, do not automatically stop the local dashboard server; leave it running, restart only when needed, or start it if it is not running and the dashboard is needed.
+
+Source:
+
+- Human request on 2026-07-08.
+
+Type:
+
+- `documentation_change`, `verification_change`.
+
+Decision:
+
+- `adopt_now`.
+
+Reason:
+
+- This is an operational habit that affects verification and handoff quality but does not change product behavior or data contracts.
+
+Affected specs:
+
+- None.
+
+Affected architecture:
+
+- None.
+
+Data contract impact:
+
+- None.
+
+Verification impact:
+
+- Future verification should preserve a useful running server instead of shutting it down automatically.
+
+Status:
+
+- Accepted and recorded in `README.md` and `docs/AI_STEP_VERIFICATION_CHECKLIST.md`.
+
 ### 2026-07-08 Persistent Project And Workspace Management
 
 Idea:
