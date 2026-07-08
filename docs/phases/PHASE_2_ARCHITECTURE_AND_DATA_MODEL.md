@@ -1,6 +1,6 @@
 # Phase 2. Architecture And Data Model
 
-Status: planned; ready for architecture work item execution.
+Status: in progress; work item 2.1 completed on 2026-07-09.
 
 ## Goal
 
@@ -90,6 +90,8 @@ Status:
 
 ### 2.1 Define Project Brief Data Contract
 
+Status: completed on 2026-07-09 for architecture/design; implementation types remain a Phase 3/OpenSpec task.
+
 Objective:
 
 - Define the structured JSON contract for project brief reports before implementation.
@@ -125,6 +127,45 @@ Exit criteria:
 OpenSpec and acceptance evidence:
 
 - `project-brief-report` requirements for local derived data, human review items, evidence labels, safe degradation, and no automatic action.
+
+Accepted contract:
+
+| Contract area | Decision |
+|---|---|
+| Top-level report | `kind`, `schemaVersion`, `generatedAt`, `mode`, `since`, `generatedFrom`, `inputState`, `baseline`, `safeStates`, `summary`, `items`, `noAttentionMessage`, and `workBoundaries`. |
+| Local input metadata | `generatedFrom` identifies saved config, generated scan data, AI context changes, AI findings state, and `remoteServicesUsed: false`. |
+| Input state | `inputState` records generated scan availability, tracked project count, previous baseline availability, findings availability, and changes availability. |
+| Baseline state | `baseline` records requested `since`, whether the previous AI context snapshot was available, whether comparison was available, and a message for first-run/missing-baseline/current-signals-only behavior. |
+| Safe states | Stable codes: `missing-generated-scan-data`, `missing-previous-baseline`, `missing-findings-store`, `empty-findings`, and `no-attention-items`; each has severity, message, and `blocksReport`. |
+| Summary | Stable counts: project count, item count, high-priority count, unresolved finding count, blocker count, approval gate count, changed project count, and safe-state count. |
+| Project item identity | Each item includes `{ id, name, path }`, deterministic `priority`, 1-based `rank`, `attentionReasons`, `changedCategories`, `findingsSummary`, `blockers`, `currentState`, `evidence`, `derivedLabels`, and `recommendedHumanDecision`. |
+| Attention reasons | Stable kinds include unresolved finding, blocker, approval gate, needs review, changed next action, changed status, changed risk, documentation gap, and first-run current signal. |
+| Findings summary | Counts by review state plus unresolved finding ids and compact unresolved finding summaries with evidence. |
+| Evidence and derived labels | Reuse `AiEvidenceItem` semantics: `source` evidence for file/line-backed facts and `derived-summary` for summaries, health/status interpretation, and recommendations without direct source lines. `derivedLabels` use `{ field, reason, evidenceKind }`. |
+| Recommended human decision | Stable decision kind, prompt, rationale, `actionTaken: false`, and `acceptedDecision: false`. |
+| Safety boundaries | Machine-readable `workBoundaries` keeps local-only, generated-scan-derived, scanned-project-read-only, no-model-provider, review-required-only, and no automatic action rules explicit. |
+
+Rejected fields for this contract:
+
+- No raw markdown body fields.
+- No request-provided project paths.
+- No report-history or report persistence identifiers.
+- No fields that imply a command, commit, task/calendar write, external notification, scanned-project edit, or agent work was triggered.
+- No field that marks a recommendation as accepted project truth.
+
+Verification mapping:
+
+- Local-only inputs: `generatedFrom`, `workBoundaries`, and no path-bearing request contract beyond saved project identity.
+- Human review items: `items`, `attentionReasons`, `findingsSummary`, `blockers`, and `recommendedHumanDecision`.
+- Evidence and derived labels: `evidence` plus `derivedLabels`.
+- Safe degradation: `baseline`, `safeStates`, `noAttentionMessage`, and empty `items`.
+- No automatic action: `workBoundaries`, `actionTaken: false`, and `acceptedDecision: false`.
+
+Notes deferred to later Phase 2 work items:
+
+- Work item 2.3 must decide whether `mode` and `since` are accepted as query parameters and how invalid `since` is reported at the API layer.
+- Work item 2.4 must define deterministic ranking tie-breakers for items with the same priority and attention reason severity.
+- Ordinary report retrieval should not update the AI context snapshot unless work item 2.4 explicitly accepts that baseline side effect.
 
 ### 2.2 Design Report Composition Module Boundary
 

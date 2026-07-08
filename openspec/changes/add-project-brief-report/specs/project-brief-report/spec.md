@@ -8,6 +8,8 @@ Projects Viewer SHALL generate project brief reports only from saved local proje
 - **WHEN** a client requests a project brief report
 - **THEN** the report is derived from saved tracked projects and generated scan data
 - **AND** it may include AI context changes and AI findings review state
+- **AND** the report identifies its local input sources in structured metadata
+- **AND** the report includes a schema version and input-state metadata
 - **AND** the request does not accept arbitrary project paths
 - **AND** scanned project folders are not modified
 
@@ -21,12 +23,14 @@ Projects Viewer SHALL include enough structured report data for the human owner 
 
 #### Scenario: Brief contains prioritized project items
 - **WHEN** generated scan data contains changed projects, blockers, approval gates, or unresolved findings
-- **THEN** the report includes project items with attention reasons
+- **THEN** the report includes ranked project items with attention reasons
 - **AND** each project item identifies the project, changed categories when known, unresolved finding counts when known, likely blockers or approval gates when available, and a recommended human decision
+- **AND** the ranking fields are deterministic advisory report fields, not accepted project decisions
 
 #### Scenario: Brief separates recommendation from action
 - **WHEN** the report recommends a human decision
 - **THEN** the report labels it as a recommendation for review
+- **AND** the recommendation includes stable fields for the decision category, prompt, rationale, action-taken guard, and accepted-decision guard
 - **AND** the report does not claim that an action was taken
 - **AND** the report does not mark the recommendation as an accepted project decision
 
@@ -37,10 +41,12 @@ Projects Viewer SHALL preserve source evidence where available and distinguish d
 #### Scenario: Brief item includes source evidence
 - **WHEN** a report item is based on a context item, finding, blocker, risk, decision, audit, spec, phase, task, or gap with source evidence
 - **THEN** the report item includes the available source file and line number evidence
+- **AND** finding summaries preserve finding ids, review state counts, confidence, and available evidence for unresolved findings
 
 #### Scenario: Derived summary is labeled
 - **WHEN** a report item is based on a derived status, health score, summary, or recommendation without direct source-line evidence
 - **THEN** the report labels the item as derived
+- **AND** derived labels identify the report field and reason for the derived label
 - **AND** it is not presented as a quoted source fact
 
 ### Requirement: Project brief report degrades safely when data is missing
@@ -55,11 +61,13 @@ Projects Viewer SHALL return clear safe states when generated scan data, previou
 #### Scenario: Previous context snapshot is missing
 - **WHEN** a client requests a project brief report and no previous AI context snapshot exists
 - **THEN** the report identifies that no previous comparison baseline is available
+- **AND** the report includes a non-blocking safe-state warning for the missing baseline
 - **AND** it can still include current blockers, approval gates, and unresolved findings from current generated data
 
 #### Scenario: No attention items exist
 - **WHEN** generated scan data exists and no changed projects, unresolved findings, blockers, or approval gates are found
 - **THEN** the report explicitly states that no attention items were found
+- **AND** the report returns an empty items array rather than inventing a recommendation
 
 ### Requirement: Project brief report does not trigger automatic action
 
