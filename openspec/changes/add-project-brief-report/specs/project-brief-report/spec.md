@@ -27,6 +27,8 @@ Projects Viewer SHALL include enough structured report data for the human owner 
 - **THEN** the report includes ranked project items with attention reasons
 - **AND** each project item identifies the project, changed categories when known, unresolved finding counts when known, likely blockers or approval gates when available, and a recommended human decision
 - **AND** the ranking fields are deterministic advisory report fields, not accepted project decisions
+- **AND** rank and priority are review-order fields only, not task order, implementation order, accepted decisions, SLAs, or commands
+- **AND** unresolved finding attention reasons are based only on findings with review state `new`
 
 #### Scenario: Brief separates recommendation from action
 - **WHEN** the report recommends a human decision
@@ -34,6 +36,7 @@ Projects Viewer SHALL include enough structured report data for the human owner 
 - **AND** the recommendation includes stable fields for the decision category, prompt, rationale, action-taken guard, and accepted-decision guard
 - **AND** the report does not claim that an action was taken
 - **AND** the report does not mark the recommendation as an accepted project decision
+- **AND** high-priority or rank 1 items still keep action-taken and accepted-decision guards set to false
 
 ### Requirement: Project brief report preserves evidence and derived labels
 
@@ -65,11 +68,14 @@ Projects Viewer SHALL return clear safe states when generated scan data, previou
 - **THEN** the report identifies that no previous comparison baseline is available
 - **AND** the report includes a non-blocking safe-state warning for the missing baseline
 - **AND** it can still include current blockers, approval gates, and unresolved findings from current generated data
+- **AND** first-run current signals are not labeled as changed since a previous report or baseline
+- **AND** ordinary report retrieval does not write a new AI context snapshot
 
 #### Scenario: No attention items exist
 - **WHEN** generated scan data exists and no changed projects, unresolved findings, blockers, or approval gates are found
 - **THEN** the report explicitly states that no attention items were found
 - **AND** the report returns an empty items array rather than inventing a recommendation
+- **AND** no-attention language is conditional on available generated local inputs rather than claiming that all projects are fine
 
 ### Requirement: Project brief report does not trigger automatic action
 

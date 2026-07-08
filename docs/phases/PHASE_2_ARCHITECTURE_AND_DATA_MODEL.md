@@ -1,6 +1,6 @@
 # Phase 2. Architecture And Data Model
 
-Status: in progress; work items 2.1, 2.2, and 2.3 completed on 2026-07-09.
+Status: in progress; work items 2.1, 2.2, 2.3, and 2.4 completed on 2026-07-09.
 
 ## Goal
 
@@ -319,6 +319,8 @@ Verification mapping:
 
 ### 2.4 Define Ranking, Empty-State, And Baseline Rules
 
+Status: completed on 2026-07-09 for architecture/design; implementation remains a Phase 3/OpenSpec task.
+
 Objective:
 
 - Define deterministic report ranking/grouping rules and safe empty-state behavior.
@@ -355,6 +357,67 @@ OpenSpec and acceptance evidence:
 - Brief contains prioritized project items.
 - Brief separates recommendation from action.
 - Brief degrades safely when data is missing.
+
+Accepted ranking rules:
+
+| Area | Decision |
+|---|---|
+| Inclusion | A project appears in `items` only when it has at least one inclusion reason: unresolved finding, blocker, approval gate, needs-review signal, changed next action/status/risk, documentation gap, or first-run current signal when no previous baseline exists. |
+| Priority | `high` for blockers, approval gates, or unresolved findings; `medium` for needs-review, changed next action/status/risk, or first-run current signal; `low` for documentation gaps without stronger reasons. |
+| Tie-breakers | Sort by priority, highest reason severity, reason kind order, unresolved finding count, blocker/gate/review signal count, lowercase project name, then lowercase project path. |
+| Reason kind order | `blocker`, `approval-gate`, `unresolved-finding`, `needs-review`, `changed-next-action`, `changed-status`, `changed-risk`, `first-run-current-signal`, `documentation-gap`. |
+| Reason severity | `blocker`, `approval-gate`, and `unresolved-finding` are high; `needs-review`, changed reasons, and `first-run-current-signal` are medium; `documentation-gap` is low. |
+| Unresolved findings | Only findings with `reviewState: "new"` create unresolved-finding attention reasons. Accepted, dismissed, and stale findings can be counted but do not create unresolved attention reasons. |
+| Source-backed signal count | Tie-breaker count means distinct blocker, approval-gate, and needs-review signal objects, not evidence item count. |
+| Documentation gaps | Include review-relevant gaps such as missing specs/design, missing audit/review/verification evidence, stale handoff pointers, or other dashboard gaps; do not promote purely informational coverage notes unless Phase 3 proves they are dashboard gaps. |
+| First-run current signal | Additional reason when valid `since` was requested, baseline is unavailable, and current signals exist. It does not replace blocker, gate, review, unresolved finding, or gap reasons. |
+| Rank meaning | `rank` is review order only. It is not a task order, implementation order, accepted decision, SLA, or command. |
+| Recommendation wording | Use advisory verbs such as review, decide, inspect, confirm, or choose. Do not say the system resolved, accepted, executed, assigned, or scheduled anything. |
+| Guard fields | Every item keeps `recommendedHumanDecision.actionTaken: false` and `recommendedHumanDecision.acceptedDecision: false`, including rank 1 and high-priority items. |
+| No-attention wording | Express no-attention through top-level `noAttentionMessage` and `no-attention-items`, conditional on available generated local inputs. Do not create a `no-action-needed` item. |
+
+Accepted empty-state rules:
+
+| State | Decision |
+|---|---|
+| Missing/invalid generated scan data | API returns `404` with `missing-generated-scan-data`; report composition is blocked. |
+| Generated scan data has zero projects | Return `200`, `items: []`, `summary.projectCount: 0`, `safeStates` includes `no-attention-items`, and `noAttentionMessage` explains that no tracked generated projects were available. |
+| Projects exist but no inclusion reasons exist | Return `200`, `items: []`, `safeStates` includes `no-attention-items`, and no recommendation item is invented. |
+| Findings store missing/unreadable | Return `200` with `missing-findings-store` safe state when scan data exists; blockers, gates, changes, and gaps can still produce items. |
+| Findings data exists but no unresolved findings exist | Return `200` with `empty-findings` safe state when there are no finding records or no unresolved finding records to summarize; this does not block other item types. |
+| Safe-state combinations | `missing-findings-store` or `empty-findings` may appear with ranked items. `no-attention-items` appears only when `items` is empty. `missing-previous-baseline` may appear with current-signal items and has `blocksReport: false`. |
+
+Accepted baseline/snapshot rules:
+
+| Case | Decision |
+|---|---|
+| `since` omitted | Current-signal-only report. `baseline.requestedSince: null`, `comparisonAvailable: false`, and no missing-baseline warning is required. |
+| Valid `since` and previous snapshot exists | Changed categories can be included from snapshot comparison; `comparisonAvailable: true`. |
+| Valid `since` and previous snapshot missing | Return `200` if generated scan data exists; include non-blocking `missing-previous-baseline`; current blockers, gates, unresolved findings, and gaps can still produce items. |
+| Valid `since` and previous snapshot unreadable/corrupt | Treat as baseline unavailable for the first implementation: return `200` with non-blocking `missing-previous-baseline` when generated scan data exists and do not overwrite the snapshot from report retrieval. |
+| Invalid `since` | API returns `400` before composition, per work item 2.3. |
+| Snapshot write | `GET /api/project-brief-report` does not write `app-data/ai.context.snapshot.json`. A future explicit "mark baseline seen" behavior needs a separate design decision and endpoint/action. |
+| Report history | No report-history store is introduced. Reports are regenerated from saved config, generated scan data, existing findings review state, and existing baseline state. |
+
+Rejected alternatives:
+
+- Treating rank 1 as a mandatory next task.
+- Allowing a report recommendation to become an accepted project decision.
+- Updating the AI context snapshot as a side effect of ordinary report retrieval.
+- Creating a persistent report-history store during the first report architecture.
+- Suppressing current blockers/gates just because the previous baseline is missing.
+- Labeling report output as "source of truth", "resolved", "approved", "assigned", "scheduled", "implemented", "all clear", or equivalent accepted/action-taken wording.
+- Triggering rank-based automation such as starting rank 1 work, creating tasks for high-priority items, accepting blockers, or marking findings handled.
+
+Verification mapping:
+
+- Ranking tests should use a fixture with blocker, approval gate, unresolved finding, needs-review, changed next action/status/risk, and gap-only projects, then assert priority and tie-breaker order.
+- Recommendation tests should assert advisory wording categories and `actionTaken: false` / `acceptedDecision: false`.
+- Empty-state tests should cover missing scan data, zero generated projects, projects with no inclusion reasons, missing findings store, and empty/unresolved-free findings.
+- Baseline tests should cover omitted `since`, valid `since` with snapshot, valid `since` without snapshot, and no snapshot write after report retrieval.
+- Gap tests should distinguish review-relevant gaps from informational coverage notes.
+- Safe-state tests should assert allowed combinations, especially `missing-findings-store` with blocker/gate items and `no-attention-items` only with empty `items`.
+- Side-effect tests should prove no report history store, scanned-project edit, command, task/calendar write, or agent trigger occurs.
 
 ### 2.5 Prepare Phase 3 Implementation Plan
 

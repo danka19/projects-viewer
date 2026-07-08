@@ -281,6 +281,109 @@ The report may rank or group items by attention reason, such as unresolved findi
 
 Alternative considered: mark the highest-ranked item as the next mandatory task. Rejected because findings and summaries are derived evidence and can be wrong.
 
+#### Ranking, empty-state, and baseline rules
+
+Inclusion rules:
+
+A project appears in `items` when at least one inclusion reason exists:
+
+| Inclusion reason | Source | Attention reason kind |
+|---|---|---|
+| At least one unresolved finding with `reviewState: "new"` | Findings review state | `unresolved-finding` |
+| At least one real blocker | `signalGroups.realBlockers` or compact AI context constraints | `blocker` |
+| At least one approval gate | `signalGroups.approvalGates` or compact AI context constraints | `approval-gate` |
+| At least one needs-review signal | `signalGroups.needsReview` or compact AI context constraints | `needs-review` |
+| `changes.changedCategories` includes `nextAction` | AI context changes | `changed-next-action` |
+| `changes.changedCategories` includes `status` or `statusReason` | AI context changes | `changed-status` |
+| `changes.changedCategories` includes `riskSummary` | AI context changes | `changed-risk` |
+| Current generated data has documentation gaps | Generated scan data / compact AI context gaps | `documentation-gap` |
+| Valid `since` was requested, previous baseline is missing, and the project has current blockers, gates, review signals, unresolved findings, or gaps | Baseline state plus current generated data | `first-run-current-signal` |
+
+Unresolved finding means `reviewState: "new"` only. `accepted`, `dismissed`, and `stale` findings remain visible in counts where useful, but they do not create an unresolved-finding attention reason.
+
+Priority mapping:
+
+| Priority | Rule |
+|---|---|
+| `high` | Any `blocker`, `approval-gate`, or `unresolved-finding` reason exists. |
+| `medium` | No high reason exists, and any `needs-review`, `changed-next-action`, `changed-status`, `changed-risk`, or `first-run-current-signal` reason exists. |
+| `low` | Only documentation gaps or other non-blocking derived signals exist. |
+
+Reason severity defaults:
+
+| Reason kind | Severity |
+|---|---|
+| `blocker` | `high` |
+| `approval-gate` | `high` |
+| `unresolved-finding` | `high` |
+| `needs-review` | `medium` |
+| `changed-next-action` | `medium` |
+| `changed-status` | `medium` |
+| `changed-risk` | `medium` |
+| `first-run-current-signal` | `medium` |
+| `documentation-gap` | `low` |
+
+Deterministic ordering:
+
+1. Priority order: `high`, then `medium`, then `low`.
+2. Highest reason severity within the item.
+3. Reason kind order: `blocker`, `approval-gate`, `unresolved-finding`, `needs-review`, `changed-next-action`, `changed-status`, `changed-risk`, `first-run-current-signal`, `documentation-gap`.
+4. More unresolved findings first.
+5. More source-backed blocker, approval-gate, and needs-review signal objects first, counted by distinct signal object rather than by evidence item count.
+6. Earlier project name using locale-insensitive lowercase string comparison.
+7. Earlier project path using lowercase string comparison.
+
+Ranking guardrails:
+
+- `rank` is review order only. It is not a task order, implementation order, accepted decision, SLA, or command.
+- `priority` means attention/review priority only. It must not be labeled as project priority, task priority, or implementation priority.
+- Recommendation text must use advisory language such as "review", "decide", "inspect", "confirm", or "choose"; it must not say that the system already resolved, accepted, executed, assigned, or scheduled anything.
+- `recommendedHumanDecision.actionTaken` and `recommendedHumanDecision.acceptedDecision` remain `false` for every item, including rank 1 and high-priority items.
+- Health score, status, gaps, and summaries remain derived dashboard interpretations unless source evidence says otherwise.
+- No-attention states should be expressed through top-level `noAttentionMessage` and `no-attention-items`, not through an item-level recommendation that claims no action is needed.
+- First-run baseline items must use "current signal" or "baseline unavailable" language. They must not claim a project "changed", is "new since last report", or is "new since baseline" when no previous baseline exists.
+- `first-run-current-signal` is an additional reason when the baseline is unavailable and current signals exist; it does not replace blocker, approval-gate, needs-review, unresolved-finding, or documentation-gap reasons.
+
+Empty-state rules:
+
+| State | Response behavior |
+|---|---|
+| Generated scan data missing or invalid | API returns `404` with `missing-generated-scan-data`; composition is blocked. |
+| Generated scan data exists but contains zero projects | Report returns `200`, `items: []`, `summary.projectCount: 0`, `safeStates` includes `no-attention-items`, and `noAttentionMessage` explains that no tracked generated projects were available for attention ranking. |
+| Generated scan data exists and projects exist, but no inclusion reasons are found | Report returns `200`, `items: []`, `safeStates` includes `no-attention-items`, and `noAttentionMessage` states that no changed projects, unresolved findings, blockers, approval gates, review signals, or relevant gaps were found. |
+| Findings store missing or unreadable but scan data exists | Report returns `200` with `missing-findings-store` safe state. It may still rank current blockers, gates, changes, and gaps. |
+| Findings data exists but has no unresolved findings | Report returns `200` with `empty-findings` safe state only when there are no finding records or no unresolved `reviewState: "new"` finding records to summarize; this does not block blockers/gates/change items. |
+
+Safe-state combinations:
+
+- `missing-findings-store` or `empty-findings` may appear with ranked items from blockers, gates, review signals, changes, or documentation gaps.
+- `no-attention-items` appears only when `items` is empty.
+- `missing-previous-baseline` may appear with ranked current-signal items and must have `blocksReport: false`.
+- `missing-generated-scan-data` blocks report composition and is handled as the API `404` case.
+
+Documentation gap inclusion:
+
+- Include gaps that map to missing specs/design, missing audit/review/verification evidence, stale handoff pointers, or other review-relevant dashboard gaps.
+- Do not include purely informational coverage notes as attention items unless Phase 3 implementation proves they are used as current dashboard gaps.
+
+Baseline and snapshot rules:
+
+| Case | Behavior |
+|---|---|
+| `since` omitted | Report uses current signals only; `baseline.requestedSince` is `null`, `comparisonAvailable` is `false`, and no missing-baseline warning is required. |
+| `since` valid and previous snapshot exists | Report can include changed categories from snapshot comparison; `comparisonAvailable` is `true`. |
+| `since` valid and previous snapshot missing | Report returns `200` if generated scan data exists; `safeStates` includes non-blocking `missing-previous-baseline`; current blockers, gates, unresolved findings, and gaps can still produce items. |
+| `since` valid and previous snapshot is unreadable/corrupt | Treat as baseline unavailable for the first implementation: return `200` with non-blocking `missing-previous-baseline` when generated scan data exists, and do not overwrite the snapshot from report retrieval. |
+| `since` invalid | API returns `400` before composition. |
+| Snapshot write | Not performed by `GET /api/project-brief-report`. Report retrieval is read-only with respect to `app-data/ai.context.snapshot.json`. A future explicit "mark baseline seen" behavior would require a separate design decision and endpoint/action. |
+
+No report history store is introduced in this change. Current reports are regenerated from saved config, generated scan data, existing findings review state, and existing baseline state.
+
+Rejected labels and automations:
+
+- Do not use labels such as "next mandatory task", "accepted recommendation", "source of truth", "resolved", "approved", "assigned", "scheduled", "implemented", or "all clear" for report output.
+- Do not trigger rank-based automation such as starting rank 1, creating tasks for high-priority items, accepting blockers, or marking findings handled.
+
 ### Reuse existing local runtime files
 
 The report should not introduce a new persistent store in the first slice. It can read the generated scan output, findings store, and AI context snapshot behavior already used by changes-since. If a future implementation needs report history, that requires a separate design decision.
