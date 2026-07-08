@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DrawerItem, ProjectData, ProjectStatus, ScanOutput, TabId } from './types';
 import { formatDate } from './statusMeta';
 import {
@@ -20,24 +20,116 @@ import StatusOrb from './components/StatusOrb';
 export default function App() {
   const [data, setData] = useState<ScanOutput | null>(null);
   const [loadError, setLoadError] = useState(false);
+  const [liveMode, setLiveMode] = useState(false);
+  const [scanStatus, setScanStatus] = useState<ScanStatus | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const lastScannedRef = useRef<string | null>(null);
+
+  const loadLiveData = useCallback(async () => {
+    const response = await fetch('/api/projects', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Live data unavailable: ${response.status}`);
+    const nextData = (await response.json()) as ScanOutput;
+    setData(nextData);
+    return nextData;
+  }, []);
+
+  const loadScanStatus = useCallback(async () => {
+    const response = await fetch('/api/scan-status', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Scan status unavailable: ${response.status}`);
+    const nextStatus = (await response.json()) as ScanStatus;
+    setScanStatus(nextStatus);
+    if (nextStatus.lastScannedAt && nextStatus.lastScannedAt !== lastScannedRef.current) {
+      lastScannedRef.current = nextStatus.lastScannedAt;
+      if (nextStatus.status === 'success') {
+        await loadLiveData();
+      }
+    }
+    return nextStatus;
+  }, [loadLiveData]);
 
   useEffect(() => {
     let mounted = true;
-    import('./data/projects.json')
-      .then((m) => {
-        if (mounted) setData(m.default as unknown as ScanOutput);
-      })
-      .catch(() => {
-        if (mounted) setLoadError(true);
-      });
+    async function loadInitialData() {
+      try {
+        const liveData = await loadLiveData();
+        if (!mounted) return;
+        setLiveMode(true);
+        lastScannedRef.current = liveData.generatedAt;
+        await loadScanStatus();
+      } catch {
+        try {
+          const m = await import('./data/projects.json');
+          if (!mounted) return;
+          setLiveMode(false);
+          setStatusMessage('Static mode: start local server to enable live rescan');
+          setData(m.default as unknown as ScanOutput);
+        } catch {
+          if (mounted) setLoadError(true);
+        }
+      }
+    }
+    void loadInitialData();
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [loadLiveData, loadScanStatus]);
+
+  useEffect(() => {
+    if (!liveMode) return;
+    const id = window.setInterval(() => {
+      void loadScanStatus().catch(() => {
+        setLiveMode(false);
+        setStatusMessage('Live server disconnected; showing last loaded data');
+      });
+    }, 2000);
+    return () => window.clearInterval(id);
+  }, [liveMode, loadScanStatus]);
+
+  const requestRescan = useCallback(async (trigger: 'manual' | 'interval' = 'manual') => {
+    if (!liveMode) return;
+    setStatusMessage(trigger === 'interval' ? 'Interval rescan requested' : 'Manual rescan requested');
+    const response = await fetch('/api/rescan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ trigger }),
+    });
+    const nextStatus = (await response.json()) as ScanStatus;
+    setScanStatus(nextStatus);
+    if (!response.ok || nextStatus.status === 'error') {
+      setStatusMessage(nextStatus.error ?? 'Scan failed');
+      return;
+    }
+    await loadLiveData();
+    setStatusMessage(
+      nextStatus.trigger === 'watcher'
+        ? 'Docs changed · rescanned automatically'
+        : 'Documentation rescan complete',
+    );
+  }, [liveMode, loadLiveData]);
 
   if (loadError) return <NoDataScreen />;
   if (!data) return <SkeletonShell />;
-  return <AppShell data={data} />;
+  return (
+    <AppShell
+      data={data}
+      liveMode={liveMode}
+      scanStatus={scanStatus}
+      statusMessage={statusMessage}
+      onRescan={requestRescan}
+    />
+  );
+}
+
+interface ScanStatus {
+  status: 'idle' | 'scanning' | 'success' | 'error';
+  lastScannedAt: string | null;
+  durationMs: number | null;
+  scannedFilesCount: number;
+  skippedFilesCount: number;
+  error: string | null;
+  trigger: 'manual' | 'watcher' | 'interval' | 'startup' | null;
+  message?: string | null;
+  queued?: boolean;
 }
 
 interface SearchHit {
@@ -49,7 +141,19 @@ interface SearchHit {
   drawer?: DrawerItem;
 }
 
-function AppShell({ data }: { data: ScanOutput }) {
+function AppShell({
+  data,
+  liveMode,
+  scanStatus,
+  statusMessage,
+  onRescan,
+}: {
+  data: ScanOutput;
+  liveMode: boolean;
+  scanStatus: ScanStatus | null;
+  statusMessage: string | null;
+  onRescan: (trigger?: 'manual' | 'interval') => Promise<void>;
+}) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
   const [selectedPath, setSelectedPath] = useState<string | null>(
@@ -246,10 +350,13 @@ function AppShell({ data }: { data: ScanOutput }) {
             )}
           </div>
 
-          <p className="hidden font-mono text-[11px] text-faint md:block">
-            scanned {formatDate(data.generatedAt)} ·{' '}
-            <code className="text-mute">npm run scan</code> to refresh
-          </p>
+          <LiveControls
+            liveMode={liveMode}
+            generatedAt={data.generatedAt}
+            scanStatus={scanStatus}
+            statusMessage={statusMessage}
+            onRescan={onRescan}
+          />
         </div>
       </header>
 
@@ -314,6 +421,114 @@ function AppShell({ data }: { data: ScanOutput }) {
       {drawer && (
         <DetailDrawer item={drawer} onNavigate={setDrawer} onClose={() => setDrawer(null)} />
       )}
+    </div>
+  );
+}
+
+const INTERVAL_OPTIONS = [
+  { label: 'Off', value: 0 },
+  { label: '5 min', value: 5 * 60 * 1000 },
+  { label: '15 min', value: 15 * 60 * 1000 },
+  { label: '30 min', value: 30 * 60 * 1000 },
+];
+
+function LiveControls({
+  liveMode,
+  generatedAt,
+  scanStatus,
+  statusMessage,
+  onRescan,
+}: {
+  liveMode: boolean;
+  generatedAt: string;
+  scanStatus: ScanStatus | null;
+  statusMessage: string | null;
+  onRescan: (trigger?: 'manual' | 'interval') => Promise<void>;
+}) {
+  const [intervalMs, setIntervalMs] = useState(() => {
+    const saved = Number(window.localStorage.getItem('projects-viewer:auto-rescan-ms') ?? 0);
+    return INTERVAL_OPTIONS.some((option) => option.value === saved) ? saved : 0;
+  });
+  const [busy, setBusy] = useState(false);
+  const isScanning = scanStatus?.status === 'scanning' || busy;
+  const modeLabel = liveMode ? 'Live' : 'Static';
+  const modeClass = liveMode ? 'border-emerald-400/30 text-emerald-200' : 'border-amber-300/30 text-amber-200';
+  const message =
+    scanStatus?.message ??
+    scanStatus?.error ??
+    statusMessage ??
+    (liveMode ? 'Local server connected' : 'Start local server to enable live rescan');
+
+  useEffect(() => {
+    window.localStorage.setItem('projects-viewer:auto-rescan-ms', String(intervalMs));
+  }, [intervalMs]);
+
+  useEffect(() => {
+    if (!liveMode || intervalMs < 5 * 60 * 1000) return;
+    const id = window.setInterval(() => {
+      if (scanStatus?.status === 'scanning') return;
+      if (scanStatus?.trigger === 'watcher' && scanStatus.lastScannedAt) {
+        const elapsed = Date.now() - Date.parse(scanStatus.lastScannedAt);
+        if (elapsed < 60_000) return;
+      }
+      void onRescan('interval');
+    }, intervalMs);
+    return () => window.clearInterval(id);
+  }, [intervalMs, liveMode, onRescan, scanStatus?.lastScannedAt, scanStatus?.status, scanStatus?.trigger]);
+
+  async function handleRescan() {
+    if (!liveMode || isScanning) return;
+    setBusy(true);
+    try {
+      await onRescan('manual');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="glass flex w-full flex-col gap-2 rounded-lg px-3 py-2 md:w-auto md:min-w-[360px]">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className={`rounded border px-2 py-1 font-mono text-[10px] uppercase ${modeClass}`}>
+          {modeLabel}
+        </span>
+        <button
+          type="button"
+          onClick={handleRescan}
+          disabled={!liveMode || isScanning}
+          title={liveMode ? 'Rescan configured project docs' : 'Start local server to enable live rescan'}
+          className="rounded-md border border-violet-300/25 bg-violet-400/10 px-3 py-1.5 text-xs font-semibold text-violet-100 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:border-slate-500/20 disabled:bg-slate-500/10 disabled:text-faint"
+        >
+          {isScanning ? 'Scanning...' : 'Rescan docs'}
+        </button>
+        <label className="ml-auto flex items-center gap-2 font-mono text-[10px] text-faint">
+          Auto
+          <select
+            value={intervalMs}
+            onChange={(event) => setIntervalMs(Number(event.target.value))}
+            disabled={!liveMode}
+            className="rounded border border-line bg-void/80 px-2 py-1 text-[11px] text-mute disabled:opacity-50"
+            title={liveMode ? 'Optional interval fallback' : 'Start local server to enable interval rescan'}
+          >
+            {INTERVAL_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <div className="grid gap-x-3 gap-y-1 font-mono text-[10px] text-faint sm:grid-cols-2">
+        <span>last {formatDate(scanStatus?.lastScannedAt ?? generatedAt)}</span>
+        <span>status {scanStatus?.status ?? (liveMode ? 'idle' : 'static')}</span>
+        <span>files {scanStatus?.scannedFilesCount ?? '-'}</span>
+        <span>skipped {scanStatus?.skippedFilesCount ?? '-'}</span>
+        <span>duration {scanStatus?.durationMs != null ? `${scanStatus.durationMs}ms` : '-'}</span>
+        <span>trigger {scanStatus?.trigger ?? '-'}</span>
+      </div>
+      <p className="truncate font-mono text-[10px] text-mute" title={message}>
+        {message}
+      </p>
     </div>
   );
 }

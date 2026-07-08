@@ -20,17 +20,56 @@ The health score is derived from documentation coverage, blocker/rejection count
 - **Read-only by design.** The scanner only *reads* whitelisted markdown files inside your projects. It never writes to, moves, or modifies them. The only file it writes is `src/data/projects.json` inside this dashboard folder.
 - **Fully local.** No database, no auth, no cloud, no API keys.
 
-Stack: Vite + React + TypeScript + Tailwind CSS + a plain Node.js scanner script (no scanner dependencies).
+Stack: Vite + React + TypeScript + Tailwind CSS + a local Express server, Chokidar watcher, and a plain Node.js scanner script.
 
 ## Quick start
 
 ```bash
 npm install      # once
 npm run scan     # reads projects.config.json -> writes src/data/projects.json
-npm run dev      # starts the dashboard at http://localhost:5173
+npm run dev      # starts the live dashboard at http://127.0.0.1:5173
 ```
 
-`npm run dev` and `npm run build` automatically run a scan first, so the data is always fresh on startup. While the dev server is running, re-run `npm run scan` in another terminal whenever you want updated data — the page picks up the new JSON automatically.
+Use the live controls in the top-right panel to rescan without leaving the browser.
+
+## Live mode, static mode, and rescans
+
+`npm run dev` starts `server.mjs`, which runs the local Express API and uses Vite middleware for the frontend. The server performs a startup scan, exposes live rescan endpoints, and watches configured documentation files for changes.
+
+Useful commands:
+
+```bash
+npm run scan     # one-time CLI scan
+npm run dev      # live local dashboard with Vite middleware
+npm run build    # type-check and build the static frontend
+npm run server   # serve the built frontend through the local server
+npm run preview  # same as server
+```
+
+The dashboard has two data modes:
+
+- **Live mode** appears when the page can reach the local Express API. The top-right panel enables **Rescan docs**, shows scan status, last scanned time, duration, scanned/skipped counts, error text, and the trigger (`manual`, `watcher`, `interval`, or `startup`).
+- **Static mode** appears when the API is unavailable. The page falls back to the generated `src/data/projects.json`; rescanning is disabled because a browser-only static build cannot read local folders or execute Node code. Start `npm run dev` or `npm run server` to enable live rescans.
+
+Manual rescan:
+
+1. Click **Rescan docs** in the top-right panel.
+2. The button disables while scanning.
+3. The frontend calls `POST /api/rescan`.
+4. After the scan completes, the frontend reloads data from `GET /api/projects`.
+
+Automatic interval rescan is optional and off by default. The selector supports **Off / 5 min / 15 min / 30 min**, stores the choice in `localStorage`, never offers intervals below 5 minutes, and skips interval scans while another scan is running or shortly after a watcher-triggered scan.
+
+File watcher behavior:
+
+- Enabled by default when running the local server.
+- Watches only documentation-like markdown files inside paths from `projects.config.json`.
+- Debounces changes by 3 seconds.
+- Never starts two scans at the same time.
+- If a change happens during a scan or inside the 30-second throttle window, one extra scan is queued or delayed.
+- The UI shows `Docs changed · rescanned automatically` after watcher scans.
+
+To disable the watcher, set `"watchDocs": false` in `projects.config.json`. Manual and interval rescans still work in live mode.
 
 ## Configuration: projects.config.json
 
@@ -39,6 +78,7 @@ The file lives in the dashboard root. Add one entry per project; use absolute pa
 ```json
 {
   "activeDays": 14,
+  "watchDocs": true,
   "projects": [
     {
       "name": "Example Project",
@@ -55,6 +95,7 @@ The file lives in the dashboard root. Add one entry per project; use absolute pa
 - `name` — display name in the dashboard.
 - `path` — absolute path to the project root. Forward slashes also work (`C:/Users/...`).
 - `activeDays` (optional, default 14) — how recent a doc change must be for a project with open work to count as **active** instead of **stalled**.
+- `watchDocs` (optional, default true in local server mode) — set to `false` to disable automatic watcher rescans.
 
 After editing, run `npm run scan` again.
 

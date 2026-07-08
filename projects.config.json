@@ -1,5 +1,6 @@
 {
   "activeDays": 14,
+  "watchDocs": true,
   "projects": [
     {
       "name": "Example Project",

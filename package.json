@@ -4,14 +4,18 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "test": "node --test",
     "scan": "node scan-projects.mjs",
-    "predev": "node scan-projects.mjs",
-    "dev": "vite",
+    "dev": "node server.mjs",
+    "server": "node server.mjs --production",
     "prebuild": "node scan-projects.mjs",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "node server.mjs --production",
+    "start": "node server.mjs --production"
   },
   "dependencies": {
+    "chokidar": "^5.0.0",
+    "express": "^5.2.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

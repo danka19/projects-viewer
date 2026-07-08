@@ -30,8 +30,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const CONFIG_PATH = path.join(__dirname, 'projects.config.json');
-const OUTPUT_PATH = path.join(__dirname, 'src', 'data', 'projects.json');
+const DEFAULT_CONFIG_PATH = path.join(__dirname, 'projects.config.json');
+const DEFAULT_OUTPUT_PATH = path.join(__dirname, 'src', 'data', 'projects.json');
+const CONFIG_PATH = DEFAULT_CONFIG_PATH;
+const OUTPUT_PATH = DEFAULT_OUTPUT_PATH;
 
 // ---------------------------------------------------------------- scan rules
 
@@ -163,15 +165,20 @@ async function collectDocs(projectRoot) {
   } catch {
     return null; // project path missing/unreadable
   }
-  const ctx = { docs: [], truncated: false, projectRoot };
+  const ctx = { docs: [], skipped: [], truncated: false, projectRoot };
   for (const entry of entries) {
-    if (entry.isSymbolicLink()) continue; // never follow links out of the project
+    if (entry.isSymbolicLink()) {
+      skip(ctx, path.join(projectRoot, entry.name), 'symlink');
+      continue; // never follow links out of the project
+    }
     const lower = entry.name.toLowerCase();
     const full = path.join(projectRoot, entry.name);
     if (entry.isFile() && ROOT_DOC_FILES.has(lower)) {
       await addDoc(ctx, full);
     } else if (entry.isDirectory() && DOC_DIRS.has(lower)) {
       await walkDir(ctx, full, 0);
+    } else {
+      skip(ctx, full, entry.isDirectory() ? 'root directory is outside scan rules' : 'root file is outside scan rules');
     }
   }
   ctx.docs.sort((a, b) => a.file.localeCompare(b.file));
@@ -188,13 +195,19 @@ async function walkDir(ctx, dir, depth) {
   }
   for (const entry of entries) {
     if (ctx.truncated) return;
-    if (entry.isSymbolicLink()) continue; // no symlinks/junctions, no cycles
+    if (entry.isSymbolicLink()) {
+      skip(ctx, path.join(dir, entry.name), 'symlink');
+      continue; // no symlinks/junctions, no cycles
+    }
     const lower = entry.name.toLowerCase();
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       if (!EXCLUDED_DIRS.has(lower)) await walkDir(ctx, full, depth + 1);
+      else skip(ctx, full, 'excluded directory');
     } else if (entry.isFile() && lower.endsWith('.md')) {
       await addDoc(ctx, full);
+    } else {
+      skip(ctx, full, 'not a markdown documentation file');
     }
   }
 }
@@ -202,11 +215,19 @@ async function walkDir(ctx, dir, depth) {
 async function addDoc(ctx, filePath) {
   if (ctx.docs.length >= LIMITS.docs) {
     ctx.truncated = true;
+    skip(ctx, filePath, 'documentation file limit reached');
     return;
   }
   try {
     const st = await fs.stat(filePath);
-    if (!st.isFile() || st.size > MAX_FILE_SIZE) return;
+    if (!st.isFile()) {
+      skip(ctx, filePath, 'not a regular file');
+      return;
+    }
+    if (st.size > MAX_FILE_SIZE) {
+      skip(ctx, filePath, 'larger than 1 MB');
+      return;
+    }
     const rel = path.relative(ctx.projectRoot, filePath).split(path.sep).join('/');
     ctx.docs.push({
       absPath: filePath,
@@ -215,9 +236,14 @@ async function addDoc(ctx, filePath) {
       sizeBytes: st.size,
       modified: st.mtime.toISOString(),
     });
-  } catch {
-    /* unreadable file: skip */
+  } catch (err) {
+    skip(ctx, filePath, `unreadable file: ${err.message}`);
   }
+}
+
+function skip(ctx, filePath, reason) {
+  const rel = path.relative(ctx.projectRoot, filePath).split(path.sep).join('/');
+  ctx.skipped.push({ file: rel || filePath, reason });
 }
 
 // ------------------------------------------------------------------ parsing
@@ -987,6 +1013,7 @@ async function scanProject(entry, activeDays) {
 
   const collected = await collectDocs(entry.path);
   const docs = collected ? collected.docs : null;
+  const skipped = collected ? collected.skipped : [];
   if (collected?.truncated) {
     console.warn(
       `  warning: ${entry.name} has more than ${LIMITS.docs} documentation files; scan truncated`,
@@ -1000,8 +1027,8 @@ async function scanProject(entry, activeDays) {
         doc.openTaskCount = perDoc.open;
         doc.completedTaskCount = perDoc.completed;
         doc.archivedFlag = perDoc.archivedFlag;
-      } catch {
-        /* unreadable file: skip */
+      } catch (err) {
+        skipped.push({ file: doc.file, reason: `unreadable file: ${err.message}` });
       }
     }
   }
@@ -1074,6 +1101,102 @@ async function scanProject(entry, activeDays) {
         totalTasks > 0
           ? Math.round((acc.completedTasks.length / totalTasks) * 100)
           : null,
+    },
+    _scan: {
+      skippedFilesCount: skipped.length,
+      skipped,
+    },
+  };
+}
+
+export async function runScan(options = {}) {
+  const {
+    configPath = DEFAULT_CONFIG_PATH,
+    outputPath = DEFAULT_OUTPUT_PATH,
+    quiet = false,
+    logger = console,
+  } = options;
+  const startedAt = Date.now();
+  let config;
+  try {
+    config = JSON.parse(await fs.readFile(configPath, 'utf8'));
+  } catch (err) {
+    throw new Error(`Cannot read ${configPath}: ${err.message}`);
+  }
+  if (!Array.isArray(config.projects) || config.projects.length === 0) {
+    throw new Error('projects.config.json must contain a non-empty "projects" array.');
+  }
+  const activeDays = Number.isFinite(config.activeDays)
+    ? config.activeDays
+    : DEFAULT_ACTIVE_DAYS;
+
+  if (!quiet) logger.log(`Scanning ${config.projects.length} project(s) from projects.config.json\n`);
+
+  const projects = [];
+  let scannedFilesCount = 0;
+  let skippedFilesCount = 0;
+  const skippedFiles = [];
+  for (const entry of config.projects) {
+    if (!entry?.name || typeof entry.path !== 'string' || entry.path.trim() === '') {
+      if (!quiet) logger.warn('  skipping config entry without a valid name/path:', JSON.stringify(entry));
+      skippedFilesCount += 1;
+      skippedFiles.push({
+        project: entry?.name ?? '(unknown)',
+        file: '(config entry)',
+        reason: 'invalid name/path',
+      });
+      continue;
+    }
+    const result = await scanProject(entry, activeDays);
+    const { _scan, ...publicResult } = result;
+    scannedFilesCount += publicResult.stats.docsCount;
+    skippedFilesCount += _scan.skippedFilesCount;
+    for (const skipped of _scan.skipped) {
+      skippedFiles.push({ project: publicResult.name, ...skipped });
+    }
+    projects.push(publicResult);
+
+    if (!quiet) {
+      logger.log(
+        `  ${publicResult.name}: ${publicResult.status} (health ${publicResult.summary.healthScore}) | ` +
+          `docs ${publicResult.stats.docsCount} | phases ${publicResult.phases.length} | ` +
+          `next ${publicResult.nextTasks.length} | blockers ${publicResult.blockers.length} | ` +
+          `risks ${publicResult.risks.length} | audits ${publicResult.audits.length} | gaps ${publicResult.gaps.length}` +
+          `${publicResult.error ? ` | ERROR: ${publicResult.error}` : ''}`,
+      );
+      for (const skipped of _scan.skipped.slice(0, 50)) {
+        logger.warn(`  skipped ${publicResult.name}: ${skipped.file} (${skipped.reason})`);
+      }
+      if (_scan.skipped.length > 50) {
+        logger.warn(`  skipped ${publicResult.name}: ${_scan.skipped.length - 50} more item(s)`);
+      }
+    }
+  }
+
+  const output = {
+    generatedAt: new Date().toISOString(),
+    activeDays,
+    projects,
+  };
+  await fs.mkdir(path.dirname(outputPath), { recursive: true });
+  await fs.writeFile(outputPath, JSON.stringify(output, null, 2) + '\n', 'utf8');
+
+  const durationMs = Date.now() - startedAt;
+  if (!quiet) {
+    logger.log(
+      `\nDone in ${durationMs} ms: ${projects.length} project(s).` +
+        `\nScanned ${scannedFilesCount} file(s), skipped ${skippedFilesCount} item(s).` +
+        `\nWrote ${path.relative(__dirname, outputPath)}`,
+    );
+  }
+
+  return {
+    output,
+    status: {
+      durationMs,
+      scannedFilesCount,
+      skippedFilesCount,
+      skippedFiles,
     },
   };
 }
@@ -1149,7 +1272,9 @@ async function main() {
   );
 }
 
-main().catch((err) => {
-  console.error(`Scan failed: ${err.message}`);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  runScan().catch((err) => {
+    console.error(`Scan failed: ${err.message}`);
+    process.exit(1);
+  });
+}
