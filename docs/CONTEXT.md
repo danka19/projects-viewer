@@ -28,6 +28,12 @@ This is the active glossary and domain-boundary file for Projects Viewer.
 | AI preflight context | Compact project context derived from generated scan data for use before AI work starts. | It omits raw markdown bodies by default and preserves source evidence where available. |
 | AI finding | A deterministic or future AI-generated review-required observation derived from scan signals. | It is proposal evidence only until a human handles it through an explicit review workflow. |
 | Project brief | A future daily or weekly digest of project changes, blockers, review-required findings, and recommended human decisions. | Not implemented yet; currently a Phase 1 workflow candidate. |
+| Raw scanned documentation | Markdown source files read from saved tracked project paths. | This is source data for scans; the dashboard must not modify it. |
+| Dashboard interpretation | Derived status, health, blocker, risk, gap, summary, or next-action signal produced from scanned documentation. | Useful for triage, but not an accepted project decision by itself. |
+| AI context snapshot | `app-data/ai.context.snapshot.json`, the local compact context snapshot used for changes-since comparison. | Runtime cache only; safe to regenerate or reset. |
+| AI findings store | `app-data/ai.findings.generated.json`, the local findings and review-state store. | Review-required evidence only; `accepted` means accepted as a finding state, not accepted as a project decision. |
+| Static fallback data | `src/data/projects.json`, build/static-mode fallback data. | Not live source of truth when the local API is available. |
+| Accepted project decision | A decision recorded in accepted OpenSpec specs, phase plans, audit files, context docs, or another reviewed durable project document. | Generated runtime files cannot create accepted decisions on their own. |
 
 ## Boundary Rules
 
@@ -40,3 +46,6 @@ This is the active glossary and domain-boundary file for Projects Viewer.
 - Review-required proposals are not accepted decisions.
 - LLM or heuristic output is proposal evidence only unless the project explicitly defines a reviewed acceptance workflow.
 - AI preflight context and project briefs must not grant AI authority to run commands, create commits, update task systems, or edit scanned projects.
+- Runtime writes are limited to the dashboard project, especially `app-data/projects.config.json`, `app-data/projects.generated.json`, `app-data/ai.context.snapshot.json`, and `app-data/ai.findings.generated.json`.
+- `app-data/projects.generated.json`, AI context snapshots, and AI findings are derived from saved config and scanned documentation; they may guide review, but they must not replace source files or accepted project documents.
+- New data sources such as cloud sync, remote model providers, databases, task/calendar systems, or external issue trackers require explicit future design approval and OpenSpec coverage before implementation.

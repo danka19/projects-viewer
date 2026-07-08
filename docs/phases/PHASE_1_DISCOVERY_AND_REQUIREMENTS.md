@@ -115,6 +115,45 @@ Open questions for human confirmation:
    Recommended default: yes.
    Tradeoff: keeps safety simple, but postpones multi-user or remote access scenarios.
 
+### 1.2 Data Sources, Runtime Files, And Trust Boundaries
+
+Status: completed on 2026-07-08 for the current local-only architecture; revisit if a new data source is proposed.
+
+Source evidence:
+
+- `server/project-config.mjs` stores canonical config under `app-data/` and resolves saved project/workspace paths before use.
+- `scan-projects.mjs` reads enabled entries from `app-data/projects.config.json` and writes the generated scan output to `app-data/projects.generated.json`.
+- `server.mjs` AI endpoints read generated scan data and saved config; they do not accept request-provided scan paths.
+- `server/ai-context.mjs` derives compact AI context from generated scan data and writes only `app-data/ai.context.snapshot.json` for changes-since comparison.
+- `server/ai-findings.mjs` derives findings from generated scan data and persists finding review state in `app-data/ai.findings.generated.json`.
+- Accepted OpenSpec specs define local-only AI context and review-required findings with no automatic agent action.
+
+Runtime and trust inventory:
+
+| Source or store | File/API | Trust level | Writer | Consumer | Notes |
+|---|---|---|---|---|---|
+| Saved tracked-project config | `app-data/projects.config.json` | Canonical local input | Project-management API or manual local edit while stopped | Scanner, watcher, AI context APIs, dashboard | Only saved paths may drive scans; browser requests can validate/save paths but not scan arbitrary paths directly. |
+| Raw scanned documentation | Saved tracked project paths from config | Trusted raw source data | Human/project repositories outside this dashboard | Scanner and derived dashboard signals | Read-only input; Projects Viewer must not write, move, delete, or reformat scanned project files. |
+| Generated scan data | `app-data/projects.generated.json`, `GET /api/projects` | Derived dashboard data | Scanner runs | Dashboard, AI context, AI findings | Regenerable from config plus raw documentation; contains statuses, health, blockers, risks, gaps, summaries, and evidence. |
+| AI preflight context | `GET /api/ai-context`, `GET /api/ai-context/projects/:id` | Derived compact context | API response from generated scan and findings | AI agents and future brief/report workflow | Omits raw markdown bodies by default; useful before work, but agents must verify source files before acting. |
+| AI context changes | `GET /api/ai-context/changes?since=<iso>` and `app-data/ai.context.snapshot.json` | Derived runtime cache | AI context API | AI agents and future brief/report workflow | Snapshot is only for comparing compact fields across requests; safe to regenerate/reset. |
+| AI findings store | `app-data/ai.findings.generated.json`, `GET /api/ai-findings`, `PATCH /api/ai-findings/:id` | Review-required proposal evidence | Findings generator and explicit review-state updates | Human owner, AI reviewer/checker agents | Findings can be `new`, `accepted`, `dismissed`, or `stale`; this does not create accepted project decisions or tasks. |
+| Static fallback data | `src/data/projects.json` | Static fallback artifact | Build/prebuild scan path | Browser-only static mode | Not live source of truth when local API is reachable; rescan controls stay disabled in static mode. |
+| Accepted behavior and decisions | `openspec/specs/**`, active/archived OpenSpec changes, phase docs, audit/context docs | Durable reviewed project truth | Human-reviewed documentation/spec workflow | Human owner and AI agents | Generated runtime files can provide evidence for updates, but cannot replace accepted specs or docs. |
+
+Forbidden or approval-required data flows:
+
+- Browser/API requests must not provide arbitrary paths to scan, watch, or summarize.
+- Scans and watchers must stay limited to enabled saved project paths from `app-data/projects.config.json`.
+- Runtime files must not write back into scanned project repositories.
+- AI findings, AI context, health scores, and summaries must not create tasks, commits, shell commands, calendar items, Trello cards, or scanned-project edits automatically.
+- Remote LLM providers, cloud sync, auth, API keys, databases, external issue trackers, and task/calendar integrations require explicit future design approval and OpenSpec coverage.
+
+Phase 2 readiness decision:
+
+- No additional data source is needed before Phase 2. Phase 2 can start from the current source set: saved local config, raw scanned documentation, generated scan data, AI context snapshot, AI findings store, static fallback data, and accepted OpenSpec/docs records.
+- If Phase 2 proposes persistent architecture beyond local JSON files, the proposal must keep this trust split visible: raw inputs, derived interpretations, review-required records, and accepted decisions are separate categories.
+
 ## Change Intake
 
 Record new ideas, fixes, scope changes, architecture notes, data contract changes, or verification requests that appear during the phase.
@@ -174,6 +213,8 @@ OpenSpec and acceptance evidence:
 - Existing `ai-context` and `ai-findings` specs are mapped to the relevant AI user workflows.
 
 ### 1.2 Inventory Data Sources, Runtime Files, And Trust Boundaries
+
+Status: completed on 2026-07-08 for the current local-only architecture.
 
 Objective:
 
