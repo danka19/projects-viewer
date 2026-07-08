@@ -400,6 +400,9 @@ test('project brief report API rejects unsafe or invalid query parameters', asyn
   try {
     for (const query of [
       'since=not-a-date',
+      'since=123',
+      'since=2026-07-08',
+      'since=2026-07-08T00:00:00',
       'mode=monthly',
       'since=2026-07-08T00:00:00.000Z&since=2026-07-09T00:00:00.000Z',
       'mode=daily&mode=weekly',
@@ -438,6 +441,28 @@ test('project brief report API returns a stable missing scan error and no-attent
     assert.equal(body.code, 'missing-generated-scan-data');
   } finally {
     await missingServer.close();
+  }
+
+  const corruptTmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-project-brief-corrupt-'));
+  const corruptAppDataDir = path.join(corruptTmp, 'app-data');
+  await fs.mkdir(corruptAppDataDir, { recursive: true });
+  await fs.writeFile(path.join(corruptAppDataDir, 'projects.config.json'), JSON.stringify(configFor([])));
+  await fs.writeFile(path.join(corruptAppDataDir, 'projects.generated.json'), '{not-json');
+  const corruptApp = await createApp({
+    appDataDir: corruptAppDataDir,
+    legacyConfigPath: path.join(corruptTmp, 'missing.json'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const corruptServer = await startTestServer(corruptApp);
+  try {
+    const response = await fetch(`${corruptServer.url}/api/project-brief-report`);
+    assert.equal(response.status, 404);
+    const body = await response.json();
+    assert.equal(body.code, 'missing-generated-scan-data');
+  } finally {
+    await corruptServer.close();
   }
 
   const quietTmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-project-brief-empty-'));

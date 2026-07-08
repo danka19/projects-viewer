@@ -257,8 +257,15 @@ export async function createApp({
     } catch (err) {
       if (err.code === 'ENOENT') {
         const missing = new Error('Generated scan data is missing. Run a scan before requesting AI context.');
+        missing.code = 'missing-generated-scan-data';
         missing.statusCode = 404;
         throw missing;
+      }
+      if (err instanceof SyntaxError) {
+        const invalid = new Error('Generated scan data is missing or invalid.');
+        invalid.code = 'missing-generated-scan-data';
+        invalid.statusCode = 404;
+        throw invalid;
       }
       throw err;
     }
@@ -307,8 +314,9 @@ export async function createApp({
 
     const sinceRaw = url.searchParams.get('since');
     if (sinceRaw === null) return { mode, since: null };
+    const strictIsoWithZone = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
     const sinceDate = new Date(sinceRaw);
-    if (!Number.isFinite(sinceDate.getTime())) {
+    if (!strictIsoWithZone.test(sinceRaw) || !Number.isFinite(sinceDate.getTime())) {
       const err = new Error('since must be a valid ISO timestamp.');
       err.statusCode = 400;
       throw err;
