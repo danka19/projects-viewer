@@ -1,6 +1,6 @@
 # Phase 2. Architecture And Data Model
 
-Status: in progress; work items 2.1, 2.2, 2.3, and 2.4 completed on 2026-07-09.
+Status: completed pending human acceptance on 2026-07-09; Phase 3 implementation plan is ready.
 
 ## Goal
 
@@ -421,6 +421,8 @@ Verification mapping:
 
 ### 2.5 Prepare Phase 3 Implementation Plan
 
+Status: completed on 2026-07-09.
+
 Objective:
 
 - Convert the resolved Phase 2 architecture into an implementation-ready plan for `openspec/changes/add-project-brief-report/tasks.md`.
@@ -456,20 +458,29 @@ OpenSpec and acceptance evidence:
 
 - `openspec/changes/add-project-brief-report/tasks.md` remains the implementation checklist source.
 
+Phase 3 plan:
+
+- Created `docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md`.
+- Selected smallest useful Phase 3 slice: JSON-only local report API with shared types, pure composition module, local endpoint, tests, and documentation.
+- Deferred dashboard UI, Markdown rendering, report history, scheduling, notifications, "mark baseline seen", findings/snapshot refresh behavior, remote providers, and external task/calendar integrations.
+- Phase 3 must use `readFindingsStore()` for report retrieval rather than `generateFindings()` so `GET /api/project-brief-report` remains read-only for findings data.
+- Phase 3 verification must include focused report tests, full tests/build, OpenSpec validation, diff check, and a static safety search for forbidden side-effect hooks.
+
 ## Phase Gate
 
-- Project brief report JSON contract is defined.
-- Report composition module boundary is accepted.
-- Local API/retrieval surface and safe parameters are accepted.
-- Ranking, empty-state, and baseline/snapshot behavior are accepted.
-- No new persistence, cloud, remote model, task/calendar, command, commit, or scanned-project write behavior is introduced without a new approved design decision.
-- Phase 3 implementation plan maps to `openspec/changes/add-project-brief-report/tasks.md`.
-- `docs/ROADMAP.md`, `docs/CURRENT_PROJECT_AUDIT.md`, `docs/00_FILE_STRUCTURE.md`, this phase plan, and relevant OpenSpec artifacts agree.
+- Completed: Project brief report JSON contract is defined.
+- Completed: Report composition module boundary is accepted for implementation planning.
+- Completed: Local API/retrieval surface and safe parameters are accepted for implementation planning.
+- Completed: Ranking, empty-state, and baseline/snapshot behavior are accepted for implementation planning.
+- Completed: No new persistence, cloud, remote model, task/calendar, command, commit, or scanned-project write behavior is introduced without a new approved design decision.
+- Completed: Phase 3 implementation plan maps to `openspec/changes/add-project-brief-report/tasks.md`.
+- Completed: `docs/ROADMAP.md`, `docs/CURRENT_PROJECT_AUDIT.md`, `docs/00_FILE_STRUCTURE.md`, this phase plan, and relevant OpenSpec artifacts agree after this session's updates.
 
 ## Human Decisions
 
 - Decision: Phase 2 starts from the selected local project brief/report workflow.
 - Decision: The first implementation surface remains API/report JSON before dashboard UI.
 - Decision: The app remains single-user local-only through Phase 3.
-- Open decision: approve the exact endpoint name and safe query parameters after work item 2.3 proposes them.
-- Open decision: approve whether Phase 3 implements the whole proposed change or the smallest report-contract slice first.
+- Decision: Phase 3 should implement the smallest useful API/report JSON slice first.
+- Decision: Future endpoint name is `GET /api/project-brief-report`, with only `since` and metadata-only `mode` accepted as query parameters.
+- Decision required: human owner accepts Phase 2 architecture/planning gate before Phase 3 implementation begins.

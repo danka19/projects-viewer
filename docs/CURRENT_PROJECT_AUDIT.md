@@ -12,7 +12,7 @@ Last updated: 2026-07-09.
 | Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer` |
 | Current branch | `phase-2/core-data-model` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Latest known commit before this audit update | `fd638f8 Define project brief API surface` |
+| Latest known commit before this audit update | `e2d9d4e Define project brief ranking rules` |
 | Local divergence | `phase-2/core-data-model` tracks `origin/phase-2/core-data-model` |
 
 ## Useful Starting Points
@@ -55,12 +55,13 @@ Last updated: 2026-07-09.
 | Phase 2 work item 2.2 | Report composition module boundary defined on 2026-07-09: future `server/project-brief-report.mjs` is a pure deterministic composer over provided scan/config/findings/change inputs, while route IO, snapshot IO, findings persistence, and HTTP behavior stay outside the module |
 | Phase 2 work item 2.3 | Local API surface defined on 2026-07-09: future `GET /api/project-brief-report` returns report JSON, accepts only `since` and metadata-only `mode`, rejects unknown/path-like/repeated scalar query parameters, returns `404` for missing generated scan data, and does not write snapshot, findings, report-history, scanned-project, or external-action artifacts |
 | Phase 2 work item 2.4 | Ranking, empty-state, and baseline rules defined on 2026-07-09: report ranks review items deterministically without creating accepted decisions/actions, handles no-attention and missing-data states, and keeps report retrieval read-only for AI context snapshots and report history |
+| Phase 2 work item 2.5 | Phase 3 implementation plan created in `docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md` on 2026-07-09; plan maps `add-project-brief-report` OpenSpec tasks to shared types, pure report composition, local API route, focused tests, docs, final verification, and OpenSpec follow-through |
 
 ## Known Risks And Gaps
 
 | ID | Risk | Owner | Status |
 |---|---|---|---|
-| AUDIT-001 | Phase 2 has resolved the project brief/report data contract, module boundary, local API surface, ranking rules, empty states, and baseline behavior; Phase 3 implementation plan still must be prepared before implementation starts. | Phase 2 | open |
+| AUDIT-001 | Phase 2 architecture/data model planning is complete pending human acceptance; Phase 3 implementation must follow `docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md` before coding the project brief/report workflow. | Human owner / Phase 3 | monitored |
 | AUDIT-002 | Environment and verification commands are recorded in README and this audit; keep them current as scripts change. | Phase 0 | monitored |
 | AUDIT-003 | Architecture decisions are partially documented in README/docs, but no ADR/OpenSpec exists for server/API/watcher contracts. | Phase 1/2 | open |
 | AUDIT-004 | Local branch had commits ahead of GitHub remote during early foundation work; `main` later matched `origin/main` before Phase 1 planning. | Human owner | closed 2026-07-08 |

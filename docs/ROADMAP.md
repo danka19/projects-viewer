@@ -47,17 +47,24 @@ Evidence:
 
 ## Phase 2. Architecture And Data Model
 
-Status: in progress; work items 2.1, 2.2, 2.3, and 2.4 completed on 2026-07-09.
+Status: completed pending human acceptance on 2026-07-09.
 
 Goal: define the first stable architecture, data contract, report composition module boundary, local API surface, ranking rules, storage boundaries, and integration contracts for the selected project brief/report workflow.
 
 Detailed plan: `docs/phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md`.
 
+Evidence:
+
+- Phase 2 resolved the project brief/report JSON contract, pure composition module boundary, local API surface, safe parameters, deterministic ranking, empty-state behavior, baseline/snapshot rules, and Phase 3 implementation plan.
+- Phase 3 plan created: `docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md`.
+
 ## Phase 3. First Usable Workflow
 
-Status: not planned in detail yet.
+Status: planned; ready to start after human acceptance of Phase 2 gate.
 
 Goal: implement the first end-to-end local project brief/report workflow from `openspec/changes/add-project-brief-report/`, starting with verified API/report output before dashboard UI.
+
+Detailed plan: `docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md`.
 
 ## Phase 4. Hardening And Pilot Readiness
 
