@@ -29,6 +29,65 @@ The implementation should add a focused module, for example `server/project-brie
 
 Alternative considered: build the report directly inside the API route. Rejected because report rules need independent tests and will likely evolve.
 
+#### Report composition module boundary
+
+The report module should be a deterministic composition module, not an IO or route module.
+
+Proposed module: `server/project-brief-report.mjs`.
+
+Primary export:
+
+```js
+buildProjectBriefReport({
+  scanOutput,
+  config,
+  findings,
+  changes,
+  previousSnapshotAvailable,
+  mode,
+  since,
+  now,
+})
+```
+
+Input ownership:
+
+| Input | Owner before composition | Report module responsibility |
+|---|---|---|
+| `scanOutput` | `server.mjs` reads `app-data/projects.generated.json` through existing config-path helpers. | Validate enough shape for composition and derive project items from generated scan data. |
+| `config` | `server.mjs` reads saved project config. | Match generated projects to saved tracked-project ids and names when available. |
+| `findings` | `server.mjs` obtains current findings through `server/ai-findings.mjs`. | Group findings by project, include review-state counts, unresolved summaries, and finding evidence. |
+| `changes` | `server.mjs` or a small orchestration helper computes AI context changes when a valid `since` is available. | Propagate changed categories into report items and safe-state metadata. |
+| `previousSnapshotAvailable` | `server.mjs` checks the existing AI context snapshot. | Report baseline availability and include missing-baseline safe states. |
+| `mode`, `since`, `now` | `server.mjs` validates or defaults request-level values. | Echo safe metadata and use injected time for deterministic tests. |
+
+Allowed dependencies:
+
+- Pure AI context helpers such as `buildAllProjectsAiContext`, `compareAiContextChanges`, and `normalizeEvidence` when useful for context shaping, comparison, or evidence normalization.
+- Shared constants/types once report types are added to `src/types.ts`.
+
+Forbidden dependencies and side effects:
+
+- No Express `req`/`res`, HTTP status handling, or query parsing.
+- No direct filesystem reads/writes, including no direct reads of `app-data/projects.generated.json`, project config, findings store, or AI context snapshot.
+- No calls to `writeAiContextSnapshot`.
+- No direct calls to `generateFindings`, `updateFindingReviewState`, or any function that persists review state.
+- No scanner, watcher, rescan controller, shell command, Git, task/calendar, notification, remote model, auth, or cloud dependency.
+- No scanned-project path traversal, arbitrary request path handling, globbing, or raw markdown body loading.
+
+Responsibilities by module:
+
+| Module | Responsibilities |
+|---|---|
+| `server.mjs` | Local API route orchestration, safe query validation, reading saved config/generated scan data, invoking findings generation if the route design accepts that side effect, reading baseline snapshot, deciding HTTP status codes, and sending JSON responses. |
+| `server/project-brief-report.mjs` | Pure report contract composition, item shaping, attention reason construction, summary counts, safe-state objects, evidence aggregation, derived labels, recommendation guard fields, and deterministic ranking once work item 2.4 defines ranking details. |
+| `server/ai-context.mjs` | Compact AI context mapping, AI context changes comparison, snapshot path/read/write helpers, and evidence normalization. It should not grow brief-specific ranking or recommendation text. |
+| `server/ai-findings.mjs` | Findings generation, findings persistence, review-state updates, stale handling, and review-state filtering. It should not know about report rank, report summary counts, or recommended human decisions. |
+| `src/types.ts` | Shared TypeScript contract types after Phase 3 starts implementation. It should describe report shape, not own composition behavior. |
+| `tests/project-brief-report.test.mjs` | Future pure composition tests with fixture data; API tests should come later after work item 2.3 finalizes endpoint behavior. |
+
+The module should return either a `project-brief-report` object or a small domain error with a status-like code for missing/invalid generated scan data. It should not know how that error is serialized over HTTP.
+
 ### Make structured JSON the primary contract
 
 The first implementation should return a structured JSON report with metadata, project items, evidence, recommended human decisions, and warnings. A text/Markdown rendering can be added later from the same data shape.

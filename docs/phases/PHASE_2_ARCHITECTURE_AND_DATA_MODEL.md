@@ -1,6 +1,6 @@
 # Phase 2. Architecture And Data Model
 
-Status: in progress; work item 2.1 completed on 2026-07-09.
+Status: in progress; work items 2.1 and 2.2 completed on 2026-07-09.
 
 ## Goal
 
@@ -169,6 +169,8 @@ Notes deferred to later Phase 2 work items:
 
 ### 2.2 Design Report Composition Module Boundary
 
+Status: completed on 2026-07-09 for architecture/design; implementation remains a Phase 3/OpenSpec task.
+
 Objective:
 
 - Define the responsibilities and inputs/outputs for a focused report composition module, likely `server/project-brief-report.mjs`.
@@ -202,6 +204,37 @@ Exit criteria:
 OpenSpec and acceptance evidence:
 
 - `add-project-brief-report/design.md` decision to add a dedicated report composition module.
+
+Accepted boundary:
+
+| Area | Decision |
+|---|---|
+| Module name | Future implementation target: `server/project-brief-report.mjs`. |
+| Primary API | `buildProjectBriefReport({ scanOutput, config, findings, changes, previousSnapshotAvailable, mode, since, now })`. |
+| Module style | Pure deterministic composition over provided inputs; no Express, no direct filesystem access, no scanner/watcher/rescan control, no remote services. |
+| Inputs | `server.mjs` or a route orchestration helper reads saved config, generated scan data, current findings, and baseline/snapshot state before calling the report module. |
+| Outputs | A `project-brief-report` object matching the work item 2.1 contract, or a domain error with a status-like code for missing/invalid generated scan data. |
+| Allowed helper reuse | Pure helpers from `server/ai-context.mjs`, especially compact context mapping, changes comparison, and evidence normalization, when useful. |
+| Forbidden helper calls | No `writeAiContextSnapshot`, no `generateFindings`, no `updateFindingReviewState`, and no direct app-data reads/writes from the report module. |
+| `server.mjs` responsibility | Route orchestration, safe query validation, HTTP status serialization, config/generated scan reads, findings generation if accepted by API design, snapshot reads, and any future snapshot write decision. |
+| `server/ai-context.mjs` responsibility | Compact context construction, changes-since comparison, snapshot helpers, and evidence normalization; no brief-specific recommendation text or ranking. |
+| `server/ai-findings.mjs` responsibility | Findings generation, persistence, stale handling, review-state updates, and filtering; no report ranking or recommendation shaping. |
+| Tests | Future `tests/project-brief-report.test.mjs` should cover pure composition first; API tests wait for work item 2.3 endpoint decisions. |
+
+Rejected alternatives:
+
+- Building the report directly inside the Express route, because ranking, safe states, and recommendation guards need focused unit tests.
+- Placing report ranking inside `server/ai-context.mjs`, because AI context should remain reusable preflight context rather than brief presentation logic.
+- Placing report ranking inside `server/ai-findings.mjs`, because findings are review-required records, not report items.
+- Letting report retrieval update the AI context snapshot by default; baseline write behavior remains deferred to work item 2.4.
+- Adding a report-history store during this boundary step.
+
+Verification mapping:
+
+- Route-only logic stays out of the composition module through the no-Express/no-query-parsing boundary.
+- Report-specific ranking and recommendations stay out of `server/ai-context.mjs` and `server/ai-findings.mjs`.
+- Local-only and read-only constraints are preserved by passing already loaded generated/local data into a pure module.
+- Future tests can instantiate the module with fixture scan/config/findings/changes objects without starting Express or touching scanned project folders.
 
 ### 2.3 Design Local API Surface And Safe Parameters
 
