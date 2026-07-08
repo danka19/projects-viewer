@@ -28,7 +28,7 @@ Identify the first real users, workflows, data sources, AI-assisted use cases, c
   - `openspec/specs/ai-context/spec.md`
   - `openspec/specs/ai-findings/spec.md`
 - Active proposed changes:
-  - None at phase start.
+  - `openspec/changes/add-project-brief-report/` for the proposed daily/weekly project brief/report workflow.
 - Acceptance scenarios:
   - Phase 1 MUST identify at least three prioritized workflows: human dashboard triage, AI agent preflight, and AI monitoring/briefing.
   - Phase 1 MUST record which workflow is selected as the first Phase 3 end-to-end workflow.
@@ -342,6 +342,8 @@ OpenSpec and acceptance evidence:
 
 ### 1.4 Convert Discovery Into Requirements And Proposed Changes
 
+Status: completed on 2026-07-08 for the project brief/report workflow.
+
 Objective:
 
 - Turn accepted Phase 1 decisions into concrete OpenSpec changes for product behavior, data contracts, UI workflows, or monitoring workflows.
@@ -376,7 +378,9 @@ Exit criteria:
 
 OpenSpec and acceptance evidence:
 
-- New OpenSpec changes created only for accepted behavior, not speculative ideas.
+- Created `openspec/changes/add-project-brief-report/` with `proposal.md`, `design.md`, `specs/project-brief-report/spec.md`, and `tasks.md`.
+- New OpenSpec requirements cover local derived inputs, human review items, evidence and derived labels, missing-data behavior, and no automatic action.
+- Existing `ai-context` and `ai-findings` specs remain unchanged; the new proposed capability composes them rather than changing their accepted contracts.
 
 ### 1.5 Select The First Usable Workflow For Phase 3
 
