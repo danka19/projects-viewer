@@ -71,6 +71,25 @@ export default function ManageProjects({
     }
   }
 
+  async function handleBrowsePath(target: 'project' | 'workspace') {
+    await runAction(async () => {
+      const response = await fetch('/api/browse-folder', { method: 'POST' });
+      if (response.status === 204) {
+        setMessage('Folder selection cancelled.');
+        return;
+      }
+      const body = (await response.json().catch(() => ({}))) as ApiError & { path?: string };
+      if (!response.ok) throw new Error(body.error ?? `Browse failed: ${response.status}`);
+      if (!body.path) {
+        setMessage('Folder selection cancelled.');
+        return;
+      }
+      if (target === 'project') setProjectPath(body.path);
+      else setWorkspacePath(body.path);
+      setMessage('Folder selected.');
+    });
+  }
+
   async function handleAddProject() {
     await runAction(async () => {
       await requestJson('/api/projects', {
@@ -189,13 +208,23 @@ export default function ManageProjects({
           <section className="rounded-lg border border-line p-4">
             <h3 className="text-sm font-semibold text-ink">Add Single Project</h3>
             <div className="mt-3 space-y-3">
-              <input
-                value={projectPath}
-                onChange={(event) => setProjectPath(event.target.value)}
-                disabled={!liveMode || busy}
-                placeholder="Project path"
-                className="w-full rounded-md border border-line bg-void/80 px-3 py-2 font-mono text-xs text-ink placeholder:text-faint disabled:opacity-50"
-              />
+              <div className="flex gap-2">
+                <input
+                  value={projectPath}
+                  onChange={(event) => setProjectPath(event.target.value)}
+                  disabled={!liveMode || busy}
+                  placeholder="Project path"
+                  className="min-w-0 flex-1 rounded-md border border-line bg-void/80 px-3 py-2 font-mono text-xs text-ink placeholder:text-faint disabled:opacity-50"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleBrowsePath('project')}
+                  disabled={!liveMode || busy}
+                  className="rounded-md border border-line px-3 py-2 text-xs font-semibold text-mute transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Browse
+                </button>
+              </div>
               <input
                 value={projectName}
                 onChange={(event) => setProjectName(event.target.value)}
@@ -217,13 +246,23 @@ export default function ManageProjects({
           <section className="rounded-lg border border-line p-4">
             <h3 className="text-sm font-semibold text-ink">Add Workspace Folder</h3>
             <div className="mt-3 space-y-3">
-              <input
-                value={workspacePath}
-                onChange={(event) => setWorkspacePath(event.target.value)}
-                disabled={!liveMode || busy}
-                placeholder="Workspace folder path"
-                className="w-full rounded-md border border-line bg-void/80 px-3 py-2 font-mono text-xs text-ink placeholder:text-faint disabled:opacity-50"
-              />
+              <div className="flex gap-2">
+                <input
+                  value={workspacePath}
+                  onChange={(event) => setWorkspacePath(event.target.value)}
+                  disabled={!liveMode || busy}
+                  placeholder="Workspace folder path"
+                  className="min-w-0 flex-1 rounded-md border border-line bg-void/80 px-3 py-2 font-mono text-xs text-ink placeholder:text-faint disabled:opacity-50"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleBrowsePath('workspace')}
+                  disabled={!liveMode || busy}
+                  className="rounded-md border border-line px-3 py-2 text-xs font-semibold text-mute transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Browse
+                </button>
+              </div>
               <input
                 value={workspaceName}
                 onChange={(event) => setWorkspaceName(event.target.value)}

@@ -123,7 +123,7 @@ Tracked projects are stored in `app-data/projects.config.json`, so they remain a
 
 1. Start live mode with `npm run dev`.
 2. Open **Manage Projects**.
-3. Paste an absolute project folder path.
+3. Click **Browse** to choose a project folder, or paste an absolute project folder path manually.
 4. Optionally enter a display name.
 5. Click **Add project**.
 6. Click **Rescan docs** or **Rescan enabled** to refresh dashboard data.
@@ -131,7 +131,7 @@ Tracked projects are stored in `app-data/projects.config.json`, so they remain a
 ### Add a workspace folder
 
 1. Open **Manage Projects**.
-2. Paste an absolute folder path that contains multiple projects.
+2. Click **Browse** to choose a folder that contains multiple projects, or paste an absolute folder path manually.
 3. Enter a display name.
 4. Choose discovery depth `1`, `2`, or `3`.
 5. Click **Discover projects**.
@@ -155,7 +155,7 @@ Use **Remove** in **Manage Projects**. Removing a project from the dashboard rem
 
 ## Configuration: app-data/projects.config.json
 
-Manual editing is optional; the dashboard UI is the preferred path. If needed, edit `app-data/projects.config.json` while the server is stopped, then restart or rescan. Use absolute paths and escape backslashes on Windows (`\\`):
+Manual editing is optional; the dashboard UI is the preferred path. The **Browse** button opens a native folder picker when supported by the local server environment, and manual path paste remains available as the fallback. If needed, edit `app-data/projects.config.json` while the server is stopped, then restart or rescan. Use absolute paths and escape backslashes on Windows (`\\`):
 
 ```json
 {

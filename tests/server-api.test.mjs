@@ -98,3 +98,44 @@ test('workspace discovery API returns candidates and track-discovered persists s
     await server.close();
   }
 });
+
+test('browse folder API returns selected local path', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-browse-api-'));
+  const selectedPath = path.join(tmp, 'selected');
+  const app = await createApp({
+    appDataDir: path.join(tmp, 'app-data'),
+    legacyConfigPath: path.join(tmp, 'missing.json'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+    browseFolder: async () => selectedPath,
+  });
+  const server = await startTestServer(app);
+  try {
+    const response = await fetch(`${server.url}/api/browse-folder`, { method: 'POST' });
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.path, selectedPath);
+  } finally {
+    await server.close();
+  }
+});
+
+test('browse folder API reports cancelled selection without error', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-browse-cancel-api-'));
+  const app = await createApp({
+    appDataDir: path.join(tmp, 'app-data'),
+    legacyConfigPath: path.join(tmp, 'missing.json'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+    browseFolder: async () => null,
+  });
+  const server = await startTestServer(app);
+  try {
+    const response = await fetch(`${server.url}/api/browse-folder`, { method: 'POST' });
+    assert.equal(response.status, 204);
+  } finally {
+    await server.close();
+  }
+});

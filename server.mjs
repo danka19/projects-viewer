@@ -19,6 +19,7 @@ import {
   updateProject,
 } from './server/project-config.mjs';
 import { discoverWorkspaceProjects } from './server/project-discovery.mjs';
+import { browseFolder as defaultBrowseFolder } from './server/folder-picker.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = path.join(__dirname, 'dist');
@@ -201,6 +202,7 @@ export async function createApp({
   skipStartupScan = false,
   skipWatcher = false,
   skipFrontend = false,
+  browseFolder = defaultBrowseFolder,
   logger = console,
 } = {}) {
   const app = express();
@@ -224,6 +226,19 @@ export async function createApp({
   app.get('/api/config', async (_req, res) => {
     try {
       res.json(await readProjectConfig(configOptions));
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.post('/api/browse-folder', async (_req, res) => {
+    try {
+      const selectedPath = await browseFolder();
+      if (!selectedPath) {
+        res.status(204).end();
+        return;
+      }
+      res.json({ path: selectedPath });
     } catch (err) {
       sendError(res, err);
     }

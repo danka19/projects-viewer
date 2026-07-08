@@ -19,6 +19,13 @@ Projects Viewer SHALL persist tracked projects and workspaces in `app-data/proje
 - **WHEN** the local server restarts
 - **THEN** `GET /api/config` still includes the project
 
+#### Scenario: User can browse for a folder path
+
+- **GIVEN** the dashboard is running in live mode
+- **WHEN** the user clicks Browse in Manage Projects and selects a folder
+- **THEN** the selected absolute folder path is inserted into the relevant path field
+- **AND** manual path entry remains available
+
 ### Requirement: Read-Only Scanned Projects
 
 Projects Viewer SHALL never write, delete, move, or reformat files inside tracked project paths.
