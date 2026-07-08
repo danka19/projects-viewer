@@ -149,11 +149,14 @@ const NEXT_ACTION_RE =
 const REJECTION_RE =
   /\b(human|owner)\b[^.]{0,40}\breject(ed|ion)\b|\breject(ed|ion)\b[^.]{0,30}by the (human|owner)|\bnot accepted\b|not employee-ready|acceptance gap/i;
 const HARD_BLOCK_RE =
-  /must not start until|is blocked|remains blocked|stays blocked|blocked until|blocked rather than/i;
+  /must not start until|is blocked|remains blocked|stays blocked|blocked until|blocked rather than|cannot continue|failing|bug prevents progress|missing required data|dependency unavailable|acceptance gap[^.]{0,80}(prevents completion|blocks completion|blocking)/i;
 // "if/when/may be ... blocked" is conditional gate language, not a live blocker.
 const CONDITIONAL_BLOCK_RE = /\b(if|when|whether|unless|may be|could be|might be)\b[^.]{0,60}blocked/i;
 const HUMAN_GATE_RE =
-  /requires explicit human approval|human acceptance|awaiting (human|owner)|owner[- ]approv|human owner (must|has to)|approval pending|pending approval|needs human review/i;
+  /approval pending|pending approval|requires (explicit )?(human |owner )?approval|requires [^.]{0,40}approval|merge[^.]{0,50}requires [^.]{0,30}approval|waiting for owner approval|completed but (requires|pending) approval|done\s*[-:]\s*approval pending|\bsdd gate\b|human acceptance/i;
+const REVIEW_SIGNAL_RE =
+  /needs review|pending review|needs verification|requires validation|final review|human-reviewed sample pending|needs human review|awaiting review/i;
+const PAUSED_DEFERRED_RE = /\bpaused\b|on hold|\bdeferred\b|resume later|planned later/i;
 const ARCHIVED_DOC_RE = /superseded|historical (evidence|context|plan)|no longer (active|the active)/i;
 
 // ------------------------------------------------------------------ walking
@@ -377,13 +380,20 @@ function readMultilineStatus(lines, i, firstPart) {
   return cut.slice(0, cut.lastIndexOf(' ')) + ' …';
 }
 
-function classifyBlocker(line) {
-  if (REJECTION_RE.test(line)) return { kind: 'rejection', severe: true };
-  if (HARD_BLOCK_RE.test(line) && !CONDITIONAL_BLOCK_RE.test(line)) {
-    return { kind: 'blocked', severe: true };
+function classifyWorkSignal(line) {
+  if (PAUSED_DEFERRED_RE.test(line)) {
+    return { group: 'pausedDeferred', kind: 'paused-deferred', severe: false };
   }
-  if (/\bpaused\b/i.test(line)) return { kind: 'blocked', severe: false };
-  if (HUMAN_GATE_RE.test(line)) return { kind: 'human-gate', severe: false };
+  if (HUMAN_GATE_RE.test(line)) {
+    return { group: 'approvalGates', kind: 'approval-gate', severe: false };
+  }
+  if (REVIEW_SIGNAL_RE.test(line)) {
+    return { group: 'needsReview', kind: 'needs-review', severe: false };
+  }
+  if (REJECTION_RE.test(line)) return { group: 'realBlockers', kind: 'rejection', severe: true };
+  if (HARD_BLOCK_RE.test(line) && !CONDITIONAL_BLOCK_RE.test(line)) {
+    return { group: 'realBlockers', kind: 'blocked', severe: true };
+  }
   return null;
 }
 
@@ -648,12 +658,13 @@ function parseDoc(content, doc, acc) {
       }
     }
 
-    // Blocked / rejected / human-gated work.
-    if (acc.blockers.length < LIMITS.blockers) {
-      const blocker = classifyBlocker(trimmed);
-      if (blocker && !acc.seenBlockers.has(bulletText)) {
-        acc.seenBlockers.add(bulletText);
-        acc.blockers.push({ ...blocker, text: bulletText, file: doc.file, line: lineNo });
+    // Work status signals: real blockers are separate from normal approval,
+    // review, and pause/defer signals.
+    if (acc.workSignals.length < LIMITS.blockers) {
+      const signal = classifyWorkSignal(trimmed);
+      if (signal && !acc.seenWorkSignals.has(bulletText)) {
+        acc.seenWorkSignals.add(bulletText);
+        acc.workSignals.push({ ...signal, text: bulletText, file: doc.file, line: lineNo });
       }
     }
 
@@ -712,6 +723,15 @@ function dedupePhases(phases) {
 }
 
 const COMPLETED_PHASE = new Set(['completed', 'completed_pending_approval']);
+
+function buildSignalGroups(workSignals) {
+  return {
+    realBlockers: workSignals.filter((s) => s.group === 'realBlockers'),
+    approvalGates: workSignals.filter((s) => s.group === 'approvalGates'),
+    needsReview: workSignals.filter((s) => s.group === 'needsReview'),
+    pausedDeferred: workSignals.filter((s) => s.group === 'pausedDeferred'),
+  };
+}
 
 /** Attach detected steps to their phases, deduped, plan files preferred. */
 function attachSteps(phases, steps) {
@@ -857,7 +877,7 @@ function computeGaps(acc, docs, lastModified, coverage) {
 
 // ------------------------------------------------------------------- status
 
-function deriveStatus(acc, docs, lastModified, activeDays) {
+function deriveStatus(acc, docs, lastModified, activeDays, signalGroups) {
   if (!docs || docs.length === 0) {
     return { status: 'unknown', reason: 'No documentation files found' };
   }
@@ -865,27 +885,48 @@ function deriveStatus(acc, docs, lastModified, activeDays) {
     (acc.markerCounts.TODO ?? 0) +
     (acc.markerCounts.FIXME ?? 0) +
     (acc.markerCounts.BUG ?? 0);
-  const rejections = acc.blockers.filter((b) => b.kind === 'rejection').length;
-  const hardBlocks = acc.blockers.filter((b) => b.kind === 'blocked' && b.severe).length;
+  const rejections = signalGroups.realBlockers.filter((b) => b.kind === 'rejection').length;
+  const hardBlocks = signalGroups.realBlockers.filter((b) => b.kind === 'blocked' && b.severe).length;
+  const reviewItems = signalGroups.needsReview.length;
 
   if (attention > 0 || rejections > 0 || hardBlocks > 0) {
     const parts = [];
     if (rejections > 0)
       parts.push(`${rejections} rejection/acceptance-gap signal${rejections === 1 ? '' : 's'}`);
     if (hardBlocks > 0)
-      parts.push(`${hardBlocks} blocked-work signal${hardBlocks === 1 ? '' : 's'}`);
+      parts.push(`${hardBlocks} real blocker${hardBlocks === 1 ? '' : 's'}`);
     if (attention > 0)
       parts.push(`${attention} TODO/FIXME/BUG marker${attention === 1 ? '' : 's'}`);
     return { status: 'needs-attention', reason: `${parts.join(', ')} in documentation` };
+  }
+
+  if (reviewItems > 0) {
+    return {
+      status: 'needs-review',
+      reason: `${reviewItems} review/verification signal${reviewItems === 1 ? '' : 's'} in documentation`,
+    };
   }
 
   const recent =
     lastModified !== null &&
     Date.now() - Date.parse(lastModified) <= activeDays * 24 * 60 * 60 * 1000;
   const activePhases = acc.phases.filter((p) => p.status === 'in_progress');
+  const currentPhase = activePhases.at(-1) ?? acc.phases.filter((p) => p.status === 'paused').at(-1) ?? null;
+  if (currentPhase?.status === 'paused') {
+    return {
+      status: 'paused',
+      reason: `current phase ${currentPhase.id} is paused/deferred`,
+    };
+  }
   const donePhases = acc.phases.filter(
     (p) => COMPLETED_PHASE.has(p.status),
   );
+  if (signalGroups.approvalGates.length > 0 && donePhases.length > 0 && activePhases.length === 0) {
+    return {
+      status: 'pending-approval',
+      reason: `${signalGroups.approvalGates.length} approval gate${signalGroups.approvalGates.length === 1 ? '' : 's'} waiting on owner/SDD approval`,
+    };
+  }
   const openWorkParts = [];
   if (acc.openTasks.length > 0) openWorkParts.push(`${acc.openTasks.length} open tasks`);
   if (activePhases.length > 0)
@@ -918,16 +959,19 @@ function deriveStatus(acc, docs, lastModified, activeDays) {
 
 // ------------------------------------------------------------ health/summary
 
-function computeHealthScore({ coverage, acc, attention, lastModified, status }) {
+function computeHealthScore({ coverage, acc, attention, lastModified, status, signalGroups }) {
   if (status === 'unknown') return 15;
   let score = 100;
   const covMissing = Object.values(coverage).filter((v) => !v).length;
   score -= covMissing * 8;
 
-  const rejections = acc.blockers.filter((b) => b.kind === 'rejection').length;
-  const hardBlocks = acc.blockers.filter((b) => b.kind === 'blocked' && b.severe).length;
-  score -= Math.min(20, rejections * 4);
-  score -= Math.min(18, hardBlocks * 6);
+  const rejections = signalGroups.realBlockers.filter((b) => b.kind === 'rejection').length;
+  const hardBlocks = signalGroups.realBlockers.filter((b) => b.kind === 'blocked' && b.severe).length;
+  score -= Math.min(25, rejections * 5);
+  score -= Math.min(30, hardBlocks * 8);
+  score -= Math.min(8, signalGroups.approvalGates.length * 2);
+  score -= Math.min(10, signalGroups.needsReview.length * 3);
+  if (acc.phases.some((p) => p.status === 'paused')) score -= Math.min(6, signalGroups.pausedDeferred.length * 2);
   score -= Math.min(12, attention * 3);
 
   if (lastModified) {
@@ -945,7 +989,7 @@ function computeHealthScore({ coverage, acc, attention, lastModified, status }) 
   return Math.max(5, Math.min(100, Math.round(score)));
 }
 
-function buildSummary({ acc, coverage, status, lastModified, attention, docs }) {
+function buildSummary({ acc, coverage, status, lastModified, attention, docs, signalGroups }) {
   const fileCategory = new Map((docs ?? []).map((d) => [d.file, d.category]));
   const activePhases = acc.phases.filter((p) => p.status === 'in_progress');
   const currentPhase =
@@ -966,7 +1010,7 @@ function buildSummary({ acc, coverage, status, lastModified, attention, docs }) 
   const scoreBlocker = (b) =>
     (b.kind === 'rejection' ? 2 : 0) + (fileCategory.get(b.file) === 'roadmap' ? 1 : 0);
   const mainBlocker =
-    [...acc.blockers.filter((b) => b.severe)].sort(
+    [...signalGroups.realBlockers.filter((b) => b.severe)].sort(
       (a, b) => scoreBlocker(b) - scoreBlocker(a),
     )[0] ?? null;
 
@@ -977,7 +1021,7 @@ function buildSummary({ acc, coverage, status, lastModified, attention, docs }) 
       : null;
   return {
     status,
-    healthScore: computeHealthScore({ coverage, acc, attention, lastModified, status }),
+    healthScore: computeHealthScore({ coverage, acc, attention, lastModified, status, signalGroups }),
     currentPhase: currentPhase ? `${currentPhase.id} ${currentPhase.name}` : null,
     nextAction: nextAction?.text ?? null,
     mainBlocker: mainBlocker?.text ?? null,
@@ -1002,11 +1046,12 @@ async function scanProject(entry, activeDays) {
     steps: [],
     decisions: [],
     blockers: [],
+    workSignals: [],
     risks: [],
     specs: [],
     claudePointer: null,
     seenDecisions: new Set(),
-    seenBlockers: new Set(),
+    seenWorkSignals: new Set(),
     seenNext: new Set(),
     seenRisks: new Set(),
   };
@@ -1037,6 +1082,8 @@ async function scanProject(entry, activeDays) {
   attachSteps(acc.phases, acc.steps);
   flagOrderingContradictions(acc.phases);
   acc.decisions.sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''));
+  const signalGroups = buildSignalGroups(acc.workSignals);
+  acc.blockers = signalGroups.realBlockers;
 
   const { changes: openspecChanges, specFileCount } = collectOpenSpec(docs ?? []);
   acc.specs.push(...openspecChanges);
@@ -1049,13 +1096,13 @@ async function scanProject(entry, activeDays) {
     : { readme: false, claude: false, roadmap: false, sddOrSpecs: false, audits: false };
   const gaps = docs ? computeGaps(acc, docs, lastModified, coverage) : [];
   const audits = docs ? buildAudits(docs, acc.blockers) : [];
-  const { status, reason } = deriveStatus(acc, docs, lastModified, activeDays);
+  const { status, reason } = deriveStatus(acc, docs, lastModified, activeDays, signalGroups);
 
   const attention =
     (acc.markerCounts.TODO ?? 0) +
     (acc.markerCounts.FIXME ?? 0) +
     (acc.markerCounts.BUG ?? 0);
-  const summary = buildSummary({ acc, coverage, status, lastModified, attention, docs });
+  const summary = buildSummary({ acc, coverage, status, lastModified, attention, docs, signalGroups });
   const totalTasks = acc.openTasks.length + acc.completedTasks.length;
 
   return {
@@ -1074,6 +1121,7 @@ async function scanProject(entry, activeDays) {
     phases: acc.phases,
     decisions: acc.decisions,
     blockers: acc.blockers,
+    signalGroups,
     risks: acc.risks,
     specs: acc.specs,
     specFileCount,
@@ -1160,7 +1208,8 @@ export async function runScan(options = {}) {
       logger.log(
         `  ${publicResult.name}: ${publicResult.status} (health ${publicResult.summary.healthScore}) | ` +
           `docs ${publicResult.stats.docsCount} | phases ${publicResult.phases.length} | ` +
-          `next ${publicResult.nextTasks.length} | blockers ${publicResult.blockers.length} | ` +
+          `next ${publicResult.nextTasks.length} | real blockers ${publicResult.signalGroups.realBlockers.length} | ` +
+          `approval gates ${publicResult.signalGroups.approvalGates.length} | review ${publicResult.signalGroups.needsReview.length} | paused ${publicResult.signalGroups.pausedDeferred.length} | ` +
           `risks ${publicResult.risks.length} | audits ${publicResult.audits.length} | gaps ${publicResult.gaps.length}` +
           `${publicResult.error ? ` | ERROR: ${publicResult.error}` : ''}`,
       );
@@ -1229,9 +1278,10 @@ async function main() {
     const result = await scanProject(entry, activeDays);
     projects.push(result);
     console.log(
-      `  ${result.name}: ${result.status} (health ${result.summary.healthScore}) | ` +
-        `docs ${result.stats.docsCount} | phases ${result.phases.length} | ` +
-        `next ${result.nextTasks.length} | blockers ${result.blockers.length} | ` +
+        `  ${result.name}: ${result.status} (health ${result.summary.healthScore}) | ` +
+          `docs ${result.stats.docsCount} | phases ${result.phases.length} | ` +
+        `next ${result.nextTasks.length} | real blockers ${result.signalGroups.realBlockers.length} | ` +
+        `approval gates ${result.signalGroups.approvalGates.length} | review ${result.signalGroups.needsReview.length} | paused ${result.signalGroups.pausedDeferred.length} | ` +
         `risks ${result.risks.length} | audits ${result.audits.length} | gaps ${result.gaps.length}` +
         `${result.error ? ` | ERROR: ${result.error}` : ''}`,
     );

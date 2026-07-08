@@ -83,7 +83,7 @@ export function decisionDrawer(d: DecisionItem, p: ProjectData): DrawerItem {
 
 export function blockerDrawer(b: BlockerItem, p: ProjectData): DrawerItem {
   return {
-    type: 'Blocked / gated work',
+    type: BLOCKER_META[b.kind]?.label ?? 'Work signal',
     title: b.text.length > 80 ? b.text.slice(0, 80) + '…' : b.text,
     status: BLOCKER_META[b.kind]?.label ?? b.kind,
     statusChip: BLOCKER_META[b.kind]?.chip,

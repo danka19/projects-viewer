@@ -2,6 +2,9 @@ export type ProjectStatus =
   | 'active'
   | 'stalled'
   | 'done'
+  | 'pending-approval'
+  | 'needs-review'
+  | 'paused'
   | 'needs-attention'
   | 'unknown';
 
@@ -92,11 +95,19 @@ export interface DecisionItem {
 }
 
 export interface BlockerItem {
-  kind: 'rejection' | 'blocked' | 'human-gate';
+  group?: 'realBlockers' | 'approvalGates' | 'needsReview' | 'pausedDeferred';
+  kind: 'rejection' | 'blocked' | 'approval-gate' | 'needs-review' | 'paused-deferred';
   severe: boolean;
   text: string;
   file: string;
   line: number;
+}
+
+export interface SignalGroups {
+  realBlockers: BlockerItem[];
+  approvalGates: BlockerItem[];
+  needsReview: BlockerItem[];
+  pausedDeferred: BlockerItem[];
 }
 
 export interface RiskItem {
@@ -190,6 +201,7 @@ export interface ProjectData {
   phases: PhaseItem[];
   decisions: DecisionItem[];
   blockers: BlockerItem[];
+  signalGroups: SignalGroups;
   risks: RiskItem[];
   specs: SpecItem[];
   specFileCount: number;

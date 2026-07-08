@@ -33,6 +33,27 @@ export const STATUS_META: Record<
     text: 'text-sky-300',
     bar: 'bg-sky-400',
   },
+  'pending-approval': {
+    label: 'Pending approval',
+    badge:
+      'border-violet-400/30 bg-violet-400/10 text-violet-300 shadow-[0_0_16px_rgba(167,139,250,0.12)]',
+    text: 'text-violet-300',
+    bar: 'bg-violet-400',
+  },
+  'needs-review': {
+    label: 'Needs review',
+    badge:
+      'border-orange-400/30 bg-orange-400/10 text-orange-300 shadow-[0_0_16px_rgba(251,146,60,0.12)]',
+    text: 'text-orange-300',
+    bar: 'bg-orange-400',
+  },
+  paused: {
+    label: 'Paused',
+    badge:
+      'border-amber-400/30 bg-amber-400/10 text-amber-300 shadow-[0_0_16px_rgba(251,191,36,0.12)]',
+    text: 'text-amber-300',
+    bar: 'bg-amber-400',
+  },
   'needs-attention': {
     label: 'Needs attention',
     badge:
@@ -129,12 +150,20 @@ export const BLOCKER_META: Record<string, { label: string; chip: string }> = {
     chip: 'border-rose-400/30 bg-rose-400/10 text-rose-300',
   },
   blocked: {
-    label: 'blocked',
+    label: 'real blocker',
     chip: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
   },
-  'human-gate': {
-    label: 'human gate',
+  'approval-gate': {
+    label: 'approval gate',
     chip: 'border-violet-400/30 bg-violet-400/10 text-violet-300',
+  },
+  'needs-review': {
+    label: 'needs review',
+    chip: 'border-orange-400/30 bg-orange-400/10 text-orange-300',
+  },
+  'paused-deferred': {
+    label: 'paused/deferred',
+    chip: 'border-slate-400/25 bg-slate-400/10 text-slate-300',
   },
 };
 
@@ -175,6 +204,9 @@ export function healthStroke(score: number): string {
 
 export const STATUS_ORDER: ProjectStatus[] = [
   'needs-attention',
+  'needs-review',
+  'pending-approval',
+  'paused',
   'active',
   'stalled',
   'done',

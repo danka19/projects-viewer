@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-07-08T05:15:30.138Z",
+  "generatedAt": "2026-07-08T08:18:48.837Z",
   "activeDays": 14,
   "projects": [
     {
       "name": "Example Project",
       "path": "C:\\Users\\danoc\\Documents\\projects\\AutoParts",
       "status": "needs-attention",
-      "statusReason": "20 rejection/acceptance-gap signals, 10 blocked-work signals in documentation",
+      "statusReason": "16 rejection/acceptance-gap signals, 14 real blockers in documentation",
       "lastModified": "2026-07-08T04:32:33.654Z",
       "error": null,
       "summary": {
         "status": "needs-attention",
-        "healthScore": 62,
+        "healthScore": 22,
         "currentPhase": "4.7 Checkpoint UI State And Acceptance",
         "nextAction": "The next card design should strongly prefer topic tabs/segments and must bring relationships into",
-        "mainBlocker": "Human acceptance update on 2026-06-20: the latest normalization/product-data cleanup result was rejected. The blocking acceptance gap is documented in `docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md`. Later remediation must treat search normalization, review-required prod",
+        "mainBlocker": "`docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md`: Human rejection of the latest normalization/product-data cleanup result, including part-number overflow, category/brand failures, kit/oil attribute questions, display-name proposal requirements, multi-part-number extractio",
         "mainRisk": "Brand coverage remains low: 63/1,583 rows. The next safe improvement is a",
         "recentDecision": "Phase 4 official-cross implementation is paused after work items 4.1-4.3; remaining official-cross work should resume only after checkpoint/customer-search priorities are accepted or the human owner explicitly reorders the roadmap. The stale Phase 4 phase-plan `in progress` statu",
         "recentChange": "docs/CURRENT_PROJECT_AUDIT.md",
@@ -3981,6 +3981,7 @@
       ],
       "blockers": [
         {
+          "group": "realBlockers",
           "kind": "blocked",
           "severe": true,
           "text": "The Local Knowledge Graph setup gives Codex a local-first repository exploration path before broad recursive search. It is intended for code and documentation navigation only; semantic, hosted, paid, or API-backed graph backends remain blocked until the human owner explicitly app",
@@ -3988,6 +3989,7 @@
           "line": 227
         },
         {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "The 2026-06-20 normalization acceptance gap showed that passing tests is not enough when the agent fails to preserve human decisions, mixes product concepts, or verifies only the happy path. This checklist exists to force each future agent to challenge its own work against curren",
@@ -3995,6 +3997,7 @@
           "line": 9
         },
         {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "Add failing regression tests for every reported bug or acceptance gap before or alongside the fix.",
@@ -4002,6 +4005,7 @@
           "line": 243
         },
         {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "Does this checklist need an update because the human introduced a new verification habit, rejected behavior, or recurring edge case?",
@@ -4009,6 +4013,15 @@
           "line": 282
         },
         {
+          "group": "realBlockers",
+          "kind": "blocked",
+          "severe": true,
+          "text": "The parser is no longer primarily failing by losing rows or by collapsing most",
+          "file": "docs/audits/FULL_ROW_PARSER_AUDIT_2026-06-24.md",
+          "line": 98
+        },
+        {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "Purpose: record the human owner's rejection of the latest Phase 4.5 normalization and product-data cleanup work, capture the visible failure modes, and define a safer remediation approach before the checkpoint can be accepted.",
@@ -4016,6 +4029,7 @@
           "line": 3
         },
         {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "The latest normalization/search cleanup result is not accepted. The human owner reported that the system is not checking itself rigorously enough and that human feedback must be recorded in durable project documentation so it is not lost between work sessions.",
@@ -4023,6 +4037,15 @@
           "line": 9
         },
         {
+          "group": "realBlockers",
+          "kind": "blocked",
+          "severe": true,
+          "text": "1. Add failing regression tests for all nine feedback examples and at least one visual/DOM smoke for the data-quality open-card action.",
+          "file": "docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md",
+          "line": 140
+        },
+        {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "part-number value. This is now a distinct parser-core acceptance gap.",
@@ -4030,13 +4053,15 @@
           "line": 165
         },
         {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "human acceptance evidence.",
+          "group": "realBlockers",
+          "kind": "blocked",
+          "severe": true,
+          "text": "fallback workbook instead of failing the review iteration. This feedback updates",
           "file": "docs/audits/PARSER_AUDIT_ROUND_2.md",
-          "line": 290
+          "line": 329
         },
         {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "category `Товар` stayed source evidence, not accepted product category.",
@@ -4044,132 +4069,7 @@
           "line": 250
         },
         {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "still requires source/license review and human acceptance.",
-          "file": "docs/audits/REAL_DATA_PARSING_REMEDIATION_2026-06-23.md",
-          "line": 127
-        },
-        {
-          "kind": "blocked",
-          "severe": false,
-          "text": "Phase 4 official-cross implementation is paused after work items 4.1-4.3; remaining official-cross work should resume only after checkpoint/customer-search priorities are accepted or the human owner explicitly reorders the roadmap. The stale Phase 4 phase-plan `in progress` statu",
-          "file": "docs/CURRENT_PROJECT_AUDIT.md",
-          "line": 33
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Phase 4.5 has a detailed plan at `docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md`; work items 4.5.1 through 4.5.15 completed the checkpoint backend/search/card/static-UI/local-upload/local-real-file/automated-gate path. On 2026-06-30 the human owner directed Phase 4.5 to be closed as",
-          "file": "docs/CURRENT_PROJECT_AUDIT.md",
-          "line": 34
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Phase 4.6 has a detailed plan at `docs/phases/PHASE_4_6_PARSER_NORMALIZATION_CORE.md`; it owns the parser-core rebuild moved out of Phase 4.5: shared strict/relaxed identifier keys, typed identifier roles, system tags, in-file link graph, rebuilt gold set with honest per-role sco",
-          "file": "docs/CURRENT_PROJECT_AUDIT.md",
-          "line": 35
-        },
-        {
-          "kind": "rejection",
-          "severe": true,
-          "text": "Phase 4.7 has a refreshed detailed plan at `docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md`; it owns the checkpoint state/UI/browser/human acceptance work after Phase 4.6: backend-backed import sessions, refresh/new-tab-safe routes, UI consumption of the typed parser con",
-          "file": "docs/CURRENT_PROJECT_AUDIT.md",
-          "line": 37
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "responsive/browser evidence, and human acceptance.",
-          "file": "docs/CURRENT_PROJECT_AUDIT.md",
-          "line": 45
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "rebuild, and final human acceptance before Phase 4.8/Phase 5 can be accepted.",
-          "file": "docs/CURRENT_PROJECT_AUDIT.md",
-          "line": 67
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Completion documentation: record accepted categories, excluded categories, human acceptance status, and commit hash.",
-          "file": "docs/phases/PHASE_1_DISCOVERY_AND_DATA.md",
-          "line": 134
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Evidence: all Phase 1 docs, `docs/CURRENT_PROJECT_AUDIT.md`, git history, and human acceptance notes.",
-          "file": "docs/phases/PHASE_1_DISCOVERY_AND_DATA.md",
-          "line": 151
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Aging-stock rules may vary by customer category and business model; defaults need human acceptance before they become report logic.",
-          "file": "docs/phases/PHASE_1_DISCOVERY_AND_DATA.md",
-          "line": 194
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Remaining manual verification: human owner must approve category defaults, aging defaults, customer-provided direct analog policy, and any real pilot header/export when available.",
-          "file": "docs/phases/PHASE_1_DISCOVERY_AND_DATA.md",
-          "line": 245
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Branch was created from `main`; merge back to `main` requires explicit human approval.",
-          "file": "docs/phases/PHASE_2_IMPORT_AND_DATA_MODEL.md",
-          "line": 55
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Status: closed as a Phase 4.5 implementation-evidence checkpoint on `phase-4-5/search-checkpoint` by human owner direction on 2026-06-30; merge to `main` still requires explicit human approval. Work items 4.5.1 through 4.5.15 completed the checkpoint contracts, local static UI, l",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 5
-        },
-        {
-          "kind": "rejection",
-          "severe": true,
-          "text": "Human acceptance update on 2026-06-20: the latest normalization/product-data cleanup result was rejected. The blocking acceptance gap is documented in `docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md`. Later remediation must treat search normalization, review-required prod",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 7
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Closure note: Phase 4.5 is closed as historical implementation evidence, not as final employee-ready acceptance. Parser-core acceptance blockers that were previously listed in this Phase 4.5 plan are now planned in `docs/phases/PHASE_4_6_PARSER_NORMALIZATION_CORE.md`. Checkpoint ",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 9
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "`docs/ROADMAP.md`: Phase 4.5 is closed as implementation evidence; Phase 4.6 owns parser-core acceptance and Phase 4.7 owns checkpoint state/UI/browser/human acceptance before the product can be treated as employee-ready.",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 16
-        },
-        {
-          "kind": "blocked",
-          "severe": false,
-          "text": "`docs/phases/PHASE_4_OFFICIAL_CROSS.md`: Phase 4 official-cross work is paused after work items 4.1-4.3; Phase 4.5 must not mix remaining official-cross relationship generation into the search checkpoint.",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 18
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "`docs/planning/PRE_MVP_PARSER_SEARCH_PLAN.md`: historical pre-MVP plan whose parser-core items are now transferred into Phase 4.6, while search-filter UX, visual badge/sidebar work, import-session state, browser acceptance, and human acceptance moved to Phase 4.7.",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 28
-        },
-        {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "`docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md`: Human rejection of the latest normalization/product-data cleanup result, including part-number overflow, category/brand failures, kit/oil attribute questions, display-name proposal requirements, multi-part-number extractio",
@@ -4177,55 +4077,7 @@
           "line": 29
         },
         {
-          "kind": "blocked",
-          "severe": false,
-          "text": "Current implementation evidence: Phase 2 import contracts, raw row persistence, manual analog raw evidence storage, audit primitives, and SQL migration `0001` exist; Phase 3 normalization snapshots, duplicate candidates, review decisions, negative duplicate evidence, batch metric",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 31
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Current repository evidence: checkpoint workspace/preset contracts, pipeline self-checks/problem logs, relationship/decision records, derived search contracts, in-memory search/card/data-quality services, the static checkpoint UI, the local upload server, local real-file limited-",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 32
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Backend-backed import sessions, refresh/new-tab-safe real-upload routing, post-4.6 UI contract consumption, search/sidebar UX, visual badge polish, browser acceptance, and final human acceptance belong to Phase 4.7.",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 65
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Completion documentation: record verification commands, counts, accepted search cases, remaining blockers, human acceptance results, no-private-data check, and final commit hash.",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 214
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Status: automated gate passed as historical Phase 4.5 evidence. Final employee-facing checkpoint acceptance is no longer owned by Phase 4.5; remaining normal-browser/human acceptance moved to Phase 4.7.",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 252
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Human owner must still run the normal-browser checklist against `autoparts-checkpoint-ui --port 8765`, including desktop/tablet/mobile widths, light/dark themes, browse layout, dashboard -> search -> card -> Back restoration, data-quality filters, local operator mode, and a real ",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 277
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Status: implementation complete with coordinator review fixes; updated gate verification passed later in 4.5.15. Remaining real/local browser verification and human acceptance moved to Phase 4.7.",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 329
-        },
-        {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "Objective: fix the human-rejected normalization behavior with contract-first implementation. The work must convert the reported real-data failures into automated and browser-verifiable regression cases before claiming improvement: no part-number column overflow, no `товар` fallba",
@@ -4233,6 +4085,7 @@
           "line": 331
         },
         {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "Evidence: `docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md`, `docs/AI_STEP_VERIFICATION_CHECKLIST.md`, `docs/09-data-cleaning-pipeline.md`, `docs/CONTEXT.md` term definitions for `Kit Component Relationship`, current `normalization/rules.py`, `normalization/product_cleanup",
@@ -4240,34 +4093,15 @@
           "line": 332
         },
         {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "A versioned local observed brand seed file was added at `src/autoparts_intelligence/normalization/resources/brand_alias_seed.csv` and packaged through `pyproject.toml`. It initially covered `CATERPILAR -> CATERPILLAR` and `MASUMA` with conservative local-source/license notes. Par",
+          "group": "realBlockers",
+          "kind": "blocked",
+          "severe": true,
+          "text": "generator writes an ignored timestamped fallback workbook instead of failing",
           "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 355
+          "line": 530
         },
         {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Status: automated updated-gate verification passed for tests, lint, frontend syntax, real-data parsing audit, local-upload API dataset generation, no-private-data checks, secret scan, and whitespace check. Normal-browser visual/back-button/local-upload acceptance and human accept",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 368
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Search follow-up: product-data cleanup signals, non-stock search offer groups, normalization remediation, the updated automated gate, and Parser Audit Round 2 measurement harness have passed. Human acceptance now requires normal-browser real-upload verification, human review of t",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 462
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Remaining acceptance boundary: the human owner must open",
-          "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
-          "line": 570
-        },
-        {
+          "group": "realBlockers",
           "kind": "blocked",
           "severe": true,
           "text": "`src/autoparts_intelligence/persistence/migrations/0004_search_checkpoint.sql` now adds `checkpoint_search_records` and `checkpoint_search_values`. `checkpoint_search_records` stores derived search-visible row data with tenant/workspace/import/raw-row foreign keys, optional norma",
@@ -4275,6 +4109,7 @@
           "line": 763
         },
         {
+          "group": "realBlockers",
           "kind": "blocked",
           "severe": true,
           "text": "Claude Code was not invoked in this work item. The handoff is ready for a future UI implementer, but actual UI implementation and browser verification remain blocked until a frontend stack/API task is started and Claude Code availability is confirmed.",
@@ -4282,41 +4117,7 @@
           "line": 933
         },
         {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Status: historical UI handoff baseline. The initial Phase 4.5 UI implementation path is complete as evidence; remaining checkpoint UI/state/browser/human acceptance work is owned by Phase 4.7 in `docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md`.",
-          "file": "docs/phases/PHASE_4_5_UI_HANDOFF.md",
-          "line": 3
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "1. The human owner approved broad brand-source discovery on 2026-06-30: targeted web searches,",
-          "file": "docs/phases/PHASE_4_6_PARSER_NORMALIZATION_CORE.md",
-          "line": 205
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "human-filled labels or a later explicitly documented owner-approved fallback.",
-          "file": "docs/phases/PHASE_4_6_PARSER_NORMALIZATION_CORE.md",
-          "line": 376
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Human acceptance: the current private gold slice was accepted only for the scoped pre-DB parser",
-          "file": "docs/phases/PHASE_4_6_PARSER_NORMALIZATION_CORE.md",
-          "line": 584
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "stage with no remarks. Human-filled labels or a documented owner-approved fallback are still",
-          "file": "docs/phases/PHASE_4_6_PARSER_NORMALIZATION_CORE.md",
-          "line": 585
-        },
-        {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "the nomenclature card is explicitly not accepted for practical employee use and needs a full UX/UI",
@@ -4324,20 +4125,7 @@
           "line": 12
         },
         {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "rebuild before the phase gate. Merge to `main` requires explicit human approval.",
-          "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
-          "line": 13
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Record human acceptance or explicit human-approved blockers before Phase 5 implementation starts.",
-          "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
-          "line": 59
-        },
-        {
+          "group": "realBlockers",
           "kind": "blocked",
           "severe": true,
           "text": "the checkpoint backend/import-session database work, and Phase 5 must not start until the checkpoint is",
@@ -4345,6 +4133,7 @@
           "line": 61
         },
         {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "The current nomenclature card is not employee-ready: the human owner reported that it is hard to",
@@ -4352,13 +4141,7 @@
           "line": 102
         },
         {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "card rebuild work item before browser/human acceptance.",
-          "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
-          "line": 105
-        },
-        {
+          "group": "realBlockers",
           "kind": "blocked",
           "severe": true,
           "text": "blocked rather than completed. The safer execution pattern is sequential agent work items with",
@@ -4366,6 +4149,7 @@
           "line": 149
         },
         {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "Evidence: human owner feedback on 2026-07-04 rejected the current card as unreadable, partly",
@@ -4373,27 +4157,7 @@
           "line": 414
         },
         {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "responsive visual evidence, and human acceptance that the card is practical for real employee",
-          "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
-          "line": 461
-        },
-        {
-          "kind": "blocked",
-          "severe": true,
-          "text": "file and record what passes, what needs human acceptance, and what remains blocked.",
-          "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
-          "line": 541
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Completion documentation: final verification commands/results, human acceptance status, and next",
-          "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
-          "line": 577
-        },
-        {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "Phase 5 gate: block Phase 5 if the checkpoint UI is not accepted. Do not start Phase 5 until the",
@@ -4401,48 +4165,7 @@
           "line": 646
         },
         {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "precision/recall claims still require human-filled labels or a documented owner-approved fallback.",
-          "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
-          "line": 689
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Prepare the first local cross-base/reference database slice: ingest an owner-approved ignored",
-          "file": "docs/phases/PHASE_4_8_PARSED_RELATIONSHIP_EVIDENCE.md",
-          "line": 41
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Objective: put the first owner-approved local cross-base/reference source into an AutoParts-owned",
-          "file": "docs/phases/PHASE_4_8_PARSED_RELATIONSHIP_EVIDENCE.md",
-          "line": 131
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "and verified source-confirmation outcomes, or a documented owner-approved blocker if the first",
-          "file": "docs/phases/PHASE_4_8_PARSED_RELATIONSHIP_EVIDENCE.md",
-          "line": 150
-        },
-        {
-          "kind": "blocked",
-          "severe": false,
-          "text": "Status: paused; work items 4.1 through 4.3 are implemented. Further official-cross implementation should resume only after checkpoint/customer-search priorities are accepted or the human owner explicitly reorders the roadmap.",
-          "file": "docs/phases/PHASE_4_OFFICIAL_CROSS.md",
-          "line": 5
-        },
-        {
-          "kind": "blocked",
-          "severe": false,
-          "text": "Added source-status enforcement so paused, retired, or license-blocked local sources cannot import reference rows.",
-          "file": "docs/phases/PHASE_4_OFFICIAL_CROSS.md",
-          "line": 258
-        },
-        {
+          "group": "realBlockers",
           "kind": "blocked",
           "severe": true,
           "text": "Verification: tests prove admin/reviewer/manager/read-only role boundaries for sensitive actions; default credentials are not committed; unauthenticated access is blocked outside health checks.",
@@ -4450,41 +4173,7 @@
           "line": 124
         },
         {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "human acceptance points, if any;",
-          "file": "docs/phases/PHASE_PLAN_TEMPLATE.md",
-          "line": 113
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Status: LLM-5 comparison complete with a safe follow-up recommendation; LLM-6 prompt/contract/runner optimization completed for the next local A/B test. Human acceptance and manual proposal spot-check are still required before any product LLM path is selected. First provider mode",
-          "file": "docs/planning/LLM_EXTRACTION_EXPERIMENT_PLAN.md",
-          "line": 3
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Documentation updates: `docs/ROADMAP.md`, `docs/CURRENT_PROJECT_AUDIT.md`, and this plan record the selected safe follow-up path and the human acceptance point.",
-          "file": "docs/planning/LLM_EXTRACTION_EXPERIMENT_PLAN.md",
-          "line": 144
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Human acceptance needed before any product LLM path:",
-          "file": "docs/planning/LLM_EXTRACTION_EXPERIMENT_PLAN.md",
-          "line": 153
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Completion documentation: selected path is recorded here; human acceptance remains pending.",
-          "file": "docs/planning/LLM_EXTRACTION_EXPERIMENT_PLAN.md",
-          "line": 158
-        },
-        {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "The remaining 100-row contract rejections were still shape issues concentrated in incomplete `product_attributes` objects, not accepted unsafe compatibility/analog/duplicate/action claims.",
@@ -4492,13 +4181,7 @@
           "line": 198
         },
         {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "documentation records the recommended follow-up path and human acceptance points;",
-          "file": "docs/planning/LLM_EXTRACTION_EXPERIMENT_PLAN.md",
-          "line": 212
-        },
-        {
+          "group": "realBlockers",
           "kind": "blocked",
           "severe": true,
           "text": "any future production LLM integration remains blocked until a separate implementation plan covers provider configuration, privacy, failure handling, storage, review UI, and audit behavior.",
@@ -4506,6 +4189,15 @@
           "line": 214
         },
         {
+          "group": "realBlockers",
+          "kind": "blocked",
+          "severe": true,
+          "text": "silently failing or becoming clean product data;",
+          "file": "docs/planning/PRE_MVP_PARSER_SEARCH_PLAN.md",
+          "line": 777
+        },
+        {
+          "group": "realBlockers",
           "kind": "blocked",
           "severe": true,
           "text": "either a derived part number or a clear reason why it remains blocked;",
@@ -4513,97 +4205,7 @@
           "line": 887
         },
         {
-          "kind": "blocked",
-          "severe": false,
-          "text": "Phase 4 official-cross work has useful implemented contracts and reference-confirmation pieces, but further official-cross work is paused after work items 4.1-4.3;",
-          "file": "docs/ROADMAP.md",
-          "line": 22
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Phase 4.5 completed the backend/search/card/documentation checkpoint gate, implemented the static checkpoint UI, validated the supplied local nomenclature-only export in limited-data mode, added deterministic product-data cleanup signals, added non-stock search offer groups with ",
-          "file": "docs/ROADMAP.md",
-          "line": 23
-        },
-        {
-          "kind": "rejection",
-          "severe": true,
-          "text": "Human acceptance feedback on 2026-06-20 rejected the then-current normalization/product-data cleanup result. The blocking issues and remediation criteria are recorded in `docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md`; as of 2026-06-29, parser-contract and human-label pr",
-          "file": "docs/ROADMAP.md",
-          "line": 24
-        },
-        {
-          "kind": "blocked",
-          "severe": false,
-          "text": "The checkpoint decisions were resolved into Phase 4.5 Search And Nomenclature Checkpoint. Phase 4.5 is now closed as an implementation-evidence checkpoint by human owner direction on 2026-06-30: backend/search/card/static-UI/local-upload/local-real-file/automated-gate evidence is",
-          "file": "docs/ROADMAP.md",
-          "line": 48
-        },
-        {
-          "kind": "rejection",
-          "severe": true,
-          "text": "Phase 4.6 Parser Normalization Core in `docs/phases/PHASE_4_6_PARSER_NORMALIZATION_CORE.md` has parser-core gate evidence as of 2026-07-02. It superseded the parser-core implementation parts of `docs/planning/PRE_MVP_PARSER_SEARCH_PLAN.md`: shared identifier keys, typed identifie",
-          "file": "docs/ROADMAP.md",
-          "line": 66
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "The 2026-06-23 real-data parsing audit, remediation, Parser Audit Round 2, the full-row parser audit, and the independent parser audit are now superseded by Phase 4.6 parser-core gate evidence for implementation state. The 2026-07-02 real audit rerun over the ignored 1,583-row lo",
-          "file": "docs/ROADMAP.md",
-          "line": 83
-        },
-        {
-          "kind": "blocked",
-          "severe": false,
-          "text": "Status: paused on `phase-4/official-cross`; work items 4.1 through 4.3 are implemented. Further official-cross implementation should resume only after checkpoint/customer-search priorities are accepted or the human owner explicitly reorders the roadmap.",
-          "file": "docs/ROADMAP.md",
-          "line": 226
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Status: closed as an implementation-evidence checkpoint on `phase-4-5/search-checkpoint` by human owner direction on 2026-06-30; merge to `main` requires explicit human approval. Work items 4.5.1 through 4.5.15 completed the checkpoint backend/search/card/static-UI/local-upload/l",
-          "file": "docs/ROADMAP.md",
-          "line": 260
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "explicit transfer of remaining import-session/new-tab routing, browser visual acceptance, sidebar/badge polish, and human acceptance to Phase 4.7.",
-          "file": "docs/ROADMAP.md",
-          "line": 287
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Status: parser-core implementation gate verified on `phase-4-6/parser-normalization-core` on 2026-07-02; merge to `main` requires explicit human approval. Employee-ready checkpoint acceptance remains Phase 4.7 work.",
-          "file": "docs/ROADMAP.md",
-          "line": 313
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "full pytest and ruff pass; one commit per work item; merge to `main` waits for explicit human approval. Parser-quality precision/recall claims still require human-filled gold labels or a documented owner-approved fallback, while Phase 4.7 owns employee-facing UI/state/browser acc",
-          "file": "docs/ROADMAP.md",
-          "line": 341
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Merge to `main` requires explicit human approval.",
-          "file": "docs/ROADMAP.md",
-          "line": 348
-        },
-        {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "Goal: finish the employee-facing checkpoint workflow after Phase 4.6 by making real-upload state durable enough for refresh/new-tab navigation, consuming the typed parser contract in the UI, polishing search filters/badges, and recording normal-browser/human acceptance.",
-          "file": "docs/ROADMAP.md",
-          "line": 352
-        },
-        {
+          "group": "realBlockers",
           "kind": "blocked",
           "severe": true,
           "text": "blocked rather than planned in parallel.",
@@ -4611,13 +4213,7 @@
           "line": 395
         },
         {
-          "kind": "human-gate",
-          "severe": false,
-          "text": "before duplicate/analog relationship generation, or an owner-approved no-cross-base blocker is",
-          "file": "docs/ROADMAP.md",
-          "line": 423
-        },
-        {
+          "group": "realBlockers",
           "kind": "rejection",
           "severe": true,
           "text": "2026-06-20 Phase 4.5 normalization acceptance gap -> recorded in `docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md` and `CURRENT_PROJECT_AUDIT.md`; the human owner rejected the latest normalization/product-data cleanup result and identified blocking issues around part-numbe",
@@ -4625,6 +4221,792 @@
           "line": 624
         }
       ],
+      "signalGroups": {
+        "realBlockers": [
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "The Local Knowledge Graph setup gives Codex a local-first repository exploration path before broad recursive search. It is intended for code and documentation navigation only; semantic, hosted, paid, or API-backed graph backends remain blocked until the human owner explicitly app",
+            "file": "docs/00_FILE_STRUCTURE.md",
+            "line": 227
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "The 2026-06-20 normalization acceptance gap showed that passing tests is not enough when the agent fails to preserve human decisions, mixes product concepts, or verifies only the happy path. This checklist exists to force each future agent to challenge its own work against curren",
+            "file": "docs/AI_STEP_VERIFICATION_CHECKLIST.md",
+            "line": 9
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "Add failing regression tests for every reported bug or acceptance gap before or alongside the fix.",
+            "file": "docs/AI_STEP_VERIFICATION_CHECKLIST.md",
+            "line": 243
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "Does this checklist need an update because the human introduced a new verification habit, rejected behavior, or recurring edge case?",
+            "file": "docs/AI_STEP_VERIFICATION_CHECKLIST.md",
+            "line": 282
+          },
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "The parser is no longer primarily failing by losing rows or by collapsing most",
+            "file": "docs/audits/FULL_ROW_PARSER_AUDIT_2026-06-24.md",
+            "line": 98
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "Purpose: record the human owner's rejection of the latest Phase 4.5 normalization and product-data cleanup work, capture the visible failure modes, and define a safer remediation approach before the checkpoint can be accepted.",
+            "file": "docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md",
+            "line": 3
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "The latest normalization/search cleanup result is not accepted. The human owner reported that the system is not checking itself rigorously enough and that human feedback must be recorded in durable project documentation so it is not lost between work sessions.",
+            "file": "docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md",
+            "line": 9
+          },
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "1. Add failing regression tests for all nine feedback examples and at least one visual/DOM smoke for the data-quality open-card action.",
+            "file": "docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md",
+            "line": 140
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "part-number value. This is now a distinct parser-core acceptance gap.",
+            "file": "docs/audits/PARSER_AUDIT_ROUND_2.md",
+            "line": 165
+          },
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "fallback workbook instead of failing the review iteration. This feedback updates",
+            "file": "docs/audits/PARSER_AUDIT_ROUND_2.md",
+            "line": 329
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "category `Товар` stayed source evidence, not accepted product category.",
+            "file": "docs/audits/REAL_DATA_PARSING_AUDIT_2026-06-23.md",
+            "line": 250
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "`docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md`: Human rejection of the latest normalization/product-data cleanup result, including part-number overflow, category/brand failures, kit/oil attribute questions, display-name proposal requirements, multi-part-number extractio",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 29
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "Objective: fix the human-rejected normalization behavior with contract-first implementation. The work must convert the reported real-data failures into automated and browser-verifiable regression cases before claiming improvement: no part-number column overflow, no `товар` fallba",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 331
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "Evidence: `docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md`, `docs/AI_STEP_VERIFICATION_CHECKLIST.md`, `docs/09-data-cleaning-pipeline.md`, `docs/CONTEXT.md` term definitions for `Kit Component Relationship`, current `normalization/rules.py`, `normalization/product_cleanup",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 332
+          },
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "generator writes an ignored timestamped fallback workbook instead of failing",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 530
+          },
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "`src/autoparts_intelligence/persistence/migrations/0004_search_checkpoint.sql` now adds `checkpoint_search_records` and `checkpoint_search_values`. `checkpoint_search_records` stores derived search-visible row data with tenant/workspace/import/raw-row foreign keys, optional norma",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 763
+          },
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "Claude Code was not invoked in this work item. The handoff is ready for a future UI implementer, but actual UI implementation and browser verification remain blocked until a frontend stack/API task is started and Claude Code availability is confirmed.",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 933
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "the nomenclature card is explicitly not accepted for practical employee use and needs a full UX/UI",
+            "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
+            "line": 12
+          },
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "the checkpoint backend/import-session database work, and Phase 5 must not start until the checkpoint is",
+            "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
+            "line": 61
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "The current nomenclature card is not employee-ready: the human owner reported that it is hard to",
+            "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
+            "line": 102
+          },
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "blocked rather than completed. The safer execution pattern is sequential agent work items with",
+            "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
+            "line": 149
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "Evidence: human owner feedback on 2026-07-04 rejected the current card as unreadable, partly",
+            "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
+            "line": 414
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "Phase 5 gate: block Phase 5 if the checkpoint UI is not accepted. Do not start Phase 5 until the",
+            "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
+            "line": 646
+          },
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "Verification: tests prove admin/reviewer/manager/read-only role boundaries for sensitive actions; default credentials are not committed; unauthenticated access is blocked outside health checks.",
+            "file": "docs/phases/PHASE_8_LAN_SERVER_MODE.md",
+            "line": 124
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "The remaining 100-row contract rejections were still shape issues concentrated in incomplete `product_attributes` objects, not accepted unsafe compatibility/analog/duplicate/action claims.",
+            "file": "docs/planning/LLM_EXTRACTION_EXPERIMENT_PLAN.md",
+            "line": 198
+          },
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "any future production LLM integration remains blocked until a separate implementation plan covers provider configuration, privacy, failure handling, storage, review UI, and audit behavior.",
+            "file": "docs/planning/LLM_EXTRACTION_EXPERIMENT_PLAN.md",
+            "line": 214
+          },
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "silently failing or becoming clean product data;",
+            "file": "docs/planning/PRE_MVP_PARSER_SEARCH_PLAN.md",
+            "line": 777
+          },
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "either a derived part number or a clear reason why it remains blocked;",
+            "file": "docs/planning/PRE_MVP_PARSER_SEARCH_PLAN.md",
+            "line": 887
+          },
+          {
+            "group": "realBlockers",
+            "kind": "blocked",
+            "severe": true,
+            "text": "blocked rather than planned in parallel.",
+            "file": "docs/ROADMAP.md",
+            "line": 395
+          },
+          {
+            "group": "realBlockers",
+            "kind": "rejection",
+            "severe": true,
+            "text": "2026-06-20 Phase 4.5 normalization acceptance gap -> recorded in `docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md` and `CURRENT_PROJECT_AUDIT.md`; the human owner rejected the latest normalization/product-data cleanup result and identified blocking issues around part-numbe",
+            "file": "docs/ROADMAP.md",
+            "line": 624
+          }
+        ],
+        "approvalGates": [
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "human acceptance evidence.",
+            "file": "docs/audits/PARSER_AUDIT_ROUND_2.md",
+            "line": 290
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "still requires source/license review and human acceptance.",
+            "file": "docs/audits/REAL_DATA_PARSING_REMEDIATION_2026-06-23.md",
+            "line": 127
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Phase 4.7 has a refreshed detailed plan at `docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md`; it owns the checkpoint state/UI/browser/human acceptance work after Phase 4.6: backend-backed import sessions, refresh/new-tab-safe routes, UI consumption of the typed parser con",
+            "file": "docs/CURRENT_PROJECT_AUDIT.md",
+            "line": 37
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "responsive/browser evidence, and human acceptance.",
+            "file": "docs/CURRENT_PROJECT_AUDIT.md",
+            "line": 45
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "rebuild, and final human acceptance before Phase 4.8/Phase 5 can be accepted.",
+            "file": "docs/CURRENT_PROJECT_AUDIT.md",
+            "line": 67
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Completion documentation: record accepted categories, excluded categories, human acceptance status, and commit hash.",
+            "file": "docs/phases/PHASE_1_DISCOVERY_AND_DATA.md",
+            "line": 134
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Evidence: all Phase 1 docs, `docs/CURRENT_PROJECT_AUDIT.md`, git history, and human acceptance notes.",
+            "file": "docs/phases/PHASE_1_DISCOVERY_AND_DATA.md",
+            "line": 151
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Aging-stock rules may vary by customer category and business model; defaults need human acceptance before they become report logic.",
+            "file": "docs/phases/PHASE_1_DISCOVERY_AND_DATA.md",
+            "line": 194
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Branch was created from `main`; merge back to `main` requires explicit human approval.",
+            "file": "docs/phases/PHASE_2_IMPORT_AND_DATA_MODEL.md",
+            "line": 55
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Status: closed as a Phase 4.5 implementation-evidence checkpoint on `phase-4-5/search-checkpoint` by human owner direction on 2026-06-30; merge to `main` still requires explicit human approval. Work items 4.5.1 through 4.5.15 completed the checkpoint contracts, local static UI, l",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 5
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Human acceptance update on 2026-06-20: the latest normalization/product-data cleanup result was rejected. The blocking acceptance gap is documented in `docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md`. Later remediation must treat search normalization, review-required prod",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 7
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Closure note: Phase 4.5 is closed as historical implementation evidence, not as final employee-ready acceptance. Parser-core acceptance blockers that were previously listed in this Phase 4.5 plan are now planned in `docs/phases/PHASE_4_6_PARSER_NORMALIZATION_CORE.md`. Checkpoint ",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 9
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "`docs/ROADMAP.md`: Phase 4.5 is closed as implementation evidence; Phase 4.6 owns parser-core acceptance and Phase 4.7 owns checkpoint state/UI/browser/human acceptance before the product can be treated as employee-ready.",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 16
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "`docs/planning/PRE_MVP_PARSER_SEARCH_PLAN.md`: historical pre-MVP plan whose parser-core items are now transferred into Phase 4.6, while search-filter UX, visual badge/sidebar work, import-session state, browser acceptance, and human acceptance moved to Phase 4.7.",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 28
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Current repository evidence: checkpoint workspace/preset contracts, pipeline self-checks/problem logs, relationship/decision records, derived search contracts, in-memory search/card/data-quality services, the static checkpoint UI, the local upload server, local real-file limited-",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 32
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Backend-backed import sessions, refresh/new-tab-safe real-upload routing, post-4.6 UI contract consumption, search/sidebar UX, visual badge polish, browser acceptance, and final human acceptance belong to Phase 4.7.",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 65
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Completion documentation: record verification commands, counts, accepted search cases, remaining blockers, human acceptance results, no-private-data check, and final commit hash.",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 214
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Status: automated gate passed as historical Phase 4.5 evidence. Final employee-facing checkpoint acceptance is no longer owned by Phase 4.5; remaining normal-browser/human acceptance moved to Phase 4.7.",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 252
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Status: implementation complete with coordinator review fixes; updated gate verification passed later in 4.5.15. Remaining real/local browser verification and human acceptance moved to Phase 4.7.",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 329
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "A versioned local observed brand seed file was added at `src/autoparts_intelligence/normalization/resources/brand_alias_seed.csv` and packaged through `pyproject.toml`. It initially covered `CATERPILAR -> CATERPILLAR` and `MASUMA` with conservative local-source/license notes. Par",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 355
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Status: automated updated-gate verification passed for tests, lint, frontend syntax, real-data parsing audit, local-upload API dataset generation, no-private-data checks, secret scan, and whitespace check. Normal-browser visual/back-button/local-upload acceptance and human accept",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 368
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Search follow-up: product-data cleanup signals, non-stock search offer groups, normalization remediation, the updated automated gate, and Parser Audit Round 2 measurement harness have passed. Human acceptance now requires normal-browser real-upload verification, human review of t",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 462
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Status: historical UI handoff baseline. The initial Phase 4.5 UI implementation path is complete as evidence; remaining checkpoint UI/state/browser/human acceptance work is owned by Phase 4.7 in `docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md`.",
+            "file": "docs/phases/PHASE_4_5_UI_HANDOFF.md",
+            "line": 3
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Human acceptance: the current private gold slice was accepted only for the scoped pre-DB parser",
+            "file": "docs/phases/PHASE_4_6_PARSER_NORMALIZATION_CORE.md",
+            "line": 584
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "rebuild before the phase gate. Merge to `main` requires explicit human approval.",
+            "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
+            "line": 13
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Record human acceptance or explicit human-approved blockers before Phase 5 implementation starts.",
+            "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
+            "line": 59
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "card rebuild work item before browser/human acceptance.",
+            "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
+            "line": 105
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "responsive visual evidence, and human acceptance that the card is practical for real employee",
+            "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
+            "line": 461
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "file and record what passes, what needs human acceptance, and what remains blocked.",
+            "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
+            "line": 541
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Completion documentation: final verification commands/results, human acceptance status, and next",
+            "file": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
+            "line": 577
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "human acceptance points, if any;",
+            "file": "docs/phases/PHASE_PLAN_TEMPLATE.md",
+            "line": 113
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Status: LLM-5 comparison complete with a safe follow-up recommendation; LLM-6 prompt/contract/runner optimization completed for the next local A/B test. Human acceptance and manual proposal spot-check are still required before any product LLM path is selected. First provider mode",
+            "file": "docs/planning/LLM_EXTRACTION_EXPERIMENT_PLAN.md",
+            "line": 3
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Documentation updates: `docs/ROADMAP.md`, `docs/CURRENT_PROJECT_AUDIT.md`, and this plan record the selected safe follow-up path and the human acceptance point.",
+            "file": "docs/planning/LLM_EXTRACTION_EXPERIMENT_PLAN.md",
+            "line": 144
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Human acceptance needed before any product LLM path:",
+            "file": "docs/planning/LLM_EXTRACTION_EXPERIMENT_PLAN.md",
+            "line": 153
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Completion documentation: selected path is recorded here; human acceptance remains pending.",
+            "file": "docs/planning/LLM_EXTRACTION_EXPERIMENT_PLAN.md",
+            "line": 158
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "documentation records the recommended follow-up path and human acceptance points;",
+            "file": "docs/planning/LLM_EXTRACTION_EXPERIMENT_PLAN.md",
+            "line": 212
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Phase 4.5 completed the backend/search/card/documentation checkpoint gate, implemented the static checkpoint UI, validated the supplied local nomenclature-only export in limited-data mode, added deterministic product-data cleanup signals, added non-stock search offer groups with ",
+            "file": "docs/ROADMAP.md",
+            "line": 23
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Human acceptance feedback on 2026-06-20 rejected the then-current normalization/product-data cleanup result. The blocking issues and remediation criteria are recorded in `docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md`; as of 2026-06-29, parser-contract and human-label pr",
+            "file": "docs/ROADMAP.md",
+            "line": 24
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Phase 4.6 Parser Normalization Core in `docs/phases/PHASE_4_6_PARSER_NORMALIZATION_CORE.md` has parser-core gate evidence as of 2026-07-02. It superseded the parser-core implementation parts of `docs/planning/PRE_MVP_PARSER_SEARCH_PLAN.md`: shared identifier keys, typed identifie",
+            "file": "docs/ROADMAP.md",
+            "line": 66
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "explicit transfer of remaining import-session/new-tab routing, browser visual acceptance, sidebar/badge polish, and human acceptance to Phase 4.7.",
+            "file": "docs/ROADMAP.md",
+            "line": 287
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Status: parser-core implementation gate verified on `phase-4-6/parser-normalization-core` on 2026-07-02; merge to `main` requires explicit human approval. Employee-ready checkpoint acceptance remains Phase 4.7 work.",
+            "file": "docs/ROADMAP.md",
+            "line": 313
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Merge to `main` requires explicit human approval.",
+            "file": "docs/ROADMAP.md",
+            "line": 348
+          },
+          {
+            "group": "approvalGates",
+            "kind": "approval-gate",
+            "severe": false,
+            "text": "Goal: finish the employee-facing checkpoint workflow after Phase 4.6 by making real-upload state durable enough for refresh/new-tab navigation, consuming the typed parser contract in the UI, polishing search filters/badges, and recording normal-browser/human acceptance.",
+            "file": "docs/ROADMAP.md",
+            "line": 352
+          }
+        ],
+        "needsReview": [
+          {
+            "group": "needsReview",
+            "kind": "needs-review",
+            "severe": false,
+            "text": "The parser needs reviewed dictionaries rather than broad guessing:",
+            "file": "docs/planning/PRE_MVP_PARSER_SEARCH_PLAN.md",
+            "line": 322
+          },
+          {
+            "group": "needsReview",
+            "kind": "needs-review",
+            "severe": false,
+            "text": "incomplete\" and \"this action needs review\";",
+            "file": "docs/planning/PRE_MVP_PARSER_SEARCH_PLAN.md",
+            "line": 737
+          },
+          {
+            "group": "needsReview",
+            "kind": "needs-review",
+            "severe": false,
+            "text": "and 4.7.6 have implementation evidence and are pending/receiving Codex final review, verification,",
+            "file": "docs/ROADMAP.md",
+            "line": 346
+          }
+        ],
+        "pausedDeferred": [
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "The main problem is scope drift inside Phase 4.5 wording. Recent product decisions added search offer groups with both search/relationship behavior and stock-summary behavior. Human clarification after this audit: non-stock search behavior remains Phase 4.5 work. That includes st",
+            "file": "docs/audits/PHASE_4_5_ALIGNMENT_AUDIT_2026-06-19.md",
+            "line": 11
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Phase 4 official-cross implementation is paused after work items 4.1-4.3; remaining official-cross work should resume only after checkpoint/customer-search priorities are accepted or the human owner explicitly reorders the roadmap. The stale Phase 4 phase-plan `in progress` statu",
+            "file": "docs/CURRENT_PROJECT_AUDIT.md",
+            "line": 33
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Phase 4.5 has a detailed plan at `docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md`; work items 4.5.1 through 4.5.15 completed the checkpoint backend/search/card/static-UI/local-upload/local-real-file/automated-gate path. On 2026-06-30 the human owner directed Phase 4.5 to be closed as",
+            "file": "docs/CURRENT_PROJECT_AUDIT.md",
+            "line": 34
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Category result: oil filters, air filters, cabin filters, bulbs, wiper blades, and clips/fasteners are included; simple fuel filters, spark plugs, and belts are reviewer-only careful categories; simple gaskets are deferred; unknown categories and high/critical-risk categories are",
+            "file": "docs/phases/PHASE_1_DISCOVERY_AND_DATA.md",
+            "line": 224
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "`docs/phases/PHASE_4_OFFICIAL_CROSS.md`: Phase 4 official-cross work is paused after work items 4.1-4.3; Phase 4.5 must not mix remaining official-cross relationship generation into the search checkpoint.",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 18
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Current implementation evidence: Phase 2 import contracts, raw row persistence, manual analog raw evidence storage, audit primitives, and SQL migration `0001` exist; Phase 3 normalization snapshots, duplicate candidates, review decisions, negative duplicate evidence, batch metric",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 31
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "LLM-driven compatibility decisions. LLM may be planned later only for extraction/explanation support.",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 62
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Completion documentation: implemented as a non-persistent search result payload over existing derived search records. `NonStockSearchOfferGroup` is a read-only offer-group contract that keeps direct matches, confirmed duplicate members, customer 1C analogs, review-required produc",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 325
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Exit criteria: Phase 4.5 is complete for import/search/card/data-quality behavior, non-stock offer grouping, normalization cleanup signals, UI/browser behavior, real-data validation boundaries, safety labeling, no-private-data hygiene, and documented manual acceptance. Stock tota",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 377
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Phase 4.5 automated gate status: passed for the repository-local contracts, tests, lint, selected frontend syntax checks, UI acceptance-risk fixes, limited-data real local import behavior, documentation evidence, no-synthetic-import guard, real-data parsing audit, local-upload AP",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 426
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Accept that Phase 4.5 includes the non-stock original-part offer workflow: search, normalization, part-number cleanup, duplicate grouping, customer analog labels, proposed/review-required alternatives, filters, and UI behavior. Only stock totals, zero-stock analog availability fi",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 588
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Pending; not committed in this work item (commit is deferred to Codex per the handoff ownership split).",
+            "file": "docs/phases/PHASE_4_5_SEARCH_CHECKPOINT.md",
+            "line": 1049
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Status: paused; work items 4.1 through 4.3 are implemented. Further official-cross implementation should resume only after checkpoint/customer-search priorities are accepted or the human owner explicitly reorders the roadmap.",
+            "file": "docs/phases/PHASE_4_OFFICIAL_CROSS.md",
+            "line": 5
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Added source-status enforcement so paused, retired, or license-blocked local sources cannot import reference rows.",
+            "file": "docs/phases/PHASE_4_OFFICIAL_CROSS.md",
+            "line": 258
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Phase 4 official-cross work has useful implemented contracts and reference-confirmation pieces, but further official-cross work is paused after work items 4.1-4.3;",
+            "file": "docs/ROADMAP.md",
+            "line": 22
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "the latest product decisions add search offer groups for original-part searches, where the matched item, confirmed duplicates, visible analogs, and proposed alternatives are presented together with clear confirmed vs review-required labels; this non-stock grouping belongs in Phas",
+            "file": "docs/ROADMAP.md",
+            "line": 29
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "The checkpoint decisions were resolved into Phase 4.5 Search And Nomenclature Checkpoint. Phase 4.5 is now closed as an implementation-evidence checkpoint by human owner direction on 2026-06-30: backend/search/card/static-UI/local-upload/local-real-file/automated-gate evidence is",
+            "file": "docs/ROADMAP.md",
+            "line": 48
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Status: paused on `phase-4/official-cross`; work items 4.1 through 4.3 are implemented. Further official-cross implementation should resume only after checkpoint/customer-search priorities are accepted or the human owner explicitly reorders the roadmap.",
+            "file": "docs/ROADMAP.md",
+            "line": 226
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "Status: closed as an implementation-evidence checkpoint on `phase-4-5/search-checkpoint` by human owner direction on 2026-06-30; merge to `main` requires explicit human approval. Work items 4.5.1 through 4.5.15 completed the checkpoint backend/search/card/static-UI/local-upload/l",
+            "file": "docs/ROADMAP.md",
+            "line": 260
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "directly matched zero-stock and limited-data rows remain visible with labels/filters; stock totals and stock-based analog filtering are deferred until reliable stock evidence exists;",
+            "file": "docs/ROADMAP.md",
+            "line": 304
+          },
+          {
+            "group": "pausedDeferred",
+            "kind": "paused-deferred",
+            "severe": false,
+            "text": "2026-06-19 Phase 4.5 alignment audit -> recorded in `docs/audits/PHASE_4_5_ALIGNMENT_AUDIT_2026-06-19.md` and `CURRENT_PROJECT_AUDIT.md`; documentation is broadly coherent, but it must distinguish non-stock search behavior from stock behavior. Historical clarification after the a",
+            "file": "docs/ROADMAP.md",
+            "line": 623
+          }
+        ]
+      },
       "risks": [
         {
           "kind": "risk",
@@ -5109,8 +5491,8 @@
           "file": "docs/CURRENT_PROJECT_AUDIT.md",
           "title": "CURRENT PROJECT AUDIT",
           "date": "2026-07-08",
-          "status": "attention",
-          "severeSignals": 1
+          "status": "recorded",
+          "severeSignals": 0
         },
         {
           "file": "docs/AI_STEP_VERIFICATION_CHECKLIST.md",
@@ -5124,21 +5506,21 @@
           "title": "PARSER AUDIT ROUND 2",
           "date": "2026-07-02",
           "status": "attention",
-          "severeSignals": 1
+          "severeSignals": 2
         },
         {
           "file": "docs/audits/NORMALIZATION_ACCEPTANCE_GAP_2026-06-20.md",
           "title": "NORMALIZATION ACCEPTANCE GAP 2026 06 20",
           "date": "2026-06-29",
           "status": "attention",
-          "severeSignals": 2
+          "severeSignals": 3
         },
         {
           "file": "docs/audits/FULL_ROW_PARSER_AUDIT_2026-06-24.md",
           "title": "FULL ROW PARSER AUDIT 2026 06 24",
           "date": "2026-06-24",
-          "status": "recorded",
-          "severeSignals": 0
+          "status": "attention",
+          "severeSignals": 1
         },
         {
           "file": "docs/audits/REAL_DATA_PARSING_AUDIT_2026-06-23.md",

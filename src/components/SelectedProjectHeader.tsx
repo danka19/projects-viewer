@@ -55,8 +55,8 @@ export default function SelectedProjectHeader({ project, onOpenTab, onOpenDrawer
           }
         />
         <SummaryTile
-          label="Main blocker"
-          value={s.mainBlocker ?? 'Nothing blocked'}
+          label="Main real blocker"
+          value={s.mainBlocker ?? 'No real blockers'}
           muted={!s.mainBlocker}
           tone={s.mainBlocker ? 'text-rose-200' : undefined}
           onClick={

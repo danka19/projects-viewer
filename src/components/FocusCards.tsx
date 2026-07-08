@@ -9,7 +9,11 @@ interface Props {
 
 export default function FocusCards({ project, onOpenTab, onOpenDrawer }: Props) {
   const next = project.nextTasks.slice(0, 3);
-  const blocked = project.blockers.filter((b) => b.severe).slice(0, 3);
+  const groups = project.signalGroups;
+  const realBlockers = groups.realBlockers.slice(0, 3);
+  const approvalGates = groups.approvalGates.slice(0, 3);
+  const needsReview = groups.needsReview.slice(0, 3);
+  const pausedDeferred = groups.pausedDeferred.slice(0, 3);
   const attention = project.markers
     .filter((m) => ['TODO', 'FIXME', 'BUG'].includes(m.type))
     .slice(0, 3);
@@ -29,11 +33,48 @@ export default function FocusCards({ project, onOpenTab, onOpenDrawer }: Props) 
         onViewAll={() => onOpenTab('tasks')}
       />
       <FocusCard
-        title="Blocked / gated"
-        accent={blocked.length > 0 ? 'text-rose-300' : 'text-mute'}
-        total={project.blockers.filter((b) => b.severe).length}
-        empty="Nothing blocked or rejected."
-        items={blocked.map((b) => ({
+        title="Real blockers"
+        tooltip="Actual inability to continue: blocked, failing, missing required data, unavailable dependency, or an acceptance gap that prevents completion."
+        accent={realBlockers.length > 0 ? 'text-rose-300' : 'text-mute'}
+        total={groups.realBlockers.length}
+        empty="No real blockers detected."
+        items={realBlockers.map((b) => ({
+          text: b.text,
+          onClick: () => onOpenDrawer(blockerDrawer(b, project)),
+        }))}
+        onViewAll={() => onOpenTab('tasks')}
+      />
+      <FocusCard
+        title="Approval gates"
+        tooltip="Normal owner/SDD approval gates: pending approval, merge approval, or completed work waiting for approval."
+        accent={approvalGates.length > 0 ? 'text-violet-300' : 'text-mute'}
+        total={groups.approvalGates.length}
+        empty="No approval gates detected."
+        items={approvalGates.map((b) => ({
+          text: b.text,
+          onClick: () => onOpenDrawer(blockerDrawer(b, project)),
+        }))}
+        onViewAll={() => onOpenTab('tasks')}
+      />
+      <FocusCard
+        title="Needs review"
+        tooltip="Review or validation work: needs review, pending review, needs verification, requires validation, or final review."
+        accent={needsReview.length > 0 ? 'text-orange-300' : 'text-mute'}
+        total={groups.needsReview.length}
+        empty="No review items detected."
+        items={needsReview.map((b) => ({
+          text: b.text,
+          onClick: () => onOpenDrawer(blockerDrawer(b, project)),
+        }))}
+        onViewAll={() => onOpenTab('tasks')}
+      />
+      <FocusCard
+        title="Paused / deferred"
+        tooltip="Work intentionally paused, on hold, deferred, planned later, or marked resume later."
+        accent={pausedDeferred.length > 0 ? 'text-slate-300' : 'text-mute'}
+        total={groups.pausedDeferred.length}
+        empty="No paused or deferred items detected."
+        items={pausedDeferred.map((b) => ({
           text: b.text,
           onClick: () => onOpenDrawer(blockerDrawer(b, project)),
         }))}
@@ -71,6 +112,7 @@ export default function FocusCards({ project, onOpenTab, onOpenDrawer }: Props) 
 
 function FocusCard({
   title,
+  tooltip,
   accent,
   total,
   empty,
@@ -78,6 +120,7 @@ function FocusCard({
   onViewAll,
 }: {
   title: string;
+  tooltip?: string;
   accent: string;
   total: number;
   empty: string;
@@ -87,7 +130,10 @@ function FocusCard({
   return (
     <section className="glass rounded-xl p-4">
       <header className="flex items-baseline justify-between gap-3">
-        <h3 className="font-mono text-[11px] font-medium tracking-[0.18em] text-mute uppercase">
+        <h3
+          className="font-mono text-[11px] font-medium tracking-[0.18em] text-mute uppercase"
+          title={tooltip}
+        >
           {title}{' '}
           <span className={`ml-1 font-display text-sm tracking-normal ${accent}`}>{total}</span>
         </h3>

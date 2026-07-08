@@ -17,6 +17,7 @@ const MARKER_STYLES: Record<string, string> = {
 };
 
 export default function TasksPanel({ project, onOpenDrawer }: Props) {
+  const groups = project.signalGroups;
   return (
     <div className="space-y-4">
       <Section title="Next up" count={project.nextTasks.length} accent="text-violet-300">
@@ -39,36 +40,46 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
         />
       </Section>
 
-      <Section
-        title="Blocked & gated"
-        count={project.blockers.length}
-        accent={project.blockers.some((b) => b.severe) ? 'text-rose-300' : 'text-mute'}
-        defaultOpen={project.blockers.some((b) => b.severe)}
-      >
-        {project.blockers.length === 0 ? (
-          <Empty text="No blocked, rejected, or human-gated work recorded." />
-        ) : (
-          <ul className="space-y-1.5">
-            {project.blockers.map((b, i) => (
-              <li key={i}>
-                <button
-                  onClick={() => onOpenDrawer(blockerDrawer(b, project))}
-                  className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
-                >
-                  <span
-                    className={`mt-0.5 rounded border px-1.5 py-px font-mono text-[10px] whitespace-nowrap ${BLOCKER_META[b.kind]?.chip ?? ''}`}
-                  >
-                    {BLOCKER_META[b.kind]?.label ?? b.kind}
-                  </span>
-                  <span className="line-clamp-2 min-w-0 text-sm leading-snug text-slate-300">
-                    {b.text}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Section>
+      <SignalSection
+        title="Real blockers"
+        tooltip="Actual inability to continue: blocked, failing, missing required data, unavailable dependency, or an acceptance gap that prevents completion."
+        items={groups.realBlockers}
+        project={project}
+        onOpenDrawer={onOpenDrawer}
+        accent={groups.realBlockers.length > 0 ? 'text-rose-300' : 'text-mute'}
+        empty="No real blockers recorded."
+        defaultOpen={groups.realBlockers.length > 0}
+      />
+
+      <SignalSection
+        title="Approval gates"
+        tooltip="Normal owner/SDD approval gates: pending approval, merge approval, or completed work waiting for approval."
+        items={groups.approvalGates}
+        project={project}
+        onOpenDrawer={onOpenDrawer}
+        accent={groups.approvalGates.length > 0 ? 'text-violet-300' : 'text-mute'}
+        empty="No approval gates recorded."
+      />
+
+      <SignalSection
+        title="Needs review"
+        tooltip="Review or validation work: needs review, pending review, needs verification, requires validation, or final review."
+        items={groups.needsReview}
+        project={project}
+        onOpenDrawer={onOpenDrawer}
+        accent={groups.needsReview.length > 0 ? 'text-orange-300' : 'text-mute'}
+        empty="No review items recorded."
+      />
+
+      <SignalSection
+        title="Paused / deferred"
+        tooltip="Work intentionally paused, on hold, deferred, planned later, or marked resume later."
+        items={groups.pausedDeferred}
+        project={project}
+        onOpenDrawer={onOpenDrawer}
+        accent={groups.pausedDeferred.length > 0 ? 'text-slate-300' : 'text-mute'}
+        empty="No paused or deferred work recorded."
+      />
 
       <Section
         title="Risks & open questions"
@@ -146,6 +157,56 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
         />
       </Section>
     </div>
+  );
+}
+
+function SignalSection({
+  title,
+  tooltip,
+  items,
+  project,
+  onOpenDrawer,
+  accent,
+  empty,
+  defaultOpen = false,
+}: {
+  title: string;
+  tooltip: string;
+  items: ProjectData['blockers'];
+  project: ProjectData;
+  onOpenDrawer: (item: DrawerItem) => void;
+  accent: string;
+  empty: string;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <Section title={title} count={items.length} accent={accent} defaultOpen={defaultOpen}>
+      <div title={tooltip}>
+        {items.length === 0 ? (
+          <Empty text={empty} />
+        ) : (
+          <ul className="space-y-1.5">
+            {items.map((b, i) => (
+              <li key={i}>
+                <button
+                  onClick={() => onOpenDrawer(blockerDrawer(b, project))}
+                  className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
+                >
+                  <span
+                    className={`mt-0.5 rounded border px-1.5 py-px font-mono text-[10px] whitespace-nowrap ${BLOCKER_META[b.kind]?.chip ?? ''}`}
+                  >
+                    {BLOCKER_META[b.kind]?.label ?? b.kind}
+                  </span>
+                  <span className="line-clamp-2 min-w-0 text-sm leading-snug text-slate-300">
+                    {b.text}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </Section>
   );
 }
 

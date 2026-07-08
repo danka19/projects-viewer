@@ -221,10 +221,15 @@ function AppShell({
           });
         }
       }
-      for (const b of p.blockers) {
+      for (const b of [
+        ...p.signalGroups.realBlockers,
+        ...p.signalGroups.approvalGates,
+        ...p.signalGroups.needsReview,
+        ...p.signalGroups.pausedDeferred,
+      ]) {
         if (b.text.toLowerCase().includes(q)) {
           push({
-            kind: 'Blocked',
+            kind: b.kind === 'blocked' || b.kind === 'rejection' ? 'Blocker' : 'Signal',
             label: b.text.slice(0, 90),
             sub: p.name,
             project: p,
