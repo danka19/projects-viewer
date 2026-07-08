@@ -206,6 +206,42 @@ export interface ScanOutput {
   projects: ProjectData[];
 }
 
+export interface TrackedProjectConfig {
+  id: string;
+  name: string;
+  path: string;
+  enabled: boolean;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorkspaceConfig {
+  id: string;
+  name: string;
+  path: string;
+  enabled: boolean;
+  discoveryDepth: 1 | 2 | 3;
+}
+
+export interface ProjectConfigSettings {
+  watchDocs: boolean;
+  autoRescanIntervalSec: number;
+  activeDays?: number;
+}
+
+export interface ProjectConfig {
+  workspaces: WorkspaceConfig[];
+  projects: TrackedProjectConfig[];
+  settings: ProjectConfigSettings;
+}
+
+export interface DiscoveredProjectCandidate {
+  name: string;
+  path: string;
+  reasons: string[];
+}
+
 export type TabId =
   | 'overview'
   | 'roadmap'
