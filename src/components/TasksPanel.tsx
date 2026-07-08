@@ -1,0 +1,196 @@
+import type { DrawerItem, ProjectData, TaskItem } from '../types';
+import { BLOCKER_META } from '../statusMeta';
+import { blockerDrawer, markerDrawer, riskDrawer, taskDrawer } from '../drawer';
+import Section from './Section';
+
+interface Props {
+  project: ProjectData;
+  onOpenDrawer: (item: DrawerItem) => void;
+}
+
+const MARKER_STYLES: Record<string, string> = {
+  TODO: 'bg-amber-400/10 text-amber-300 border-amber-400/25',
+  FIXME: 'bg-rose-400/10 text-rose-300 border-rose-400/25',
+  BUG: 'bg-rose-500/10 text-rose-300 border-rose-500/25',
+  NEXT: 'bg-violet-400/10 text-violet-300 border-violet-400/25',
+  DONE: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/25',
+};
+
+export default function TasksPanel({ project, onOpenDrawer }: Props) {
+  return (
+    <div className="space-y-4">
+      <Section title="Next up" count={project.nextTasks.length} accent="text-violet-300">
+        <TaskButtons
+          items={project.nextTasks}
+          kind="Next action"
+          project={project}
+          onOpenDrawer={onOpenDrawer}
+          empty="No next actions, NEXT markers, or tasks under a “Next” heading."
+        />
+      </Section>
+
+      <Section title="Open tasks" count={project.openTasks.length}>
+        <TaskButtons
+          items={project.openTasks}
+          kind="Open task"
+          project={project}
+          onOpenDrawer={onOpenDrawer}
+          empty="No open checkbox tasks found in documentation."
+        />
+      </Section>
+
+      <Section
+        title="Blocked & gated"
+        count={project.blockers.length}
+        accent={project.blockers.some((b) => b.severe) ? 'text-rose-300' : 'text-mute'}
+        defaultOpen={project.blockers.some((b) => b.severe)}
+      >
+        {project.blockers.length === 0 ? (
+          <Empty text="No blocked, rejected, or human-gated work recorded." />
+        ) : (
+          <ul className="space-y-1.5">
+            {project.blockers.map((b, i) => (
+              <li key={i}>
+                <button
+                  onClick={() => onOpenDrawer(blockerDrawer(b, project))}
+                  className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
+                >
+                  <span
+                    className={`mt-0.5 rounded border px-1.5 py-px font-mono text-[10px] whitespace-nowrap ${BLOCKER_META[b.kind]?.chip ?? ''}`}
+                  >
+                    {BLOCKER_META[b.kind]?.label ?? b.kind}
+                  </span>
+                  <span className="line-clamp-2 min-w-0 text-sm leading-snug text-slate-300">
+                    {b.text}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      <Section
+        title="Risks & open questions"
+        count={project.risks.length}
+        accent={project.risks.length > 0 ? 'text-amber-300' : 'text-mute'}
+        defaultOpen={false}
+      >
+        {project.risks.length === 0 ? (
+          <Empty text="No risk sections or open questions found." />
+        ) : (
+          <ul className="space-y-1.5">
+            {project.risks.map((r, i) => (
+              <li key={i}>
+                <button
+                  onClick={() => onOpenDrawer(riskDrawer(r, project))}
+                  className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
+                >
+                  <span className="mt-0.5 rounded border border-amber-400/25 bg-amber-400/10 px-1.5 py-px font-mono text-[10px] whitespace-nowrap text-amber-300">
+                    {r.kind === 'open-question' ? 'question' : 'risk'}
+                  </span>
+                  <span className="line-clamp-2 min-w-0 text-sm leading-snug text-slate-300">
+                    {r.text}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      <Section
+        title="Attention markers"
+        count={project.markers.length}
+        accent={project.markers.length > 0 ? 'text-amber-300' : 'text-mute'}
+        defaultOpen={false}
+      >
+        {project.markers.length === 0 ? (
+          <Empty text="No TODO / FIXME / BUG / NEXT / DONE markers found." />
+        ) : (
+          <ul className="space-y-1.5">
+            {project.markers.map((m, i) => (
+              <li key={i}>
+                <button
+                  onClick={() => onOpenDrawer(markerDrawer(m, project))}
+                  className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
+                >
+                  <span
+                    className={`mt-0.5 rounded border px-1.5 py-px font-mono text-[10px] ${MARKER_STYLES[m.type] ?? 'border-slate-600 bg-slate-800 text-slate-300'}`}
+                  >
+                    {m.type}
+                  </span>
+                  <span className="line-clamp-2 min-w-0 text-sm leading-snug text-slate-300">
+                    {m.text}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      <Section
+        title="Completed tasks"
+        count={project.completedTasks.length}
+        accent="text-emerald-300"
+        defaultOpen={false}
+      >
+        <TaskButtons
+          items={project.completedTasks}
+          kind="Completed task"
+          project={project}
+          onOpenDrawer={onOpenDrawer}
+          empty="No completed checkbox tasks found."
+          done
+        />
+      </Section>
+    </div>
+  );
+}
+
+function Empty({ text }: { text: string }) {
+  return (
+    <div className="flex items-center gap-2.5 py-1">
+      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400/60" />
+      <p className="text-sm text-faint">{text}</p>
+    </div>
+  );
+}
+
+function TaskButtons({
+  items,
+  kind,
+  project,
+  onOpenDrawer,
+  empty,
+  done = false,
+}: {
+  items: TaskItem[];
+  kind: string;
+  project: ProjectData;
+  onOpenDrawer: (item: DrawerItem) => void;
+  empty: string;
+  done?: boolean;
+}) {
+  if (items.length === 0) return <Empty text={empty} />;
+  return (
+    <ul className="space-y-1.5">
+      {items.map((t, i) => (
+        <li key={i}>
+          <button
+            onClick={() => onOpenDrawer(taskDrawer(t, project, kind))}
+            className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
+          >
+            <span className={`mt-px ${done ? 'text-emerald-400' : 'text-faint'}`}>
+              {done ? '☑' : '☐'}
+            </span>
+            <span className="line-clamp-2 min-w-0 text-sm leading-snug text-slate-300">
+              {t.text}
+            </span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
