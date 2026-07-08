@@ -4,6 +4,11 @@ Projects Viewer already turns local project documentation into a structured, evi
 
 This change defines a safe AI-facing context and findings layer without giving AI control over scanned projects. The goal is to make Projects Viewer useful as local context infrastructure for AI-assisted project monitoring, triage, and agent preflight while preserving the existing read-only and local-only boundaries.
 
+## Human Acceptance
+
+- Accepted by the human owner on 2026-07-08 as the proposed direction for future implementation.
+- Implementation has not started; apply this change through the OpenSpec implementation workflow before editing code.
+
 ## What Changes
 
 - Add an AI context contract that exposes compact, evidence-preserving scan summaries for all enabled projects and for a selected project.

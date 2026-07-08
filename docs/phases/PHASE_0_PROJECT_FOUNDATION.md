@@ -168,4 +168,4 @@ Verification impact:
 
 Status:
 
-- Accepted for OpenSpec proposal only; implementation has not started.
+- OpenSpec proposal accepted by the human owner on 2026-07-08; implementation has not started.
