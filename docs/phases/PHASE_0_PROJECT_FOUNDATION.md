@@ -41,3 +41,47 @@ Evidence:
 Approval status:
 
 - Completed pending human review.
+
+## Change Intake
+
+### 2026-07-08 Persistent Project And Workspace Management
+
+Idea:
+
+- Add persistent UI and backend support for managing tracked local projects and workspace discovery.
+
+Source:
+
+- Human request on 2026-07-08.
+
+Type:
+
+- `new_feature`, `architecture_change`, `data_contract_change`, `verification_change`, `documentation_change`.
+
+Decision:
+
+- `create_openspec_change` for implementation planning, with design captured first in `docs/superpowers/specs/2026-07-08-persistent-project-management-design.md`.
+
+Reason:
+
+- The request changes config persistence, API contracts, scanner input rules, watcher behavior, generated data storage, UI workflows, and verification requirements.
+
+Affected specs:
+
+- No `openspec/` directory exists yet; implementation planning should create or initialize the relevant OpenSpec change before code changes.
+
+Affected architecture:
+
+- Introduces canonical `app-data/projects.config.json`, generated `app-data/projects.generated.json`, config-management helpers, workspace discovery helpers, and UI management workflow.
+
+Data contract impact:
+
+- Adds persistent `workspaces`, richer `projects`, and `settings` config objects.
+
+Verification impact:
+
+- Requires migration, API, discovery, enabled-project scan filtering, persistence-after-restart, and UI workflow verification.
+
+Status:
+
+- Accepted for design and implementation planning; not yet implemented.
