@@ -1,6 +1,6 @@
 # Phase 2. Architecture And Data Model
 
-Status: completed pending human acceptance on 2026-07-09; Phase 3 implementation plan is ready.
+Status: accepted and closed on 2026-07-09; Phase 3 implementation plan was executed after human approval to proceed.
 
 ## Goal
 
@@ -483,4 +483,4 @@ Phase 3 plan:
 - Decision: The app remains single-user local-only through Phase 3.
 - Decision: Phase 3 should implement the smallest useful API/report JSON slice first.
 - Decision: Future endpoint name is `GET /api/project-brief-report`, with only `since` and metadata-only `mode` accepted as query parameters.
-- Decision required: human owner accepts Phase 2 architecture/planning gate before Phase 3 implementation begins.
+- Decision: human owner accepted the Phase 2 architecture/planning gate by explicitly approving the start of Phase 3 on 2026-07-09.

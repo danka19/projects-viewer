@@ -6,6 +6,14 @@ Repo: https://github.com/danka19/projects-viewer
 
 ## Current State
 
+v6 implemented on 2026-07-09:
+
+- JSON-first project brief/report workflow implemented for `GET /api/project-brief-report`.
+- Shared `ProjectBriefReport` contract types added to `src/types.ts`.
+- Pure `server/project-brief-report.mjs` composition module ranks advisory review-order items from generated scan data, saved config, existing findings review state, optional AI context changes, and baseline availability.
+- Endpoint accepts only `mode` and `since`, rejects unsafe query parameters, returns `missing-generated-scan-data` for missing generated scan output, and does not write snapshots, findings stores, report history, scanned project files, or external action records.
+- Focused report tests cover ranking, evidence, derived labels, safe states, query validation, and read-only side-effect boundaries.
+
 v5 implemented on 2026-07-08:
 
 - Persistent tracked project and workspace config in `app-data/projects.config.json`.
@@ -43,8 +51,8 @@ v3 implemented on 2026-07-07:
 | `AI_STEP_VERIFICATION_CHECKLIST.md` | Required checks before claiming code or documentation work is complete |
 | `CONTEXT.md` | Canonical terms and boundary rules for live/static scanning |
 | `phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 plan for users, workflows, data sources, AI use cases, and acceptance criteria |
-| `phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Completed pending acceptance Phase 2 plan for the project brief/report data contract, module boundaries, API surface, ranking rules, and Phase 3 readiness |
-| `phases/PHASE_3_FIRST_USABLE_WORKFLOW.md` | Planned Phase 3 implementation plan for the JSON-first project brief/report API workflow |
+| `phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Accepted and closed Phase 2 plan for the project brief/report data contract, module boundaries, API surface, ranking rules, and Phase 3 readiness |
+| `phases/PHASE_3_FIRST_USABLE_WORKFLOW.md` | Completed pending acceptance Phase 3 implementation record for the JSON-first project brief/report API workflow |
 | `01-doc-conventions-analysis.md` | How the user's documentation system works and parsing signals table |
 | `02-dashboard-data-model.md` | Proposed JSON data model for scanner output |
 | `03-status-rules.md` | Status derivation rules |
@@ -59,6 +67,7 @@ v3 implemented on 2026-07-07:
 - Build verification: `npm run build`.
 - AI context API: `GET /api/ai-context`, `GET /api/ai-context/projects/:id`, `GET /api/ai-context/changes?since=<iso>`.
 - AI findings API: `GET /api/ai-findings?state=unresolved`, `PATCH /api/ai-findings/:id`.
+- Project brief report API: `GET /api/project-brief-report`, optional `mode=daily|weekly`, optional `since=<iso>`.
 - AI runtime files: `app-data/ai.context.snapshot.json` and `app-data/ai.findings.generated.json`.
 - Current configured scanned project: `Example Project` at `C:\Users\danoc\Documents\projects\AutoParts`, migrated from legacy config when `app-data/projects.config.json` is absent.
 
@@ -71,5 +80,6 @@ v3 implemented on 2026-07-07:
 - AI context uses only `app-data/projects.generated.json` and saved tracked project ids; it does not accept arbitrary project paths.
 - AI context changes-since compares saved compact context snapshots where available, rather than relying only on documentation modification times.
 - AI findings are review-required derived runtime records under `app-data/`; they do not modify scanned project folders and do not trigger agent actions.
+- Project brief reports are advisory and read-only: they reject arbitrary paths/selectors, read existing runtime data, and do not write snapshots, findings, report history, scanned project files, tasks/calendar records, commands, commits, remote calls, or agent work.
 - No cloud, auth, API keys, agent control, arbitrary shell commands, or whole-disk scanning are part of the current design.
 - Markdown files larger than 1 MB and unsafe folders such as `node_modules`, `.git`, `dist`, `build`, `.next`, `coverage`, and `vendor` are skipped.

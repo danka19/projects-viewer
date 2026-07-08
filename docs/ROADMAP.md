@@ -4,7 +4,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Current Roadmap Validation
 
-- Current phase: Phase 2 Architecture And Data Model.
+- Current phase: Phase 3 First Usable Workflow, completed pending human acceptance.
 - Planning from this roadmap alone is forbidden. Detailed phase plans must reconcile roadmap intent, current docs, current implementation, environment evidence, audit findings, and human decisions.
 - Product behavior, requirements, proposed changes, and acceptance criteria belong in OpenSpec artifacts under `openspec/` when SDD applies.
 - New ideas during active phase work must go through change intake before they alter scope or plans.
@@ -47,7 +47,7 @@ Evidence:
 
 ## Phase 2. Architecture And Data Model
 
-Status: completed pending human acceptance on 2026-07-09.
+Status: accepted and closed on 2026-07-09.
 
 Goal: define the first stable architecture, data contract, report composition module boundary, local API surface, ranking rules, storage boundaries, and integration contracts for the selected project brief/report workflow.
 
@@ -57,14 +57,27 @@ Evidence:
 
 - Phase 2 resolved the project brief/report JSON contract, pure composition module boundary, local API surface, safe parameters, deterministic ranking, empty-state behavior, baseline/snapshot rules, and Phase 3 implementation plan.
 - Phase 3 plan created: `docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md`.
+- Human owner approved starting Phase 3 on 2026-07-09.
 
 ## Phase 3. First Usable Workflow
 
-Status: planned; ready to start after human acceptance of Phase 2 gate.
+Status: completed pending human acceptance on 2026-07-09.
 
 Goal: implement the first end-to-end local project brief/report workflow from `openspec/changes/add-project-brief-report/`, starting with verified API/report output before dashboard UI.
 
 Detailed plan: `docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md`.
+
+Evidence:
+
+- Shared project brief/report types exist in `src/types.ts`.
+- Pure report composition exists in `server/project-brief-report.mjs`.
+- Local endpoint `GET /api/project-brief-report` exists in `server.mjs`, accepts only `mode` and `since`, and returns advisory JSON.
+- `tests/project-brief-report.test.mjs` covers ranking, evidence, derived labels, safe states, invalid parameters, missing scan data, no arbitrary paths, no snapshot/finding/report-history writes, and unchanged scanned project sentinel files.
+- Verification passed during implementation: `npm test`, `npm run build`, `openspec validate --all --strict`, and `git diff --check`.
+
+Decision required:
+
+- Human owner reviews the API/report output and decides whether `add-project-brief-report` is accepted for OpenSpec archival, needs another JSON report iteration, or should proceed to a dashboard UI follow-up.
 
 ## Phase 4. Hardening And Pilot Readiness
 
