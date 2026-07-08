@@ -67,7 +67,14 @@ Development workflow:
 3. Let Vite reload the frontend and let the watcher rescan configured project docs.
 4. Use **Manage Projects** to adjust tracked projects when needed.
 5. Use **Rescan docs** for an immediate manual scan when needed.
-5. Run `npm test` and `npm run build` before committing code changes.
+6. Run `npm test` and `npm run build` before committing code changes.
+
+Server lifecycle rule:
+
+- Do not stop the local dashboard server automatically at the end of agent work.
+- If the server is already running, leave it running unless a restart is required to pick up backend changes.
+- If the server is not running and the user needs the dashboard, start it and report the URL.
+- Restart the server only when necessary, for example after backend/server changes or when the current process is serving the wrong branch.
 
 ## Live mode, static mode, and rescans
 
