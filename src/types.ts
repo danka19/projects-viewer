@@ -383,6 +383,191 @@ export interface AiFinding {
   staleAt?: string;
 }
 
+export type ProjectBriefReportMode = 'daily' | 'weekly';
+
+export type ProjectBriefReportPriority = 'high' | 'medium' | 'low';
+
+export type ProjectBriefReportSafeStateCode =
+  | 'missing-generated-scan-data'
+  | 'missing-previous-baseline'
+  | 'missing-findings-store'
+  | 'empty-findings'
+  | 'no-attention-items';
+
+export type ProjectBriefReportSafeStateSeverity = 'info' | 'warning' | 'error';
+
+export type ProjectBriefReportAttentionReasonKind =
+  | 'unresolved-finding'
+  | 'blocker'
+  | 'approval-gate'
+  | 'needs-review'
+  | 'changed-next-action'
+  | 'changed-status'
+  | 'changed-risk'
+  | 'documentation-gap'
+  | 'first-run-current-signal';
+
+export type ProjectBriefReportAttentionReasonSource =
+  | 'ai-finding'
+  | 'ai-context'
+  | 'scan-summary'
+  | 'baseline';
+
+export type ProjectBriefReportDerivedLabelReason =
+  | 'derived-status'
+  | 'derived-health-score'
+  | 'derived-summary'
+  | 'derived-recommendation'
+  | 'missing-source-line';
+
+export type ProjectBriefReportRecommendedDecisionKind =
+  | 'review-findings'
+  | 'resolve-blocker'
+  | 'approve-or-reject-gate'
+  | 'choose-next-action'
+  | 'inspect-changes'
+  | 'no-action-needed';
+
+export type ProjectBriefReportChangedCategory =
+  | 'status'
+  | 'statusReason'
+  | 'currentPhase'
+  | 'nextAction'
+  | 'blockerSummary'
+  | 'riskSummary'
+  | 'gaps'
+  | 'findings';
+
+export interface ProjectBriefReportGeneratedFrom {
+  projectConfig: 'app-data/projects.config.json';
+  scanData: 'app-data/projects.generated.json';
+  aiContextChanges: 'derived' | 'unavailable';
+  aiFindings: 'app-data/ai.findings.generated.json';
+  remoteServicesUsed: false;
+}
+
+export interface ProjectBriefReportInputState {
+  generatedScanAvailable: boolean;
+  trackedProjectCount: number;
+  previousBaselineAvailable: boolean;
+  findingsAvailable: boolean;
+  changesAvailable: boolean;
+}
+
+export interface ProjectBriefReportBaseline {
+  kind: 'ai-context-snapshot';
+  requestedSince: string | null;
+  previousSnapshotAvailable: boolean;
+  comparisonAvailable: boolean;
+  message: string;
+}
+
+export interface ProjectBriefReportSafeState {
+  code: ProjectBriefReportSafeStateCode;
+  severity: ProjectBriefReportSafeStateSeverity;
+  message: string;
+  blocksReport: boolean;
+}
+
+export interface ProjectBriefReportSummary {
+  projectCount: number;
+  itemCount: number;
+  highPriorityCount: number;
+  unresolvedFindingCount: number;
+  blockerCount: number;
+  approvalGateCount: number;
+  changedProjectCount: number;
+  safeStateCount: number;
+}
+
+export interface ProjectBriefReportAttentionReason {
+  kind: ProjectBriefReportAttentionReasonKind;
+  label: string;
+  severity: ProjectBriefReportPriority;
+  source: ProjectBriefReportAttentionReasonSource;
+}
+
+export interface ProjectBriefReportFindingSummary {
+  unresolvedCount: number;
+  acceptedCount: number;
+  dismissedCount: number;
+  staleCount: number;
+  unresolvedIds: string[];
+  unresolved: Array<{
+    id: string;
+    type: AiFindingType;
+    title: string;
+    confidence: Confidence;
+    evidence: AiEvidenceItem[];
+  }>;
+}
+
+export interface ProjectBriefReportCurrentState {
+  status: ProjectStatus;
+  healthScore: number | null;
+  currentPhase: string | null;
+  nextAction: string | null;
+  mainBlocker: string | null;
+  mainRisk: string | null;
+}
+
+export interface ProjectBriefReportDerivedLabel {
+  field: string;
+  reason: ProjectBriefReportDerivedLabelReason;
+  evidenceKind: 'derived-summary';
+}
+
+export interface ProjectBriefReportRecommendedHumanDecision {
+  kind: ProjectBriefReportRecommendedDecisionKind;
+  prompt: string;
+  rationale: string;
+  actionTaken: false;
+  acceptedDecision: false;
+}
+
+export interface ProjectBriefReportItem {
+  project: {
+    id: string | null;
+    name: string;
+    path: string;
+  };
+  priority: ProjectBriefReportPriority;
+  rank: number;
+  attentionReasons: ProjectBriefReportAttentionReason[];
+  changedCategories: ProjectBriefReportChangedCategory[];
+  findingsSummary: ProjectBriefReportFindingSummary;
+  blockers: AiContextItem[];
+  currentState: ProjectBriefReportCurrentState;
+  evidence: AiEvidenceItem[];
+  derivedLabels: ProjectBriefReportDerivedLabel[];
+  recommendedHumanDecision: ProjectBriefReportRecommendedHumanDecision;
+}
+
+export interface ProjectBriefReportWorkBoundaries {
+  localOnly: true;
+  derivedFromGeneratedScan: true;
+  scannedProjectsReadOnly: true;
+  noModelProviderRequired: true;
+  reviewRequiredFindingsOnly: true;
+  noAutomaticAction: true;
+}
+
+export interface ProjectBriefReport {
+  kind: 'project-brief-report';
+  schemaVersion: 1;
+  generatedAt: string;
+  mode: ProjectBriefReportMode;
+  since: string | null;
+  generatedFrom: ProjectBriefReportGeneratedFrom;
+  inputState: ProjectBriefReportInputState;
+  baseline: ProjectBriefReportBaseline;
+  safeStates: ProjectBriefReportSafeState[];
+  summary: ProjectBriefReportSummary;
+  items: ProjectBriefReportItem[];
+  noAttentionMessage: string | null;
+  workBoundaries: ProjectBriefReportWorkBoundaries;
+}
+
 export interface TrackedProjectConfig {
   id: string;
   name: string;
