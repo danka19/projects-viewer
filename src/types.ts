@@ -252,6 +252,137 @@ export interface ScanOutput {
   projects: ProjectData[];
 }
 
+export type AiEvidenceKind = 'source' | 'derived-summary';
+
+export interface AiEvidenceItem {
+  kind: AiEvidenceKind;
+  file?: string;
+  line?: number;
+  text?: string | null;
+}
+
+export type AiFindingReviewState = 'new' | 'accepted' | 'dismissed' | 'stale';
+
+export type AiFindingType =
+  | 'status-contradiction'
+  | 'stale-audit'
+  | 'stale-handoff-pointer'
+  | 'unresolved-human-gate'
+  | 'unclear-next-action'
+  | 'missing-specs'
+  | 'missing-verification-evidence';
+
+export interface AiContextItem {
+  text: string;
+  evidence: AiEvidenceItem[];
+}
+
+export interface AiContextListItem extends AiContextItem {
+  category: 'constraint' | 'risk' | 'decision' | 'spec' | 'audit';
+  kind?: string | null;
+  confidence?: Confidence | null;
+  status?: string;
+  name?: string;
+  title?: string;
+  date?: string | null;
+  openTasks?: number | null;
+  completedTasks?: number | null;
+  severeSignals?: number;
+}
+
+export interface AiProjectContext {
+  kind: 'project-ai-context';
+  identity: {
+    id: string | null;
+    name: string;
+    path: string;
+  };
+  generatedFrom: 'projects.generated.json';
+  status: ProjectStatus;
+  statusReason: string;
+  healthScore: number | null;
+  lastModified: string | null;
+  currentPhase: AiContextItem | null;
+  nextAction: AiContextItem | null;
+  mainBlocker: AiContextItem | null;
+  mainRisk: AiContextItem | null;
+  recentDecision: AiContextItem | null;
+  gaps: AiContextItem[];
+  constraints: {
+    realBlockers: AiContextListItem[];
+    approvalGates: AiContextListItem[];
+    needsReview: AiContextListItem[];
+    pausedDeferred: AiContextListItem[];
+  };
+  risks: AiContextListItem[];
+  decisions: AiContextListItem[];
+  specs: AiContextListItem[];
+  audits: AiContextListItem[];
+  findings: {
+    unresolvedCount: number;
+    acceptedCount: number;
+    dismissedCount: number;
+    staleCount: number;
+    ids: string[];
+  };
+  workBoundaries: {
+    localOnly: true;
+    derivedFromGeneratedScan: true;
+    scannedProjectsReadOnly: true;
+    noModelProviderRequired: true;
+    reviewRequiredFindingsOnly: true;
+  };
+}
+
+export interface AllProjectsAiContext {
+  kind: 'all-project-ai-context';
+  generatedAt: string;
+  activeDays: number;
+  projectCount: number;
+  projects: AiProjectContext[];
+}
+
+export interface AiContextChanges {
+  kind: 'ai-context-changes';
+  generatedAt: string;
+  since: string;
+  hasChanges: boolean;
+  message: string;
+  projects: {
+    project: { name: string; path: string };
+    lastModified: string | null;
+    changedCategories: Array<
+      | 'status'
+      | 'statusReason'
+      | 'currentPhase'
+      | 'nextAction'
+      | 'blockerSummary'
+      | 'riskSummary'
+      | 'gaps'
+      | 'findings'
+    >;
+  }[];
+}
+
+export interface AiFinding {
+  id: string;
+  type: AiFindingType;
+  title: string;
+  explanation: string;
+  confidence: Confidence;
+  reviewState: AiFindingReviewState;
+  reviewRequired: true;
+  project: {
+    name: string;
+    path: string;
+  };
+  evidence: AiEvidenceItem[];
+  createdAt: string;
+  updatedAt: string;
+  reviewedAt?: string;
+  staleAt?: string;
+}
+
 export interface TrackedProjectConfig {
   id: string;
   name: string;

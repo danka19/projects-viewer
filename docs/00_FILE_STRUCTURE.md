@@ -34,6 +34,8 @@ This document is the repository map for agents and humans. Keep it current whene
 | `server/scan-controller.mjs` | Single-flight scan controller with queue, delay, status, trigger, and throttle logic |
 | `server/project-config.mjs` | Canonical config path helpers, legacy migration, validation, project/workspace CRUD, enabled-project filtering |
 | `server/project-discovery.mjs` | Safe workspace candidate discovery with marker reasons, depth caps, and excluded folders |
+| `server/ai-context.mjs` | Compact AI context mapping, source-evidence normalization, and changes-since category comparison |
+| `server/ai-findings.mjs` | Deterministic review-required findings generation and local review-state persistence |
 
 ## Local Runtime Data
 
@@ -41,6 +43,7 @@ This document is the repository map for agents and humans. Keep it current whene
 |---|---|
 | `app-data/projects.config.json` | Canonical local tracked project/workspace config; ignored by git |
 | `app-data/projects.generated.json` | Generated live scan output; ignored by git |
+| `app-data/ai.findings.generated.json` | Generated AI findings plus accepted/dismissed/stale review metadata; ignored by git |
 
 ## Documentation
 

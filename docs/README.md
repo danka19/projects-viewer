@@ -10,6 +10,7 @@ v5 implemented on 2026-07-08:
 
 - Persistent tracked project and workspace config in `app-data/projects.config.json`.
 - Generated live scan data separated into `app-data/projects.generated.json`.
+- Local AI context and findings layer in progress: compact AI context endpoints derive from generated scan data, and deterministic review-required findings persist local review state in `app-data/ai.findings.generated.json`.
 - Legacy root `projects.config.json` migration on first local startup when the canonical config is missing.
 - Express management API endpoints for config, tracked projects, workspaces, discovery, selected tracking, and rescans.
 - **Manage Projects** UI for adding one project, adding a workspace folder, discovering candidates, tracking selected projects, disabling projects, removing tracking entries, and rescanning enabled projects.
@@ -53,6 +54,8 @@ v3 implemented on 2026-07-07:
 - One-shot scan: `npm run scan`.
 - Tests: `npm test`.
 - Build verification: `npm run build`.
+- AI context API: `GET /api/ai-context`, `GET /api/ai-context/projects/:id`, `GET /api/ai-context/changes?since=<iso>`.
+- AI findings API: `GET /api/ai-findings?state=unresolved`, `PATCH /api/ai-findings/:id`.
 - Current configured scanned project: `Example Project` at `C:\Users\danoc\Documents\projects\AutoParts`, migrated from legacy config when `app-data/projects.config.json` is absent.
 
 ## Safety Summary
@@ -61,5 +64,7 @@ v3 implemented on 2026-07-07:
 - Scanned projects are read-only inputs.
 - Browser path input is accepted only by config-management endpoints that validate and save paths; scan and watcher code use saved enabled config paths only.
 - The API scans only enabled paths from `app-data/projects.config.json`.
+- AI context uses only `app-data/projects.generated.json` and saved tracked project ids; it does not accept arbitrary project paths.
+- AI findings are review-required derived runtime records under `app-data/`; they do not modify scanned project folders and do not trigger agent actions.
 - No cloud, auth, API keys, agent control, arbitrary shell commands, or whole-disk scanning are part of the current design.
 - Markdown files larger than 1 MB and unsafe folders such as `node_modules`, `.git`, `dist`, `build`, `.next`, `coverage`, and `vendor` are skipped.

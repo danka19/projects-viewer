@@ -19,6 +19,7 @@ The health score is derived from documentation coverage, blocker/rejection count
 
 - **Read-only by design.** The scanner only *reads* whitelisted markdown files inside your projects. It never writes to, moves, or modifies them. Runtime writes stay inside this dashboard folder, primarily under `app-data/`.
 - **Fully local.** No database, no auth, no cloud, no API keys.
+- **AI preflight context.** Local API endpoints expose compact, evidence-linked project context and review-required findings derived from generated scan data. They do not call model providers and do not write to scanned project folders.
 
 Stack: Vite + React + TypeScript + Tailwind CSS + a local Express server, Chokidar watcher, and a plain Node.js scanner script.
 
@@ -217,7 +218,25 @@ Workspace config fields:
 
 Generated scan results are stored separately in `app-data/projects.generated.json`. The static fallback file `src/data/projects.json` remains available for browser-only static mode and build compatibility.
 
+AI findings are stored separately in `app-data/ai.findings.generated.json`. This file is local runtime data: it records deterministic review-required findings and human review states (`new`, `accepted`, `dismissed`, `stale`) without changing scanned project documentation or accepted project decisions.
+
 After editing project paths, use **Rescan docs** in live mode or run `npm run scan` from the terminal.
+
+## AI context and findings API
+
+The local server exposes deterministic AI-readable context for agent preflight:
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/ai-context` | Compact context for all enabled projects from `app-data/projects.generated.json`. Query paths are ignored; the endpoint never scans arbitrary request-provided paths. |
+| `GET /api/ai-context/projects/:id` | Compact context for one saved tracked project id from `app-data/projects.config.json`. |
+| `GET /api/ai-context/changes?since=<iso>` | AI-readable changed field categories since an ISO timestamp. |
+| `GET /api/ai-findings?state=unresolved` | Review-required findings, filtered by `unresolved`, `all`, `new`, `accepted`, `dismissed`, or `stale`. |
+| `PATCH /api/ai-findings/:id` | Update local finding review state to `new`, `accepted`, or `dismissed`. |
+
+AI context includes project identity, status, status reason, health score, current phase, next action, main blocker/risk, recent decision, gaps, selected constraints, risks, decisions, specs, audits, and evidence references. It intentionally omits raw markdown document bodies.
+
+Findings are deterministic derived records for review, such as suspected status contradictions, unresolved human gates, unclear next actions, missing specs/design docs, missing verification evidence, stale handoff pointers, and audits needing attention. A finding is not an accepted decision, requirement, blocker, or verification result until a human handles it through a separate workflow.
 
 ## What gets scanned
 
@@ -291,12 +310,15 @@ The scanner never crashes on unreadable files or folders — it skips them silen
 ```text
 app-data/projects.config.json      # local tracked project/workspace config (ignored)
 app-data/projects.generated.json   # generated live scan output (ignored)
+app-data/ai.findings.generated.json # generated AI findings and review state (ignored)
 scan-projects.mjs        # read-only Node scanner (npm run scan)
 src/data/projects.json   # static fallback scan output
 src/App.tsx              # app shell: header, global search, layout, drawer state
 src/components/ManageProjects.tsx  # tracked project/workspace management UI
 server/project-config.mjs          # config migration, validation, CRUD helpers
 server/project-discovery.mjs       # safe workspace candidate discovery
+server/ai-context.mjs              # compact AI context and changes-since helpers
+server/ai-findings.mjs             # deterministic findings and local review-state store
 src/drawer.ts            # builders that turn extracted items into drawer payloads
 src/components/          # OverviewStats, ProjectSidebar, SelectedProjectHeader,
                          # FocusCards, ProjectTabs, RoadmapTimeline, SpecsPanel,

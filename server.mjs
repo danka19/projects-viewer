@@ -22,6 +22,16 @@ import {
   validateDiscoveredProjectSelection,
 } from './server/project-discovery.mjs';
 import { browseFolder as defaultBrowseFolder } from './server/folder-picker.mjs';
+import {
+  buildAllProjectsAiContext,
+  buildProjectAiContext,
+  compareAiContextChanges,
+} from './server/ai-context.mjs';
+import {
+  filterFindings,
+  generateFindings,
+  updateFindingReviewState,
+} from './server/ai-findings.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = path.join(__dirname, 'dist');
@@ -225,6 +235,19 @@ export async function createApp({
     res.status(err.statusCode ?? 500).json({ error: err.message });
   }
 
+  async function readGeneratedScan() {
+    try {
+      return await readProjectsOutput(configOptions);
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        const missing = new Error('Generated scan data is missing. Run a scan before requesting AI context.');
+        missing.statusCode = 404;
+        throw missing;
+      }
+      throw err;
+    }
+  }
+
   app.get('/api/config', async (_req, res) => {
     try {
       res.json(await readProjectConfig(configOptions));
@@ -339,6 +362,74 @@ export async function createApp({
       res.json(await readProjectsOutput(configOptions));
     } catch (err) {
       res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/ai-context', async (_req, res) => {
+    try {
+      const scan = await readGeneratedScan();
+      const config = await readProjectConfig(configOptions);
+      const findingsStore = await generateFindings(scan, configOptions);
+      res.json(buildAllProjectsAiContext(scan, { config, findings: findingsStore.findings }));
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.get('/api/ai-context/projects/:id', async (req, res) => {
+    try {
+      const scan = await readGeneratedScan();
+      const config = await readProjectConfig(configOptions);
+      const configProject = config.projects.find((project) => project.id === req.params.id);
+      if (!configProject) {
+        const err = new Error('Tracked project not found.');
+        err.statusCode = 404;
+        throw err;
+      }
+      const project = scan.projects.find(
+        (entry) => path.resolve(entry.path).toLowerCase() === path.resolve(configProject.path).toLowerCase(),
+      );
+      if (!project) {
+        const err = new Error('Generated scan data does not contain the requested tracked project.');
+        err.statusCode = 404;
+        throw err;
+      }
+      const findingsStore = await generateFindings(scan, configOptions);
+      res.json({ project: buildProjectAiContext(project, { configProject, findings: findingsStore.findings }) });
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.get('/api/ai-context/changes', async (req, res) => {
+    try {
+      const scan = await readGeneratedScan();
+      const findingsStore = await generateFindings(scan, configOptions);
+      res.json(compareAiContextChanges(scan, { since: req.query.since, findings: findingsStore.findings }));
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.get('/api/ai-findings', async (req, res) => {
+    try {
+      const scan = await readGeneratedScan();
+      const findingsStore = await generateFindings(scan, configOptions);
+      res.json({
+        generatedAt: findingsStore.generatedAt,
+        findings: filterFindings(findingsStore.findings, req.query.state ?? 'unresolved'),
+      });
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.patch('/api/ai-findings/:id', async (req, res) => {
+    try {
+      const finding = await updateFindingReviewState(req.params.id, req.body?.reviewState, configOptions);
+      res.json({ finding });
+    } catch (err) {
+      sendError(res, err);
     }
   });
 
