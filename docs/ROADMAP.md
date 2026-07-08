@@ -32,23 +32,25 @@ Evidence:
 
 ## Phase 1. Discovery And Requirements
 
-Status: in progress.
+Status: gate decisions documented; pending human approval to move into Phase 2.
 
 Goal: identify users, workflows, data sources, constraints, and first acceptance criteria.
 
 Detailed plan: `docs/phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md`.
 
+Selected first workflow: local daily/weekly project brief as API/report JSON first, dashboard UI later. Proposed OpenSpec change: `openspec/changes/add-project-brief-report/`.
+
 ## Phase 2. Architecture And Data Model
 
 Status: not planned in detail yet.
 
-Goal: define the first stable architecture, core entities, storage boundaries, and integration contracts.
+Goal: define the first stable architecture, data contract, report composition module boundary, local API surface, ranking rules, storage boundaries, and integration contracts for the selected project brief/report workflow.
 
 ## Phase 3. First Usable Workflow
 
 Status: not planned in detail yet.
 
-Goal: implement the first end-to-end workflow that proves project value.
+Goal: implement the first end-to-end local project brief/report workflow from `openspec/changes/add-project-brief-report/`, starting with verified API/report output before dashboard UI.
 
 ## Phase 4. Hardening And Pilot Readiness
 

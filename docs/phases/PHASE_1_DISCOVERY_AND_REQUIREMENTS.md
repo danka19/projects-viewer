@@ -384,6 +384,8 @@ OpenSpec and acceptance evidence:
 
 ### 1.5 Select The First Usable Workflow For Phase 3
 
+Status: completed on 2026-07-08 for Phase 1 gate planning.
+
 Objective:
 
 - Choose the first end-to-end workflow that proves product value and define why it is first.
@@ -419,20 +421,61 @@ OpenSpec and acceptance evidence:
 
 - Selected workflow is either covered by accepted specs or has a proposed OpenSpec change ready for implementation planning.
 
+## Selected First Usable Workflow
+
+Selected Phase 3 workflow: daily/weekly project brief as a local API/report workflow first, with dashboard UI deferred until the report contract proves useful.
+
+Why this is first:
+
+- It turns existing scan, AI context, changes-since, and findings data into one concrete human decision aid.
+- It supports both human dashboard triage and AI-agent preflight without granting AI authority to act.
+- It has an active OpenSpec proposal ready for implementation planning: `openspec/changes/add-project-brief-report/`.
+- It is smaller and safer than a full findings-review UI because the first slice can validate content, ranking, evidence labels, and safe missing-data behavior through API/report tests.
+
+Workflow definition:
+
+| Field | Decision |
+|---|---|
+| Primary user | Human owner, with future AI implementation/reviewer agents as secondary consumers. |
+| Trigger | Manual request for a current daily/weekly brief; future scheduled or dashboard trigger is out of scope until approved. |
+| Inputs | Saved tracked-project config, generated scan data, AI context changes, AI findings review state, accepted specs/docs as evidence references. |
+| Output | Structured local report with changed projects, unresolved findings, likely blockers, approval gates, evidence, derived labels, warnings, and recommended human decisions. |
+| First surface | Local API/report JSON. A dashboard panel or Markdown rendering can follow after the data contract is implemented and verified. |
+| Acceptance source | `openspec/changes/add-project-brief-report/specs/project-brief-report/spec.md`. |
+| Verification approach | Contract tests for report composition, missing data, evidence labels, no arbitrary paths, and no unauthorized side effects; `npm test`, `npm run build`, `openspec validate --all --strict`, and `git diff --check`. |
+
+Explicit non-goals for the first usable workflow:
+
+- No remote LLM provider, cloud sync, auth, API keys, external issue tracker, calendar, or Trello integration.
+- No automatic task creation, commits, shell commands, notifications, scanned-project edits, or agent implementation trigger.
+- No full findings-review UI before the report contract exists.
+- No new persistent report-history store unless Phase 2 explicitly designs and approves it.
+
+Phase 2 architecture target:
+
+- Design the `project-brief-report` data contract and module boundary around a focused report composition module, likely `server/project-brief-report.mjs`.
+- Decide the local retrieval surface, likely `GET /api/project-brief` or equivalent, including safe query parameters such as optional `since`.
+- Define report item ranking/grouping rules for changed projects, unresolved findings, blockers, approval gates, and changed next actions.
+- Confirm whether the first implementation reuses existing AI context snapshot behavior only, or needs a documented report-baseline strategy.
+- Map the OpenSpec tasks in `openspec/changes/add-project-brief-report/tasks.md` into a Phase 2 implementation plan before any Phase 3 UI or workflow build.
+
+Phase 3 implementation target:
+
+- Implement the first end-to-end local project brief/report workflow from the proposed OpenSpec change after Phase 2 resolves the contract and module boundaries.
+- Deliver API/report output before dashboard UI, then use verified report output to decide whether a dashboard panel, Markdown rendering, or findings review UI is the next useful surface.
+
 ## Phase Gate
 
 - Primary users and daily/weekly decisions are documented.
 - Data sources, runtime stores, trust boundaries, and forbidden flows are documented.
 - AI-assisted workflows are ranked with accepted, deferred, and rejected behaviors.
-- At least one first usable workflow is selected for Phase 3.
-- OpenSpec changes exist for any accepted behavior that is not already covered by main specs.
-- `docs/ROADMAP.md`, `docs/CURRENT_PROJECT_AUDIT.md`, and `docs/00_FILE_STRUCTURE.md` match the resulting plan.
+- First usable workflow selected for Phase 3: daily/weekly project brief as local API/report JSON first, dashboard UI later.
+- OpenSpec change exists for the selected behavior: `openspec/changes/add-project-brief-report/`.
+- `docs/ROADMAP.md`, `docs/CURRENT_PROJECT_AUDIT.md`, and `docs/00_FILE_STRUCTURE.md` match the resulting plan after work item 1.5 updates.
 
 ## Human Decisions
 
-- Required: confirm whether Phase 1 should optimize first for human dashboard triage, AI-agent preflight, AI findings review, or daily/weekly project brief.
-- Recommended default: daily/weekly project brief built from AI context and findings, because it connects the human dashboard and AI use case without granting AI control.
-- Required: confirm whether the first user-visible AI findings surface belongs in the dashboard UI, an API-only workflow, or a generated report.
-- Recommended default: start with API/report workflow first, then add UI after the review policy is validated.
-- Required: confirm whether tracked-project configuration remains single-user local-only for the next usable workflow.
-- Recommended default: keep single-user local-only through Phase 3.
+- Decision: Phase 3 should optimize first for a daily/weekly project brief built from AI context and findings.
+- Decision: The first surface should be API/report JSON, then dashboard UI or Markdown rendering after the review policy and report contract are validated.
+- Decision: Tracked-project configuration remains single-user local-only through Phase 3.
+- Remaining human confirmation before implementation: approve moving from Phase 1 discovery into Phase 2 architecture planning for `add-project-brief-report`.
