@@ -59,9 +59,15 @@ Projects Viewer SHALL provide an AI-readable changes-since view over derived pro
 
 #### Scenario: Project status changed after timestamp
 
-- **WHEN** a client requests changes since a timestamp and a project's status, status reason, current phase, next action, blocker summary, risk summary, gaps, or findings changed after that timestamp
+- **WHEN** a client requests changes since a timestamp and a project's status, status reason, current phase, next action, blocker summary, risk summary, gaps, or findings differ from the saved compact context snapshot
 - **THEN** the response includes that project in the changed projects list
 - **AND** the response identifies the changed field categories
+
+#### Scenario: Saved compact context snapshot is used
+
+- **WHEN** a previous compact AI context snapshot exists
+- **THEN** Projects Viewer compares derived AI context fields against that snapshot
+- **AND** it does not rely only on project documentation modification timestamps to infer derived field changes
 
 #### Scenario: No meaningful changes found
 

@@ -43,6 +43,7 @@ This document is the repository map for agents and humans. Keep it current whene
 |---|---|
 | `app-data/projects.config.json` | Canonical local tracked project/workspace config; ignored by git |
 | `app-data/projects.generated.json` | Generated live scan output; ignored by git |
+| `app-data/ai.context.snapshot.json` | Last compact AI context snapshot used by changes-since comparison; ignored by git |
 | `app-data/ai.findings.generated.json` | Generated AI findings plus accepted/dismissed/stale review metadata; ignored by git |
 
 ## Documentation
@@ -62,7 +63,9 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/superpowers/specs/` | Approved design specs produced by the brainstorming workflow |
 | `docs/superpowers/plans/` | Implementation plans produced by the writing-plans workflow |
 | `openspec/changes/add-persistent-project-management/` | Completed OpenSpec change for persistent project/workspace management |
-| `openspec/changes/add-ai-context-findings-layer/` | Proposed OpenSpec change for AI-readable project context and review-required findings |
+| `openspec/changes/archive/2026-07-08-add-ai-context-findings-layer/` | Archived OpenSpec change for AI-readable project context and review-required findings |
+| `openspec/specs/ai-context/spec.md` | Accepted AI context requirements |
+| `openspec/specs/ai-findings/spec.md` | Accepted AI findings requirements |
 
 ## Local Runtime
 

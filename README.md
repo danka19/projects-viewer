@@ -218,6 +218,8 @@ Workspace config fields:
 
 Generated scan results are stored separately in `app-data/projects.generated.json`. The static fallback file `src/data/projects.json` remains available for browser-only static mode and build compatibility.
 
+AI context snapshots are stored in `app-data/ai.context.snapshot.json` so the changes-since endpoint can compare derived compact context fields across requests instead of relying only on documentation modification times.
+
 AI findings are stored separately in `app-data/ai.findings.generated.json`. This file is local runtime data: it records deterministic review-required findings and human review states (`new`, `accepted`, `dismissed`, `stale`) without changing scanned project documentation or accepted project decisions.
 
 After editing project paths, use **Rescan docs** in live mode or run `npm run scan` from the terminal.
@@ -230,7 +232,7 @@ The local server exposes deterministic AI-readable context for agent preflight:
 |---|---|
 | `GET /api/ai-context` | Compact context for all enabled projects from `app-data/projects.generated.json`. Query paths are ignored; the endpoint never scans arbitrary request-provided paths. |
 | `GET /api/ai-context/projects/:id` | Compact context for one saved tracked project id from `app-data/projects.config.json`. |
-| `GET /api/ai-context/changes?since=<iso>` | AI-readable changed field categories since an ISO timestamp. |
+| `GET /api/ai-context/changes?since=<iso>` | AI-readable changed field categories since an ISO timestamp, compared against the saved compact context snapshot when available. |
 | `GET /api/ai-findings?state=unresolved` | Review-required findings, filtered by `unresolved`, `all`, `new`, `accepted`, `dismissed`, or `stale`. |
 | `PATCH /api/ai-findings/:id` | Update local finding review state to `new`, `accepted`, or `dismissed`. |
 
@@ -310,6 +312,7 @@ The scanner never crashes on unreadable files or folders — it skips them silen
 ```text
 app-data/projects.config.json      # local tracked project/workspace config (ignored)
 app-data/projects.generated.json   # generated live scan output (ignored)
+app-data/ai.context.snapshot.json  # saved compact AI context snapshot for changes-since (ignored)
 app-data/ai.findings.generated.json # generated AI findings and review state (ignored)
 scan-projects.mjs        # read-only Node scanner (npm run scan)
 src/data/projects.json   # static fallback scan output

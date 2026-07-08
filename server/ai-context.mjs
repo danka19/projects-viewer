@@ -1,3 +1,7 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { DEFAULT_APP_DATA_DIR } from './project-config.mjs';
+
 const CONTEXT_LIMITS = {
   constraints: 8,
   risks: 8,
@@ -6,6 +10,8 @@ const CONTEXT_LIMITS = {
   audits: 8,
   gaps: 12,
 };
+
+const SNAPSHOT_FILE = 'ai.context.snapshot.json';
 
 export function buildAllProjectsAiContext(scanOutput, { config = null, findings = [] } = {}) {
   assertScanOutput(scanOutput);
@@ -73,7 +79,7 @@ export function buildProjectAiContext(project, { configProject = null, findings 
   };
 }
 
-export function compareAiContextChanges(scanOutput, { since, findings = [] } = {}) {
+export function compareAiContextChanges(scanOutput, { since, findings = [], previousContext = null, config = null } = {}) {
   assertScanOutput(scanOutput);
   const sinceMs = Date.parse(since ?? '');
   if (!Number.isFinite(sinceMs)) {
@@ -82,11 +88,8 @@ export function compareAiContextChanges(scanOutput, { since, findings = [] } = {
     throw err;
   }
 
-  const generatedMs = Date.parse(scanOutput.generatedAt);
-  const findingsChanged = findings.some((finding) => timestampAfter(finding.updatedAt ?? finding.createdAt, sinceMs));
-  if (Number.isFinite(generatedMs) && generatedMs <= sinceMs && !findingsChanged) {
-    return noChanges(scanOutput, since);
-  }
+  const currentContext = buildAllProjectsAiContext(scanOutput, { config, findings });
+  if (previousContext) return compareContextSnapshots(currentContext, previousContext, since);
 
   const projects = [];
   for (const project of scanOutput.projects) {
@@ -111,6 +114,32 @@ export function compareAiContextChanges(scanOutput, { since, findings = [] } = {
         : 'No meaningful AI-context changes were found.',
     projects,
   };
+}
+
+export function getAiContextSnapshotPath({ appDataDir = DEFAULT_APP_DATA_DIR } = {}) {
+  return path.join(appDataDir, SNAPSHOT_FILE);
+}
+
+export async function readAiContextSnapshot(options = {}) {
+  try {
+    return JSON.parse(await fs.readFile(getAiContextSnapshotPath(options), 'utf8'));
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err;
+    return null;
+  }
+}
+
+export async function writeAiContextSnapshot(context, options = {}) {
+  const snapshotPath = getAiContextSnapshotPath(options);
+  await fs.mkdir(path.dirname(snapshotPath), { recursive: true });
+  const payload = {
+    savedAt: new Date().toISOString(),
+    context,
+  };
+  const tmpPath = `${snapshotPath}.tmp`;
+  await fs.writeFile(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+  await fs.rename(tmpPath, snapshotPath);
+  return payload;
 }
 
 export function normalizeEvidence(item, fallbackText = null) {
@@ -220,15 +249,67 @@ function noChanges(scanOutput, since) {
   };
 }
 
+function compareContextSnapshots(currentContext, previousContext, since) {
+  const previousProjects = new Map(
+    (previousContext.projects ?? []).map((project) => [String(project.identity?.path ?? '').toLowerCase(), project]),
+  );
+  const projects = [];
+  for (const current of currentContext.projects) {
+    const previous = previousProjects.get(String(current.identity.path).toLowerCase());
+    const changedCategories = previous
+      ? changedCategoriesForContextProject(current, previous)
+      : ['status', 'statusReason', 'currentPhase', 'nextAction', 'blockerSummary', 'riskSummary', 'gaps', 'findings'];
+    if (changedCategories.length > 0) {
+      projects.push({
+        project: { name: current.identity.name, path: current.identity.path },
+        lastModified: current.lastModified ?? null,
+        changedCategories,
+      });
+    }
+  }
+  return {
+    kind: 'ai-context-changes',
+    generatedAt: currentContext.generatedAt,
+    since,
+    hasChanges: projects.length > 0,
+    message:
+      projects.length > 0
+        ? `${projects.length} project(s) have meaningful AI-context changes.`
+        : 'No meaningful AI-context changes were found.',
+    projects,
+  };
+}
+
+function changedCategoriesForContextProject(current, previous) {
+  const categories = [];
+  if (current.status !== previous.status) categories.push('status');
+  if (current.statusReason !== previous.statusReason) categories.push('statusReason');
+  if (itemText(current.currentPhase) !== itemText(previous.currentPhase)) categories.push('currentPhase');
+  if (itemText(current.nextAction) !== itemText(previous.nextAction)) categories.push('nextAction');
+  if (itemText(current.mainBlocker) !== itemText(previous.mainBlocker)) categories.push('blockerSummary');
+  if (itemText(current.mainRisk) !== itemText(previous.mainRisk)) categories.push('riskSummary');
+  if (stableJson((current.gaps ?? []).map((gap) => gap.text)) !== stableJson((previous.gaps ?? []).map((gap) => gap.text))) {
+    categories.push('gaps');
+  }
+  if (stableJson(current.findings ?? {}) !== stableJson(previous.findings ?? {})) categories.push('findings');
+  return categories;
+}
+
+function itemText(item) {
+  return item?.text ?? null;
+}
+
+function stableJson(value) {
+  return JSON.stringify(value);
+}
+
 function changedCategoriesForProject(project, sinceMs, findings) {
   const projectModifiedMs = Date.parse(project.lastModified ?? '');
   const projectChanged = Number.isFinite(projectModifiedMs) && projectModifiedMs > sinceMs;
   const projectFindings = findings.filter((finding) => sameProject(project, finding.project));
   const findingChanged =
     (projectChanged && projectFindings.length > 0) ||
-    projectFindings.some((finding) =>
-      timestampAfter(finding.updatedAt ?? finding.createdAt ?? finding.reviewedAt ?? finding.staleAt, sinceMs),
-    );
+    projectFindings.some((finding) => timestampAfter(finding.reviewedAt ?? finding.staleAt, sinceMs));
   if (!projectChanged && !findingChanged) return [];
 
   const categories = [];

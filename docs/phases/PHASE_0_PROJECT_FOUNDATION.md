@@ -152,20 +152,20 @@ Reason:
 
 Affected specs:
 
-- New proposed OpenSpec capabilities in `openspec/changes/add-ai-context-findings-layer/`: `ai-context` and `ai-findings`.
+- Accepted OpenSpec capabilities in `openspec/specs/ai-context/spec.md` and `openspec/specs/ai-findings/spec.md`; implementation history is archived at `openspec/changes/archive/2026-07-08-add-ai-context-findings-layer/`.
 
 Affected architecture:
 
-- Future work would add compact AI context endpoints and local `app-data/` finding runtime data derived from existing scan output, while preserving read-only scanned project boundaries.
+- Implemented compact AI context endpoints, local compact context snapshot runtime data, and local `app-data/` finding review-state runtime data derived from existing scan output, while preserving read-only scanned project boundaries.
 
 Data contract impact:
 
-- Adds proposed AI context, changes-since, finding, evidence, and finding review-state contracts.
+- Added accepted AI context, changes-since, finding, evidence, and finding review-state contracts.
 
 Verification impact:
 
-- Requires contract tests for compact context, evidence preservation, no arbitrary path input, no scanned-project writes, finding review-state persistence, changes-since behavior, OpenSpec validation, tests, and build verification.
+- Covered by contract tests for compact context, evidence preservation, no arbitrary path input, no scanned-project writes, finding review-state persistence, snapshot-based changes-since behavior, OpenSpec validation, tests, and build verification.
 
 Status:
 
-- OpenSpec proposal accepted by the human owner on 2026-07-08; implementation has not started.
+- Implemented, accepted into main OpenSpec specs, archived, committed, and pushed on 2026-07-08.

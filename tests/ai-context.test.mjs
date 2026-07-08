@@ -7,6 +7,7 @@ import { createApp } from '../server.mjs';
 import {
   buildAllProjectsAiContext,
   compareAiContextChanges,
+  readAiContextSnapshot,
 } from '../server/ai-context.mjs';
 import {
   generateFindings,
@@ -279,6 +280,81 @@ test('AI changes-since reports changed categories and no-change state', () => {
   const unchanged = compareAiContextChanges(scan, { since: '2026-07-08T01:00:00.000Z', findings: [] });
   assert.equal(unchanged.hasChanges, false);
   assert.deepEqual(unchanged.projects, []);
+});
+
+test('AI changes-since compares derived fields against previous compact context snapshot', () => {
+  const tmp = os.tmpdir();
+  const previousScan = sampleScan(tmp);
+  const currentScan = sampleScan(tmp);
+  previousScan.projects[0].status = 'active';
+  previousScan.projects[0].statusReason = 'Docs changed within active window';
+  previousScan.projects[0].summary.currentPhase = '0 Foundation';
+  previousScan.projects[0].summary.nextAction = 'Old next action.';
+  previousScan.projects[0].summary.mainRisk = null;
+  previousScan.projects[0].gaps = [];
+
+  currentScan.generatedAt = '2026-07-08T03:00:00.000Z';
+  currentScan.projects[0].lastModified = '2026-07-08T00:30:00.000Z';
+  const previousContext = buildAllProjectsAiContext(previousScan);
+
+  const changed = compareAiContextChanges(currentScan, {
+    since: '2026-07-08T02:00:00.000Z',
+    previousContext,
+    findings: [],
+  });
+
+  assert.equal(changed.hasChanges, true);
+  assert.deepEqual(changed.projects[0].changedCategories.sort(), [
+    'currentPhase',
+    'gaps',
+    'nextAction',
+    'riskSummary',
+    'status',
+    'statusReason',
+  ]);
+});
+
+test('AI changes endpoint persists and compares local compact context snapshots', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-ai-context-snapshot-'));
+  const appDataDir = path.join(tmp, 'app-data');
+  await fs.mkdir(appDataDir, { recursive: true });
+  const initialScan = sampleScan(tmp);
+  initialScan.projects[0].status = 'active';
+  initialScan.projects[0].statusReason = 'Docs changed within active window';
+  initialScan.projects[0].summary.nextAction = 'Old next action.';
+  initialScan.projects[0].gaps = [];
+  await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), JSON.stringify(initialScan));
+  const app = await createApp({
+    appDataDir,
+    legacyConfigPath: path.join(tmp, 'missing.json'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const first = await fetch(`${server.url}/api/ai-context/changes?since=2026-07-08T02:00:00.000Z`);
+    assert.equal(first.status, 200);
+    const firstBody = await first.json();
+    assert.equal(firstBody.hasChanges, false);
+
+    const currentScan = sampleScan(tmp);
+    currentScan.generatedAt = '2026-07-08T03:00:00.000Z';
+    currentScan.projects[0].lastModified = '2026-07-08T00:30:00.000Z';
+    await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), JSON.stringify(currentScan));
+
+    const second = await fetch(`${server.url}/api/ai-context/changes?since=2026-07-08T02:00:00.000Z`);
+    assert.equal(second.status, 200);
+    const secondBody = await second.json();
+    assert.equal(secondBody.hasChanges, true);
+    assert.ok(secondBody.projects[0].changedCategories.includes('status'));
+    assert.ok(secondBody.projects[0].changedCategories.includes('nextAction'));
+
+    const snapshot = await readAiContextSnapshot({ appDataDir });
+    assert.equal(snapshot.context.generatedAt, '2026-07-08T03:00:00.000Z');
+  } finally {
+    await server.close();
+  }
 });
 
 test('AI findings generation and review state writes only under app-data', async () => {

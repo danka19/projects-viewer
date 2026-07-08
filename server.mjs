@@ -26,6 +26,8 @@ import {
   buildAllProjectsAiContext,
   buildProjectAiContext,
   compareAiContextChanges,
+  readAiContextSnapshot,
+  writeAiContextSnapshot,
 } from './server/ai-context.mjs';
 import {
   filterFindings,
@@ -404,8 +406,18 @@ export async function createApp({
   app.get('/api/ai-context/changes', async (req, res) => {
     try {
       const scan = await readGeneratedScan();
+      const config = await readProjectConfig(configOptions);
       const findingsStore = await generateFindings(scan, configOptions);
-      res.json(compareAiContextChanges(scan, { since: req.query.since, findings: findingsStore.findings }));
+      const previousSnapshot = await readAiContextSnapshot(configOptions);
+      const currentContext = buildAllProjectsAiContext(scan, { config, findings: findingsStore.findings });
+      const changes = compareAiContextChanges(scan, {
+        since: req.query.since,
+        findings: findingsStore.findings,
+        previousContext: previousSnapshot?.context ?? null,
+        config,
+      });
+      await writeAiContextSnapshot(currentContext, configOptions);
+      res.json(changes);
     } catch (err) {
       sendError(res, err);
     }
