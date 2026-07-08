@@ -1,6 +1,6 @@
 # Phase 1. Discovery And Requirements
 
-Status: planned and ready to execute.
+Status: in progress.
 
 ## Goal
 
@@ -50,6 +50,71 @@ Identify the first real users, workflows, data sources, AI-assisted use cases, c
 - No cloud, auth, API keys, agent control, arbitrary shell commands, whole-disk scanning, or scanned-project write-back is approved.
 - The main open risk is product direction: the implementation can surface many signals, but the first valuable daily workflow and acceptance criteria are not yet chosen.
 
+## Discovery Notes
+
+### 1.1 Primary Users And Daily Decisions
+
+Status: completed for planning assumptions; human confirmation is still required before the Phase 1 gate closes.
+
+Source evidence:
+
+- `README.md` defines the dashboard as a local project radar that answers status, next action, and needs-attention questions.
+- Accepted `ai-context` requirements define compact AI preflight context for all projects and selected projects.
+- Accepted `ai-findings` requirements define review-required findings with human review states and no automatic agent action.
+- `docs/CONTEXT.md` requires raw documentation, derived dashboard interpretations, review-required proposals, and accepted decisions to stay separate.
+
+Primary users:
+
+| User | Purpose | Product responsibility |
+|---|---|---|
+| Human owner | Decide what to work on, what needs review, and which project signals are accepted or dismissed. | Owns product, UX, data-source, security, scope, and final acceptance decisions. |
+| AI implementation agent | Read compact project context before coding, planning, or reviewing a project. | Uses context as preflight evidence, then verifies against source files before making changes. |
+| AI reviewer/checker agent | Inspect risks, blockers, missing verification, stale docs, and contradiction signals. | Produces review-required observations; does not convert findings into accepted decisions. |
+| Future brief consumer | Receive a daily or weekly digest of project changes, blockers, and required human decisions. | Reviews a generated summary; does not grant AI authority to act. |
+
+Daily and weekly decisions:
+
+| Decision | Primary user | Inputs | Expected output |
+|---|---|---|---|
+| Which project needs attention first? | Human owner | Project status, health score, blockers, approval gates, stale docs, findings. | A chosen project or a conscious decision to defer. |
+| What is the next safe action for this project? | Human owner with AI agent support | Next action, current phase, accepted specs, blockers, risks, source evidence. | A task to execute, a human review action, or a decision to pause. |
+| Can an AI agent start work safely? | AI implementation agent | AI context, OpenSpec specs/changes, phase plan, current blockers, trust boundaries. | Proceed with scoped work, ask for a human decision, or stop because context is insufficient. |
+| Which findings require human review? | Human owner with AI reviewer/checker support | AI findings, evidence, confidence, review state, source file/line. | Accepted, dismissed, or left new for later review. |
+| What changed since the last check? | Human owner or future brief consumer | AI context changes-since, findings state changes, project status/next-action diffs. | Daily/weekly brief items and follow-up priorities. |
+
+Workflow ranking for Phase 1:
+
+1. Daily/weekly project brief built from AI context and findings.
+   Recommended first because it combines human dashboard triage and AI assistance without giving AI control.
+2. AI-agent preflight before project work.
+   Already backed by accepted `ai-context` specs; useful for future agents and subagents.
+3. Human dashboard triage.
+   Existing UI already supports much of this; Phase 1 should identify the missing high-value decision points before adding UI.
+4. AI findings review surface.
+   Useful, but should follow a reviewed policy so findings do not look like accepted truth.
+
+Non-goals for the next usable slice:
+
+- Do not let AI findings create tasks, commits, shell commands, calendar items, Trello cards, or scanned-project edits automatically.
+- Do not add remote LLM providers, cloud sync, authentication, or API keys.
+- Do not make the dashboard a whole-project file browser or arbitrary path scanner.
+- Do not treat health score, status, or finding confidence as a judgment of code quality.
+
+Open questions for human confirmation:
+
+1. Should Phase 1 optimize the next usable workflow for daily/weekly project brief first?
+   Recommended default: yes.
+   Tradeoff: a brief proves end-to-end value quickly, but it may delay a richer dashboard findings UI.
+2. Should the first brief be generated as an API/report artifact before any new UI?
+   Recommended default: yes.
+   Tradeoff: an API/report validates content and review policy faster, while UI work is more visible but more expensive.
+3. Should AI-agent preflight become mandatory project workflow guidance before any future implementation session?
+   Recommended default: yes for Projects Viewer phase work and optional for unrelated small fixes.
+   Tradeoff: it improves safety but adds ceremony to tiny changes.
+4. Should tracked-project configuration remain single-user local-only through Phase 3?
+   Recommended default: yes.
+   Tradeoff: keeps safety simple, but postpones multi-user or remote access scenarios.
+
 ## Change Intake
 
 Record new ideas, fixes, scope changes, architecture notes, data contract changes, or verification requests that appear during the phase.
@@ -70,6 +135,8 @@ Status:
 ## Work Items
 
 ### 1.1 Identify Primary Users And Daily Decisions
+
+Status: completed on 2026-07-08 for planning assumptions; pending human confirmation of the open decisions above.
 
 Objective:
 

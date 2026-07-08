@@ -22,6 +22,12 @@ This is the active glossary and domain-boundary file for Projects Viewer.
 | Watcher rescan | Chokidar-triggered scan after documentation file changes. | Watches only documentation-like markdown files under configured project paths. |
 | Interval rescan | Optional localStorage-backed fallback scan interval. | Off by default; minimum selectable interval is 5 minutes. |
 | Skipped file | A path the scanner/watcher intentionally did not read or watch. | Reasons are logged, including unsafe folders, non-markdown files, and files larger than 1 MB. |
+| Human owner | The person using Projects Viewer to decide priorities, review gates, accepted decisions, and product direction. | The human owner keeps final product, UX, data-source, security, and business-scope decisions. |
+| AI implementation agent | An AI assistant using project context before planning, coding, or reviewing implementation work. | It must treat AI context as preflight evidence, then verify against source files before changing code or docs. |
+| AI reviewer/checker agent | An AI assistant focused on risks, blockers, stale docs, missing verification, contradiction signals, or acceptance evidence. | It can produce review-required observations but cannot accept decisions or trigger work automatically. |
+| AI preflight context | Compact project context derived from generated scan data for use before AI work starts. | It omits raw markdown bodies by default and preserves source evidence where available. |
+| AI finding | A deterministic or future AI-generated review-required observation derived from scan signals. | It is proposal evidence only until a human handles it through an explicit review workflow. |
+| Project brief | A future daily or weekly digest of project changes, blockers, review-required findings, and recommended human decisions. | Not implemented yet; currently a Phase 1 workflow candidate. |
 
 ## Boundary Rules
 
@@ -33,3 +39,4 @@ This is the active glossary and domain-boundary file for Projects Viewer.
 - Raw documentation text is source data. Derived statuses, health scores, blockers, risks, and summaries are dashboard interpretations.
 - Review-required proposals are not accepted decisions.
 - LLM or heuristic output is proposal evidence only unless the project explicitly defines a reviewed acceptance workflow.
+- AI preflight context and project briefs must not grant AI authority to run commands, create commits, update task systems, or edit scanned projects.

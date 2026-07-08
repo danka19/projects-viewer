@@ -32,7 +32,7 @@ Evidence:
 
 ## Phase 1. Discovery And Requirements
 
-Status: planned and ready to execute.
+Status: in progress.
 
 Goal: identify users, workflows, data sources, constraints, and first acceptance criteria.
 
