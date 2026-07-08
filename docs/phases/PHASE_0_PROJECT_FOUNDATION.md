@@ -127,3 +127,45 @@ Verification impact:
 Status:
 
 - Accepted for design and implementation planning; not yet implemented.
+
+### 2026-07-08 AI Context And Findings Layer
+
+Idea:
+
+- Add a safe AI-facing context and findings layer so local AI agents can use Projects Viewer scan data for project preflight, monitoring, contradiction detection, and review-required insights.
+
+Source:
+
+- Human request on 2026-07-08 after analysis of how Projects Viewer can support AI-assisted project understanding beyond human dashboard observation.
+
+Type:
+
+- `new_feature`, `architecture_change`, `data_contract_change`, `verification_change`, `documentation_change`.
+
+Decision:
+
+- `create_openspec_change`.
+
+Reason:
+
+- The idea introduces new AI-readable data contracts, local runtime finding records, review-state behavior, privacy/safety boundaries, and future API/UI work. It should be proposed separately instead of changing the active project-foundation phase scope or silently expanding existing project-management work.
+
+Affected specs:
+
+- New proposed OpenSpec capabilities in `openspec/changes/add-ai-context-findings-layer/`: `ai-context` and `ai-findings`.
+
+Affected architecture:
+
+- Future work would add compact AI context endpoints and local `app-data/` finding runtime data derived from existing scan output, while preserving read-only scanned project boundaries.
+
+Data contract impact:
+
+- Adds proposed AI context, changes-since, finding, evidence, and finding review-state contracts.
+
+Verification impact:
+
+- Requires contract tests for compact context, evidence preservation, no arbitrary path input, no scanned-project writes, finding review-state persistence, changes-since behavior, OpenSpec validation, tests, and build verification.
+
+Status:
+
+- Accepted for OpenSpec proposal only; implementation has not started.

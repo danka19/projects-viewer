@@ -58,7 +58,8 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/handoffs/` | Bounded task handoffs to Claude |
 | `docs/superpowers/specs/` | Approved design specs produced by the brainstorming workflow |
 | `docs/superpowers/plans/` | Implementation plans produced by the writing-plans workflow |
-| `openspec/changes/add-persistent-project-management/` | Active OpenSpec change for persistent project/workspace management |
+| `openspec/changes/add-persistent-project-management/` | Completed OpenSpec change for persistent project/workspace management |
+| `openspec/changes/add-ai-context-findings-layer/` | Proposed OpenSpec change for AI-readable project context and review-required findings |
 
 ## Local Runtime
 
