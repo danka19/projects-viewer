@@ -32,6 +32,42 @@ npm run dev      # starts the live dashboard at http://127.0.0.1:5173
 
 Use the live controls in the top-right panel to rescan without leaving the browser.
 
+## Project setup and command reference
+
+Initial setup:
+
+1. Install Node.js 20 or newer.
+2. Run `npm install` in the dashboard folder.
+3. Edit `projects.config.json` and add absolute paths for the projects you want to monitor.
+4. Run `npm run dev` and open `http://127.0.0.1:5173`.
+
+Common commands:
+
+| Command | Use |
+|---|---|
+| `npm install` | Install local dependencies. Run once after cloning, and again when `package-lock.json` changes. |
+| `npm run scan` | Run a one-time read-only documentation scan and write `src/data/projects.json`. |
+| `npm run dev` | Start the local live dashboard: Express API, Vite middleware, startup scan, and watcher. |
+| `npm run build` | Type-check the app and build the static frontend into `dist/`. |
+| `npm run server` | Serve the built frontend through the same local Express API. Run `npm run build` first. |
+| `npm run preview` | Alias for serving the built dashboard through `server.mjs`. |
+| `npm run start` | Alias for serving the built dashboard through `server.mjs`. |
+| `npm test` | Run the Node test suite for scanner/server behavior. |
+
+Local URLs and ports:
+
+- The default live URL is `http://127.0.0.1:5173`.
+- In PowerShell, run `$env:PORT=5174; npm run dev` if you need a different port.
+- In PowerShell, run `$env:HOST="127.0.0.1"; npm run dev` if you need to override the bind host.
+
+Development workflow:
+
+1. Keep `npm run dev` running while editing.
+2. Change code or docs.
+3. Let Vite reload the frontend and let the watcher rescan configured project docs.
+4. Use **Rescan docs** for an immediate manual scan when needed.
+5. Run `npm test` and `npm run build` before committing code changes.
+
 ## Live mode, static mode, and rescans
 
 `npm run dev` starts `server.mjs`, which runs the local Express API and uses Vite middleware for the frontend. The server performs a startup scan, exposes live rescan endpoints, and watches configured documentation files for changes.
@@ -97,7 +133,7 @@ The file lives in the dashboard root. Add one entry per project; use absolute pa
 - `activeDays` (optional, default 14) — how recent a doc change must be for a project with open work to count as **active** instead of **stalled**.
 - `watchDocs` (optional, default true in local server mode) — set to `false` to disable automatic watcher rescans.
 
-After editing, run `npm run scan` again.
+After editing project paths, use **Rescan docs** in live mode or run `npm run scan` from the terminal.
 
 ## What gets scanned
 
