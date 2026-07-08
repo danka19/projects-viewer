@@ -9,7 +9,8 @@ Last updated: 2026-07-08.
 | Item | Current State |
 |---|---|
 | Repository root | `C:\Users\danoc\Documents\projects\projects-viewer` |
-| Current branch | `main` |
+| Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer\.worktrees\persistent-project-management` |
+| Current branch | `feature/persistent-project-management` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
 | Latest known commit before this audit update | `624c8ae Document setup and project commands` |
 | Local divergence | `main` was ahead of `origin/main` by 2 commits before this documentation-foundation update |
@@ -34,6 +35,11 @@ Last updated: 2026-07-08.
 | Local app/server available | `npm run dev` started `http://127.0.0.1:5173`; `/api/scan-status` returned `success`, trigger `startup`, docs `53` |
 | Production-like local server | `npm run server` started after `npm run build`; `/api/projects` returned 1 project and 53 docs; `/` returned HTTP 200 |
 | Watcher behavior | Temporary markdown add produced watcher scan with 54 docs; delayed unlink scan returned 53 docs |
+| Persistent config module | `npm test -- tests/project-config.test.mjs` passed: migration, project CRUD, duplicate handling, enabled filtering, workspace normalization |
+| Workspace discovery module | `npm test -- tests/project-discovery.test.mjs` passed: depth normalization, marker reasons, exclusions, disabled workspace |
+| Scanner config contract | `npm test -- tests/run-scan.test.mjs` passed: legacy config, enabled-project filtering, app-data generated output |
+| Project management API | `npm test -- tests/server-api.test.mjs` passed: add project validation/persistence, workspace discovery, track-discovered |
+| Frontend build | `npm run build` passed after adding `Manage Projects`; prebuild wrote `app-data/projects.generated.json` |
 
 ## Known Risks And Gaps
 
@@ -43,6 +49,7 @@ Last updated: 2026-07-08.
 | AUDIT-002 | Environment and verification commands are recorded in README and this audit; keep them current as scripts change. | Phase 0 | monitored |
 | AUDIT-003 | Architecture decisions are partially documented in README/docs, but no ADR/OpenSpec exists for server/API/watcher contracts. | Phase 1/2 | open |
 | AUDIT-004 | Local branch has commits ahead of GitHub remote; push is still a human/project decision. | Human owner | open |
+| AUDIT-005 | Manual browser verification for add project, restart persistence, workspace discovery, track selected, disable, and rescan remains pending for the persistent management feature. | Current feature | open |
 
 ## Audit Rules
 
