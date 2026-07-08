@@ -12,7 +12,7 @@ Last updated: 2026-07-09.
 | Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer` |
 | Current branch | `phase-2/core-data-model` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Latest known commit before this audit update | `97a88a5 Define project brief report contract` |
+| Latest known commit before this audit update | `34b8fad Define project brief module boundary` |
 | Local divergence | `phase-2/core-data-model` tracks `origin/phase-2/core-data-model` |
 
 ## Useful Starting Points
@@ -53,12 +53,13 @@ Last updated: 2026-07-09.
 | Phase 2 planning | Human owner approved moving into Phase 2 on 2026-07-09; `docs/phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` now defines the architecture work items for `add-project-brief-report` |
 | Phase 2 work item 2.1 | Project brief/report JSON contract defined in `openspec/changes/add-project-brief-report/design.md`, sharpened in the delta spec, and recorded in the Phase 2 plan on 2026-07-09; `openspec list`, `openspec list --specs`, `openspec validate --all --strict`, and `git diff --check` passed |
 | Phase 2 work item 2.2 | Report composition module boundary defined on 2026-07-09: future `server/project-brief-report.mjs` is a pure deterministic composer over provided scan/config/findings/change inputs, while route IO, snapshot IO, findings persistence, and HTTP behavior stay outside the module |
+| Phase 2 work item 2.3 | Local API surface defined on 2026-07-09: future `GET /api/project-brief-report` returns report JSON, accepts only `since` and metadata-only `mode`, rejects unknown/path-like/repeated scalar query parameters, returns `404` for missing generated scan data, and does not write snapshot, findings, report-history, scanned-project, or external-action artifacts |
 
 ## Known Risks And Gaps
 
 | ID | Risk | Owner | Status |
 |---|---|---|---|
-| AUDIT-001 | Phase 2 has resolved the project brief/report data contract and module boundary; local API surface, ranking rules, and baseline behavior still must be resolved before Phase 3 implementation starts. | Phase 2 | open |
+| AUDIT-001 | Phase 2 has resolved the project brief/report data contract, module boundary, and local API surface; ranking rules, empty states, and baseline behavior still must be resolved before Phase 3 implementation starts. | Phase 2 | open |
 | AUDIT-002 | Environment and verification commands are recorded in README and this audit; keep them current as scripts change. | Phase 0 | monitored |
 | AUDIT-003 | Architecture decisions are partially documented in README/docs, but no ADR/OpenSpec exists for server/API/watcher contracts. | Phase 1/2 | open |
 | AUDIT-004 | Local branch had commits ahead of GitHub remote during early foundation work; `main` later matched `origin/main` before Phase 1 planning. | Human owner | closed 2026-07-08 |

@@ -47,7 +47,7 @@ Evidence:
 
 ## Phase 2. Architecture And Data Model
 
-Status: in progress; work items 2.1 and 2.2 completed on 2026-07-09.
+Status: in progress; work items 2.1, 2.2, and 2.3 completed on 2026-07-09.
 
 Goal: define the first stable architecture, data contract, report composition module boundary, local API surface, ranking rules, storage boundaries, and integration contracts for the selected project brief/report workflow.
 

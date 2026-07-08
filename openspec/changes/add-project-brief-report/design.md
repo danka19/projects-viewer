@@ -228,6 +228,53 @@ Recommended human decision fields:
 
 Evidence fields reuse `AiEvidenceItem`: `kind` is either `source` or `derived-summary`; source evidence includes `file`, optional `line`, and optional `text`; derived evidence includes explanatory `text`.
 
+### Add a local read-only project brief report endpoint
+
+The first retrieval surface should be `GET /api/project-brief-report`.
+
+This endpoint is local API/report JSON first. It should return the structured `project-brief-report` contract and should not add dashboard UI, Markdown rendering, scheduling, notifications, external task/calendar writes, or agent execution.
+
+Allowed query parameters:
+
+| Parameter | Type | Default | Behavior |
+|---|---|---|---|
+| `since` | ISO timestamp string | Omitted / `null` | Optional comparison anchor. When omitted, the report uses current signals only and `baseline.comparisonAvailable` is `false`. When present, it must parse as a valid timestamp or the endpoint returns `400`. |
+| `mode` | `"daily"` or `"weekly"` | `"daily"` | Metadata-only cadence label for the first API design. It must not change data sources, persistence, ranking, or filtering until a later design explicitly accepts that behavior. |
+
+Rejected query/body inputs:
+
+- `path`, `projectPath`, `workspacePath`, `rootPath`, `scanPath`, `file`, `files`, `glob`, `include`, `exclude`, `projectId`, and arbitrary selectors.
+- Request body input. The endpoint is a `GET` report retrieval surface; it should not use a request body.
+- Any command, action, agent, task, calendar, notification, remote provider, auth, or model parameter.
+
+Unknown query parameters should return `400` with a clear error listing allowed parameters. This is intentionally stricter than silent ignore so path-like integration mistakes are visible during testing.
+
+HTTP behavior:
+
+| Condition | Status | Response |
+|---|---|---|
+| Generated scan data exists and request parameters are valid | `200` | `project-brief-report` JSON. |
+| `app-data/projects.generated.json` is missing or invalid | `404` | Structured error with a stable `missing-generated-scan-data` code; it must not scan request-provided paths as a fallback. |
+| `since` is present but invalid | `400` | Error response stating that `since` must be a valid ISO timestamp. |
+| Unsupported `mode` value | `400` | Error response stating that `mode` must be `daily` or `weekly`. |
+| Unknown query parameter is present | `400` | Error response stating the allowed parameters. |
+| Previous AI context snapshot is missing | `200` | Report JSON with `missing-previous-baseline` safe state when `since` is valid, and current signals can still appear. |
+| Findings store is missing but generated scan data exists | `200` | Report JSON with `missing-findings-store` or `empty-findings` safe state; ordinary report retrieval should not generate and persist findings. |
+
+Route orchestration responsibilities:
+
+1. Validate that only `since` and `mode` query parameters are present.
+2. Validate `since` and `mode`.
+3. Read generated scan data through existing app-data config-path helpers.
+4. Read saved project config.
+5. Read previous AI context snapshot before composition.
+6. Read current findings review state without generating or persisting new findings.
+7. Compute AI context changes only when `since` is valid and present.
+8. Call `buildProjectBriefReport(...)`.
+9. Serialize domain errors to HTTP errors.
+
+Snapshot behavior remains intentionally unresolved until work item 2.4. For work item 2.3, ordinary report retrieval must not introduce a new persistence source or report-history store, and it must not update the AI context snapshot unless work item 2.4 explicitly accepts that side effect. It also must not write `app-data/ai.findings.generated.json`; if fresh findings generation becomes necessary for report freshness, that requires an explicit later design decision because it makes a `GET` report retrieval mutate local runtime data.
+
 ### Rank attention without claiming authority
 
 The report may rank or group items by attention reason, such as unresolved findings, blockers, approval gates, or changed next actions. It must phrase outcomes as recommendations for human review, not actions taken or verified truth.

@@ -1,6 +1,6 @@
 # Phase 2. Architecture And Data Model
 
-Status: in progress; work items 2.1 and 2.2 completed on 2026-07-09.
+Status: in progress; work items 2.1, 2.2, and 2.3 completed on 2026-07-09.
 
 ## Goal
 
@@ -238,6 +238,8 @@ Verification mapping:
 
 ### 2.3 Design Local API Surface And Safe Parameters
 
+Status: completed on 2026-07-09 for architecture/design; implementation remains a Phase 3/OpenSpec task.
+
 Objective:
 
 - Decide the retrieval surface for the first report, including endpoint name, response shape, HTTP status behavior, and allowed query parameters.
@@ -274,6 +276,46 @@ OpenSpec and acceptance evidence:
 - Brief uses saved local inputs.
 - Generated scan data is missing.
 - Previous context snapshot is missing.
+
+Accepted API surface:
+
+| Area | Decision |
+|---|---|
+| Endpoint | `GET /api/project-brief-report`. |
+| First surface | Local API/report JSON only; no dashboard UI, Markdown rendering, schedule, notification, or external action in this work item. |
+| Response shape | `200` returns the `project-brief-report` JSON contract defined in work item 2.1. |
+| Allowed query parameters | `since` and `mode` only. |
+| `since` | Optional ISO timestamp. If omitted, report uses current signals only and comparison is unavailable. If present and invalid, return `400`. |
+| `mode` | Optional `"daily"` or `"weekly"`, default `"daily"`. Metadata-only in the first API design; it does not alter ranking, filtering, data sources, or persistence. |
+| Unknown query parameters | Return `400` with a clear allowed-parameters error. This includes path-like parameters instead of silently ignoring them. Repeated scalar params also return `400`. |
+| Rejected selectors | No `path`, `projectPath`, `workspacePath`, `rootPath`, `scanPath`, `file`, `files`, `glob`, `include`, `exclude`, `projectId`, or arbitrary selectors. |
+| Request body | Not used. This is a `GET` retrieval surface. |
+| Missing generated scan data | Return `404` with a clear `missing-generated-scan-data` error; never scan request-provided paths as fallback. |
+| Missing previous snapshot | Return `200` with `missing-previous-baseline` safe state when `since` is valid and current generated data exists. |
+| Findings store missing | Return `200` when generated scan data exists with `missing-findings-store` or `empty-findings` safe state; ordinary report retrieval does not generate or persist findings. |
+| Snapshot writes | Deferred to work item 2.4. Work item 2.3 does not approve report retrieval updating the AI context snapshot. |
+| Findings writes | Not approved for report retrieval. If fresh findings generation becomes necessary, it needs a later explicit design decision because it makes a `GET` report retrieval mutate local runtime data. |
+
+Route orchestration sequence:
+
+1. Validate query parameter names.
+2. Validate `since` and `mode` values.
+3. Read generated scan data through existing app-data config-path helpers.
+4. Read saved project config.
+5. Read previous AI context snapshot before composition.
+6. Read findings review state without generating or persisting new findings.
+7. Compute AI context changes only when a valid `since` is present.
+8. Call `buildProjectBriefReport(...)`.
+9. Serialize domain errors to HTTP errors.
+
+Verification mapping:
+
+- Safe parameters: API tests should assert `since` and `mode` are accepted, invalid/repeated values return `400`, and unknown/path-like parameters return `400`.
+- Saved-config-only boundary: API tests should prove no request path can select scan roots or files.
+- Missing generated data: API tests should assert `404` with `missing-generated-scan-data` without a fallback scan.
+- Previous baseline missing: API tests should assert `200` with a missing-baseline safe state when generated data exists.
+- No attention items: API tests should assert `200`, `items: []`, and `noAttentionMessage` or `no-attention-items`, without invented recommendations.
+- Side effects: negative tests should prove no scanned project files change, no AI context snapshot is written by report retrieval, no findings store is created or rewritten by report retrieval, and no report-history store is created.
 
 ### 2.4 Define Ranking, Empty-State, And Baseline Rules
 

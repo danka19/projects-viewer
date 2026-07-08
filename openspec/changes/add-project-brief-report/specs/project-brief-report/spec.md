@@ -10,7 +10,8 @@ Projects Viewer SHALL generate project brief reports only from saved local proje
 - **AND** it may include AI context changes and AI findings review state
 - **AND** the report identifies its local input sources in structured metadata
 - **AND** the report includes a schema version and input-state metadata
-- **AND** the request does not accept arbitrary project paths
+- **AND** the request accepts only documented safe report parameters
+- **AND** the request rejects arbitrary project paths, workspace paths, file selectors, globs, project selectors, and unknown parameters
 - **AND** scanned project folders are not modified
 
 #### Scenario: Brief does not require remote services
@@ -56,6 +57,7 @@ Projects Viewer SHALL return clear safe states when generated scan data, previou
 #### Scenario: Generated scan data is missing
 - **WHEN** a client requests a project brief report before generated scan data is available
 - **THEN** the system returns a clear empty-state or error response
+- **AND** the response uses a missing-generated-scan-data safe state or equivalent clear error
 - **AND** it does not scan arbitrary request-provided paths as a fallback
 
 #### Scenario: Previous context snapshot is missing
