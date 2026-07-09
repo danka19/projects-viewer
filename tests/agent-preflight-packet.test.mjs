@@ -942,6 +942,16 @@ test('agent preflight packet API returns valid packet for saved project without 
     assert.equal(await fs.readFile(findingsPath, 'utf8'), findingsBefore);
     assert.equal(await fs.readFile(aiContextPath, 'utf8'), aiContextBefore);
     await assert.rejects(fs.access(path.join(appDataDir, 'report-history.json')));
+    for (const forbiddenArtifact of [
+      'task-records.json',
+      'calendar-records.json',
+      'commit-records.json',
+      'shell-command-records.json',
+      'remote-call-records.json',
+      'agent-work-records.json',
+    ]) {
+      await assert.rejects(fs.access(path.join(appDataDir, forbiddenArtifact)), forbiddenArtifact);
+    }
     assert.equal(await fs.readFile(sentinelPath, 'utf8'), 'tracked project sentinel\n');
   } finally {
     await server.close();

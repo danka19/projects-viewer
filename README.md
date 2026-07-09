@@ -19,7 +19,7 @@ The health score is derived from documentation coverage, blocker/rejection count
 
 - **Read-only by design.** The scanner only *reads* whitelisted markdown files inside your projects. It never writes to, moves, or modifies them. Runtime writes stay inside this dashboard folder, primarily under `app-data/`.
 - **Fully local.** No database, no auth, no cloud, no API keys.
-- **AI preflight context and project brief reports.** Local API endpoints expose compact, evidence-linked project context, review-required findings, and an advisory daily/weekly project brief report derived from generated scan data. They do not call model providers and do not write to scanned project folders.
+- **AI preflight context, agent packets, and project brief reports.** Local API endpoints expose compact, evidence-linked project context, review-required findings, an agent-oriented preflight packet, and an advisory daily/weekly project brief report derived from generated scan data. They do not call model providers and do not write to scanned project folders.
 
 Stack: Vite + React + TypeScript + Tailwind CSS + a local Express server, Chokidar watcher, and a plain Node.js scanner script.
 
@@ -224,9 +224,9 @@ AI findings are stored separately in `app-data/ai.findings.generated.json`. This
 
 After editing project paths, use **Rescan docs** in live mode or run `npm run scan` from the terminal.
 
-## AI context, findings, and brief API
+## AI context, findings, packets, and brief API
 
-The local server exposes deterministic AI-readable context for agent preflight and an advisory project brief/report for human review:
+The local server exposes deterministic AI-readable context, a dedicated agent preflight packet, and an advisory project brief/report for human review:
 
 | Endpoint | Purpose |
 |---|---|
@@ -235,17 +235,23 @@ The local server exposes deterministic AI-readable context for agent preflight a
 | `GET /api/ai-context/changes?since=<iso>` | AI-readable changed field categories since an ISO timestamp, compared against the saved compact context snapshot when available. |
 | `GET /api/ai-findings?state=unresolved` | Review-required findings, filtered by `unresolved`, `all`, `new`, `accepted`, `dismissed`, or `stale`. |
 | `PATCH /api/ai-findings/:id` | Update local finding review state to `new`, `accepted`, or `dismissed`. |
+| `GET /api/agent-preflight-packet?projectId=<id>` | Agent-oriented JSON packet for one saved tracked project, with optional `changeId` and `agentRole=implementation|reviewer|verification|handoff`. |
 | `GET /api/project-brief-report` | Advisory JSON report with ranked review-order project items, attention reasons, source evidence, derived labels, safe states, and recommended human decisions. |
 
 AI context includes project identity, status, status reason, health score, current phase, next action, main blocker/risk, recent decision, gaps, selected constraints, risks, decisions, specs, audits, and evidence references. It intentionally omits raw markdown document bodies.
 
 Findings are deterministic derived records for review, such as suspected status contradictions, unresolved human gates, unclear next actions, missing specs/design docs, missing verification evidence, stale handoff pointers, and audits needing attention. A finding is not an accepted decision, requirement, blocker, or verification result until a human handles it through a separate workflow.
 
+Agent preflight packets are JSON-first and read-only. The endpoint requires a saved `projectId`, accepts optional `changeId`, and accepts optional `agentRole` as a metadata/sorting hint. It rejects unknown, repeated, path-like, selector, command/action, task/calendar, notification, remote provider, auth, model, and agent-control parameters with `400`. Missing generated scan data returns `404` with code `missing-generated-scan-data`; unknown or disabled saved projects return `404` with code `project-not-found`; unknown local changes return `200` with an `unknown-change` safe state and no fabricated proposed requirements or tasks. Packet retrieval reads existing generated scan data, saved project config, existing AI context/findings state, local OpenSpec metadata, and local project docs. It does not write snapshots, findings stores, report history, scanned project files, task/calendar records, commits, shell command records, remote call records, or agent-work records, and it does not start agent work.
+
+Agent packets are separate from project brief reports. Packets use `kind: "agent-preflight-packet"` and include agent-facing fields such as `agentRole`, `requiredReading`, `acceptanceMap`, `attentionSignals`, and `verificationPlan`. Human brief reports use `kind: "project-brief-report"` and include report-facing fields such as `mode`, `recommendedHumanDecision`, and `noAttentionMessage`.
+
 Project brief reports are JSON-first and read-only. The endpoint accepts only `mode=daily|weekly` and an optional `since=<iso>` timestamp; invalid, repeated, unknown, path-like, project selector, file selector, and glob parameters return `400`. Missing generated scan data returns `404` with code `missing-generated-scan-data`. Report retrieval reads existing generated scan data, saved project config, current findings review state, and the existing AI context snapshot when available. It does not write snapshots, findings stores, report history, scanned project files, tasks, calendar records, commits, shell commands, remote calls, or agent work.
 
 Examples:
 
 ```bash
+curl "http://127.0.0.1:5173/api/agent-preflight-packet?projectId=project-1&changeId=agent-preflight-packet&agentRole=verification"
 curl http://127.0.0.1:5173/api/project-brief-report
 curl "http://127.0.0.1:5173/api/project-brief-report?mode=weekly&since=2026-07-08T00:00:00.000Z"
 ```
@@ -332,6 +338,7 @@ server/project-config.mjs          # config migration, validation, CRUD helpers
 server/project-discovery.mjs       # safe workspace candidate discovery
 server/ai-context.mjs              # compact AI context and changes-since helpers
 server/ai-findings.mjs             # deterministic findings and local review-state store
+server/agent-preflight-packet.mjs  # pure agent preflight packet composition
 server/project-brief-report.mjs    # pure advisory project brief/report composition
 src/drawer.ts            # builders that turn extracted items into drawer payloads
 src/components/          # OverviewStats, ProjectSidebar, SelectedProjectHeader,

@@ -6,6 +6,14 @@ Repo: https://github.com/danka19/projects-viewer
 
 ## Current State
 
+v7 implemented on 2026-07-09:
+
+- JSON-first agent preflight packet workflow implemented for `GET /api/agent-preflight-packet`.
+- Shared `AgentPreflightPacket` contract types added to `src/types.ts`.
+- Pure `server/agent-preflight-packet.mjs` composition module builds required reading, project state, acceptance mapping, attention signals, verification expectations, safe states, evidence, and work boundaries from prepared local inputs.
+- Endpoint requires saved `projectId`, accepts optional `changeId` and `agentRole=implementation|reviewer|verification|handoff`, rejects unsafe query parameters, returns stable domain errors, and keeps unknown changes non-blocking through an `unknown-change` safe state without fabricated proposed requirements or tasks.
+- Focused packet tests cover pure composition, API query validation, read-only side-effect boundaries, unknown-change behavior, and separation from `project-brief-report`.
+
 v6 implemented on 2026-07-09:
 
 - JSON-first project brief/report workflow implemented for `GET /api/project-brief-report`.
@@ -61,7 +69,7 @@ v3 implemented on 2026-07-07:
 ## Active OpenSpec Changes
 
 - `openspec/changes/add-project-brief-report/`: proposed local daily/weekly human project brief/report workflow.
-- `openspec/changes/agent-preflight-packet/`: proposed local AI-agent preflight packet workflow, intentionally separate from the human brief/report contract.
+- `openspec/changes/agent-preflight-packet/`: implemented proposed local AI-agent preflight packet workflow, ready for human acceptance review and intentionally separate from the human brief/report contract.
 
 ## Operations Summary
 
@@ -72,6 +80,7 @@ v3 implemented on 2026-07-07:
 - Build verification: `npm run build`.
 - AI context API: `GET /api/ai-context`, `GET /api/ai-context/projects/:id`, `GET /api/ai-context/changes?since=<iso>`.
 - AI findings API: `GET /api/ai-findings?state=unresolved`, `PATCH /api/ai-findings/:id`.
+- Agent preflight packet API: `GET /api/agent-preflight-packet`, required `projectId`, optional `changeId`, optional `agentRole=implementation|reviewer|verification|handoff`.
 - Project brief report API: `GET /api/project-brief-report`, optional `mode=daily|weekly`, optional `since=<iso>`.
 - AI runtime files: `app-data/ai.context.snapshot.json` and `app-data/ai.findings.generated.json`.
 - Current configured scanned project: `Example Project` at `C:\Users\danoc\Documents\projects\AutoParts`, migrated from legacy config when `app-data/projects.config.json` is absent.
@@ -85,6 +94,7 @@ v3 implemented on 2026-07-07:
 - AI context uses only `app-data/projects.generated.json` and saved tracked project ids; it does not accept arbitrary project paths.
 - AI context changes-since compares saved compact context snapshots where available, rather than relying only on documentation modification times.
 - AI findings are review-required derived runtime records under `app-data/`; they do not modify scanned project folders and do not trigger agent actions.
+- Agent preflight packets are advisory and read-only: they reject arbitrary paths/selectors, action parameters, task/calendar parameters, remote/auth/model parameters, and agent-control parameters; they read existing runtime and local documentation/OpenSpec metadata, and do not write snapshots, findings, report history, scanned project files, task/calendar records, commits, shell command records, remote call records, or agent-work records.
 - Project brief reports are advisory and read-only: they reject arbitrary paths/selectors, read existing runtime data, and do not write snapshots, findings, report history, scanned project files, tasks/calendar records, commands, commits, remote calls, or agent work.
 - No cloud, auth, API keys, agent control, arbitrary shell commands, or whole-disk scanning are part of the current design.
 - Markdown files larger than 1 MB and unsafe folders such as `node_modules`, `.git`, `dist`, `build`, `.next`, `coverage`, and `vendor` are skipped.

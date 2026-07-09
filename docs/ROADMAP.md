@@ -77,7 +77,7 @@ Evidence:
 
 Decision required:
 
-- `add-project-brief-report` is ready for OpenSpec archival after the phase branch is reviewed/merged. A future phase should decide whether the next product slice is dashboard UI, Markdown/rendered brief, or an agent preflight packet follow-up.
+- `add-project-brief-report` is ready for OpenSpec archival after the phase branch is reviewed/merged. The separate `agent-preflight-packet` follow-up has been implemented as a proposed OpenSpec change and is ready for human acceptance review after final verification; a future product slice should decide whether to add dashboard UI or Markdown/rendered brief output.
 
 ## Phase 4. Hardening And Pilot Readiness
 

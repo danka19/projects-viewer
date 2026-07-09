@@ -21,14 +21,14 @@
   - Task 2 core coverage completed: packet shape, agent role, project identity, missing/invalid generated scan handling, missing `projectId`, disabled/unknown project handling, generated-scan saved-path mismatch handling, normalized config-path matching, unknown `changeId` safe state, no fabricated proposed requirements/tasks for unresolved change ids, and purity guards are now covered in `tests/agent-preflight-packet.test.mjs`.
 - [x] 3.2 Add tests proving packet generation stays separate from `project-brief-report` output and does not include daily/weekly human brief fields.
 - [x] 3.3 Add API tests for valid packet retrieval, missing `projectId`, unknown or disabled projects, unknown change ids, invalid `agentRole`, repeated scalar parameters, unknown parameters, path-like parameters, and missing generated scan data.
-- [ ] 3.4 Add negative side-effect tests proving retrieval does not write AI context snapshots, findings stores, report history, scanned project files, task/calendar records, commits, shell commands, remote calls, or agent work.
+- [x] 3.4 Add negative side-effect tests proving retrieval does not write AI context snapshots, findings stores, report history, scanned project files, task/calendar records, commits, shell commands, remote calls, or agent work.
   - [x] Task 6 and Task 7 focused coverage proves the API retrieval path stays read-only for local files already exercised here: the findings store, `ai.context.snapshot.json`, `report-history.json`, a tracked-project sentinel file, plus query validation/error-state handling for safe request parsing.
-  - [ ] Full negative side-effect verification for task/calendar records, commits, shell commands, remote calls, and agent work remains for final verification or a later explicit test expansion before 3.4 can be marked complete.
-- [ ] 3.5 Run focused tests, `npm test`, `npm run build`, `openspec list`, `openspec list --specs`, `openspec validate --all --strict`, and `git diff --check`.
+  - [x] Final local focused coverage asserts valid packet retrieval does not create task, calendar, commit, shell-command, remote-call, or agent-work action artifacts under local runtime data.
+- [x] 3.5 Run focused tests, `npm test`, `npm run build`, `openspec list`, `openspec list --specs`, `openspec validate --all --strict`, and `git diff --check`.
 
 ## 4. Documentation And Follow-Through
 
-- [ ] 4.1 Update README/docs to describe the agent preflight packet behavior, endpoint, safe query parameters, output boundaries, and relationship to AI context, AI findings, and human project brief reports.
-- [ ] 4.2 Update `docs/00_FILE_STRUCTURE.md` if new modules, tests, or docs are added.
-- [ ] 4.3 Update `docs/CONTEXT.md` with the accepted packet terminology once implementation is ready for acceptance.
-- [ ] 4.4 Update `docs/CURRENT_PROJECT_AUDIT.md` and relevant phase/roadmap docs with implementation evidence, remaining risks, and whether the change is ready for human acceptance.
+- [x] 4.1 Update README/docs to describe the agent preflight packet behavior, endpoint, safe query parameters, output boundaries, and relationship to AI context, AI findings, and human project brief reports.
+- [x] 4.2 Update `docs/00_FILE_STRUCTURE.md` if new modules, tests, or docs are added.
+- [x] 4.3 Update `docs/CONTEXT.md` with the accepted packet terminology once implementation is ready for acceptance.
+- [x] 4.4 Update `docs/CURRENT_PROJECT_AUDIT.md` and relevant phase/roadmap docs with implementation evidence, remaining risks, and whether the change is ready for human acceptance.
