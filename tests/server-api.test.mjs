@@ -286,3 +286,24 @@ test('configured projects API rejects unsupported query parameters including pat
     await server.close();
   }
 });
+
+test('unknown API routes return JSON 404 instead of the frontend HTML shell when frontend fallback is enabled', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-api-fallback-regression-'));
+  const app = await createApp({
+    appDataDir: path.join(tmp, 'app-data'),
+    skipStartupScan: true,
+    skipWatcher: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const response = await fetch(`${server.url}/api/does-not-exist`);
+    assert.equal(response.status, 404);
+    assert.match(response.headers.get('content-type') ?? '', /^application\/json\b/i);
+    assert.deepEqual(await response.json(), {
+      error: 'API route not found.',
+      code: 'api-route-not-found',
+    });
+  } finally {
+    await server.close();
+  }
+});
