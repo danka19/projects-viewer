@@ -36,7 +36,10 @@ This document is the repository map for agents and humans. Keep it current whene
 | `server/project-discovery.mjs` | Safe workspace candidate discovery with marker reasons, depth caps, and excluded folders |
 | `server/ai-context.mjs` | Compact AI context mapping, source-evidence normalization, and changes-since category comparison |
 | `server/ai-findings.mjs` | Deterministic review-required findings generation and local review-state persistence |
+| `server/agent-preflight-packet.mjs` | Pure agent preflight packet composition, required reading, acceptance mapping, attention signals, verification plan, safe states, and work-boundary guards |
 | `server/project-brief-report.mjs` | Pure advisory project brief/report composition, ranking, safe states, evidence aggregation, and recommendation guards |
+| `tests/agent-preflight-packet.test.mjs` | Pure composition and local API tests for agent preflight packet behavior, query validation, contract separation, and read-only side effects |
+| `tests/agent-preflight-packet-types.ts` | Type-level contract sample for shared agent preflight packet TypeScript types |
 | `tests/project-brief-report.test.mjs` | Pure composition and local API tests for project brief/report behavior and read-only side effects |
 | `tests/project-brief-report-types.ts` | Type-level contract sample for shared project brief/report TypeScript types |
 
@@ -70,7 +73,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/superpowers/plans/` | Implementation plans produced by the writing-plans workflow |
 | `openspec/changes/add-persistent-project-management/` | Completed OpenSpec change for persistent project/workspace management |
 | `openspec/changes/add-project-brief-report/` | Active proposed OpenSpec change for the local daily/weekly project brief/report workflow |
-| `openspec/changes/agent-preflight-packet/` | Active proposed OpenSpec change for a separate local AI-agent preflight packet workflow |
+| `openspec/changes/agent-preflight-packet/` | Implemented proposed OpenSpec change for a separate local AI-agent preflight packet workflow, ready for human acceptance review |
 | `openspec/changes/archive/2026-07-08-add-ai-context-findings-layer/` | Archived OpenSpec change for AI-readable project context and review-required findings |
 | `openspec/specs/ai-context/spec.md` | Accepted AI context requirements |
 | `openspec/specs/ai-findings/spec.md` | Accepted AI findings requirements |

@@ -10,10 +10,10 @@ Last updated: 2026-07-09.
 |---|---|
 | Repository root | `C:\Users\danoc\Documents\projects\projects-viewer` |
 | Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer` |
-| Current branch | `main` |
+| Current branch | `codex/agent-preflight-packet` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Latest known commit before this audit update | `7564457 Merge phase 3 first usable workflow` |
-| Local divergence | `main` is ahead of `origin/main` during local integration of Phase 3 closure and `agent-preflight-packet` |
+| Latest known commit before this audit update | `7cfff9b Add task 8 contract separation regression test` plus local Task 9 documentation edits in progress |
+| Local divergence | Feature branch `codex/agent-preflight-packet` contains local implementation commits for the `agent-preflight-packet` OpenSpec change; unrelated uncommitted UI/worktree changes were present during verification and intentionally not touched |
 
 ## Useful Starting Points
 
@@ -62,6 +62,8 @@ Last updated: 2026-07-09.
 | Phase 3 review fix | Independent review found invalid generated-scan JSON and loose parseable `since` values could violate the API contract; `0cd3eb5` added regression tests and fixed both boundaries on 2026-07-09 |
 | Phase 3 acceptance | Human owner accepted closing Phase 3 on 2026-07-09 after project brief/report API implementation, verification, push, and review-fix evidence |
 | Agent preflight packet intake | Human owner requested a separate `agent-preflight-packet` OpenSpec proposal on 2026-07-09 so agent preflight behavior does not mix into the daily/weekly human brief; routing decision was `create_openspec_change` |
+| Agent preflight packet implementation | `GET /api/agent-preflight-packet` implemented on branch `codex/agent-preflight-packet` with shared `AgentPreflightPacket` types, pure `server/agent-preflight-packet.mjs` composition, strict saved-project query validation, read-only local API retrieval, unknown-change safe state without fabricated proposed requirements/tasks, and contract-separation regression coverage |
+| Agent preflight packet focused verification | `npm test -- tests/agent-preflight-packet.test.mjs` passed 20/20 after adding explicit local negative side-effect artifact assertions for task/calendar/commit/shell/remote/agent-work records |
 
 ## Known Risks And Gaps
 
@@ -73,8 +75,9 @@ Last updated: 2026-07-09.
 | AUDIT-004 | Local branch had commits ahead of GitHub remote during early foundation work; `main` later matched `origin/main` before Phase 1 planning. | Human owner | closed 2026-07-08 |
 | AUDIT-005 | Manual browser verification for add project, restart persistence, workspace discovery, track selected, disable, and rescan. | Current feature | closed 2026-07-08 |
 | AUDIT-006 | Phase 3 project brief/report API is implemented, verified, reviewed, pushed, and accepted as closed; `add-project-brief-report` remains ready for OpenSpec archival after branch review/merge. | Human owner / next OpenSpec archival step | closed 2026-07-09 |
-| AUDIT-007 | `agent-preflight-packet` is proposed separately from `project-brief-report`; implementation must preserve separate contracts, endpoints, and no-action boundaries. | Future implementation | monitored |
-| AUDIT-008 | Next implementation step remains a human/product decision: archive `add-project-brief-report`, implement `agent-preflight-packet`, or continue with dashboard/brief UI. | Human owner | open |
+| AUDIT-007 | `agent-preflight-packet` is implemented separately from `project-brief-report`; final acceptance still requires full verification evidence and human review before archiving the OpenSpec change. | Current feature | monitored |
+| AUDIT-008 | Next implementation step remains a human/product decision: archive `add-project-brief-report`, accept/archive `agent-preflight-packet` after final verification, or continue with dashboard/brief UI. | Human owner | open |
+| AUDIT-009 | Unrelated uncommitted UI/worktree changes were present while implementing `agent-preflight-packet`; they were not reverted or included in feature commits, and final verification must distinguish them from this change. | Human owner / current session | monitored |
 
 ## Audit Rules
 
