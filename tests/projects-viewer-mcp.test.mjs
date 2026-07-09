@@ -295,6 +295,80 @@ test('projects viewer MCP server returns a tool error with detail when the local
   }
 });
 
+test('projects viewer MCP server rejects agent preflight html fallback and malformed json responses', async () => {
+  const cases = [
+    {
+      name: 'html fallback',
+      path: '/api/agent-preflight-packet?projectId=project-1&agentRole=implementation',
+      contentType: 'text/html; charset=utf-8',
+      body: '<!doctype html><html><body>Vite fallback\nfor stale server</body></html>',
+      expected: [
+        /Expected JSON response/i,
+        /text\/html/i,
+        /\/api\/agent-preflight-packet\?projectId=project-1&agentRole=implementation/i,
+        /Vite fallback for stale server/i,
+      ],
+    },
+    {
+      name: 'malformed json',
+      path: '/api/agent-preflight-packet?projectId=project-1&agentRole=reviewer',
+      contentType: 'application/json; charset=utf-8',
+      body: '{"kind":"agent-preflight-packet",',
+      expected: [
+        /malformed JSON/i,
+        /application\/json/i,
+        /\/api\/agent-preflight-packet\?projectId=project-1&agentRole=reviewer/i,
+        /"kind":"agent-preflight-packet"/i,
+      ],
+    },
+  ];
+
+  for (const { name, path: apiPath, contentType, body, expected } of cases) {
+    const packetServer = http.createServer((request, response) => {
+      if (request.url === apiPath) {
+        response.writeHead(200, { 'Content-Type': contentType });
+        response.end(body);
+        return;
+      }
+
+      response.writeHead(404, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify({ error: 'not-found' }));
+    });
+
+    await new Promise((resolve) => packetServer.listen(0, '127.0.0.1', resolve));
+    const { port } = packetServer.address();
+    const mcp = startMcpClient(`http://127.0.0.1:${port}`);
+
+    try {
+      await mcp.request('initialize', {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'projects-viewer-test', version: '0.1.0' },
+      });
+      mcp.notify('notifications/initialized');
+
+      const agentRole = new URL(`http://127.0.0.1${apiPath}`).searchParams.get('agentRole');
+      const result = await mcp.request('tools/call', {
+        name: 'get_agent_preflight_packet',
+        arguments: { projectId: 'project-1', agentRole },
+      });
+      const errorText = result.content[0].text.trimEnd();
+      assert.equal(result.isError, true, `expected tool error for ${name}`);
+      assert.match(errorText, /status 200/i);
+      assert.match(errorText, /preview/i);
+      for (const expectedPattern of expected) {
+        assert.match(errorText, expectedPattern);
+      }
+      assert.doesNotMatch(errorText, /\n/);
+    } finally {
+      await mcp.close();
+      await new Promise((resolve, reject) => {
+        packetServer.close((err) => (err ? reject(err) : resolve()));
+      });
+    }
+  }
+});
+
 test('projects viewer MCP server returns a tool error with detail when the local API responds with a non-ok json error', async () => {
   const errorServer = http.createServer((request, response) => {
     if (request.url === '/api/projects') {
@@ -382,7 +456,11 @@ test('projects viewer MCP server rejects wrong-shape JSON responses with contrac
     for (const [name, args, expectedContract] of cases) {
       const result = await mcp.request('tools/call', { name, arguments: args });
       assert.equal(result.isError, true, `expected tool error for ${name}`);
-      assert.match(result.content[0].text.trimEnd(), expectedContract);
+      const errorText = result.content[0].text.trimEnd();
+      assert.match(errorText, expectedContract);
+      if (name === 'get_agent_preflight_packet') {
+        assert.match(errorText, /Expected kind "agent-preflight-packet"/i);
+      }
     }
   } finally {
     await mcp.close();
