@@ -953,6 +953,13 @@ export async function createApp({
     res.status(status.status === 'error' ? 500 : 200).json(status);
   });
 
+  app.use('/api', (_req, res) => {
+    res.status(404).json({
+      error: 'API route not found.',
+      code: 'api-route-not-found',
+    });
+  });
+
   if (!skipStartupScan) await controller.requestScan('startup');
   if (!skipWatcher) watcher = await createWatcher(controller, configOptions);
 
