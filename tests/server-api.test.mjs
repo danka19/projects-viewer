@@ -184,7 +184,7 @@ test('browse folder API reports cancelled selection without error', async () => 
   }
 });
 
-test('configured projects API returns compact configured project identities', async () => {
+test('configured projects API returns enabled and disabled project identities with normalized tags', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-configured-projects-api-'));
   const appDataDir = path.join(tmp, 'app-data');
   const alphaRoot = path.join(tmp, 'alpha');
@@ -202,13 +202,19 @@ test('configured projects API returns compact configured project identities', as
     await fetch(`${server.url}/api/projects`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: alphaRoot, name: 'Alpha', tags: ['docs', 'docs'] }),
+      body: JSON.stringify({ path: alphaRoot, name: 'Alpha', tags: ['docs', ' docs ', '', 'docs'] }),
     });
     await fetch(`${server.url}/api/projects`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: betaRoot, name: 'Beta', tags: ['api'] }),
+      body: JSON.stringify({ path: betaRoot, name: 'Beta', tags: ['api', 'ops'] }),
     });
+    const disableBeta = await fetch(`${server.url}/api/projects/beta`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: false, tags: ['ops', 'ops', ' api '] }),
+    });
+    assert.equal(disableBeta.status, 200);
 
     const response = await fetch(`${server.url}/api/configured-projects`);
     assert.equal(response.status, 200);
@@ -227,11 +233,31 @@ test('configured projects API returns compact configured project identities', as
           id: 'beta',
           name: 'Beta',
           path: path.resolve(betaRoot),
-          enabled: true,
-          tags: ['api'],
+          enabled: false,
+          tags: ['ops', 'api'],
         },
       ],
     });
+    assert.equal(body.projects.every((project) => !Object.hasOwn(project, 'status')), true);
+  } finally {
+    await server.close();
+  }
+});
+
+test('configured projects API returns empty list when config has no saved projects', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-configured-projects-empty-api-'));
+  const app = await createApp({
+    appDataDir: path.join(tmp, 'app-data'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const response = await fetch(`${server.url}/api/configured-projects`);
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.deepEqual(body, { projects: [] });
   } finally {
     await server.close();
   }
