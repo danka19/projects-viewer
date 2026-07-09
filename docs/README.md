@@ -61,7 +61,7 @@ v3 implemented on 2026-07-07:
 | `AI_STEP_VERIFICATION_CHECKLIST.md` | Required checks before claiming code or documentation work is complete |
 | `AGENTS_USAGE.md` | Codex and agent runbook for local startup, context packet API usage, MCP tools, and safety boundaries |
 | `CONTEXT.md` | Canonical terms and boundary rules for live/static scanning |
-| `planning/MCP_CONTEXT_API_HARDENING_PLAN.md` | Planned cleanup for canonical config, compact project-id listing, agent preflight API routing, MCP non-JSON errors, and local HTTP diagnostics |
+| `planning/MCP_CONTEXT_API_HARDENING_PLAN.md` | Hardening plan and implementation notes for canonical config, compact project-id listing, agent preflight API routing, MCP non-JSON errors, and local HTTP diagnostics |
 | `phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 plan for users, workflows, data sources, AI use cases, and acceptance criteria |
 | `phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Accepted and closed Phase 2 plan for the project brief/report data contract, module boundaries, API surface, ranking rules, and Phase 3 readiness |
 | `phases/PHASE_3_FIRST_USABLE_WORKFLOW.md` | Accepted and closed Phase 3 implementation record for the JSON-first project brief/report API workflow |
@@ -74,7 +74,7 @@ v3 implemented on 2026-07-07:
 
 - `openspec/changes/add-project-brief-report/`: proposed local daily/weekly human project brief/report workflow.
 - `openspec/changes/agent-preflight-packet/`: implemented proposed local AI-agent preflight packet workflow, ready for human acceptance review and intentionally separate from the human brief/report contract.
-- `openspec/changes/harden-mcp-context-api/`: proposed hardening change for canonical project config, compact saved project-id listing, JSON-only API boundaries, MCP response validation, and local API diagnostics.
+- `openspec/changes/harden-mcp-context-api/`: active hardening change for canonical project config, compact saved project-id listing, JSON-only API boundaries, MCP response validation, and local API diagnostics.
 
 ## Operations Summary
 
@@ -93,6 +93,8 @@ v3 implemented on 2026-07-07:
 - OpenSpec hardening change: `openspec/changes/harden-mcp-context-api/`.
 - AI runtime files: `app-data/ai.context.snapshot.json` and `app-data/ai.findings.generated.json`.
 - Canonical tracked-project config: `app-data/projects.config.json`. Use **Manage Projects** or direct local edits, with `projects.config.example.json` as the empty schema reference.
+- Empty config/no tracked projects is a valid state. Startup and scan should not add defaults or crash.
+- API diagnostics needing headers/content type should use `curl.exe -i --max-time 10` against the same `127.0.0.1` URL.
 
 ## Safety Summary
 
@@ -101,6 +103,9 @@ v3 implemented on 2026-07-07:
 - Browser path input is accepted only by config-management endpoints that validate and save paths; scan and watcher code use saved enabled config paths only.
 - The API scans only enabled paths from `app-data/projects.config.json`.
 - Runtime tracked-project config comes only from `app-data/projects.config.json`; the versioned `projects.config.example.json` is a schema reference only.
+- Root `projects.config.json` is not a runtime fallback or migration source.
+- Unknown `/api/*` routes return JSON `404` errors, not the Vite HTML shell.
+- MCP adapter calls reject non-JSON, malformed JSON, wrong response shapes, and non-`agent-preflight-packet` packet responses with explicit response evidence.
 - AI context uses only `app-data/projects.generated.json` and saved tracked project ids; it does not accept arbitrary project paths.
 - AI context changes-since compares saved compact context snapshots where available, rather than relying only on documentation modification times.
 - AI findings are review-required derived runtime records under `app-data/`; they do not modify scanned project folders and do not trigger agent actions.

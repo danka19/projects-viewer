@@ -32,7 +32,7 @@ npm run scan     # reads app-data/projects.config.json -> writes app-data/projec
 npm run dev      # starts the live dashboard at http://127.0.0.1:5173
 ```
 
-Fresh setup starts with no tracked projects. Use **Manage Projects** to add one project, add a workspace folder, discover candidates, and track selected projects, or edit `app-data/projects.config.json` directly using `projects.config.example.json` as the schema reference.
+Fresh setup starts with no tracked projects. The runtime tracked-project config source is only `app-data/projects.config.json`; root `projects.config.json` is ignored and is not migrated or used as fallback. Use **Manage Projects** to add one project, add a workspace folder, discover candidates, and track selected projects, or edit `app-data/projects.config.json` directly using `projects.config.example.json` as the empty schema reference.
 
 ## Project setup and command reference
 
@@ -172,7 +172,7 @@ Use **Remove** in **Manage Projects**. Removing a project from the dashboard rem
 
 ## Configuration: app-data/projects.config.json
 
-Manual editing is optional; the dashboard UI is the preferred path. The **Browse** button opens a native folder picker when supported by the local server environment, and manual path paste remains available as the fallback. If needed, edit `app-data/projects.config.json` while the server is stopped, then restart or rescan. The versioned `projects.config.example.json` file shows the expected schema. Use absolute paths and escape backslashes on Windows (`\\`):
+Manual editing is optional; the dashboard UI is the preferred path. The **Browse** button opens a native folder picker when supported by the local server environment, and manual path paste remains available as the fallback. If needed, edit `app-data/projects.config.json` while the server is stopped, then restart or rescan. The versioned `projects.config.example.json` file shows the expected empty schema and is never read as runtime config. Use absolute paths and escape backslashes on Windows (`\\`):
 
 ```json
 {
@@ -249,7 +249,7 @@ curl http://127.0.0.1:5173/api/project-brief-report
 curl "http://127.0.0.1:5173/api/project-brief-report?mode=weekly&since=2026-07-08T00:00:00.000Z"
 ```
 
-For agent workflows, use `GET /api/configured-projects` first to discover a saved `projectId`, then call `GET /api/agent-preflight-packet`. The fuller `GET /api/projects` payload is for dashboard scan data, not the preferred preflight lookup.
+For agent workflows, use `GET /api/configured-projects` first to discover a saved `projectId`, then call `GET /api/agent-preflight-packet`. The fuller `GET /api/projects` payload is for dashboard scan data, not the preferred preflight lookup. Unknown `/api/*` routes return JSON `404` errors instead of the Vite HTML shell. MCP callers reject non-JSON responses, malformed JSON, wrong response shapes, and agent-preflight responses whose `kind` is not `agent-preflight-packet`, with error details that include status, content type, API path, and a short body preview.
 
 ## What gets scanned
 
@@ -303,6 +303,8 @@ Static fallback data at `src/data/projects.json` does not exist. Run `npm run sc
 **No projects found / “No projects scanned yet”**
 `app-data/projects.config.json` has an empty enabled `projects` array, or every entry was skipped. The scanner prints `skipping config entry without a valid name/path` for malformed entries — each project needs both a `name` and a `path` string.
 
+An empty config is valid. Fresh installs and intentionally empty setups should show no scanned projects without crashing or adding example projects.
+
 **A project shows “unknown — Project path not found or not readable”**
 The `path` in `app-data/projects.config.json` is wrong. Check for typos, use the full absolute path, and on Windows either escape backslashes (`C:\\Users\\me\\project`) or use forward slashes (`C:/Users/me/project`). A path that points to a file instead of a folder fails the same way.
 
@@ -317,6 +319,13 @@ The scanner never crashes on unreadable files or folders — it skips them silen
 
 **Port 5173 is busy**
 `npm run dev` will pick the next free port; check the terminal output for the actual URL.
+
+**Checking API status and content type**
+For JSON body inspection, ordinary `curl` or PowerShell JSON commands are fine. When headers, status, content type, or suspicious HTML/non-JSON bodies matter, prefer:
+
+```bash
+curl.exe -i --max-time 10 "http://127.0.0.1:5173/api/agent-preflight-packet?projectId=<id>&agentRole=implementation"
+```
 
 ## Project structure
 

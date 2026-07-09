@@ -9,11 +9,11 @@ Last updated: 2026-07-09.
 | Item | Current State |
 |---|---|
 | Repository root | `C:\Users\danoc\Documents\projects\projects-viewer` |
-| Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer` |
-| Current branch | `codex/agent-preflight-packet` |
+| Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer\.worktrees\harden-mcp-context-api` |
+| Current branch | `harden-mcp-context-api` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Latest known commit before this audit update | `7cfff9b Add task 8 contract separation regression test` plus local Task 9 documentation edits in progress |
-| Local divergence | Feature branch `codex/agent-preflight-packet` contains local implementation commits for the `agent-preflight-packet` OpenSpec change; unrelated uncommitted UI/worktree changes were present during verification and intentionally not touched |
+| Latest known commit before this audit update | Task 15 implementation for `harden-mcp-context-api`; Task 16 documentation edits in progress |
+| Local divergence | Feature branch/worktree `harden-mcp-context-api` contains local implementation commits for the MCP/API hardening OpenSpec change |
 
 ## Useful Starting Points
 
@@ -37,7 +37,7 @@ Last updated: 2026-07-09.
 | Watcher behavior | Temporary markdown add produced watcher scan with 54 docs; delayed unlink scan returned 53 docs |
 | Persistent config module | `npm test -- tests/project-config.test.mjs` passed: migration, project CRUD, duplicate handling, enabled filtering, workspace normalization |
 | Workspace discovery module | `npm test -- tests/project-discovery.test.mjs` passed: default depth 1, explicit nested discovery, ignored internal folders, marker reasons, disabled workspace, and selected-path validation |
-| Scanner config contract | `npm test -- tests/run-scan.test.mjs` passed: legacy config, enabled-project filtering, app-data generated output |
+| Scanner config contract | Runtime config now reads only `app-data/projects.config.json`; root `projects.config.json` fallback/migration was removed. Empty config/no projects scan is valid and should not crash. |
 | Project management API | `npm test -- tests/server-api.test.mjs` passed: add project validation/persistence, workspace discovery, track-discovered, and invalid selection rejection without partial adds |
 | Frontend build | `npm run build` passed after adding `Manage Projects`; prebuild wrote `app-data/projects.generated.json` |
 | Real workspace discovery check | `C:\Users\danoc\Documents\projects` returned top-level candidates AutoParts, autoparts-db, finance-sheets, projects-viewer, ScanLabMultiplatform, ScanLabTesting, teamSsdCli, and vpn-and-router; forbidden internal names were absent from candidates; `AnnaPh` was not present on disk during verification |
@@ -64,8 +64,9 @@ Last updated: 2026-07-09.
 | Agent preflight packet intake | Human owner requested a separate `agent-preflight-packet` OpenSpec proposal on 2026-07-09 so agent preflight behavior does not mix into the daily/weekly human brief; routing decision was `create_openspec_change` |
 | Agent preflight packet implementation | `GET /api/agent-preflight-packet` implemented on branch `codex/agent-preflight-packet` with shared `AgentPreflightPacket` types, pure `server/agent-preflight-packet.mjs` composition, strict saved-project query validation, read-only local API retrieval, unknown-change safe state without fabricated proposed requirements/tasks, and contract-separation regression coverage |
 | Agent preflight packet focused verification | `npm test -- tests/agent-preflight-packet.test.mjs` passed 20/20 after adding explicit local negative side-effect artifact assertions for task/calendar/commit/shell/remote/agent-work records |
-| MCP/API hardening follow-up | 2026-07-09 diagnostic found that `get_agent_preflight_packet` can return the Vite HTML shell with HTTP 200, `list_projects` is too large for convenient project-id selection, root `projects.config.json` can mislead agents with legacy `Example Project` data, and `Invoke-WebRequest` can produce low-value diagnostics. Planned remediation is recorded in `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md`. |
+| MCP/API hardening follow-up | 2026-07-09 diagnostic found historical failure modes: `get_agent_preflight_packet` could return the Vite HTML shell with HTTP 200, `list_projects` was too large for convenient project-id selection, root `projects.config.json` could mislead agents with legacy `Example Project` data, and `Invoke-WebRequest` could produce low-value diagnostics. Remediation context is recorded in `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md`. |
 | MCP/API hardening OpenSpec | Proposed change `openspec/changes/harden-mcp-context-api/` now captures the hardening work as formal OpenSpec artifacts: proposal, design, tasks, and delta specs for `local-project-config`, `mcp-context-api`, and `agent-preflight-packet`. The planning doc records why the OpenSpec was not created in the first documentation-only follow-up. |
+| MCP/API hardening implementation facts | Runtime tracked-project config source is only `app-data/projects.config.json`; `projects.config.example.json` is a versioned empty schema reference; `GET /api/configured-projects` and MCP `list_configured_projects` provide compact saved project identities for `projectId` lookup; unknown `/api/*` routes return JSON `404`; the MCP adapter rejects non-JSON, malformed JSON, wrong response shapes, and wrong packet kind with explicit status/content-type/path/preview details; diagnostics should prefer `curl.exe -i --max-time 10` when headers or content type matter. |
 
 ## Known Risks And Gaps
 
