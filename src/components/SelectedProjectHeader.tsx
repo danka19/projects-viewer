@@ -35,7 +35,7 @@ export default function SelectedProjectHeader({ project, onOpenTab, onOpenDrawer
         </div>
       </div>
       <p className="mt-1.5 font-mono text-xs break-all text-faint">{project.path}</p>
-      {project.error && <p className="mt-2 text-sm text-rose-400">{project.error}</p>}
+      {project.error && <p className="mt-2 text-sm text-danger">{project.error}</p>}
 
       <div className="mt-4 grid grid-cols-1 gap-2.5 border-t border-line pt-4 sm:grid-cols-2 lg:grid-cols-3">
         <SummaryTile
@@ -58,7 +58,7 @@ export default function SelectedProjectHeader({ project, onOpenTab, onOpenDrawer
           label="Main real blocker"
           value={s.mainBlocker ?? 'No real blockers'}
           muted={!s.mainBlocker}
-          tone={s.mainBlocker ? 'text-rose-200' : undefined}
+          tone={s.mainBlocker ? 'text-danger' : undefined}
           onClick={
             blockerItem
               ? () => onOpenDrawer(blockerDrawer(blockerItem, project))
@@ -84,7 +84,7 @@ export default function SelectedProjectHeader({ project, onOpenTab, onOpenDrawer
         />
         <button
           onClick={() => onOpenTab('docs')}
-          className="rounded-lg border border-line bg-void/30 px-3.5 py-2.5 text-left transition-colors hover:border-slate-500/40"
+          className="rounded-lg border border-line bg-void/30 px-3.5 py-2.5 text-left transition-colors hover:border-line-strong"
         >
           <p className="font-mono text-[10px] tracking-[0.18em] text-faint uppercase">
             Doc coverage · {covCount}/5
@@ -120,12 +120,12 @@ function SummaryTile({
   return (
     <button
       onClick={onClick}
-      className="rounded-lg border border-line bg-void/30 px-3.5 py-2.5 text-left transition-colors hover:border-slate-500/40"
+      className="rounded-lg border border-line bg-void/30 px-3.5 py-2.5 text-left transition-colors hover:border-line-strong"
     >
       <p className="font-mono text-[10px] tracking-[0.18em] text-faint uppercase">{label}</p>
       <p
         className={`mt-1 line-clamp-2 text-[13px] leading-snug ${
-          muted ? 'text-faint' : (tone ?? 'text-slate-200')
+          muted ? 'text-faint' : (tone ?? 'text-ink')
         } ${mono ? 'font-mono text-xs' : ''}`}
       >
         {value}
@@ -140,11 +140,11 @@ function CovDot({ label, ok }: { label: string; ok: boolean }) {
       <span
         className={`h-1.5 w-1.5 rounded-full ${
           ok
-            ? 'bg-sky-400 shadow-[0_0_6px_rgba(56,189,248,0.6)]'
-            : 'border border-rose-400/50'
+            ? 'bg-info'
+            : 'border border-danger/50'
         }`}
       />
-      <span className={`font-mono text-[10px] ${ok ? 'text-slate-300' : 'text-rose-300/80'}`}>
+      <span className={`font-mono text-[10px] ${ok ? 'text-mute' : 'text-danger/80'}`}>
         {label}
       </span>
     </span>

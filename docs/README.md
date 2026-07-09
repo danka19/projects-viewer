@@ -9,6 +9,7 @@ Repo: https://github.com/danka19/projects-viewer
 v7 implemented on 2026-07-09:
 
 - JSON-first agent preflight packet workflow implemented for `GET /api/agent-preflight-packet`.
+- Dashboard UI polish added a saved light/dark theme toggle and consolidated semantic status colors around shared theme tokens.
 - Shared `AgentPreflightPacket` contract types added to `src/types.ts`.
 - Pure `server/agent-preflight-packet.mjs` composition module builds required reading, project state, acceptance mapping, attention signals, verification expectations, safe states, evidence, and work boundaries from prepared local inputs.
 - Endpoint requires saved `projectId`, accepts optional `changeId` and `agentRole=implementation|reviewer|verification|handoff`, rejects unsafe query parameters, returns stable domain errors, and keeps unknown changes non-blocking through an `unknown-change` safe state without fabricated proposed requirements or tasks.

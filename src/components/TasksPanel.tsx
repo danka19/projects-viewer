@@ -15,18 +15,18 @@ interface Props {
 }
 
 const MARKER_STYLES: Record<string, string> = {
-  TODO: 'bg-amber-400/10 text-amber-300 border-amber-400/25',
-  FIXME: 'bg-rose-400/10 text-rose-300 border-rose-400/25',
-  BUG: 'bg-rose-500/10 text-rose-300 border-rose-500/25',
-  NEXT: 'bg-violet-400/10 text-violet-300 border-violet-400/25',
-  DONE: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/25',
+  TODO: 'bg-warn/10 text-warn border-warn/30',
+  FIXME: 'bg-danger/10 text-danger border-danger/30',
+  BUG: 'bg-danger/10 text-danger border-danger/30',
+  NEXT: 'bg-accent/10 text-accent-ink border-accent/30',
+  DONE: 'bg-ok/10 text-ok border-ok/30',
 };
 
 export default function TasksPanel({ project, onOpenDrawer }: Props) {
   const groups = project.signalGroups;
   return (
     <div className="space-y-4">
-      <Section title="Next up" count={project.nextTasks.length} accent="text-violet-300">
+      <Section title="Next up" count={project.nextTasks.length} accent="text-accent-ink">
         <TaskButtons
           items={project.nextTasks}
           kind="Next action"
@@ -62,7 +62,7 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
         items={groups.realBlockers}
         project={project}
         onOpenDrawer={onOpenDrawer}
-        accent={groups.realBlockers.length > 0 ? 'text-rose-300' : 'text-mute'}
+        accent={groups.realBlockers.length > 0 ? 'text-danger' : 'text-mute'}
         empty="No real blockers recorded."
         defaultOpen={groups.realBlockers.length > 0}
       />
@@ -73,7 +73,7 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
         items={groups.approvalGates}
         project={project}
         onOpenDrawer={onOpenDrawer}
-        accent={groups.approvalGates.length > 0 ? 'text-violet-300' : 'text-mute'}
+        accent={groups.approvalGates.length > 0 ? 'text-accent-ink' : 'text-mute'}
         empty="No approval gates recorded."
       />
 
@@ -83,7 +83,7 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
         items={groups.needsReview}
         project={project}
         onOpenDrawer={onOpenDrawer}
-        accent={groups.needsReview.length > 0 ? 'text-orange-300' : 'text-mute'}
+        accent={groups.needsReview.length > 0 ? 'text-review' : 'text-mute'}
         empty="No review items recorded."
       />
 
@@ -93,7 +93,7 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
         items={groups.pausedDeferred}
         project={project}
         onOpenDrawer={onOpenDrawer}
-        accent={groups.pausedDeferred.length > 0 ? 'text-slate-300' : 'text-mute'}
+        accent={groups.pausedDeferred.length > 0 ? 'text-mute' : 'text-mute'}
         empty="No paused or deferred work recorded."
       />
 
@@ -102,7 +102,7 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
       <Section
         title="Risks & open questions"
         count={project.risks.length}
-        accent={project.risks.length > 0 ? 'text-amber-300' : 'text-mute'}
+        accent={project.risks.length > 0 ? 'text-warn' : 'text-mute'}
         defaultOpen={false}
       >
         {project.risks.length === 0 ? (
@@ -115,10 +115,10 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
                   onClick={() => onOpenDrawer(riskDrawer(r, project))}
                   className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
                 >
-                  <span className="mt-0.5 rounded border border-amber-400/25 bg-amber-400/10 px-1.5 py-px font-mono text-[10px] whitespace-nowrap text-amber-300">
+                  <span className="mt-0.5 rounded border border-warn/30 bg-warn/10 px-1.5 py-px font-mono text-[10px] whitespace-nowrap text-warn">
                     {r.kind === 'open-question' ? 'question' : 'risk'}
                   </span>
-                  <span className="line-clamp-2 min-w-0 text-sm leading-snug text-slate-300">
+                  <span className="line-clamp-2 min-w-0 text-sm leading-snug text-mute">
                     {r.text}
                   </span>
                 </button>
@@ -131,7 +131,7 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
       <Section
         title="Attention markers"
         count={project.markers.length}
-        accent={project.markers.length > 0 ? 'text-amber-300' : 'text-mute'}
+        accent={project.markers.length > 0 ? 'text-warn' : 'text-mute'}
         defaultOpen={false}
       >
         {project.markers.length === 0 ? (
@@ -145,11 +145,11 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
                   className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
                 >
                   <span
-                    className={`mt-0.5 rounded border px-1.5 py-px font-mono text-[10px] ${MARKER_STYLES[m.type] ?? 'border-slate-600 bg-slate-800 text-slate-300'}`}
+                    className={`mt-0.5 rounded border px-1.5 py-px font-mono text-[10px] ${MARKER_STYLES[m.type] ?? 'border-dim/40 bg-dim/10 text-dim'}`}
                   >
                     {m.type}
                   </span>
-                  <span className="line-clamp-2 min-w-0 text-sm leading-snug text-slate-300">
+                  <span className="line-clamp-2 min-w-0 text-sm leading-snug text-mute">
                     {m.text}
                   </span>
                 </button>
@@ -162,7 +162,7 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
       <Section
         title="Completed tasks"
         count={project.completedTasks.length}
-        accent="text-emerald-300"
+        accent="text-ok"
         defaultOpen={false}
       >
         <TaskButtons
@@ -215,7 +215,7 @@ function SignalSection({
                   >
                     {BLOCKER_META[b.kind]?.label ?? b.kind}
                   </span>
-                  <span className="line-clamp-2 min-w-0 text-sm leading-snug text-slate-300">
+                  <span className="line-clamp-2 min-w-0 text-sm leading-snug text-mute">
                     {b.text}
                   </span>
                 </button>
@@ -246,7 +246,7 @@ function ConstraintDiagnostics({
     <Section
       title="Constraint diagnostics"
       count={d.summary.oldRawCandidateCount}
-      accent={d.summary.filteredOutCount > 0 ? 'text-slate-300' : 'text-mute'}
+      accent={d.summary.filteredOutCount > 0 ? 'text-mute' : 'text-mute'}
       defaultOpen={false}
     >
       <div className="mb-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
@@ -271,10 +271,10 @@ function ConstraintDiagnostics({
                       onClick={() => onOpenDrawer(blockedGatedCandidateDrawer(item, project))}
                       className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
                     >
-                      <span className="mt-0.5 rounded border border-slate-500/30 bg-slate-500/10 px-1.5 py-px font-mono text-[10px] whitespace-nowrap text-slate-300">
+                      <span className="mt-0.5 rounded border border-dim/40 bg-dim/10 px-1.5 py-px font-mono text-[10px] whitespace-nowrap text-dim">
                         {item.confidence}
                       </span>
-                      <span className="min-w-0 text-sm leading-snug text-slate-300">
+                      <span className="min-w-0 text-sm leading-snug text-mute">
                         <span className="line-clamp-2">{item.text}</span>
                         <span className="mt-0.5 block font-mono text-[10px] text-faint">
                           {item.file}:{item.line} В· {item.reason}
@@ -296,7 +296,7 @@ function DiagnosticCount({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-lg border border-line bg-void/30 px-2.5 py-2">
       <p className="font-mono text-[10px] tracking-[0.14em] text-faint uppercase">{label}</p>
-      <p className="mt-1 font-display text-sm font-semibold text-slate-200">{value}</p>
+      <p className="mt-1 font-display text-sm font-semibold text-ink">{value}</p>
     </div>
   );
 }
@@ -304,7 +304,7 @@ function DiagnosticCount({ label, value }: { label: string; value: number }) {
 function Empty({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-2.5 py-1">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400/60" />
+      <span className="h-1.5 w-1.5 rounded-full bg-ok/60" />
       <p className="text-sm text-faint">{text}</p>
     </div>
   );
@@ -334,10 +334,10 @@ function TaskButtons({
             onClick={() => onOpenDrawer(taskDrawer(t, project, kind))}
             className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
           >
-            <span className={`mt-px ${done ? 'text-emerald-400' : 'text-faint'}`}>
+            <span className={`mt-px ${done ? 'text-ok' : 'text-faint'}`}>
               {done ? '☑' : '☐'}
             </span>
-            <span className="line-clamp-2 min-w-0 text-sm leading-snug text-slate-300">
+            <span className="line-clamp-2 min-w-0 text-sm leading-snug text-mute">
               {t.text}
             </span>
           </button>

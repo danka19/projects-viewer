@@ -55,7 +55,7 @@ export default function ProjectSidebar({
             </p>
             <button
               onClick={onClear}
-              className="mt-3 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-[11px] text-violet-300 transition-colors hover:bg-accent/20"
+              className="mt-3 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/20"
             >
               Clear search and filters
             </button>
@@ -93,8 +93,8 @@ function SidebarCard({
       aria-pressed={selected}
       className={`glass w-full rounded-xl p-4 text-left transition-all duration-200 hover:-translate-y-px ${
         selected
-          ? 'border-accent/40 shadow-[0_0_24px_rgba(167,139,250,0.1)]'
-          : 'hover:border-slate-500/30'
+          ? 'border-accent/60'
+          : 'hover:border-line-strong'
       }`}
     >
       <div className="flex items-center gap-2.5">
@@ -110,7 +110,7 @@ function SidebarCard({
         </span>
       </div>
       <p className="mt-2 line-clamp-1 text-[13px] text-mute">{project.statusReason}</p>
-      {project.error && <p className="mt-1 text-xs text-rose-400">{project.error}</p>}
+      {project.error && <p className="mt-1 text-xs text-danger">{project.error}</p>}
       <div className="mt-2.5 flex items-center gap-3 font-mono text-[11px] text-faint">
         <span className={meta.text}>{meta.label}</span>
         <span className="ml-auto">{daysAgo(project.lastModified) || '—'}</span>
@@ -136,8 +136,8 @@ function FilterChip({
       aria-pressed={active}
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] tracking-wide uppercase transition-all duration-150 ${
         active
-          ? 'border-accent/50 bg-accent/15 text-violet-200 shadow-[0_0_14px_rgba(167,139,250,0.15)]'
-          : 'border-line bg-slate-500/5 text-mute hover:border-slate-500/40 hover:text-slate-300'
+          ? 'border-accent/50 bg-accent/15 text-accent-ink'
+          : 'border-line bg-dim/5 text-mute hover:border-line-strong hover:text-ink'
       }`}
     >
       {status && <StatusOrb status={status} size={6} />}

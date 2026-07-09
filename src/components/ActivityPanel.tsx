@@ -36,8 +36,8 @@ export default function ActivityPanel({ project, onOpenDrawer }: Props) {
               <span
                 className={`absolute top-2.5 -left-[3.5px] h-1.5 w-1.5 rounded-full ${
                   showDay
-                    ? 'bg-accent shadow-[0_0_6px_rgba(167,139,250,0.6)]'
-                    : 'bg-slate-600'
+                    ? 'bg-accent'
+                    : 'bg-dim'
                 }`}
               />
               {showDay && (
@@ -49,7 +49,7 @@ export default function ActivityPanel({ project, onOpenDrawer }: Props) {
                 onClick={() => onOpenDrawer(docDrawer(d, project))}
                 className="flex w-full items-baseline gap-3 rounded-md px-2 py-1 text-left transition-colors hover:bg-void/40"
               >
-                <span className="min-w-0 truncate font-mono text-xs text-slate-300">
+                <span className="min-w-0 truncate font-mono text-xs text-mute">
                   {d.file}
                 </span>
                 <span className="ml-auto font-mono text-[10px] whitespace-nowrap text-faint">

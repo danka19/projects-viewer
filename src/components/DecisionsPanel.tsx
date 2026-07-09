@@ -24,7 +24,7 @@ export default function DecisionsPanel({ project, onOpenDrawer }: Props) {
 
   return (
     <div className="space-y-4">
-      <Section title="Dated decisions" count={dated.length} accent="text-violet-300">
+      <Section title="Dated decisions" count={dated.length} accent="text-accent-ink">
         <DecisionList items={dated} project={project} onOpenDrawer={onOpenDrawer} />
       </Section>
       {undated.length > 0 && (
@@ -53,10 +53,10 @@ function DecisionList({
             onClick={() => onOpenDrawer(decisionDrawer(d, project))}
             className="flex w-full items-start gap-3 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
           >
-            <span className="mt-0.5 w-20 flex-none font-mono text-[10px] text-violet-300/80">
+            <span className="mt-0.5 w-20 flex-none font-mono text-[10px] text-accent-ink/80">
               {d.date ?? '—'}
             </span>
-            <span className="line-clamp-2 min-w-0 text-sm leading-snug text-slate-300">
+            <span className="line-clamp-2 min-w-0 text-sm leading-snug text-mute">
               {d.text}
             </span>
           </button>

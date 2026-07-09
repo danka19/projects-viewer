@@ -27,7 +27,7 @@ export default function AuditsPanel({ project, onOpenDrawer }: Props) {
   return (
     <div className="space-y-4">
       {attention.length > 0 && (
-        <Section title="Attention" count={attention.length} accent="text-rose-300">
+        <Section title="Attention" count={attention.length} accent="text-danger">
           <AuditList items={attention} project={project} onOpenDrawer={onOpenDrawer} />
         </Section>
       )}
@@ -63,17 +63,17 @@ function AuditList({
         <li key={a.file}>
           <button
             onClick={() => onOpenDrawer(auditDrawer(a, project))}
-            className="flex w-full flex-wrap items-baseline gap-x-2.5 gap-y-1 rounded-lg border border-line bg-void/30 px-3 py-2 text-left transition-colors hover:border-slate-500/40"
+            className="flex w-full flex-wrap items-baseline gap-x-2.5 gap-y-1 rounded-lg border border-line bg-void/30 px-3 py-2 text-left transition-colors hover:border-line-strong"
           >
-            <span className="font-mono text-[10px] text-violet-300/80">{a.date}</span>
-            <span className="min-w-0 text-sm font-medium text-slate-200">{a.title}</span>
+            <span className="font-mono text-[10px] text-accent-ink/80">{a.date}</span>
+            <span className="min-w-0 text-sm font-medium text-ink">{a.title}</span>
             <span
               className={`rounded border px-1.5 py-px font-mono text-[10px] ${AUDIT_STATUS_CHIP[a.status]}`}
             >
               {a.status}
             </span>
             {a.severeSignals > 0 && (
-              <span className="font-mono text-[10px] text-rose-300/80">
+              <span className="font-mono text-[10px] text-danger/80">
                 {a.severeSignals} signal{a.severeSignals === 1 ? '' : 's'}
               </span>
             )}
