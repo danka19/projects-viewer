@@ -4,7 +4,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Current Roadmap Validation
 
-- Current phase: no active implementation phase. Phase 3 is accepted and closed; Phase 4 is not planned in detail yet.
+- Current phase: no active implementation phase. Phase 3 is accepted and closed; Phase 4 is not planned in detail yet. Proposed first hardening slice: `openspec/changes/harden-mcp-context-api/`.
 - Planning from this roadmap alone is forbidden. Detailed phase plans must reconcile roadmap intent, current docs, current implementation, environment evidence, audit findings, and human decisions.
 - Product behavior, requirements, proposed changes, and acceptance criteria belong in OpenSpec artifacts under `openspec/` when SDD applies.
 - New ideas during active phase work must go through change intake before they alter scope or plans.
@@ -84,6 +84,11 @@ Decision required:
 Status: not planned in detail yet.
 
 Goal: improve reliability, safety, UX, operations, and acceptance evidence.
+
+Proposed first slice:
+
+- `openspec/changes/harden-mcp-context-api/` defines canonical config cleanup, compact saved project-id listing, JSON-only API boundaries, MCP response validation, agent preflight packet retrieval hardening, and local HTTP diagnostics.
+- This slice should be implemented before relying on Projects Viewer MCP preflight packets for everyday agent startup, because it addresses the observed HTML fallback, legacy config ambiguity, and project-id lookup friction.
 
 ## Phase Planning Rule
 

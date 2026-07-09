@@ -44,7 +44,7 @@ npm run scan
 
 ## Get Project Context
 
-Project ids come from saved Projects Viewer config, not from inferred project names or legacy config files. The planned hardening work in `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md` will add a compact project-id listing endpoint/tool. Until then, use the saved ids in `app-data/projects.config.json` when a preflight packet requires `projectId`.
+Project ids come from saved Projects Viewer config, not from inferred project names or legacy config files. The planned hardening work in `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md` and `openspec/changes/harden-mcp-context-api/` will add a compact project-id listing endpoint/tool. Until then, use the saved ids in `app-data/projects.config.json` when a preflight packet requires `projectId`.
 
 List currently scanned dashboard projects:
 

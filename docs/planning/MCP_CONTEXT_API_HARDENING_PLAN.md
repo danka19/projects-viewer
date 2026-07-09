@@ -4,6 +4,8 @@ Status: planned.
 
 Decision date: 2026-07-09.
 
+OpenSpec change: `openspec/changes/harden-mcp-context-api/`.
+
 ## Purpose
 
 This plan records the follow-up work from the 2026-07-09 MCP/API diagnostic session. The goal is to make Projects Viewer safer and easier for Codex agents to use by removing legacy config ambiguity, returning explicit project ids for agent workflows, and making API/MCP failures visible as failures instead of successful-looking HTML responses.
@@ -112,3 +114,19 @@ Expected evidence:
 - `docs/README.md`: current state, operations summary, and safety summary.
 - `docs/CURRENT_PROJECT_AUDIT.md`: close or revise the related risk once verified.
 - OpenSpec artifacts if the implementation changes accepted API behavior or creates a new agent-facing contract.
+
+## Why OpenSpec Was Not Created Immediately
+
+The first session captured a planning response and then a documentation-only follow-up. That preserved the decision quickly, but it stopped one step too early for this project workflow because the proposed work changes API behavior, MCP contracts, startup config behavior, and agent-facing acceptance scenarios. Those are OpenSpec-level changes, not only planning notes.
+
+Contributing factors:
+
+- The initial request was phrased as a future-change plan, so the work was treated as durable planning documentation rather than a formal SDD proposal.
+- Existing related OpenSpec changes already covered persistent project management and agent preflight packets, which made the hardening look like follow-up implementation detail at first glance.
+- The diagnostic found several separate symptoms at once: legacy config ambiguity, project-id ergonomics, API route fallback, MCP response validation, and PowerShell diagnostics. The architectural boundary between "small bug fixes" and "new cross-cutting contract" became clear only after those were grouped together.
+- The plan itself explicitly said OpenSpec artifacts were required if accepted API behavior or a new agent-facing contract changed, but the session ended after recording the plan and before converting that line into an actual change.
+
+Corrective decision:
+
+- `harden-mcp-context-api` is now the OpenSpec source for this follow-up.
+- Future work that changes Projects Viewer API behavior, MCP tools, config source-of-truth rules, or agent workflow contracts should create or update OpenSpec artifacts in the same session as the durable planning note.

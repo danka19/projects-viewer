@@ -73,6 +73,7 @@ v3 implemented on 2026-07-07:
 
 - `openspec/changes/add-project-brief-report/`: proposed local daily/weekly human project brief/report workflow.
 - `openspec/changes/agent-preflight-packet/`: implemented proposed local AI-agent preflight packet workflow, ready for human acceptance review and intentionally separate from the human brief/report contract.
+- `openspec/changes/harden-mcp-context-api/`: proposed hardening change for canonical project config, compact saved project-id listing, JSON-only API boundaries, MCP response validation, and local API diagnostics.
 
 ## Operations Summary
 
@@ -87,6 +88,7 @@ v3 implemented on 2026-07-07:
 - Project brief report API: `GET /api/project-brief-report`, optional `mode=daily|weekly`, optional `since=<iso>`.
 - Agent/Codex usage and MCP runbook: `docs/AGENTS_USAGE.md`.
 - Planned MCP/API hardening: `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md`.
+- OpenSpec hardening change: `openspec/changes/harden-mcp-context-api/`.
 - AI runtime files: `app-data/ai.context.snapshot.json` and `app-data/ai.findings.generated.json`.
 - Canonical tracked-project config: `app-data/projects.config.json`. Planned hardening will remove the root `projects.config.json` runtime fallback; a clean setup should start with no default tracked projects, and any example config should be empty.
 

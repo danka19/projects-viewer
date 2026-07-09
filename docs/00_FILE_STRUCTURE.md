@@ -75,6 +75,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `openspec/changes/add-persistent-project-management/` | Completed OpenSpec change for persistent project/workspace management |
 | `openspec/changes/add-project-brief-report/` | Active proposed OpenSpec change for the local daily/weekly project brief/report workflow |
 | `openspec/changes/agent-preflight-packet/` | Implemented proposed OpenSpec change for a separate local AI-agent preflight packet workflow, ready for human acceptance review |
+| `openspec/changes/harden-mcp-context-api/` | Proposed OpenSpec change for canonical config cleanup, compact project-id listing, API JSON boundary hardening, MCP response validation, and diagnostics |
 | `openspec/changes/archive/2026-07-08-add-ai-context-findings-layer/` | Archived OpenSpec change for AI-readable project context and review-required findings |
 | `openspec/specs/ai-context/spec.md` | Accepted AI context requirements |
 | `openspec/specs/ai-findings/spec.md` | Accepted AI findings requirements |
