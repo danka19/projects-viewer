@@ -580,7 +580,7 @@ export type AgentPreflightAcceptanceSource =
   | 'checklist'
   | 'project-doc';
 
-export type AgentPreflightAcceptanceStatus = 'accepted' | 'proposed';
+export type AgentPreflightAcceptanceStatus = 'accepted' | 'planned' | 'proposed' | 'advisory';
 
 export type AgentPreflightAttentionSignalKind =
   | 'risk'
@@ -752,7 +752,7 @@ export interface AgentPreflightPacket {
   generatedAt: string;
   project: AgentPreflightProject;
   agentRole: AgentPreflightAgentRole;
-  change: AgentPreflightChange;
+  change: AgentPreflightChange | null;
   generatedFrom: AgentPreflightGeneratedFrom;
   inputState: AgentPreflightInputState;
   safeStates: AgentPreflightSafeState[];
