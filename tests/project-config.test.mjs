@@ -36,11 +36,27 @@ test('ensureProjectConfig creates an empty canonical config on clean startup', a
   );
 });
 
-test('ensureProjectConfig ignores root projects.config.json at runtime', async () => {
+test('ensureProjectConfig ignores root projects.config.json at runtime', async (t) => {
   const tmp = await makeTemp();
   const legacyConfigPath = path.join(tmp, 'projects.config.json');
   const appDataDir = path.join(tmp, 'app-data');
-  await fs.writeFile(legacyConfigPath, '{ invalid json', 'utf8');
+  await fs.writeFile(
+    legacyConfigPath,
+    JSON.stringify({
+      projects: [{ id: 'legacy-project', path: path.join(tmp, 'legacy-project'), name: 'Legacy Project' }],
+      workspaces: [],
+      settings: { watchDocs: false, autoRescanIntervalSec: 15 },
+    }),
+    'utf8',
+  );
+  const originalReadFile = fs.readFile;
+  t.mock.method(fs, 'readFile', async (candidatePath, ...args) => {
+    if (path.resolve(String(candidatePath)) === path.resolve(legacyConfigPath)) {
+      throw new Error('legacy config read');
+    }
+
+    return originalReadFile(candidatePath, ...args);
+  });
 
   const config = await assert.doesNotReject(() =>
     ensureProjectConfig({
