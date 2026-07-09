@@ -5,6 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { createApp } from '../server.mjs';
 import { buildAgentPreflightPacket } from '../server/agent-preflight-packet.mjs';
+import { buildProjectBriefReport } from '../server/project-brief-report.mjs';
 
 async function startTestServer(app) {
   const server = app.listen(0, '127.0.0.1');
@@ -184,6 +185,61 @@ test('buildAgentPreflightPacket returns agent packet shape, role, project identi
   assert.equal(Object.hasOwn(packet, 'mode'), false);
   assert.equal(Object.hasOwn(packet, 'recommendedHumanDecision'), false);
   assert.equal(Object.hasOwn(packet, 'noAttentionMessage'), false);
+});
+
+test('agent preflight packet stays separate from project brief report output', () => {
+  const project = minimalProject('Alpha', {
+    realBlockers: [signal('blocked', 'Human approval is still required.', 14)],
+  });
+
+  const packet = buildAgentPreflightPacket({
+    scanOutput: scanWith([project]),
+    config: configFor([project]),
+    projectId: 'project-1',
+    agentRole: 'implementation',
+    changeId: 'agent-preflight-packet',
+    aiContext: { projectPath: project.path },
+    findings: [],
+    openspecState: { changes: [changeState()] },
+    phaseSignals: [],
+    auditSignals: [],
+    checklistSignals: [],
+    now: () => new Date('2026-07-09T02:00:00.000Z'),
+  });
+
+  const report = buildProjectBriefReport({
+    scanOutput: scanWith([project]),
+    config: configFor([project]),
+    findings: [],
+    changes: null,
+    previousSnapshotAvailable: false,
+    mode: 'daily',
+    since: null,
+    now: () => new Date('2026-07-09T02:00:00.000Z'),
+  });
+
+  assert.equal(packet.kind, 'agent-preflight-packet');
+  assert.equal(report.kind, 'project-brief-report');
+
+  assert.equal(packet.agentRole, 'implementation');
+  assert.ok(Array.isArray(packet.requiredReading));
+  assert.ok(Array.isArray(packet.acceptanceMap));
+  assert.ok(Array.isArray(packet.verificationPlan));
+
+  assert.equal(report.mode, 'daily');
+  assert.ok(Array.isArray(report.items));
+  assert.ok(report.items[0]?.recommendedHumanDecision);
+  assert.equal(Object.hasOwn(report, 'noAttentionMessage'), true);
+  assert.equal(report.noAttentionMessage, null);
+
+  assert.equal(Object.hasOwn(packet, 'mode'), false);
+  assert.equal(Object.hasOwn(packet, 'recommendedHumanDecision'), false);
+  assert.equal(Object.hasOwn(packet, 'noAttentionMessage'), false);
+
+  assert.equal(Object.hasOwn(report, 'agentRole'), false);
+  assert.equal(Object.hasOwn(report, 'requiredReading'), false);
+  assert.equal(Object.hasOwn(report, 'acceptanceMap'), false);
+  assert.equal(Object.hasOwn(report, 'verificationPlan'), false);
 });
 
 test('buildAgentPreflightPacket treats missing or invalid generated scan data as a domain error', () => {

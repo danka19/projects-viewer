@@ -19,7 +19,7 @@
 
 - [x] 3.1 Add pure composition tests for packet shape, `kind: "agent-preflight-packet"`, agent roles, required reading, project state, acceptance mapping, attention signals, verification expectations, evidence, derived labels, and work boundaries.
   - Task 2 core coverage completed: packet shape, agent role, project identity, missing/invalid generated scan handling, missing `projectId`, disabled/unknown project handling, generated-scan saved-path mismatch handling, normalized config-path matching, unknown `changeId` safe state, no fabricated proposed requirements/tasks for unresolved change ids, and purity guards are now covered in `tests/agent-preflight-packet.test.mjs`.
-- [ ] 3.2 Add tests proving packet generation stays separate from `project-brief-report` output and does not include daily/weekly human brief fields.
+- [x] 3.2 Add tests proving packet generation stays separate from `project-brief-report` output and does not include daily/weekly human brief fields.
 - [x] 3.3 Add API tests for valid packet retrieval, missing `projectId`, unknown or disabled projects, unknown change ids, invalid `agentRole`, repeated scalar parameters, unknown parameters, path-like parameters, and missing generated scan data.
 - [ ] 3.4 Add negative side-effect tests proving retrieval does not write AI context snapshots, findings stores, report history, scanned project files, task/calendar records, commits, shell commands, remote calls, or agent work.
   - [x] Task 6 and Task 7 focused coverage proves the API retrieval path stays read-only for local files already exercised here: the findings store, `ai.context.snapshot.json`, `report-history.json`, a tracked-project sentinel file, plus query validation/error-state handling for safe request parsing.
