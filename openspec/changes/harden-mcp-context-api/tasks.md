@@ -9,7 +9,7 @@
 
 - [x] 2.1 Add a pure helper that maps saved config projects to compact project identity objects.
 - [x] 2.2 Add `GET /api/configured-projects` with safe query handling and no arbitrary path input.
-- [ ] 2.3 Add tests for enabled/disabled projects, tags, empty config, and optional scan status joining where implemented.
+- [x] 2.3 Add tests for enabled/disabled projects, tags, empty config, and optional scan status joining where implemented.
 - [ ] 2.4 Add MCP tool `list_configured_projects` and document it as the preferred preflight `projectId` lookup.
 
 ## 3. API JSON Boundary Hardening
