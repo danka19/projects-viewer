@@ -100,6 +100,36 @@ function changeState(overrides = {}) {
   };
 }
 
+function acceptedSpec(overrides = {}) {
+  return {
+    id: overrides.id ?? 'accepted-spec-1',
+    title: overrides.title ?? 'Accepted packet contract',
+    evidenceTarget: overrides.evidenceTarget ?? 'Accepted behavior has verification evidence.',
+    file: overrides.file ?? 'openspec/specs/agent-preflight-packet/spec.md',
+    line: overrides.line ?? 12,
+  };
+}
+
+function checklistExpectation(overrides = {}) {
+  return {
+    kind: overrides.kind ?? 'command',
+    command: overrides.command,
+    reason: overrides.reason ?? 'Checklist verification guidance.',
+    expectedEvidence: overrides.expectedEvidence ?? 'Verification evidence recorded.',
+    evidence: overrides.evidence ?? [{ kind: 'source', file: 'docs/AI_STEP_VERIFICATION_CHECKLIST.md', line: 1 }],
+  };
+}
+
+function phaseExpectation(overrides = {}) {
+  return {
+    kind: overrides.kind ?? 'review',
+    command: overrides.command,
+    reason: overrides.reason ?? 'Phase expectation for the active work item.',
+    expectedEvidence: overrides.expectedEvidence ?? 'Phase evidence recorded.',
+    evidence: overrides.evidence ?? [{ kind: 'source', file: 'docs/phases/PHASE_3.md', line: 1 }],
+  };
+}
+
 test('buildAgentPreflightPacket returns agent packet shape, role, project identity, source list, and work boundaries', () => {
   const project = minimalProject('Alpha', {
     realBlockers: [signal('blocked', 'Human approval is still required.', 14)],
@@ -374,6 +404,206 @@ test('buildAgentPreflightPacket uses openspecState artifacts even without a reso
       { kind: 'change-artifact', title: 'OpenSpec tasks' },
     ],
   );
+});
+
+test('buildAgentPreflightPacket labels proposed change requirements and tasks without treating them as accepted', () => {
+  const project = minimalProject('Alpha');
+
+  const packet = buildAgentPreflightPacket({
+    scanOutput: scanWith([project]),
+    config: configFor([project]),
+    projectId: 'project-1',
+    changeId: 'agent-preflight-packet',
+    findings: [],
+    openspecState: {
+      acceptedSpecs: [
+        acceptedSpec({
+          id: 'accepted:packet-kind',
+          title: 'Packet identifies its own kind',
+          evidenceTarget: 'tests/agent-preflight-packet.test.mjs covers kind separation.',
+        }),
+      ],
+      changes: [changeState()],
+      change: {
+        id: 'agent-preflight-packet',
+        requirements: [
+          {
+            id: 'req-1',
+            title: 'Packet includes active change context',
+            evidenceTarget: 'Focused packet composition assertions prove change context is present.',
+            file: 'openspec/changes/agent-preflight-packet/specs/agent-preflight-packet/spec.md',
+            line: 28,
+          },
+        ],
+      },
+      tasks: [
+        {
+          id: '1.4',
+          title: 'Compose acceptance mapping from accepted specs and proposed change deltas',
+          body: 'Long task body that must not be copied into acceptanceMap output.',
+          evidenceTarget: 'Focused task assertions cover acceptanceMap references only.',
+          file: 'openspec/changes/agent-preflight-packet/tasks.md',
+          line: 4,
+        },
+      ],
+    },
+  });
+
+  const proposedRequirement = packet.acceptanceMap.find((item) => item.id === 'req-1');
+  const acceptedRequirement = packet.acceptanceMap.find((item) => item.id === 'accepted:packet-kind');
+  const taskReference = packet.acceptanceMap.find((item) => item.id === '1.4');
+
+  assert.equal(proposedRequirement?.source, 'proposed-change');
+  assert.equal(proposedRequirement?.status, 'proposed');
+  assert.equal(acceptedRequirement?.source, 'accepted-spec');
+  assert.equal(acceptedRequirement?.status, 'accepted');
+  assert.match(taskReference?.evidenceTarget ?? '', /Focused task assertions cover acceptanceMap references only\./);
+  assert.equal(taskReference?.title.includes('Long task body that must not be copied'), false);
+});
+
+test('buildAgentPreflightPacket ranks attention and verification first for verification role', () => {
+  const project = minimalProject('Alpha', {
+    realBlockers: [signal('blocked', 'Release is blocked pending decision.', 10)],
+    approvalGates: [signal('approval-gate', 'Human sign-off is required before merge.', 11)],
+    mainRisk: 'Verification ordering could drift from the role contract.',
+    gaps: [
+      {
+        title: 'README does not mention agent preflight packet yet.',
+        file: 'docs/README.md',
+        line: 20,
+      },
+    ],
+  });
+
+  const findings = [
+    {
+      title: 'Focused verification scenario still missing coverage.',
+      reviewState: 'new',
+      project: { path: project.path },
+      evidence: [{ kind: 'source', file: 'docs/CURRENT_PROJECT_AUDIT.md', line: 9 }],
+    },
+  ];
+
+  const verificationPacket = buildAgentPreflightPacket({
+    scanOutput: scanWith([project]),
+    config: configFor([project]),
+    projectId: 'project-1',
+    agentRole: 'verification',
+    findings,
+    openspecState: {
+      tasks: [
+        {
+          id: '1.4',
+          title: 'Compose acceptance mapping from accepted specs and proposed change deltas',
+          evidenceTarget: 'Acceptance map assertions remain covered.',
+          file: 'openspec/changes/agent-preflight-packet/tasks.md',
+          line: 4,
+        },
+      ],
+    },
+    auditSignals: {
+      signals: [
+        {
+          kind: 'stale-doc',
+          title: 'Audit says README is stale.',
+          file: 'docs/CURRENT_PROJECT_AUDIT.md',
+          line: 14,
+          evidence: [{ kind: 'source', file: 'docs/CURRENT_PROJECT_AUDIT.md', line: 14 }],
+        },
+      ],
+    },
+    checklistSignals: {
+      signals: [
+        {
+          kind: 'verification-gap',
+          title: 'git diff --check has not been recorded yet.',
+          file: 'docs/AI_STEP_VERIFICATION_CHECKLIST.md',
+          line: 8,
+          evidence: [{ kind: 'source', file: 'docs/AI_STEP_VERIFICATION_CHECKLIST.md', line: 8 }],
+        },
+      ],
+      expectations: [
+        checklistExpectation({
+          command: 'git diff --check',
+          reason: 'Detect whitespace and patch formatting issues.',
+          expectedEvidence: 'git diff --check exits cleanly.',
+        }),
+      ],
+    },
+    phaseSignals: {
+      expectations: [
+        phaseExpectation({
+          reason: 'Complete acceptance map task implementation.',
+          expectedEvidence: 'Task 1.4 implementation is finished.',
+        }),
+      ],
+    },
+  });
+
+  const implementationPacket = buildAgentPreflightPacket({
+    scanOutput: scanWith([project]),
+    config: configFor([project]),
+    projectId: 'project-1',
+    agentRole: 'implementation',
+    findings,
+    openspecState: {
+      tasks: [
+        {
+          id: '1.4',
+          title: 'Compose acceptance mapping from accepted specs and proposed change deltas',
+          evidenceTarget: 'Acceptance map assertions remain covered.',
+          file: 'openspec/changes/agent-preflight-packet/tasks.md',
+          line: 4,
+        },
+      ],
+    },
+    auditSignals: {
+      signals: [
+        {
+          kind: 'stale-doc',
+          title: 'Audit says README is stale.',
+          file: 'docs/CURRENT_PROJECT_AUDIT.md',
+          line: 14,
+          evidence: [{ kind: 'source', file: 'docs/CURRENT_PROJECT_AUDIT.md', line: 14 }],
+        },
+      ],
+    },
+    checklistSignals: {
+      signals: [
+        {
+          kind: 'verification-gap',
+          title: 'git diff --check has not been recorded yet.',
+          file: 'docs/AI_STEP_VERIFICATION_CHECKLIST.md',
+          line: 8,
+          evidence: [{ kind: 'source', file: 'docs/AI_STEP_VERIFICATION_CHECKLIST.md', line: 8 }],
+        },
+      ],
+      expectations: [
+        checklistExpectation({
+          command: 'git diff --check',
+          reason: 'Detect whitespace and patch formatting issues.',
+          expectedEvidence: 'git diff --check exits cleanly.',
+        }),
+      ],
+    },
+    phaseSignals: {
+      expectations: [
+        phaseExpectation({
+          reason: 'Complete acceptance map task implementation.',
+          expectedEvidence: 'Task 1.4 implementation is finished.',
+        }),
+      ],
+    },
+  });
+
+  assert.deepEqual(
+    verificationPacket.attentionSignals.map((item) => item.kind),
+    ['blocker', 'approval-gate', 'finding', 'stale-doc', 'verification-gap', 'risk', 'documentation-gap'],
+  );
+  assert.equal(verificationPacket.workBoundaries, implementationPacket.workBoundaries);
+  assert.equal(verificationPacket.generatedFrom.remoteServicesUsed, implementationPacket.generatedFrom.remoteServicesUsed);
+  assert.match(verificationPacket.verificationPlan[0]?.expectedEvidence ?? '', /git diff --check exits cleanly\./);
+  assert.match(implementationPacket.verificationPlan[0]?.expectedEvidence ?? '', /Task 1\.4 implementation is finished\./);
 });
 
 test('agent preflight composition module stays pure and avoids forbidden side-effect dependencies', async () => {

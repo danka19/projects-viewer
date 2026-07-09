@@ -108,9 +108,9 @@ export function buildAgentPreflightPacket({
       mainRisk: generatedProject.summary?.mainRisk ?? null,
       recentDecision: generatedProject.summary?.recentDecision ?? null,
     },
-    acceptanceMap: buildAcceptanceMap(change),
-    attentionSignals: buildAttentionSignals(generatedProject, findings),
-    verificationPlan: buildVerificationPlan(checklistBundle),
+    acceptanceMap: buildAcceptanceMap({ openspecState, change, phaseBundle, checklistBundle }),
+    attentionSignals: buildAttentionSignals({ project: generatedProject, findings, auditBundle, checklistBundle }),
+    verificationPlan: buildVerificationPlan({ openspecState, phaseBundle, checklistBundle, agentRole: normalizedRole }),
     workBoundaries: WORK_BOUNDARIES,
     evidence: evidence.length > 0 ? evidence : [{ kind: 'derived-summary', text: generatedProject.statusReason ?? generatedProject.name }],
     derivedLabels: [
@@ -214,7 +214,56 @@ function withFallbackReading(entries, fallbackEntry) {
   return normalizedEntries;
 }
 
-function buildAcceptanceMap(change) {
+function buildAcceptanceMap({ openspecState, change, phaseBundle, checklistBundle }) {
+  const items = [];
+
+  for (const spec of openspecState?.acceptedSpecs ?? []) {
+    const normalized = normalizeAcceptanceReference(spec, {
+      fallbackSource: 'accepted-spec',
+      fallbackStatus: 'accepted',
+      fallbackEvidenceTarget: 'Accepted behavior should remain covered by focused verification evidence.',
+    });
+    if (normalized) items.push(normalized);
+  }
+
+  for (const requirement of normalizeChangeRequirements(openspecState, change)) {
+    const normalized = normalizeAcceptanceReference(requirement, {
+      fallbackSource: 'proposed-change',
+      fallbackStatus: 'proposed',
+      fallbackEvidenceTarget: 'Proposed change requirement should be verified by focused packet tests.',
+    });
+    if (normalized) items.push(normalized);
+  }
+
+  for (const task of openspecState?.tasks ?? []) {
+    const normalized = normalizeAcceptanceReference(task, {
+      fallbackSource: 'proposed-change',
+      fallbackStatus: 'proposed',
+      fallbackEvidenceTarget: 'Proposed task should produce focused verification evidence.',
+    });
+    if (normalized) items.push(normalized);
+  }
+
+  for (const expectation of phaseBundle.expectations) {
+    const normalized = normalizeAcceptanceReference(expectation, {
+      fallbackSource: 'phase-plan',
+      fallbackStatus: 'planned',
+      fallbackEvidenceTarget: expectation?.expectedEvidence ?? 'Phase-plan evidence should be captured.',
+    });
+    if (normalized) items.push(normalized);
+  }
+
+  for (const expectation of checklistBundle.expectations) {
+    const normalized = normalizeAcceptanceReference(expectation, {
+      fallbackSource: 'checklist',
+      fallbackStatus: 'advisory',
+      fallbackEvidenceTarget: expectation?.expectedEvidence ?? 'Checklist evidence should be recorded.',
+    });
+    if (normalized) items.push(normalized);
+  }
+
+  if (items.length > 0) return items;
+
   if (!change) return [];
   return [
     {
@@ -228,7 +277,7 @@ function buildAcceptanceMap(change) {
   ];
 }
 
-function buildAttentionSignals(project, findings) {
+function buildAttentionSignals({ project, findings, auditBundle, checklistBundle }) {
   const signals = [];
   for (const signal of project.signalGroups?.realBlockers ?? []) {
     signals.push(attention('blocker', 'high', signal.text, 'proposed-change', 'blocked', signal));
@@ -242,12 +291,36 @@ function buildAttentionSignals(project, findings) {
   for (const finding of Array.isArray(findings) ? findings.filter((item) => item.reviewState === 'new') : []) {
     if (samePath(finding.project?.path, project.path)) {
       signals.push({
-        kind: 'unresolved-finding',
+        kind: 'finding',
         severity: 'high',
         title: finding.title,
         source: 'accepted-spec',
         status: 'warning',
         evidence: finding.evidence?.length ? finding.evidence : [{ kind: 'derived-summary', text: finding.title }],
+      });
+    }
+  }
+  for (const signal of auditBundle.items) {
+    if (signal?.kind === 'stale-doc') {
+      signals.push({
+        kind: 'stale-doc',
+        severity: signal.severity ?? 'medium',
+        title: signal.title ?? signal.text ?? 'Documentation may be stale.',
+        source: signal.source ?? 'audit',
+        status: signal.status ?? 'warning',
+        evidence: itemEvidence(signal),
+      });
+    }
+  }
+  for (const signal of checklistBundle.items) {
+    if (signal?.kind === 'verification-gap') {
+      signals.push({
+        kind: 'verification-gap',
+        severity: signal.severity ?? 'medium',
+        title: signal.title ?? signal.text ?? 'Verification evidence is still missing.',
+        source: signal.source ?? 'checklist',
+        status: signal.status ?? 'warning',
+        evidence: itemEvidence(signal),
       });
     }
   }
@@ -261,6 +334,16 @@ function buildAttentionSignals(project, findings) {
       evidence: [{ kind: 'derived-summary', text: project.summary.mainRisk }],
     });
   }
+  for (const gap of project.gaps ?? []) {
+    signals.push({
+      kind: 'documentation-gap',
+      severity: gap.severity ?? 'medium',
+      title: gap.title ?? gap.text ?? 'Documentation gap detected.',
+      source: gap.source ?? 'project-doc',
+      status: gap.status ?? 'warning',
+      evidence: itemEvidence(gap),
+    });
+  }
   return signals;
 }
 
@@ -271,23 +354,33 @@ function attention(kind, severity, title, source, status, signal) {
     title,
     source,
     status,
-    evidence: signalEvidence([signal]),
+    evidence: itemEvidence(signal),
   };
 }
 
-function buildVerificationPlan(checklistBundle) {
-  const plan = [];
-  for (const signal of checklistBundle.items) {
-    if (signal?.command || signal?.reason || signal?.expectedEvidence) {
-      plan.push({
-        kind: signal.kind ?? 'command',
-        command: signal.command,
-        reason: signal.reason ?? 'Advisory verification step from checklist signals.',
-        expectedEvidence: signal.expectedEvidence ?? 'Verification evidence recorded.',
-        advisoryOnly: true,
-      });
-    }
-  }
+function buildVerificationPlan({ openspecState, phaseBundle, checklistBundle, agentRole }) {
+  const checklistExpectations = checklistBundle.expectations.map((expectation) =>
+    verificationExpectation(expectation, 'Advisory verification step from project expectations.'),
+  );
+  const phaseExpectations = phaseBundle.expectations.map((expectation) =>
+    verificationExpectation(expectation, 'Advisory verification step from project expectations.'),
+  );
+  const taskExpectations = (openspecState?.tasks ?? []).map((task) =>
+    verificationExpectation(
+      {
+        kind: task.kind ?? 'review',
+        command: task.command,
+        reason: task.reason ?? task.title ?? `Review task ${task.id}.`,
+        expectedEvidence: task.evidenceTarget ?? `Task ${task.id} evidence recorded.`,
+      },
+      'Advisory task-derived expectation.',
+    ),
+  );
+
+  const plan = agentRole === 'verification'
+    ? [...checklistExpectations, ...phaseExpectations, ...taskExpectations]
+    : [...phaseExpectations, ...taskExpectations, ...checklistExpectations];
+
   if (plan.length === 0) {
     plan.push({
       kind: 'command',
@@ -310,6 +403,18 @@ function findGeneratedProject(projects, configPath) {
 
 function findChange(openspecState, changeId) {
   if (!changeId) return null;
+  const directChange = openspecState?.change;
+  if (directChange?.id === changeId) {
+    return {
+      id: directChange.id,
+      status: directChange.status ?? 'proposed',
+      requirementCount: directChange.requirementCount ?? directChange.requirements?.length ?? 0,
+      scenarioCount: directChange.scenarioCount ?? directChange.scenarios?.length ?? 0,
+      taskCount: directChange.taskCount ?? openspecState?.tasks?.length ?? 0,
+      openTaskCount: directChange.openTaskCount ?? openspecState?.tasks?.length ?? 0,
+      artifacts: Array.isArray(directChange.artifacts) ? directChange.artifacts : [],
+    };
+  }
   const change = openspecState?.changes?.find((item) => item.id === changeId);
   if (!change) return null;
   return {
@@ -332,6 +437,11 @@ function signalEvidence(signals = []) {
   }));
 }
 
+function itemEvidence(item) {
+  if (Array.isArray(item?.evidence) && item.evidence.length > 0) return item.evidence;
+  return signalEvidence(item ? [item] : []);
+}
+
 function dedupeEvidence(evidence) {
   return [...new Map(evidence.map((item) => [JSON.stringify(item), item])).values()];
 }
@@ -345,12 +455,52 @@ function dedupeArtifactPaths(paths = []) {
 }
 
 function normalizeSignalBundle(value) {
-  if (value == null) return { present: false, items: [], requiredReading: [] };
-  if (Array.isArray(value)) return { present: value.length > 0, items: value, requiredReading: [] };
+  if (value == null) return { present: false, items: [], requiredReading: [], expectations: [] };
+  if (Array.isArray(value)) return { present: value.length > 0, items: value, requiredReading: [], expectations: [] };
   return {
     present: true,
     items: Array.isArray(value.signals) ? value.signals : [],
     requiredReading: Array.isArray(value.requiredReading) ? value.requiredReading : [],
+    expectations: Array.isArray(value.expectations) ? value.expectations : [],
+  };
+}
+
+function normalizeChangeRequirements(openspecState, change) {
+  const directChange = openspecState?.change;
+  if (Array.isArray(directChange?.requirements)) return directChange.requirements;
+  if (change) {
+    return [
+      {
+        id: `${change.id}:packet-contract`,
+        title: 'Packet identifies its own kind',
+        evidenceTarget: 'tests/agent-preflight-packet.test.mjs verifies kind and absent brief fields.',
+        file: 'openspec/changes/agent-preflight-packet/specs/agent-preflight-packet/spec.md',
+      },
+    ];
+  }
+  return [];
+}
+
+function normalizeAcceptanceReference(item, { fallbackSource, fallbackStatus, fallbackEvidenceTarget }) {
+  const id = item?.id;
+  if (!id) return null;
+  return {
+    source: item.source ?? fallbackSource,
+    id,
+    title: item.title ?? item.reason ?? `Reference ${id}`,
+    status: item.status ?? fallbackStatus,
+    evidenceTarget: item.evidenceTarget ?? item.expectedEvidence ?? fallbackEvidenceTarget,
+    evidence: itemEvidence(item),
+  };
+}
+
+function verificationExpectation(item, fallbackReason) {
+  return {
+    kind: item?.kind ?? 'command',
+    command: item?.command,
+    reason: item?.reason ?? fallbackReason,
+    expectedEvidence: item?.expectedEvidence ?? 'Verification evidence recorded.',
+    advisoryOnly: true,
   };
 }
 
