@@ -335,3 +335,110 @@ test('projects viewer MCP server returns a tool error with detail when the local
     });
   }
 });
+
+test('projects viewer MCP server rejects wrong-shape JSON responses with contract-specific errors', async () => {
+  const invalidByPath = new Map([
+    ['/api/projects', { generatedAt: '2026-07-09T00:00:00.000Z' }],
+    ['/api/configured-projects', { projects: [{ id: 'project-1', name: 'MCP Project', path: '/tmp/project' }] }],
+    ['/api/ai-context', { kind: 'all-project-ai-context', generatedAt: '2026-07-09T00:00:00.000Z' }],
+    ['/api/ai-findings', { generatedAt: '2026-07-09T00:00:00.000Z' }],
+    ['/api/project-brief-report', { kind: 'project-brief-report', generatedAt: '2026-07-09T00:00:00.000Z' }],
+    ['/api/agent-preflight-packet?projectId=project-1', { kind: 'project-brief-report', project: { id: 'project-1' } }],
+  ]);
+  const cases = [
+    ['list_projects', {}, /dashboard scan payload/i],
+    ['list_configured_projects', {}, /configured projects payload/i],
+    ['get_ai_context', {}, /ai context payload/i],
+    ['get_ai_findings', {}, /ai findings payload/i],
+    ['get_project_brief_report', {}, /project brief report payload/i],
+    ['get_agent_preflight_packet', { projectId: 'project-1' }, /agent preflight packet payload/i],
+  ];
+  const wrongShapeServer = http.createServer((request, response) => {
+    const body = invalidByPath.get(request.url);
+    if (body) {
+      response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify(body));
+      return;
+    }
+
+    response.writeHead(404, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ error: 'not-found' }));
+  });
+
+  await new Promise((resolve) => wrongShapeServer.listen(0, '127.0.0.1', resolve));
+  const { port } = wrongShapeServer.address();
+  const mcp = startMcpClient(`http://127.0.0.1:${port}`);
+
+  try {
+    await mcp.request('initialize', {
+      protocolVersion: '2024-11-05',
+      capabilities: {},
+      clientInfo: { name: 'projects-viewer-test', version: '0.1.0' },
+    });
+    mcp.notify('notifications/initialized');
+
+    for (const [name, args, expectedContract] of cases) {
+      const result = await mcp.request('tools/call', { name, arguments: args });
+      assert.equal(result.isError, true, `expected tool error for ${name}`);
+      assert.match(result.content[0].text.trimEnd(), expectedContract);
+    }
+  } finally {
+    await mcp.close();
+    await new Promise((resolve, reject) => {
+      wrongShapeServer.close((err) => (err ? reject(err) : resolve()));
+    });
+  }
+});
+
+test('projects viewer MCP server accepts a valid agent preflight packet payload', async () => {
+  const packetServer = http.createServer((request, response) => {
+    if (request.url === '/api/agent-preflight-packet?projectId=project-1&agentRole=verification') {
+      response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      response.end(
+        JSON.stringify({
+          kind: 'agent-preflight-packet',
+          schemaVersion: 1,
+          generatedAt: '2026-07-09T00:00:00.000Z',
+          agentRole: 'verification',
+          project: {
+            id: 'project-1',
+            name: 'MCP Project',
+            path: 'C:/tracked/project',
+          },
+        }),
+      );
+      return;
+    }
+
+    response.writeHead(404, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ error: 'not-found' }));
+  });
+
+  await new Promise((resolve) => packetServer.listen(0, '127.0.0.1', resolve));
+  const { port } = packetServer.address();
+  const mcp = startMcpClient(`http://127.0.0.1:${port}`);
+
+  try {
+    await mcp.request('initialize', {
+      protocolVersion: '2024-11-05',
+      capabilities: {},
+      clientInfo: { name: 'projects-viewer-test', version: '0.1.0' },
+    });
+    mcp.notify('notifications/initialized');
+
+    const result = await mcp.request('tools/call', {
+      name: 'get_agent_preflight_packet',
+      arguments: { projectId: 'project-1', agentRole: 'verification' },
+    });
+    assert.equal(result.isError, false);
+    const payload = JSON.parse(result.content[0].text);
+    assert.equal(payload.kind, 'agent-preflight-packet');
+    assert.equal(payload.project.id, 'project-1');
+    assert.equal(payload.agentRole, 'verification');
+  } finally {
+    await mcp.close();
+    await new Promise((resolve, reject) => {
+      packetServer.close((err) => (err ? reject(err) : resolve()));
+    });
+  }
+});

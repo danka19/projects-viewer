@@ -72,25 +72,46 @@ const tools = [
 ];
 
 const handlers = {
-  list_projects: () => requestJson('/api/projects'),
-  list_configured_projects: () => requestJson('/api/configured-projects'),
+  list_projects: () =>
+    requestJson('/api/projects', {
+      contractName: 'dashboard scan payload',
+      validate: validateDashboardScanPayload,
+    }),
+  list_configured_projects: () =>
+    requestJson('/api/configured-projects', {
+      contractName: 'configured projects payload',
+      validate: validateConfiguredProjectsPayload,
+    }),
   get_agent_preflight_packet: (args) => {
     const params = new URLSearchParams({ projectId: requiredString(args, 'projectId') });
     if (args.changeId) params.set('changeId', String(args.changeId));
     if (args.agentRole) params.set('agentRole', String(args.agentRole));
-    return requestJson(`/api/agent-preflight-packet?${params.toString()}`);
+    return requestJson(`/api/agent-preflight-packet?${params.toString()}`, {
+      contractName: 'agent preflight packet payload',
+      validate: validateAgentPreflightPacketPayload,
+    });
   },
   get_project_brief_report: (args) => {
     const params = new URLSearchParams();
     if (args.mode) params.set('mode', String(args.mode));
     if (args.since) params.set('since', String(args.since));
-    return requestJson(`/api/project-brief-report${params.size ? `?${params.toString()}` : ''}`);
+    return requestJson(`/api/project-brief-report${params.size ? `?${params.toString()}` : ''}`, {
+      contractName: 'project brief report payload',
+      validate: validateProjectBriefReportPayload,
+    });
   },
-  get_ai_context: (args) => requestJson(args.projectId ? `/api/ai-context/projects/${encodeURIComponent(String(args.projectId))}` : '/api/ai-context'),
+  get_ai_context: (args) =>
+    requestJson(args.projectId ? `/api/ai-context/projects/${encodeURIComponent(String(args.projectId))}` : '/api/ai-context', {
+      contractName: 'AI context payload',
+      validate: validateAiContextPayload,
+    }),
   get_ai_findings: (args) => {
     const params = new URLSearchParams();
     if (args.state) params.set('state', String(args.state));
-    return requestJson(`/api/ai-findings${params.size ? `?${params.toString()}` : ''}`);
+    return requestJson(`/api/ai-findings${params.size ? `?${params.toString()}` : ''}`, {
+      contractName: 'AI findings payload',
+      validate: validateAiFindingsPayload,
+    });
   },
 };
 
@@ -152,7 +173,7 @@ function respond(id, result, error) {
   process.stdout.write(`${JSON.stringify(payload)}\n`);
 }
 
-async function requestJson(pathname) {
+async function requestJson(pathname, { contractName = null, validate = null } = {}) {
   const response = await fetch(new URL(pathname, API_BASE_URL));
   const text = await response.text();
   const contentType = response.headers.get('content-type') ?? 'unknown';
@@ -181,6 +202,14 @@ async function requestJson(pathname) {
       `Projects Viewer API returned ${response.status}. ${errorContext}. Start the local dashboard with "npm run dev" and retry.`,
     );
   }
+  if (typeof validate === 'function') {
+    const validationError = validate(body);
+    if (validationError) {
+      throw new Error(
+        `Projects Viewer API returned wrong shape for ${contractName}. Expected ${validationError}. ${errorContext}.`,
+      );
+    }
+  }
   return body;
 }
 
@@ -197,4 +226,75 @@ function requiredString(args, key) {
   const value = args?.[key];
   if (typeof value !== 'string' || value.trim() === '') throw new Error(`${key} is required.`);
   return value;
+}
+
+function validateDashboardScanPayload(body) {
+  if (!isObject(body) || !isString(body.generatedAt) || !Array.isArray(body.projects)) {
+    return 'generatedAt string and projects array';
+  }
+  return null;
+}
+
+function validateConfiguredProjectsPayload(body) {
+  if (!isObject(body) || !Array.isArray(body.projects)) {
+    return 'projects array of compact project identities';
+  }
+  if (
+    !body.projects.every(
+      (project) =>
+        isObject(project) &&
+        isString(project.id) &&
+        isString(project.name) &&
+        isString(project.path) &&
+        typeof project.enabled === 'boolean' &&
+        Array.isArray(project.tags),
+    )
+  ) {
+    return 'projects array of compact project identities';
+  }
+  return null;
+}
+
+function validateAiContextPayload(body) {
+  if (!isObject(body) || !isString(body.kind)) {
+    return 'all-project or single-project AI context contract';
+  }
+  if (body.kind === 'all-project-ai-context') {
+    return !isString(body.generatedAt) || !Array.isArray(body.projects) ? 'kind "all-project-ai-context" with generatedAt string and projects array' : null;
+  }
+  if (body.kind === 'project-ai-context') {
+    return !isObject(body.identity) || !isString(body.identity.name) || !isString(body.identity.path)
+      ? 'kind "project-ai-context" with identity.name and identity.path strings'
+      : null;
+  }
+  return 'kind "all-project-ai-context" or "project-ai-context"';
+}
+
+function validateAiFindingsPayload(body) {
+  if (!isObject(body) || !isString(body.generatedAt) || !Array.isArray(body.findings)) {
+    return 'generatedAt string and findings array';
+  }
+  return null;
+}
+
+function validateProjectBriefReportPayload(body) {
+  if (!isObject(body) || body.kind !== 'project-brief-report' || !isString(body.generatedAt) || !Array.isArray(body.items)) {
+    return 'kind "project-brief-report" with generatedAt string and items array';
+  }
+  return null;
+}
+
+function validateAgentPreflightPacketPayload(body) {
+  if (!isObject(body) || body.kind !== 'agent-preflight-packet') {
+    return 'kind "agent-preflight-packet"';
+  }
+  return null;
+}
+
+function isObject(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isString(value) {
+  return typeof value === 'string';
 }
