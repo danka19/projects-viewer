@@ -81,7 +81,7 @@ Last updated: 2026-07-09.
 | AUDIT-007 | `agent-preflight-packet` is implemented separately from `project-brief-report`; final acceptance still requires full verification evidence and human review before archiving the OpenSpec change. | Current feature | monitored |
 | AUDIT-008 | Next implementation step remains a human/product decision: archive `add-project-brief-report`, accept/archive `agent-preflight-packet` after final verification, or continue with dashboard/brief UI. | Human owner | open |
 | AUDIT-009 | Unrelated uncommitted UI/worktree changes were present while implementing `agent-preflight-packet`; they were not reverted or included in feature commits, and final verification must distinguish them from this change. | Human owner / current session | monitored |
-| AUDIT-010 | MCP/API hardening is needed before agents can rely on preflight packet retrieval in everyday workflow: remove root legacy config fallback, expose compact saved project ids, prevent `/api/*` HTML fallback from masquerading as success, and improve local HTTP diagnostics. OpenSpec proposal now exists as `harden-mcp-context-api`; implementation remains open. | Next bounded change | open |
+| AUDIT-010 | MCP/API hardening implementation has landed in branch `harden-mcp-context-api`: root legacy config fallback is removed, compact saved project ids are exposed, `/api/*` HTML fallback no longer masquerades as success, and local HTTP diagnostics guidance is updated. Final verification evidence and audit closure remain pending for Task 17. | Task 17 verification/closure | open |
 
 ## Audit Rules
 
