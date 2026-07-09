@@ -1,6 +1,6 @@
 ## 1. Contract And Composition
 
-- [ ] 1.1 Define shared agent preflight packet types for metadata, project identity, agent role, change context, generated sources, input state, safe states, required reading, acceptance mapping, attention signals, verification expectations, evidence, derived labels, and work boundaries.
+- [x] 1.1 Define shared agent preflight packet types for metadata, project identity, agent role, change context, generated sources, input state, safe states, required reading, acceptance mapping, attention signals, verification expectations, evidence, derived labels, and work boundaries.
 - [ ] 1.2 Add a focused pure server composition module for `agent-preflight-packet` that accepts prepared local inputs and does not read arbitrary request paths.
 - [ ] 1.3 Compose required-reading references from project rules, documentation map, relevant phase docs, OpenSpec artifacts, audit docs, and verification checklist signals where available.
 - [ ] 1.4 Compose acceptance mapping from accepted specs, proposed change deltas, change tasks, phase-plan expectations, and checklist evidence targets without treating proposed changes as accepted behavior.

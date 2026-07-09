@@ -568,6 +568,204 @@ export interface ProjectBriefReport {
   workBoundaries: ProjectBriefReportWorkBoundaries;
 }
 
+export type AgentPreflightAgentRole = 'implementation' | 'reviewer' | 'verification' | 'handoff';
+
+export type AgentPreflightChangeStatus = 'proposed' | 'accepted' | 'archived' | 'unknown';
+
+export type AgentPreflightAcceptanceSource =
+  | 'accepted-spec'
+  | 'proposed-change'
+  | 'phase-plan'
+  | 'audit'
+  | 'checklist'
+  | 'project-doc';
+
+export type AgentPreflightAcceptanceStatus = 'accepted' | 'proposed';
+
+export type AgentPreflightAttentionSignalKind =
+  | 'risk'
+  | 'blocker'
+  | 'approval-gate'
+  | 'finding'
+  | 'documentation-gap'
+  | 'verification-gap'
+  | 'stale-doc'
+  | 'project-state';
+
+export type AgentPreflightVerificationExpectationKind = 'command' | 'manual-check' | 'review' | 'doc-read';
+
+export type AgentPreflightRequiredReadingKind =
+  | 'project-rule'
+  | 'documentation-map'
+  | 'roadmap'
+  | 'phase-doc'
+  | 'openspec'
+  | 'audit'
+  | 'verification-checklist';
+
+export type AgentPreflightReadingStatus = 'available' | 'missing' | 'proposed' | 'accepted' | 'archived' | 'unavailable';
+
+export type AgentPreflightSafeStateCode =
+  | 'missing-generated-scan-data'
+  | 'missing-tracked-project'
+  | 'missing-project-config'
+  | 'missing-ai-context'
+  | 'missing-ai-findings'
+  | 'missing-openspec'
+  | 'missing-phase-docs'
+  | 'missing-audit-docs'
+  | 'missing-checklist-docs'
+  | 'unknown-change';
+
+export type AgentPreflightSafeStateSeverity = 'info' | 'warning' | 'error';
+
+export type AgentPreflightDerivedLabelReason =
+  | 'derived-status'
+  | 'derived-health-score'
+  | 'derived-summary'
+  | 'derived-recommendation'
+  | 'missing-source-line';
+
+export interface AgentPreflightEvidence {
+  kind: AiEvidenceKind;
+  file?: string;
+  line?: number;
+  text?: string | null;
+}
+
+export interface AgentPreflightProject {
+  id: string;
+  name: string;
+  path: string;
+  enabled: boolean;
+  generatedScanName: string | null;
+}
+
+export interface AgentPreflightChange {
+  id: string;
+  status: AgentPreflightChangeStatus;
+  requirementCount: number;
+  scenarioCount: number;
+  taskCount: number;
+  openTaskCount: number;
+  artifacts: string[];
+}
+
+export interface AgentPreflightGeneratedFrom {
+  projectConfig: string;
+  scanData: string;
+  aiContext: 'derived' | 'unavailable';
+  aiFindings: string;
+  openspec: 'local-artifacts' | 'unavailable';
+  projectDocs: 'local-docs' | 'unavailable';
+  remoteServicesUsed: false;
+}
+
+export interface AgentPreflightInputState {
+  generatedScanAvailable: boolean;
+  trackedProjectAvailable: boolean;
+  projectEnabled: boolean;
+  aiContextAvailable: boolean;
+  findingsAvailable: boolean;
+  openspecAvailable: boolean;
+  phaseDocsAvailable: boolean;
+  auditDocsAvailable: boolean;
+  checklistDocsAvailable: boolean;
+}
+
+export interface AgentPreflightSafeState {
+  code: AgentPreflightSafeStateCode;
+  severity: AgentPreflightSafeStateSeverity;
+  message: string;
+  blocksPacket: boolean;
+}
+
+export interface AgentPreflightRequiredReading {
+  order: number;
+  kind: AgentPreflightRequiredReadingKind;
+  title: string;
+  path: string;
+  status: AgentPreflightReadingStatus;
+  reason: string;
+  evidence: AgentPreflightEvidence[];
+}
+
+export interface AgentPreflightProjectState {
+  status: ProjectStatus;
+  healthScore: number;
+  currentPhase: string | null;
+  nextAction: string | null;
+  mainBlocker: string | null;
+  mainRisk: string | null;
+  recentDecision: string | null;
+}
+
+export interface AgentPreflightAcceptanceMapItem {
+  source: AgentPreflightAcceptanceSource;
+  id: string;
+  title: string;
+  status: AgentPreflightAcceptanceStatus;
+  evidenceTarget: string;
+  evidence: AgentPreflightEvidence[];
+}
+
+export interface AgentPreflightAttentionSignal {
+  kind: AgentPreflightAttentionSignalKind;
+  severity: ProjectBriefReportPriority;
+  title: string;
+  source: AgentPreflightAcceptanceSource;
+  status: 'advisory' | 'warning' | 'blocked' | 'info';
+  evidence: AgentPreflightEvidence[];
+}
+
+export interface AgentPreflightVerificationExpectation {
+  kind: AgentPreflightVerificationExpectationKind;
+  command?: string;
+  reason: string;
+  expectedEvidence: string;
+  advisoryOnly: boolean;
+}
+
+export interface AgentPreflightDerivedLabel {
+  field: string;
+  reason: AgentPreflightDerivedLabelReason;
+  evidenceKind: AiEvidenceKind;
+}
+
+export interface AgentPreflightWorkBoundaries {
+  localOnly: true;
+  derivedFromGeneratedScan: true;
+  scannedProjectsReadOnly: true;
+  noModelProviderRequired: true;
+  reviewRequiredFindingsOnly: true;
+  noAutomaticAction: true;
+  noCommandsExecuted: true;
+  noCommitsCreated: true;
+  noTaskOrCalendarWrites: true;
+  noRemoteCalls: true;
+  proposedChangesAreNotAccepted: true;
+}
+
+export interface AgentPreflightPacket {
+  kind: 'agent-preflight-packet';
+  schemaVersion: 1;
+  generatedAt: string;
+  project: AgentPreflightProject;
+  agentRole: AgentPreflightAgentRole;
+  change: AgentPreflightChange;
+  generatedFrom: AgentPreflightGeneratedFrom;
+  inputState: AgentPreflightInputState;
+  safeStates: AgentPreflightSafeState[];
+  requiredReading: AgentPreflightRequiredReading[];
+  projectState: AgentPreflightProjectState;
+  acceptanceMap: AgentPreflightAcceptanceMapItem[];
+  attentionSignals: AgentPreflightAttentionSignal[];
+  verificationPlan: AgentPreflightVerificationExpectation[];
+  workBoundaries: AgentPreflightWorkBoundaries;
+  evidence: AgentPreflightEvidence[];
+  derivedLabels: AgentPreflightDerivedLabel[];
+}
+
 export interface TrackedProjectConfig {
   id: string;
   name: string;

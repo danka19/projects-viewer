@@ -1,0 +1,113 @@
+import type { AgentPreflightAgentRole, AgentPreflightPacket } from '../src/types';
+
+const role: AgentPreflightAgentRole = 'implementation';
+
+export const packetContractSample: AgentPreflightPacket = {
+  kind: 'agent-preflight-packet',
+  schemaVersion: 1,
+  generatedAt: '2026-07-09T00:00:00.000Z',
+  project: {
+    id: 'sample',
+    name: 'Sample',
+    path: 'C:/projects/sample',
+    enabled: true,
+    generatedScanName: 'Sample',
+  },
+  agentRole: role,
+  change: {
+    id: 'agent-preflight-packet',
+    status: 'proposed',
+    requirementCount: 1,
+    scenarioCount: 1,
+    taskCount: 1,
+    openTaskCount: 1,
+    artifacts: ['openspec/changes/agent-preflight-packet/proposal.md'],
+  },
+  generatedFrom: {
+    projectConfig: 'app-data/projects.config.json',
+    scanData: 'app-data/projects.generated.json',
+    aiContext: 'derived',
+    aiFindings: 'app-data/ai.findings.generated.json',
+    openspec: 'local-artifacts',
+    projectDocs: 'local-docs',
+    remoteServicesUsed: false,
+  },
+  inputState: {
+    generatedScanAvailable: true,
+    trackedProjectAvailable: true,
+    projectEnabled: true,
+    aiContextAvailable: true,
+    findingsAvailable: true,
+    openspecAvailable: true,
+    phaseDocsAvailable: true,
+    auditDocsAvailable: true,
+    checklistDocsAvailable: true,
+  },
+  safeStates: [],
+  requiredReading: [
+    {
+      order: 1,
+      kind: 'project-rule',
+      title: 'Agent operating guide',
+      path: 'AGENTS.md',
+      status: 'available',
+      reason: 'Canonical project instructions.',
+      evidence: [{ kind: 'source', file: 'AGENTS.md', line: 1, text: 'Agent Operating Guide' }],
+    },
+  ],
+  projectState: {
+    status: 'active',
+    healthScore: 80,
+    currentPhase: null,
+    nextAction: 'Implement agent preflight packet.',
+    mainBlocker: null,
+    mainRisk: 'Packet must stay separate from human brief reports.',
+    recentDecision: null,
+  },
+  acceptanceMap: [
+    {
+      source: 'proposed-change',
+      id: 'agent-preflight-packet:Packet identifies its own kind',
+      title: 'Packet identifies its own kind',
+      status: 'proposed',
+      evidenceTarget: 'tests/agent-preflight-packet.test.mjs verifies kind and absent brief fields.',
+      evidence: [
+        { kind: 'source', file: 'openspec/changes/agent-preflight-packet/specs/agent-preflight-packet/spec.md' },
+      ],
+    },
+  ],
+  attentionSignals: [
+    {
+      kind: 'risk',
+      severity: 'medium',
+      title: 'Separate contract risk',
+      source: 'proposed-change',
+      status: 'advisory',
+      evidence: [{ kind: 'derived-summary', text: 'Packet could drift into brief semantics.' }],
+    },
+  ],
+  verificationPlan: [
+    {
+      kind: 'command',
+      command: 'npm test -- tests/agent-preflight-packet.test.mjs',
+      reason: 'Verify packet composition and API behavior.',
+      expectedEvidence: 'All agent preflight packet tests pass.',
+      advisoryOnly: true,
+    },
+  ],
+  workBoundaries: {
+    localOnly: true,
+    derivedFromGeneratedScan: true,
+    scannedProjectsReadOnly: true,
+    noModelProviderRequired: true,
+    reviewRequiredFindingsOnly: true,
+    noAutomaticAction: true,
+    noCommandsExecuted: true,
+    noCommitsCreated: true,
+    noTaskOrCalendarWrites: true,
+    noRemoteCalls: true,
+    proposedChangesAreNotAccepted: true,
+  },
+  evidence: [{ kind: 'derived-summary', text: 'Sample packet.' }],
+  derivedLabels: [{ field: 'projectState.status', reason: 'derived-status', evidenceKind: 'derived-summary' }],
+};
