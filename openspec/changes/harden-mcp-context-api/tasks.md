@@ -30,4 +30,4 @@
 - [x] 5.1 Update `README.md`, `docs/README.md`, `docs/00_FILE_STRUCTURE.md`, `docs/AGENTS_USAGE.md`, and `docs/CURRENT_PROJECT_AUDIT.md`.
 - [x] 5.2 Record the implementation result and close or revise `AUDIT-010`.
 - [x] 5.3 Run `npm test -- tests/project-config.test.mjs`, `npm test -- tests/server-api.test.mjs`, `npm test -- tests/projects-viewer-mcp.test.mjs`, and `npm test -- tests/agent-preflight-packet.test.mjs`.
-- [ ] 5.4 Run `npm test`, `npm run build`, `openspec list`, `openspec list --specs`, `openspec validate --all --strict`, and `git diff --check`.
+- [x] 5.4 Run `npm test`, `npm run build`, `openspec list`, `openspec list --specs`, `openspec validate --all --strict`, and `git diff --check`.
