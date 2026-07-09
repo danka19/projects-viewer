@@ -26,6 +26,7 @@ This is the active glossary and domain-boundary file for Projects Viewer.
 | AI implementation agent | An AI assistant using project context before planning, coding, or reviewing implementation work. | It must treat AI context as preflight evidence, then verify against source files before changing code or docs. |
 | AI reviewer/checker agent | An AI assistant focused on risks, blockers, stale docs, missing verification, contradiction signals, or acceptance evidence. | It can produce review-required observations but cannot accept decisions or trigger work automatically. |
 | AI preflight context | Compact project context derived from generated scan data for use before AI work starts. | It omits raw markdown bodies by default and preserves source evidence where available. |
+| Agent preflight packet | Proposed AI-agent-oriented packet for required reading, active change context, acceptance mapping, attention signals, verification expectations, and safety boundaries before agent work. | Proposed in `openspec/changes/agent-preflight-packet/`; it is separate from the daily/weekly human project brief. |
 | AI finding | A deterministic or future AI-generated review-required observation derived from scan signals. | It is proposal evidence only until a human handles it through an explicit review workflow. |
 | Project brief | A future daily or weekly digest of project changes, blockers, review-required findings, and recommended human decisions. | Not implemented yet; currently a Phase 1 workflow candidate. |
 | Raw scanned documentation | Markdown source files read from saved tracked project paths. | This is source data for scans; the dashboard must not modify it. |
@@ -46,7 +47,7 @@ This is the active glossary and domain-boundary file for Projects Viewer.
 - Raw documentation text is source data. Derived statuses, health scores, blockers, risks, and summaries are dashboard interpretations.
 - Review-required proposals are not accepted decisions.
 - LLM or heuristic output is proposal evidence only unless the project explicitly defines a reviewed acceptance workflow.
-- AI preflight context and project briefs must not grant AI authority to run commands, create commits, update task systems, or edit scanned projects.
+- AI preflight context, agent preflight packets, and project briefs must not grant AI authority to run commands, create commits, update task systems, or edit scanned projects.
 - Runtime writes are limited to the dashboard project, especially `app-data/projects.config.json`, `app-data/projects.generated.json`, `app-data/ai.context.snapshot.json`, and `app-data/ai.findings.generated.json`.
 - `app-data/projects.generated.json`, AI context snapshots, and AI findings are derived from saved config and scanned documentation; they may guide review, but they must not replace source files or accepted project documents.
 - New data sources such as cloud sync, remote model providers, databases, task/calendar systems, or external issue trackers require explicit future design approval and OpenSpec coverage before implementation.

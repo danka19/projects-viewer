@@ -9,11 +9,11 @@ Last updated: 2026-07-09.
 | Item | Current State |
 |---|---|
 | Repository root | `C:\Users\danoc\Documents\projects\projects-viewer` |
-| Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer\.worktrees\phase-3-first-usable-workflow` |
-| Current branch | `phase-3/first-usable-workflow` |
+| Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer` |
+| Current branch | `main` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Latest known commit before this audit update | `df6aae0 Record project brief report review fixes` |
-| Local divergence | `phase-3/first-usable-workflow` tracks `origin/phase-3/first-usable-workflow`; no local divergence during this audit update |
+| Latest known commit before this audit update | `7564457 Merge phase 3 first usable workflow` |
+| Local divergence | `main` is ahead of `origin/main` during local integration of Phase 3 closure and `agent-preflight-packet` |
 
 ## Useful Starting Points
 
@@ -61,6 +61,7 @@ Last updated: 2026-07-09.
 | Phase 3 work item 3.4 | `GET /api/project-brief-report` implemented in `server.mjs`; API tests cover safe params, missing scan data, no arbitrary paths, no snapshot/finding/report-history writes, and unchanged scanned project sentinel files; `npm test` and `npm run build` passed on 2026-07-09 |
 | Phase 3 review fix | Independent review found invalid generated-scan JSON and loose parseable `since` values could violate the API contract; `0cd3eb5` added regression tests and fixed both boundaries on 2026-07-09 |
 | Phase 3 acceptance | Human owner accepted closing Phase 3 on 2026-07-09 after project brief/report API implementation, verification, push, and review-fix evidence |
+| Agent preflight packet intake | Human owner requested a separate `agent-preflight-packet` OpenSpec proposal on 2026-07-09 so agent preflight behavior does not mix into the daily/weekly human brief; routing decision was `create_openspec_change` |
 
 ## Known Risks And Gaps
 
@@ -72,7 +73,8 @@ Last updated: 2026-07-09.
 | AUDIT-004 | Local branch had commits ahead of GitHub remote during early foundation work; `main` later matched `origin/main` before Phase 1 planning. | Human owner | closed 2026-07-08 |
 | AUDIT-005 | Manual browser verification for add project, restart persistence, workspace discovery, track selected, disable, and rescan. | Current feature | closed 2026-07-08 |
 | AUDIT-006 | Phase 3 project brief/report API is implemented, verified, reviewed, pushed, and accepted as closed; `add-project-brief-report` remains ready for OpenSpec archival after branch review/merge. | Human owner / next OpenSpec archival step | closed 2026-07-09 |
-| AUDIT-007 | Next product slice is undecided: dashboard UI, Markdown/rendered brief, or agent preflight packet follow-up. | Human owner | open |
+| AUDIT-007 | `agent-preflight-packet` is proposed separately from `project-brief-report`; implementation must preserve separate contracts, endpoints, and no-action boundaries. | Future implementation | monitored |
+| AUDIT-008 | Next implementation step remains a human/product decision: archive `add-project-brief-report`, implement `agent-preflight-packet`, or continue with dashboard/brief UI. | Human owner | open |
 
 ## Audit Rules
 
