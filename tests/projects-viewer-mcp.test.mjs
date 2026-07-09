@@ -155,7 +155,6 @@ test('projects viewer MCP server exposes read-only context tools and proxies loc
 
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,

@@ -23,7 +23,6 @@ test('ensureProjectConfig creates an empty canonical config on clean startup', a
 
   const config = await ensureProjectConfig({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     now: () => new Date('2026-07-08T00:00:00.000Z'),
   });
 
@@ -81,7 +80,7 @@ test('addProject validates directories and deduplicates by resolved path', async
   const appDataDir = path.join(tmp, 'app-data');
   const projectRoot = path.join(tmp, 'AutoParts');
   await fs.mkdir(projectRoot, { recursive: true });
-  await ensureProjectConfig({ appDataDir, legacyConfigPath: path.join(tmp, 'missing.json') });
+  await ensureProjectConfig({ appDataDir });
 
   const first = await addProject({ path: projectRoot, name: 'AutoParts' }, { appDataDir });
   const second = await addProject({ path: projectRoot, name: 'Different Name' }, { appDataDir });
@@ -97,7 +96,7 @@ test('updateProject changes editable fields and removeProject only updates confi
   const appDataDir = path.join(tmp, 'app-data');
   const projectRoot = path.join(tmp, 'sample');
   await fs.mkdir(projectRoot, { recursive: true });
-  await ensureProjectConfig({ appDataDir, legacyConfigPath: path.join(tmp, 'missing.json') });
+  await ensureProjectConfig({ appDataDir });
   const { project } = await addProject({ path: projectRoot, name: 'Sample' }, { appDataDir });
 
   const updated = await updateProject(
@@ -121,7 +120,7 @@ test('addWorkspace validates directory and normalizes discovery depth', async ()
   const appDataDir = path.join(tmp, 'app-data');
   const workspaceRoot = path.join(tmp, 'projects');
   await fs.mkdir(workspaceRoot, { recursive: true });
-  await ensureProjectConfig({ appDataDir, legacyConfigPath: path.join(tmp, 'missing.json') });
+  await ensureProjectConfig({ appDataDir });
 
   const { workspace } = await addWorkspace(
     { path: workspaceRoot, name: 'Local Projects', discoveryDepth: 9 },
@@ -139,7 +138,7 @@ test('addWorkspace preserves explicit nested project discovery setting', async (
   const appDataDir = path.join(tmp, 'app-data');
   const workspaceRoot = path.join(tmp, 'projects');
   await fs.mkdir(workspaceRoot, { recursive: true });
-  await ensureProjectConfig({ appDataDir, legacyConfigPath: path.join(tmp, 'missing.json') });
+  await ensureProjectConfig({ appDataDir });
 
   const { workspace } = await addWorkspace(
     { path: workspaceRoot, name: 'Local Projects', discoveryDepth: 3, allowNestedProjects: true },

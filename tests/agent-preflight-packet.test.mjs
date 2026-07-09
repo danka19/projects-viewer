@@ -920,7 +920,6 @@ test('agent preflight packet API returns valid packet for saved project without 
 
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -980,7 +979,6 @@ test('agent preflight packet API rejects unsafe or invalid query parameters', as
 
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -1043,7 +1041,6 @@ test('agent preflight packet API returns expected error states for missing proje
 
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -1095,7 +1092,6 @@ test('agent preflight packet API returns unknown-change safe state for unresolve
 
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,

@@ -25,7 +25,6 @@ test('project management API persists added project and rejects missing path', a
   await fs.mkdir(projectRoot, { recursive: true });
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -68,7 +67,6 @@ test('workspace discovery API returns candidates and track-discovered persists s
   await fs.writeFile(path.join(docsRoot, 'README.md'), '# Docs');
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -117,7 +115,6 @@ test('track-discovered rejects internal folders without adding partial projects'
   await fs.writeFile(path.join(docsRoot, 'README.md'), '# Docs');
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -153,7 +150,6 @@ test('browse folder API returns selected local path', async () => {
   const selectedPath = path.join(tmp, 'selected');
   const app = await createApp({
     appDataDir: path.join(tmp, 'app-data'),
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -174,7 +170,6 @@ test('browse folder API reports cancelled selection without error', async () => 
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-browse-cancel-api-'));
   const app = await createApp({
     appDataDir: path.join(tmp, 'app-data'),
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,

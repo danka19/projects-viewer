@@ -494,7 +494,6 @@ async function readAgentPreflightChecklistSignals() {
 
 export async function createApp({
   appDataDir,
-  legacyConfigPath = path.join(__dirname, 'projects.config.json'),
   skipStartupScan = false,
   skipWatcher = false,
   skipFrontend = false,
@@ -502,7 +501,7 @@ export async function createApp({
   logger = console,
 } = {}) {
   const app = express();
-  const configOptions = { appDataDir, legacyConfigPath };
+  const configOptions = { appDataDir };
   await ensureProjectConfig(configOptions);
   const controller = createScanController({ runScan: createDashboardRunScan(configOptions), logger });
   let watcher = null;
