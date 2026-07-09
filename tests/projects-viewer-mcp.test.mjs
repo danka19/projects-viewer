@@ -215,7 +215,7 @@ test('projects viewer MCP server returns a tool error when the local API respond
   const htmlServer = http.createServer((request, response) => {
     if (request.url === '/api/projects') {
       response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      response.end('<!doctype html><html><body>Not JSON</body></html>');
+      response.end('<!doctype html><html><body>Not JSON\nSecond line</body></html>');
       return;
     }
 
@@ -236,15 +236,102 @@ test('projects viewer MCP server returns a tool error when the local API respond
     mcp.notify('notifications/initialized');
 
     const result = await mcp.request('tools/call', { name: 'list_projects', arguments: {} });
+    const errorText = result.content[0].text.trimEnd();
     assert.equal(result.isError, true);
-    assert.match(result.content[0].text, /Expected JSON response/i);
-    assert.doesNotMatch(result.content[0].text, /"raw"/i);
-    assert.match(result.content[0].text, /text\/html/i);
-    assert.match(result.content[0].text, /\/api\/projects/i);
+    assert.match(errorText, /Expected JSON response/i);
+    assert.match(errorText, /status 200/i);
+    assert.match(errorText, /text\/html/i);
+    assert.match(errorText, /\/api\/projects/i);
+    assert.match(errorText, /preview/i);
+    assert.match(errorText, /<!doctype html><html><body>Not JSON Second line<\/body><\/html>/i);
+    assert.doesNotMatch(errorText, /\nSecond line/);
   } finally {
     await mcp.close();
     await new Promise((resolve, reject) => {
       htmlServer.close((err) => (err ? reject(err) : resolve()));
+    });
+  }
+});
+
+test('projects viewer MCP server returns a tool error with detail when the local API responds with malformed json', async () => {
+  const malformedServer = http.createServer((request, response) => {
+    if (request.url === '/api/projects') {
+      response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      response.end('{"projects":[\n');
+      return;
+    }
+
+    response.writeHead(404, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ error: 'not-found' }));
+  });
+
+  await new Promise((resolve) => malformedServer.listen(0, '127.0.0.1', resolve));
+  const { port } = malformedServer.address();
+  const mcp = startMcpClient(`http://127.0.0.1:${port}`);
+
+  try {
+    await mcp.request('initialize', {
+      protocolVersion: '2024-11-05',
+      capabilities: {},
+      clientInfo: { name: 'projects-viewer-test', version: '0.1.0' },
+    });
+    mcp.notify('notifications/initialized');
+
+    const result = await mcp.request('tools/call', { name: 'list_projects', arguments: {} });
+    const errorText = result.content[0].text.trimEnd();
+    assert.equal(result.isError, true);
+    assert.match(errorText, /malformed json/i);
+    assert.match(errorText, /status 200/i);
+    assert.match(errorText, /application\/json/i);
+    assert.match(errorText, /\/api\/projects/i);
+    assert.match(errorText, /preview/i);
+    assert.match(errorText, /{"projects":\[/i);
+    assert.doesNotMatch(errorText, /\n/);
+  } finally {
+    await mcp.close();
+    await new Promise((resolve, reject) => {
+      malformedServer.close((err) => (err ? reject(err) : resolve()));
+    });
+  }
+});
+
+test('projects viewer MCP server returns a tool error with detail when the local API responds with a non-ok json error', async () => {
+  const errorServer = http.createServer((request, response) => {
+    if (request.url === '/api/projects') {
+      response.writeHead(503, { 'Content-Type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({ error: 'service unavailable', detail: 'backend warming up' }));
+      return;
+    }
+
+    response.writeHead(404, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ error: 'not-found' }));
+  });
+
+  await new Promise((resolve) => errorServer.listen(0, '127.0.0.1', resolve));
+  const { port } = errorServer.address();
+  const mcp = startMcpClient(`http://127.0.0.1:${port}`);
+
+  try {
+    await mcp.request('initialize', {
+      protocolVersion: '2024-11-05',
+      capabilities: {},
+      clientInfo: { name: 'projects-viewer-test', version: '0.1.0' },
+    });
+    mcp.notify('notifications/initialized');
+
+    const result = await mcp.request('tools/call', { name: 'list_projects', arguments: {} });
+    const errorText = result.content[0].text.trimEnd();
+    assert.equal(result.isError, true);
+    assert.match(errorText, /returned 503/i);
+    assert.match(errorText, /application\/json/i);
+    assert.match(errorText, /\/api\/projects/i);
+    assert.match(errorText, /preview/i);
+    assert.match(errorText, /service unavailable/i);
+    assert.doesNotMatch(errorText, /\n/);
+  } finally {
+    await mcp.close();
+    await new Promise((resolve, reject) => {
+      errorServer.close((err) => (err ? reject(err) : resolve()));
     });
   }
 });

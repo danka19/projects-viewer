@@ -157,10 +157,16 @@ async function requestJson(pathname) {
   const text = await response.text();
   const contentType = response.headers.get('content-type') ?? 'unknown';
   const isJson = /^\s*application\/json\b/i.test(contentType);
+  const errorContext = formatApiErrorContext({
+    pathname,
+    status: response.status,
+    contentType,
+    bodyPreview: createBodyPreview(text),
+  });
 
   if (!isJson) {
     throw new Error(
-      `Expected JSON response from Projects Viewer API for ${pathname}, got status ${response.status} with content-type ${contentType}. Start the local dashboard with "npm run dev" and retry.`,
+      `Expected JSON response from Projects Viewer API. ${errorContext}. Start the local dashboard with "npm run dev" and retry.`,
     );
   }
 
@@ -168,16 +174,23 @@ async function requestJson(pathname) {
   try {
     body = text ? JSON.parse(text) : null;
   } catch (err) {
-    throw new Error(
-      `Projects Viewer API returned malformed JSON for ${pathname} with status ${response.status}: ${err.message}`,
-    );
+    throw new Error(`Projects Viewer API returned malformed JSON. ${errorContext}. Parse error: ${err.message}`);
   }
   if (!response.ok) {
     throw new Error(
-      `Projects Viewer API returned ${response.status}. Start the local dashboard with "npm run dev" and retry. Response: ${JSON.stringify(body)}`,
+      `Projects Viewer API returned ${response.status}. ${errorContext}. Start the local dashboard with "npm run dev" and retry.`,
     );
   }
   return body;
+}
+
+function formatApiErrorContext({ pathname, status, contentType, bodyPreview }) {
+  return `API path ${pathname}, status ${status}, content-type ${contentType}, preview "${bodyPreview}"`;
+}
+
+function createBodyPreview(body) {
+  if (!body) return '(empty)';
+  return body.replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
 }
 
 function requiredString(args, key) {
