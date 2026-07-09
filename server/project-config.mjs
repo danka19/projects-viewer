@@ -105,6 +105,18 @@ export function normalizeProjectConfig(input = {}, { now = () => new Date() } = 
   return { workspaces, projects, settings };
 }
 
+export function getConfiguredProjectIdentities(config) {
+  return (Array.isArray(config?.projects) ? config.projects : [])
+    .filter((project) => project && typeof project.path === 'string')
+    .map((project) => ({
+      id: project.id,
+      name: project.name,
+      path: project.path,
+      enabled: project.enabled !== false,
+      tags: normalizeTags(project.tags),
+    }));
+}
+
 export function getEnabledProjects(config) {
   return (Array.isArray(config?.projects) ? config.projects : []).filter(
     (project) => project?.enabled !== false,

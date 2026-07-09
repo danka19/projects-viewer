@@ -7,6 +7,7 @@ import {
   addProject,
   addWorkspace,
   ensureProjectConfig,
+  getConfiguredProjectIdentities,
   getEnabledProjects,
   readProjectConfig,
   removeProject,
@@ -73,6 +74,67 @@ test('ensureProjectConfig ignores root projects.config.json at runtime', async (
     JSON.parse(await fs.readFile(path.join(appDataDir, 'projects.config.json'), 'utf8')),
     config,
   );
+});
+
+test('getConfiguredProjectIdentities returns compact saved project identity for enabled and disabled projects', () => {
+  const identities = getConfiguredProjectIdentities({
+    projects: [
+      {
+        id: 'alpha',
+        name: 'Alpha',
+        path: 'C:/projects/alpha',
+        enabled: true,
+        tags: ['docs', 'backend'],
+        createdAt: '2026-07-08T00:00:00.000Z',
+        updatedAt: '2026-07-08T00:00:00.000Z',
+      },
+      {
+        id: 'beta',
+        name: 'Beta',
+        path: 'C:/projects/beta',
+        enabled: false,
+        createdAt: '2026-07-08T00:00:00.000Z',
+        updatedAt: '2026-07-08T00:00:00.000Z',
+      },
+      {
+        id: 'gamma',
+        name: 'Gamma',
+        path: 'C:/projects/gamma',
+        tags: ['ops', 'ops', ''],
+        createdAt: '2026-07-08T00:00:00.000Z',
+        updatedAt: '2026-07-08T00:00:00.000Z',
+      },
+    ],
+  });
+
+  assert.deepEqual(identities, [
+    {
+      id: 'alpha',
+      name: 'Alpha',
+      path: 'C:/projects/alpha',
+      enabled: true,
+      tags: ['docs', 'backend'],
+    },
+    {
+      id: 'beta',
+      name: 'Beta',
+      path: 'C:/projects/beta',
+      enabled: false,
+      tags: [],
+    },
+    {
+      id: 'gamma',
+      name: 'Gamma',
+      path: 'C:/projects/gamma',
+      enabled: true,
+      tags: ['ops'],
+    },
+  ]);
+});
+
+test('getConfiguredProjectIdentities returns an empty list for empty config', () => {
+  assert.deepEqual(getConfiguredProjectIdentities({}), []);
+  assert.deepEqual(getConfiguredProjectIdentities({ projects: [] }), []);
 });
 
 test('addProject validates directories and deduplicates by resolved path', async () => {
