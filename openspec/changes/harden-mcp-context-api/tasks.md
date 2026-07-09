@@ -3,7 +3,7 @@
 - [x] 1.1 Add regression tests proving a clean setup creates no tracked projects and does not read root `projects.config.json`.
 - [x] 1.2 Remove root `projects.config.json` fallback and legacy migration from `server/project-config.mjs`.
 - [x] 1.3 Delete or stop relying on root `projects.config.json`; add an empty example config only if needed.
-- [ ] 1.4 Update empty-state UI text and docs so users add projects through Manage Projects or `app-data/projects.config.json`.
+- [x] 1.4 Update empty-state UI text and docs so users add projects through Manage Projects or `app-data/projects.config.json`.
 
 ## 2. Compact Project Identity API
 
