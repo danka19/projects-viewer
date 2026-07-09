@@ -13,6 +13,15 @@ const tools = [
     },
   },
   {
+    name: 'list_configured_projects',
+    description: 'List compact saved Projects Viewer project ids from the local read-only API.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+      additionalProperties: false,
+    },
+  },
+  {
     name: 'get_agent_preflight_packet',
     description: 'Fetch a read-only agent preflight packet for a saved project id.',
     inputSchema: {
@@ -64,6 +73,7 @@ const tools = [
 
 const handlers = {
   list_projects: () => requestJson('/api/projects'),
+  list_configured_projects: () => requestJson('/api/configured-projects'),
   get_agent_preflight_packet: (args) => {
     const params = new URLSearchParams({ projectId: requiredString(args, 'projectId') });
     if (args.changeId) params.set('changeId', String(args.changeId));

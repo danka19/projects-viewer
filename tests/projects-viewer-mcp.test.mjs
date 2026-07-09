@@ -174,7 +174,14 @@ test('projects viewer MCP server exposes read-only context tools and proxies loc
     const tools = await mcp.request('tools/list');
     assert.deepEqual(
       tools.tools.map((tool) => tool.name),
-      ['list_projects', 'get_agent_preflight_packet', 'get_project_brief_report', 'get_ai_context', 'get_ai_findings'],
+      [
+        'list_projects',
+        'list_configured_projects',
+        'get_agent_preflight_packet',
+        'get_project_brief_report',
+        'get_ai_context',
+        'get_ai_findings',
+      ],
     );
 
     const result = await mcp.request('tools/call', { name: 'list_projects', arguments: {} });
@@ -182,6 +189,21 @@ test('projects viewer MCP server exposes read-only context tools and proxies loc
     const payload = JSON.parse(result.content[0].text);
     assert.equal(payload.projects[0].name, 'MCP Project');
     assert.equal(payload.projects[0].path, projectRoot);
+
+    const configuredProjects = await mcp.request('tools/call', { name: 'list_configured_projects', arguments: {} });
+    assert.equal(configuredProjects.isError, false);
+    const configuredPayload = JSON.parse(configuredProjects.content[0].text);
+    assert.deepEqual(configuredPayload, {
+      projects: [
+        {
+          id: 'project-1',
+          name: 'MCP Project',
+          path: projectRoot,
+          enabled: true,
+          tags: [],
+        },
+      ],
+    });
   } finally {
     await mcp.close();
     await server.close();

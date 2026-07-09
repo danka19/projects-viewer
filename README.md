@@ -226,6 +226,7 @@ The local server exposes deterministic AI-readable context, a dedicated agent pr
 | `GET /api/ai-context/changes?since=<iso>` | AI-readable changed field categories since an ISO timestamp, compared against the saved compact context snapshot when available. |
 | `GET /api/ai-findings?state=unresolved` | Review-required findings, filtered by `unresolved`, `all`, `new`, `accepted`, `dismissed`, or `stale`. |
 | `PATCH /api/ai-findings/:id` | Update local finding review state to `new`, `accepted`, or `dismissed`. |
+| `GET /api/configured-projects` | Compact saved tracked-project identity list for `projectId` lookup before agent preflight requests. |
 | `GET /api/agent-preflight-packet?projectId=<id>` | Agent-oriented JSON packet for one saved tracked project, with optional `changeId` and `agentRole=implementation|reviewer|verification|handoff`. |
 | `GET /api/project-brief-report` | Advisory JSON report with ranked review-order project items, attention reasons, source evidence, derived labels, safe states, and recommended human decisions. |
 
@@ -242,10 +243,13 @@ Project brief reports are JSON-first and read-only. The endpoint accepts only `m
 Examples:
 
 ```bash
+curl http://127.0.0.1:5173/api/configured-projects
 curl "http://127.0.0.1:5173/api/agent-preflight-packet?projectId=project-1&changeId=agent-preflight-packet&agentRole=verification"
 curl http://127.0.0.1:5173/api/project-brief-report
 curl "http://127.0.0.1:5173/api/project-brief-report?mode=weekly&since=2026-07-08T00:00:00.000Z"
 ```
+
+For agent workflows, use `GET /api/configured-projects` first to discover a saved `projectId`, then call `GET /api/agent-preflight-packet`. The fuller `GET /api/projects` payload is for dashboard scan data, not the preferred preflight lookup.
 
 ## What gets scanned
 

@@ -9,6 +9,7 @@ Repo: https://github.com/danka19/projects-viewer
 v7 implemented on 2026-07-09:
 
 - JSON-first agent preflight packet workflow implemented for `GET /api/agent-preflight-packet`.
+- MCP/config hardening now includes the compact `GET /api/configured-projects` lookup and `list_configured_projects` as the preferred `projectId` discovery step before `get_agent_preflight_packet`.
 - Dashboard UI polish added a saved light/dark theme toggle and consolidated semantic status colors around shared theme tokens.
 - Shared `AgentPreflightPacket` contract types added to `src/types.ts`.
 - Pure `server/agent-preflight-packet.mjs` composition module builds required reading, project state, acceptance mapping, attention signals, verification expectations, safe states, evidence, and work boundaries from prepared local inputs.
@@ -85,6 +86,7 @@ v3 implemented on 2026-07-07:
 - AI context API: `GET /api/ai-context`, `GET /api/ai-context/projects/:id`, `GET /api/ai-context/changes?since=<iso>`.
 - AI findings API: `GET /api/ai-findings?state=unresolved`, `PATCH /api/ai-findings/:id`.
 - Agent preflight packet API: `GET /api/agent-preflight-packet`, required `projectId`, optional `changeId`, optional `agentRole=implementation|reviewer|verification|handoff`.
+- Configured-project lookup API: `GET /api/configured-projects`, preferred compact `projectId` discovery before agent preflight requests.
 - Project brief report API: `GET /api/project-brief-report`, optional `mode=daily|weekly`, optional `since=<iso>`.
 - Agent/Codex usage and MCP runbook: `docs/AGENTS_USAGE.md`.
 - MCP/API hardening plan and implementation notes: `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md`.

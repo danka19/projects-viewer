@@ -44,7 +44,13 @@ npm run scan
 
 ## Get Project Context
 
-Project ids come from saved Projects Viewer config, not from inferred project names or legacy config files. The planned hardening work in `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md` and `openspec/changes/harden-mcp-context-api/` will add a compact project-id listing endpoint/tool. Until then, use the saved ids in `app-data/projects.config.json` when a preflight packet requires `projectId`.
+Project ids come from saved Projects Viewer config, not from inferred project names or legacy config files. Prefer the compact configured-project list before requesting an agent preflight packet.
+
+List compact configured project ids from the local API:
+
+```powershell
+Invoke-RestMethod "http://127.0.0.1:5173/api/configured-projects"
+```
 
 List currently scanned dashboard projects:
 
@@ -93,10 +99,17 @@ server/projects-viewer-mcp.mjs
 It exposes only read-only context tools:
 
 - `list_projects`
+- `list_configured_projects`
 - `get_agent_preflight_packet`
 - `get_project_brief_report`
 - `get_ai_context`
 - `get_ai_findings`
+
+Preferred MCP preflight flow:
+
+1. Call `list_configured_projects` to get saved `projectId` values from the compact config-focused payload.
+2. Call `get_agent_preflight_packet` with one of those ids.
+3. Use `list_projects` only when you need the fuller dashboard scan payload from `/api/projects`.
 
 The adapter calls the local Projects Viewer HTTP API. By default it uses:
 
