@@ -1,7 +1,7 @@
 ## 1. Contract And Composition
 
 - [x] 1.1 Define shared agent preflight packet types for metadata, project identity, agent role, change context, generated sources, input state, safe states, required reading, acceptance mapping, attention signals, verification expectations, evidence, derived labels, and work boundaries.
-- [ ] 1.2 Add a focused pure server composition module for `agent-preflight-packet` that accepts prepared local inputs and does not read arbitrary request paths.
+- [x] 1.2 Add a focused pure server composition module for `agent-preflight-packet` that accepts prepared local inputs and does not read arbitrary request paths.
 - [ ] 1.3 Compose required-reading references from project rules, documentation map, relevant phase docs, OpenSpec artifacts, audit docs, and verification checklist signals where available.
 - [ ] 1.4 Compose acceptance mapping from accepted specs, proposed change deltas, change tasks, phase-plan expectations, and checklist evidence targets without treating proposed changes as accepted behavior.
 - [ ] 1.5 Compose attention signals from current project state, blockers, gates, unresolved findings, stale docs, missing verification, risk signals, and documentation gaps.
@@ -17,6 +17,7 @@
 ## 3. Verification
 
 - [ ] 3.1 Add pure composition tests for packet shape, `kind: "agent-preflight-packet"`, agent roles, required reading, project state, acceptance mapping, attention signals, verification expectations, evidence, derived labels, and work boundaries.
+  - Task 2 core coverage completed: packet shape, agent role, project identity, missing/invalid generated scan handling, disabled/unknown project handling, normalized config-path matching, and purity guards are now covered in `tests/agent-preflight-packet.test.mjs`.
 - [ ] 3.2 Add tests proving packet generation stays separate from `project-brief-report` output and does not include daily/weekly human brief fields.
 - [ ] 3.3 Add API tests for valid packet retrieval, missing `projectId`, unknown or disabled projects, unknown change ids, invalid `agentRole`, repeated scalar parameters, unknown parameters, path-like parameters, and missing generated scan data.
 - [ ] 3.4 Add negative side-effect tests proving retrieval does not write AI context snapshots, findings stores, report history, scanned project files, task/calendar records, commits, shell commands, remote calls, or agent work.
