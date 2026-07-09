@@ -58,13 +58,14 @@ test('ensureProjectConfig ignores root projects.config.json at runtime', async (
     return originalReadFile(candidatePath, ...args);
   });
 
-  const config = await assert.doesNotReject(() =>
-    ensureProjectConfig({
+  let config;
+  await assert.doesNotReject(async () => {
+    config = await ensureProjectConfig({
       appDataDir,
       legacyConfigPath,
       now: () => new Date('2026-07-08T00:00:00.000Z'),
-    }),
-  );
+    });
+  });
 
   assert.deepEqual(config.projects, []);
   assert.deepEqual(config.workspaces, []);

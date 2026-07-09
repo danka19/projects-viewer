@@ -7,15 +7,11 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 
 export const DEFAULT_APP_DATA_DIR = path.join(REPO_ROOT, 'app-data');
 
-export function getConfigPaths({
-  appDataDir = DEFAULT_APP_DATA_DIR,
-  legacyConfigPath = path.join(REPO_ROOT, 'projects.config.json'),
-} = {}) {
+export function getConfigPaths({ appDataDir = DEFAULT_APP_DATA_DIR } = {}) {
   return {
     appDataDir,
     configPath: path.join(appDataDir, 'projects.config.json'),
     generatedPath: path.join(appDataDir, 'projects.generated.json'),
-    legacyConfigPath,
   };
 }
 
@@ -27,15 +23,7 @@ export async function ensureProjectConfig(options = {}) {
   } catch (err) {
     if (err.code !== 'ENOENT') throw err;
   }
-
-  let legacy = {};
-  try {
-    legacy = JSON.parse(await fs.readFile(paths.legacyConfigPath, 'utf8'));
-  } catch (err) {
-    if (err.code !== 'ENOENT') throw err;
-  }
-
-  const config = normalizeProjectConfig(legacy, options);
+  const config = normalizeProjectConfig({}, options);
   await writeProjectConfig(config, options);
   return config;
 }
