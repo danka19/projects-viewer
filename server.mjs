@@ -36,6 +36,7 @@ import {
   readFindingsStore,
   updateFindingReviewState,
 } from './server/ai-findings.mjs';
+import { buildAgentPreflightPacket } from './server/agent-preflight-packet.mjs';
 import { buildProjectBriefReport } from './server/project-brief-report.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -213,6 +214,279 @@ function watchPatternMatches(normalizedPath, pattern) {
   return false;
 }
 
+function isDomainError(err) {
+  return Boolean(err?.code && Number.isInteger(err?.statusCode));
+}
+
+function serializeDomainError(err) {
+  return { error: err.message, code: err.code };
+}
+
+async function pathExists(candidatePath) {
+  try {
+    await fs.access(candidatePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function toRepoRelative(candidatePath) {
+  return path.relative(__dirname, candidatePath).replaceAll('\\', '/');
+}
+
+function slugify(value) {
+  return String(value ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function findFirstMatch(source, pattern) {
+  const match = pattern.exec(source);
+  if (!match) return null;
+  const index = match.index ?? source.indexOf(match[0]);
+  const line = source.slice(0, index).split('\n').length;
+  return { match, line };
+}
+
+async function readTextIfExists(candidatePath) {
+  try {
+    return await fs.readFile(candidatePath, 'utf8');
+  } catch (err) {
+    if (err.code === 'ENOENT') return null;
+    throw err;
+  }
+}
+
+async function readAgentPreflightFindings(configOptions) {
+  if (!(await pathExists(getFindingsPath(configOptions)))) return null;
+  return readFindingsStore(configOptions);
+}
+
+async function readAgentPreflightOpenSpecState(changeId) {
+  const specsRoot = path.join(__dirname, 'openspec', 'specs');
+  const changesRoot = path.join(__dirname, 'openspec', 'changes');
+  const [acceptedSpecs, changes] = await Promise.all([
+    readAcceptedSpecReferences(specsRoot),
+    readOpenSpecChangeSummaries(changesRoot),
+  ]);
+
+  const requestedChange = changeId ? changes.find((entry) => entry.id === changeId) ?? null : null;
+  const changeDetail = requestedChange
+    ? await readOpenSpecChangeDetail(path.join(changesRoot, changeId), requestedChange)
+    : null;
+
+  return {
+    acceptedSpecs,
+    changes,
+    change: changeDetail?.change ?? null,
+    tasks: changeDetail?.tasks ?? [],
+    artifacts: changeDetail?.artifacts ?? requestedChange?.artifacts ?? [],
+  };
+}
+
+async function readAcceptedSpecReferences(specsRoot) {
+  if (!(await pathExists(specsRoot))) return [];
+  const entries = await fs.readdir(specsRoot, { withFileTypes: true });
+  const acceptedSpecs = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const specPath = path.join(specsRoot, entry.name, 'spec.md');
+    const source = await readTextIfExists(specPath);
+    if (!source) continue;
+    const requirement = findFirstMatch(source, /^### Requirement:\s+(.+)$/m);
+    const title = requirement?.match[1]?.trim() || entry.name;
+    acceptedSpecs.push({
+      id: `accepted:${entry.name}`,
+      title,
+      evidenceTarget: 'Accepted behavior should remain covered by focused verification evidence.',
+      file: toRepoRelative(specPath),
+      line: requirement?.line ?? 1,
+    });
+  }
+  return acceptedSpecs;
+}
+
+async function readOpenSpecChangeSummaries(changesRoot) {
+  if (!(await pathExists(changesRoot))) return [];
+  const entries = await fs.readdir(changesRoot, { withFileTypes: true });
+  const changes = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory() || entry.name === 'archive') continue;
+    const changeDir = path.join(changesRoot, entry.name);
+    const summary = await summarizeOpenSpecChange(changeDir, entry.name);
+    changes.push(summary);
+  }
+  return changes;
+}
+
+async function summarizeOpenSpecChange(changeDir, changeId) {
+  const artifacts = [];
+  for (const candidate of [
+    path.join(changeDir, 'proposal.md'),
+    path.join(changeDir, 'design.md'),
+    path.join(changeDir, 'tasks.md'),
+    path.join(changeDir, 'specs', changeId, 'spec.md'),
+  ]) {
+    if (await pathExists(candidate)) artifacts.push(toRepoRelative(candidate));
+  }
+
+  const specPath = path.join(changeDir, 'specs', changeId, 'spec.md');
+  const tasksPath = path.join(changeDir, 'tasks.md');
+  const [specSource, tasksSource] = await Promise.all([
+    readTextIfExists(specPath),
+    readTextIfExists(tasksPath),
+  ]);
+  const requirementCount = (specSource?.match(/^### Requirement:\s+/gm) ?? []).length;
+  const scenarioCount = (specSource?.match(/^#### Scenario:\s+/gm) ?? []).length;
+  const taskMatches = tasksSource?.match(/^- \[(?: |x)\] /gm) ?? [];
+  const openTaskMatches = tasksSource?.match(/^- \[ \] /gm) ?? [];
+
+  return {
+    id: changeId,
+    status: 'proposed',
+    requirementCount,
+    scenarioCount,
+    taskCount: taskMatches.length,
+    openTaskCount: openTaskMatches.length,
+    artifacts,
+  };
+}
+
+async function readOpenSpecChangeDetail(changeDir, summary) {
+  const specPath = path.join(changeDir, 'specs', summary.id, 'spec.md');
+  const tasksPath = path.join(changeDir, 'tasks.md');
+  const [specSource, tasksSource] = await Promise.all([
+    readTextIfExists(specPath),
+    readTextIfExists(tasksPath),
+  ]);
+  const specRelativePath = toRepoRelative(specPath);
+  const tasksRelativePath = toRepoRelative(tasksPath);
+  const requirements = [];
+
+  if (specSource) {
+    const requirementPattern = /^### Requirement:\s+(.+)$/gm;
+    for (const match of specSource.matchAll(requirementPattern)) {
+      const index = match.index ?? specSource.indexOf(match[0]);
+      const line = specSource.slice(0, index).split('\n').length;
+      requirements.push({
+        id: `${summary.id}:${slugify(match[1])}`,
+        title: match[1].trim(),
+        evidenceTarget: 'Proposed change requirement should be verified by focused packet tests.',
+        file: specRelativePath,
+        line,
+      });
+    }
+  }
+
+  const tasks = [];
+  if (tasksSource) {
+    const taskPattern = /^- \[( |x)\] (?:(\d+(?:\.\d+)*)\s+)?(.+)$/gm;
+    for (const match of tasksSource.matchAll(taskPattern)) {
+      const title = match[3]?.trim();
+      if (!title) continue;
+      const index = match.index ?? tasksSource.indexOf(match[0]);
+      const line = tasksSource.slice(0, index).split('\n').length;
+      const id = match[2] ?? `${summary.id}:task:${slugify(title)}`;
+      tasks.push({
+        id,
+        title,
+        evidenceTarget: `Task ${id} evidence recorded.`,
+        file: tasksRelativePath,
+        line,
+      });
+    }
+  }
+
+  return {
+    artifacts: summary.artifacts,
+    change: {
+      ...summary,
+      requirements,
+    },
+    tasks,
+  };
+}
+
+async function readAgentPreflightPhaseSignals() {
+  const roadmapPath = path.join(__dirname, 'docs', 'ROADMAP.md');
+  const roadmapSource = await readTextIfExists(roadmapPath);
+  if (!roadmapSource) return null;
+  const currentPhase = findFirstMatch(roadmapSource, /^- Current phase:\s+(.+)$/m);
+  const currentPhaseText = currentPhase?.match[1]?.trim() ?? '';
+  if (!currentPhaseText || /^no active implementation phase/i.test(currentPhaseText)) return null;
+  const phaseNumber = currentPhaseText.match(/Phase\s+(\d+)/i)?.[1];
+  if (!phaseNumber) return null;
+
+  const phasesRoot = path.join(__dirname, 'docs', 'phases');
+  const phaseEntries = await fs.readdir(phasesRoot, { withFileTypes: true }).catch(() => []);
+  const phaseEntry = phaseEntries.find(
+    (entry) => entry.isFile() && entry.name.startsWith(`PHASE_${phaseNumber}_`) && entry.name.endsWith('.md'),
+  );
+  if (!phaseEntry) return null;
+
+  const relativePath = toRepoRelative(path.join(phasesRoot, phaseEntry.name));
+  return {
+    requiredReading: [
+      {
+        path: relativePath,
+        title: `Phase ${phaseNumber} plan`,
+        reason: 'Current roadmap phase implementation details.',
+        evidence: [{ kind: 'source', file: relativePath }],
+      },
+    ],
+  };
+}
+
+async function readAgentPreflightAuditSignals() {
+  const auditPath = path.join(__dirname, 'docs', 'CURRENT_PROJECT_AUDIT.md');
+  if (!(await pathExists(auditPath))) return null;
+  const relativePath = toRepoRelative(auditPath);
+  return {
+    requiredReading: [
+      {
+        path: relativePath,
+        title: 'Current project audit',
+        reason: 'Known findings and implementation risks.',
+        evidence: [{ kind: 'source', file: relativePath }],
+      },
+    ],
+  };
+}
+
+async function readAgentPreflightChecklistSignals() {
+  const checklistPath = path.join(__dirname, 'docs', 'AI_STEP_VERIFICATION_CHECKLIST.md');
+  if (!(await pathExists(checklistPath))) return null;
+  const relativePath = toRepoRelative(checklistPath);
+  return {
+    requiredReading: [
+      {
+        path: relativePath,
+        title: 'AI verification checklist',
+        reason: 'Required verification guardrails.',
+        evidence: [{ kind: 'source', file: relativePath }],
+      },
+    ],
+    expectations: [
+      {
+        kind: 'command',
+        command: 'npm test -- tests/agent-preflight-packet.test.mjs',
+        reason: 'Focused verification for the agent preflight packet route.',
+        expectedEvidence: 'Focused agent preflight packet tests pass.',
+        evidence: [{ kind: 'source', file: relativePath }],
+      },
+      {
+        kind: 'command',
+        command: 'git diff --check',
+        reason: 'Detect whitespace and patch formatting issues.',
+        expectedEvidence: 'git diff --check exits cleanly.',
+        evidence: [{ kind: 'source', file: relativePath }],
+      },
+    ],
+  };
+}
+
 export async function createApp({
   appDataDir,
   legacyConfigPath = path.join(__dirname, 'projects.config.json'),
@@ -246,6 +520,14 @@ export async function createApp({
         error: 'Generated scan data is missing. Run a scan before requesting a project brief report.',
         code: 'missing-generated-scan-data',
       });
+      return;
+    }
+    sendError(res, err);
+  }
+
+  function sendAgentPreflightPacketError(res, err) {
+    if (isDomainError(err)) {
+      res.status(err.statusCode).json(serializeDomainError(err));
       return;
     }
     sendError(res, err);
@@ -322,6 +604,26 @@ export async function createApp({
       throw err;
     }
     return { mode, since: sinceDate.toISOString() };
+  }
+
+  function parseAgentPreflightPacketQuery(req) {
+    const url = new URL(req.originalUrl, 'http://127.0.0.1');
+    const getScalar = (key) => {
+      const values = url.searchParams.getAll(key);
+      if (values.length === 0) return null;
+      if (values.length > 1) {
+        const err = new Error(`${key} must be provided at most once.`);
+        err.code = 'invalid-query';
+        err.statusCode = 400;
+        throw err;
+      }
+      return values[0];
+    };
+
+    const projectId = getScalar('projectId');
+    const changeId = getScalar('changeId');
+    const agentRole = getScalar('agentRole') ?? 'implementation';
+    return { projectId, changeId, agentRole };
   }
 
   app.get('/api/config', async (_req, res) => {
@@ -471,6 +773,39 @@ export async function createApp({
       );
     } catch (err) {
       sendProjectBriefReportError(res, err);
+    }
+  });
+
+  app.get('/api/agent-preflight-packet', async (req, res) => {
+    try {
+      const { projectId, changeId, agentRole } = parseAgentPreflightPacketQuery(req);
+      const [scan, config, findingsStore, openspecState, phaseSignals, auditSignals, checklistSignals] =
+        await Promise.all([
+          readGeneratedScan(),
+          readProjectConfig(configOptions),
+          readAgentPreflightFindings(configOptions),
+          readAgentPreflightOpenSpecState(changeId),
+          readAgentPreflightPhaseSignals(),
+          readAgentPreflightAuditSignals(),
+          readAgentPreflightChecklistSignals(),
+        ]);
+
+      res.json(
+        buildAgentPreflightPacket({
+          scanOutput: scan,
+          config,
+          projectId,
+          changeId,
+          agentRole,
+          findings: findingsStore?.findings ?? null,
+          openspecState,
+          phaseSignals,
+          auditSignals,
+          checklistSignals,
+        }),
+      );
+    } catch (err) {
+      sendAgentPreflightPacketError(res, err);
     }
   });
 

@@ -1,8 +1,23 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { createApp } from '../server.mjs';
 import { buildAgentPreflightPacket } from '../server/agent-preflight-packet.mjs';
+
+async function startTestServer(app) {
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise((resolve) => server.once('listening', resolve));
+  const { port } = server.address();
+  return {
+    url: `http://127.0.0.1:${port}`,
+    close: () =>
+      new Promise((resolve, reject) => {
+        server.close((err) => (err ? reject(err) : resolve()));
+      }),
+  };
+}
 
 function minimalProject(name, overrides = {}) {
   const projectPath = overrides.path ?? `C:/projects/${name.toLowerCase()}`;
@@ -784,4 +799,72 @@ test('agent preflight composition module stays pure and avoids forbidden side-ef
   assert.equal(source.includes('updateFindingReviewState'), false);
   assert.equal(source.includes('writeAiContextSnapshot'), false);
   assert.equal(source.includes('runScan'), false);
+});
+
+test('agent preflight packet API returns valid packet for saved project without unauthorized side effects', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-agent-preflight-api-'));
+  const appDataDir = path.join(tmp, 'app-data');
+  const trackedProject = path.join(tmp, 'tracked-project');
+  await fs.mkdir(appDataDir, { recursive: true });
+  await fs.mkdir(trackedProject, { recursive: true });
+  const sentinelPath = path.join(trackedProject, 'AGENTS.md');
+  await fs.writeFile(sentinelPath, 'tracked project sentinel\n');
+
+  const project = minimalProject('ApiProject', {
+    path: trackedProject,
+    realBlockers: [signal('blocked', 'API project is blocked.', 20)],
+    mainBlocker: 'API project is blocked.',
+  });
+  await fs.writeFile(path.join(appDataDir, 'projects.config.json'), JSON.stringify(configFor([project])));
+  await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), JSON.stringify(scanWith([project])));
+
+  const findingsStore = {
+    generatedAt: '2026-07-09T00:00:00.000Z',
+    findings: [
+      {
+        id: 'api-finding',
+        type: 'missing-verification-evidence',
+        title: 'Review API evidence',
+        confidence: 'high',
+        reviewState: 'new',
+        reviewRequired: true,
+        project: { name: project.name, path: project.path },
+        evidence: [{ kind: 'source', file: 'docs/audit.md', line: 3, text: 'Needs evidence.' }],
+        createdAt: '2026-07-09T00:00:00.000Z',
+        updatedAt: '2026-07-09T00:00:00.000Z',
+      },
+    ],
+    reviewStates: {},
+  };
+  const findingsPath = path.join(appDataDir, 'ai.findings.generated.json');
+  await fs.writeFile(findingsPath, JSON.stringify(findingsStore, null, 2));
+  const findingsBefore = await fs.readFile(findingsPath, 'utf8');
+
+  const app = await createApp({
+    appDataDir,
+    legacyConfigPath: path.join(tmp, 'missing.json'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const response = await fetch(
+      `${server.url}/api/agent-preflight-packet?projectId=project-1&changeId=agent-preflight-packet&agentRole=verification`,
+    );
+    assert.equal(response.status, 200);
+    const packet = await response.json();
+    assert.equal(packet.kind, 'agent-preflight-packet');
+    assert.equal(packet.project.id, 'project-1');
+    assert.equal(Object.hasOwn(packet, 'mode'), false);
+    assert.equal(Object.hasOwn(packet, 'recommendedHumanDecision'), false);
+    assert.equal(Object.hasOwn(packet, 'noAttentionMessage'), false);
+
+    assert.equal(await fs.readFile(findingsPath, 'utf8'), findingsBefore);
+    await assert.rejects(fs.access(path.join(appDataDir, 'ai.context.snapshot.json')));
+    await assert.rejects(fs.access(path.join(appDataDir, 'report-history.json')));
+    assert.equal(await fs.readFile(sentinelPath, 'utf8'), 'tracked project sentinel\n');
+  } finally {
+    await server.close();
+  }
 });
