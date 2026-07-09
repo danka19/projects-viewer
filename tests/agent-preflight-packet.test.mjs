@@ -891,3 +891,157 @@ test('agent preflight packet API returns valid packet for saved project without 
     await server.close();
   }
 });
+
+test('agent preflight packet API rejects unsafe or invalid query parameters', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-agent-preflight-api-invalid-'));
+  const appDataDir = path.join(tmp, 'app-data');
+  const trackedProject = path.join(tmp, 'tracked-project');
+  await fs.mkdir(appDataDir, { recursive: true });
+  await fs.mkdir(trackedProject, { recursive: true });
+
+  const project = minimalProject('ApiProject', { path: trackedProject });
+  await fs.writeFile(path.join(appDataDir, 'projects.config.json'), JSON.stringify(configFor([project])));
+  await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), JSON.stringify(scanWith([project])));
+
+  const app = await createApp({
+    appDataDir,
+    legacyConfigPath: path.join(tmp, 'missing.json'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+  const cases = [
+    '',
+    'agentRole=builder',
+    'projectId=project-1&projectId=project-2',
+    'projectId=project-1&changeId=one&changeId=two',
+    'projectId=project-1&agentRole=implementation&agentRole=verification',
+    'projectId=project-1&path=C:/projects/example',
+    'projectId=project-1&projectPath=C:/projects/example',
+    'projectId=project-1&workspacePath=C:/projects',
+    'projectId=project-1&rootPath=C:/projects',
+    'projectId=project-1&scanPath=C:/projects',
+    'projectId=project-1&file=README.md',
+    'projectId=project-1&files=README.md',
+    'projectId=project-1&glob=**/*.md',
+    'projectId=project-1&include=docs',
+    'projectId=project-1&exclude=node_modules',
+    'projectId=project-1&command=npm test',
+    'projectId=project-1&action=commit',
+    'projectId=project-1&commit=true',
+    'projectId=project-1&task=follow-up',
+    'projectId=project-1&calendar=slot',
+    'projectId=project-1&notification=send',
+    'projectId=project-1&remoteProvider=openai',
+    'projectId=project-1&auth=token',
+    'projectId=project-1&model=gpt',
+    'projectId=project-1&agent=run',
+    'projectId=project-1&unknown=value',
+  ];
+
+  try {
+    for (const query of cases) {
+      const url = query
+        ? `${server.url}/api/agent-preflight-packet?${query}`
+        : `${server.url}/api/agent-preflight-packet`;
+      const response = await fetch(url);
+      assert.equal(response.status, 400, `expected 400 for query "${query || '<empty>'}"`);
+      const body = await response.json();
+      assert.match(body.error, /Allowed parameters: projectId, changeId, agentRole|must be provided at most once|projectId is required|agentRole must be one of: implementation, verification\./);
+    }
+  } finally {
+    await server.close();
+  }
+});
+
+test('agent preflight packet API returns expected error states for missing project or generated scan inputs', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-agent-preflight-api-errors-'));
+  const appDataDir = path.join(tmp, 'app-data');
+  const trackedProject = path.join(tmp, 'tracked-project');
+  await fs.mkdir(appDataDir, { recursive: true });
+  await fs.mkdir(trackedProject, { recursive: true });
+
+  const project = minimalProject('ApiProject', { path: trackedProject });
+  await fs.writeFile(path.join(appDataDir, 'projects.config.json'), JSON.stringify(configFor([project])));
+  await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), JSON.stringify(scanWith([project])));
+
+  const app = await createApp({
+    appDataDir,
+    legacyConfigPath: path.join(tmp, 'missing.json'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+
+  try {
+    const unknownProject = await fetch(`${server.url}/api/agent-preflight-packet?projectId=missing-project`);
+    assert.equal(unknownProject.status, 404);
+    assert.equal((await unknownProject.json()).code, 'project-not-found');
+
+    await fs.writeFile(
+      path.join(appDataDir, 'projects.config.json'),
+      JSON.stringify(
+        configFor([project], {
+          enabledByPath: { [project.path]: false },
+        }),
+      ),
+    );
+    const disabledProject = await fetch(`${server.url}/api/agent-preflight-packet?projectId=project-1`);
+    assert.equal(disabledProject.status, 404);
+    assert.equal((await disabledProject.json()).code, 'project-not-found');
+
+    await fs.writeFile(path.join(appDataDir, 'projects.config.json'), JSON.stringify(configFor([project])));
+    await fs.rm(path.join(appDataDir, 'projects.generated.json'));
+    const missingGeneratedScan = await fetch(`${server.url}/api/agent-preflight-packet?projectId=project-1`);
+    assert.equal(missingGeneratedScan.status, 404);
+    assert.equal((await missingGeneratedScan.json()).code, 'missing-generated-scan-data');
+
+    await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), '{not valid json');
+    const corruptGeneratedScan = await fetch(`${server.url}/api/agent-preflight-packet?projectId=project-1`);
+    assert.equal(corruptGeneratedScan.status, 404);
+    assert.equal((await corruptGeneratedScan.json()).code, 'missing-generated-scan-data');
+  } finally {
+    await server.close();
+  }
+});
+
+test('agent preflight packet API returns unknown-change safe state for unresolved local changeId', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-agent-preflight-api-unknown-change-'));
+  const appDataDir = path.join(tmp, 'app-data');
+  const trackedProject = path.join(tmp, 'tracked-project');
+  await fs.mkdir(appDataDir, { recursive: true });
+  await fs.mkdir(trackedProject, { recursive: true });
+
+  const project = minimalProject('ApiProject', { path: trackedProject });
+  await fs.writeFile(path.join(appDataDir, 'projects.config.json'), JSON.stringify(configFor([project])));
+  await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), JSON.stringify(scanWith([project])));
+
+  const app = await createApp({
+    appDataDir,
+    legacyConfigPath: path.join(tmp, 'missing.json'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+
+  try {
+    const response = await fetch(`${server.url}/api/agent-preflight-packet?projectId=project-1&changeId=missing-change`);
+    assert.equal(response.status, 200);
+    const packet = await response.json();
+    assert.equal(packet.change, null);
+    assert.deepEqual(
+      packet.safeStates.find((item) => item.code === 'unknown-change'),
+      {
+        code: 'unknown-change',
+        severity: 'warning',
+        message: 'Requested OpenSpec change was not found locally.',
+        blocksPacket: false,
+      },
+    );
+  } finally {
+    await server.close();
+  }
+});

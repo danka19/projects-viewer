@@ -11,17 +11,17 @@
 ## 2. Local Retrieval Surface
 
 - [x] 2.1 Add local read-only `GET /api/agent-preflight-packet`.
-- [ ] 2.2 Validate that the endpoint requires a saved `projectId`, accepts only optional `changeId` and `agentRole`, rejects unknown or repeated scalar parameters, and never accepts arbitrary paths or selectors.
+- [x] 2.2 Validate that the endpoint requires a saved `projectId`, accepts only optional `changeId` and `agentRole`, rejects unknown or repeated scalar parameters, and never accepts arbitrary paths or selectors.
 - [x] 2.3 Ensure packet retrieval reads generated scan data, saved config, existing AI context/findings state, OpenSpec metadata, and local project docs without writing snapshots, findings review state, report history, scanned project files, tasks/calendar records, commits, shell commands, remote calls, or agent work.
-- [ ] 2.4 Return structured errors or safe states for missing generated scan data, unknown project ids, disabled projects, unknown change ids, and missing optional docs/signals.
+- [x] 2.4 Return structured errors or safe states for missing generated scan data, unknown project ids, disabled projects, unknown change ids, and missing optional docs/signals.
 
 ## 3. Verification
 
 - [x] 3.1 Add pure composition tests for packet shape, `kind: "agent-preflight-packet"`, agent roles, required reading, project state, acceptance mapping, attention signals, verification expectations, evidence, derived labels, and work boundaries.
   - Task 2 core coverage completed: packet shape, agent role, project identity, missing/invalid generated scan handling, missing `projectId`, disabled/unknown project handling, generated-scan saved-path mismatch handling, normalized config-path matching, unknown `changeId` safe state, no fabricated proposed requirements/tasks for unresolved change ids, and purity guards are now covered in `tests/agent-preflight-packet.test.mjs`.
 - [ ] 3.2 Add tests proving packet generation stays separate from `project-brief-report` output and does not include daily/weekly human brief fields.
-- [ ] 3.3 Add API tests for valid packet retrieval, missing `projectId`, unknown or disabled projects, unknown change ids, invalid `agentRole`, repeated scalar parameters, unknown parameters, path-like parameters, and missing generated scan data.
-- [ ] 3.4 Add negative side-effect tests proving retrieval does not write AI context snapshots, findings stores, report history, scanned project files, task/calendar records, commits, shell commands, remote calls, or agent work.
+- [x] 3.3 Add API tests for valid packet retrieval, missing `projectId`, unknown or disabled projects, unknown change ids, invalid `agentRole`, repeated scalar parameters, unknown parameters, path-like parameters, and missing generated scan data.
+- [x] 3.4 Add negative side-effect tests proving retrieval does not write AI context snapshots, findings stores, report history, scanned project files, task/calendar records, commits, shell commands, remote calls, or agent work.
   - [x] Focused API coverage now proves valid packet retrieval leaves the findings store, `ai.context.snapshot.json`, `report-history.json`, and a tracked-project sentinel file unchanged.
 - [ ] 3.5 Run focused tests, `npm test`, `npm run build`, `openspec list`, `openspec list --specs`, `openspec validate --all --strict`, and `git diff --check`.
 

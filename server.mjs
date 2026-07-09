@@ -613,6 +613,16 @@ export async function createApp({
 
   function parseAgentPreflightPacketQuery(req) {
     const url = new URL(req.originalUrl, 'http://127.0.0.1');
+    const allowed = new Set(['projectId', 'changeId', 'agentRole']);
+    for (const key of new Set(url.searchParams.keys())) {
+      if (!allowed.has(key)) {
+        const err = new Error('Unsupported parameter. Allowed parameters: projectId, changeId, agentRole.');
+        err.code = 'invalid-query';
+        err.statusCode = 400;
+        throw err;
+      }
+    }
+
     const getScalar = (key) => {
       const values = url.searchParams.getAll(key);
       if (values.length === 0) return null;
@@ -626,8 +636,22 @@ export async function createApp({
     };
 
     const projectId = getScalar('projectId');
+    if (projectId === null || projectId.trim() === '') {
+      const err = new Error('projectId is required.');
+      err.code = 'invalid-query';
+      err.statusCode = 400;
+      throw err;
+    }
+
     const changeId = getScalar('changeId');
     const agentRole = getScalar('agentRole') ?? 'implementation';
+    if (!['implementation', 'verification'].includes(agentRole)) {
+      const err = new Error('agentRole must be one of: implementation, verification.');
+      err.code = 'invalid-query';
+      err.statusCode = 400;
+      throw err;
+    }
+
     return { projectId, changeId, agentRole };
   }
 
