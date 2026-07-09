@@ -20,6 +20,10 @@ async function startTestServer(app) {
   };
 }
 
+function assertJsonContentType(response) {
+  assert.match(response.headers.get('content-type') ?? '', /^application\/json\b/i);
+}
+
 function minimalProject(name, overrides = {}) {
   const projectPath = overrides.path ?? `C:/projects/${name.toLowerCase()}`;
   return {
@@ -931,6 +935,7 @@ test('agent preflight packet API returns valid packet for saved project without 
         `${server.url}/api/agent-preflight-packet?projectId=project-1&agentRole=${agentRole}`,
       );
       assert.equal(response.status, 200, `expected 200 for agentRole=${agentRole}`);
+      assertJsonContentType(response);
       const packet = await response.json();
       assert.equal(packet.agentRole, agentRole);
     }
@@ -939,6 +944,7 @@ test('agent preflight packet API returns valid packet for saved project without 
       `${server.url}/api/agent-preflight-packet?projectId=project-1&changeId=agent-preflight-packet&agentRole=verification`,
     );
     assert.equal(response.status, 200);
+    assertJsonContentType(response);
     const packet = await response.json();
     assert.equal(packet.kind, 'agent-preflight-packet');
     assert.equal(packet.project.id, 'project-1');
@@ -1020,7 +1026,9 @@ test('agent preflight packet API rejects unsafe or invalid query parameters', as
         : `${server.url}/api/agent-preflight-packet`;
       const response = await fetch(url);
       assert.equal(response.status, 400, `expected 400 for query "${query || '<empty>'}"`);
+      assertJsonContentType(response);
       const body = await response.json();
+      assert.equal(body.code, 'invalid-query');
       assert.match(body.error, /Allowed parameters: projectId, changeId, agentRole|must be provided at most once|projectId is required|agentRole must be one of: implementation, reviewer, verification, handoff\./);
     }
   } finally {
@@ -1050,6 +1058,7 @@ test('agent preflight packet API returns expected error states for missing proje
   try {
     const unknownProject = await fetch(`${server.url}/api/agent-preflight-packet?projectId=missing-project`);
     assert.equal(unknownProject.status, 404);
+    assertJsonContentType(unknownProject);
     assert.equal((await unknownProject.json()).code, 'project-not-found');
 
     await fs.writeFile(
@@ -1062,17 +1071,20 @@ test('agent preflight packet API returns expected error states for missing proje
     );
     const disabledProject = await fetch(`${server.url}/api/agent-preflight-packet?projectId=project-1`);
     assert.equal(disabledProject.status, 404);
+    assertJsonContentType(disabledProject);
     assert.equal((await disabledProject.json()).code, 'project-not-found');
 
     await fs.writeFile(path.join(appDataDir, 'projects.config.json'), JSON.stringify(configFor([project])));
     await fs.rm(path.join(appDataDir, 'projects.generated.json'));
     const missingGeneratedScan = await fetch(`${server.url}/api/agent-preflight-packet?projectId=project-1`);
     assert.equal(missingGeneratedScan.status, 404);
+    assertJsonContentType(missingGeneratedScan);
     assert.equal((await missingGeneratedScan.json()).code, 'missing-generated-scan-data');
 
     await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), '{not valid json');
     const corruptGeneratedScan = await fetch(`${server.url}/api/agent-preflight-packet?projectId=project-1`);
     assert.equal(corruptGeneratedScan.status, 404);
+    assertJsonContentType(corruptGeneratedScan);
     assert.equal((await corruptGeneratedScan.json()).code, 'missing-generated-scan-data');
   } finally {
     await server.close();
