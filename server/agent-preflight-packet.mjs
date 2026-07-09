@@ -42,10 +42,10 @@ export function buildAgentPreflightPacket({
   assertProjectId(projectId);
 
   const configProject = findConfigProject(config, projectId);
-  if (!configProject || configProject.enabled === false) throw domainError('project-not-found', 404, 'Tracked project was not found.');
+  if (!configProject || configProject.enabled === false) throw projectNotFoundError('Tracked project was not found.');
 
   const generatedProject = findGeneratedProject(scanOutput.projects, configProject.path);
-  if (!generatedProject) throw domainError('project-not-found', 404, 'Tracked project was not found in generated scan data.');
+  if (!generatedProject) throw projectNotFoundError('Tracked project was not found in generated scan data.');
 
   const normalizedRole = VALID_AGENT_ROLES.has(agentRole) ? agentRole : 'implementation';
   const change = findChange(openspecState, changeId);
@@ -564,13 +564,13 @@ function toIso(value) {
 
 function assertScanOutput(scanOutput) {
   if (!scanOutput || !Array.isArray(scanOutput.projects) || typeof scanOutput.generatedAt !== 'string') {
-    throw domainError('missing-generated-scan-data', 404, 'Generated scan data is missing or invalid.');
+    throw missingGeneratedScanDataError();
   }
 }
 
 function assertProjectId(projectId) {
   if (typeof projectId !== 'string' || projectId.trim() === '') {
-    throw domainError('project-id-required', 400, 'projectId is required.');
+    throw missingProjectIdError();
   }
 }
 
@@ -579,4 +579,16 @@ function domainError(code, statusCode, message) {
   err.code = code;
   err.statusCode = statusCode;
   return err;
+}
+
+function missingGeneratedScanDataError() {
+  return domainError('missing-generated-scan-data', 404, 'Generated scan data is missing or invalid.');
+}
+
+function missingProjectIdError() {
+  return domainError('missing-project-id', 400, 'projectId is required.');
+}
+
+function projectNotFoundError(message) {
+  return domainError('project-not-found', 404, message);
 }

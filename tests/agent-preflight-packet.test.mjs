@@ -185,7 +185,7 @@ test('buildAgentPreflightPacket treats missing or invalid generated scan data as
   }
 });
 
-test('buildAgentPreflightPacket rejects missing, unknown, or disabled project ids', () => {
+test('buildAgentPreflightPacket throws missing-project-id when projectId is absent', () => {
   const project = minimalProject('Alpha');
   const scanOutput = scanWith([project]);
 
@@ -195,7 +195,22 @@ test('buildAgentPreflightPacket rejects missing, unknown, or disabled project id
         scanOutput,
         config: configFor([project]),
       }),
-    (err) => err.code === 'project-id-required',
+    (err) => err.code === 'missing-project-id' && err.statusCode === 400,
+  );
+});
+
+test('buildAgentPreflightPacket throws project-not-found when projectId is unknown or disabled', () => {
+  const project = minimalProject('Alpha');
+  const scanOutput = scanWith([project]);
+
+  assert.throws(
+    () =>
+      buildAgentPreflightPacket({
+        scanOutput,
+        config: configFor([project]),
+        projectId: 'missing-project',
+      }),
+    (err) => err.code === 'project-not-found' && err.statusCode === 404,
   );
 
   assert.throws(
@@ -215,6 +230,25 @@ test('buildAgentPreflightPacket rejects missing, unknown, or disabled project id
         config: configFor([project], {
           enabledByPath: { [project.path]: false },
         }),
+        projectId: 'project-1',
+      }),
+    (err) => err.code === 'project-not-found' && err.statusCode === 404,
+  );
+});
+
+test('buildAgentPreflightPacket throws project-not-found when generated scan misses the saved config path', () => {
+  const configProject = minimalProject('Alpha', {
+    path: 'C:/projects/alpha-from-config',
+  });
+  const generatedProject = minimalProject('Alpha', {
+    path: 'C:/projects/alpha-from-scan',
+  });
+
+  assert.throws(
+    () =>
+      buildAgentPreflightPacket({
+        scanOutput: scanWith([generatedProject]),
+        config: configFor([configProject]),
         projectId: 'project-1',
       }),
     (err) => err.code === 'project-not-found' && err.statusCode === 404,
@@ -332,6 +366,30 @@ test('buildAgentPreflightPacket composes ordered required reading and non-blocki
     ],
   );
   assert.equal(safePacket.safeStates.every((item) => item.blocksPacket === false), true);
+});
+
+test('buildAgentPreflightPacket returns non-blocking unknown-change safe state for an unresolved changeId', () => {
+  const project = minimalProject('Alpha');
+
+  const packet = buildAgentPreflightPacket({
+    scanOutput: scanWith([project]),
+    config: configFor([project]),
+    projectId: 'project-1',
+    changeId: 'missing-change',
+    findings: [],
+    openspecState: { changes: [] },
+  });
+
+  assert.equal(packet.change, null);
+  assert.deepEqual(
+    packet.safeStates.find((item) => item.code === 'unknown-change'),
+    {
+      code: 'unknown-change',
+      severity: 'warning',
+      message: 'Requested OpenSpec change was not found locally.',
+      blocksPacket: false,
+    },
+  );
 });
 
 test('buildAgentPreflightPacket treats empty legacy signal arrays as missing safe-state inputs', () => {
