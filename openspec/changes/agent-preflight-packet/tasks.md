@@ -5,8 +5,8 @@
 - [x] 1.3 Compose required-reading references from project rules, documentation map, relevant phase docs, OpenSpec artifacts, audit docs, and verification checklist signals where available.
 - [x] 1.4 Compose acceptance mapping from accepted specs, proposed change deltas, change tasks, phase-plan expectations, and checklist evidence targets without treating proposed changes as accepted behavior.
 - [x] 1.5 Compose attention signals from current project state, blockers, gates, unresolved findings, stale docs, missing verification, risk signals, and documentation gaps.
-- [x] 1.6 Implement safe states for missing generated scan data, missing optional findings/audit/phase/checklist signals, and unknown change ids.
-  - [x] Safe optional-input coverage for missing findings/audit/phase/checklist signals is implemented in the pure composition module and focused test.
+- [x] 1.6 Implement the accepted blocking/safe-state contract: missing generated scan data returns blocking `missing-generated-scan-data` domain error with status `404`, while missing optional findings/audit/phase/checklist inputs and unknown change ids remain non-blocking safe states.
+  - [x] Focused pure-module tests cover blocking generated-scan error handling plus safe optional-input and unknown-change states.
 
 ## 2. Local Retrieval Surface
 
@@ -18,7 +18,7 @@
 ## 3. Verification
 
 - [x] 3.1 Add pure composition tests for packet shape, `kind: "agent-preflight-packet"`, agent roles, required reading, project state, acceptance mapping, attention signals, verification expectations, evidence, derived labels, and work boundaries.
-  - Task 2 core coverage completed: packet shape, agent role, project identity, missing/invalid generated scan handling, missing `projectId`, disabled/unknown project handling, generated-scan saved-path mismatch handling, normalized config-path matching, unknown `changeId` safe state, and purity guards are now covered in `tests/agent-preflight-packet.test.mjs`.
+  - Task 2 core coverage completed: packet shape, agent role, project identity, missing/invalid generated scan handling, missing `projectId`, disabled/unknown project handling, generated-scan saved-path mismatch handling, normalized config-path matching, unknown `changeId` safe state, no fabricated proposed requirements/tasks for unresolved change ids, and purity guards are now covered in `tests/agent-preflight-packet.test.mjs`.
 - [ ] 3.2 Add tests proving packet generation stays separate from `project-brief-report` output and does not include daily/weekly human brief fields.
 - [ ] 3.3 Add API tests for valid packet retrieval, missing `projectId`, unknown or disabled projects, unknown change ids, invalid `agentRole`, repeated scalar parameters, unknown parameters, path-like parameters, and missing generated scan data.
 - [ ] 3.4 Add negative side-effect tests proving retrieval does not write AI context snapshots, findings stores, report history, scanned project files, task/calendar records, commits, shell commands, remote calls, or agent work.

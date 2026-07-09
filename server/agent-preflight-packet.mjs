@@ -235,13 +235,15 @@ function buildAcceptanceMap({ openspecState, change, phaseBundle, checklistBundl
     if (normalized) items.push(normalized);
   }
 
-  for (const task of openspecState?.tasks ?? []) {
-    const normalized = normalizeAcceptanceReference(task, {
-      fallbackSource: 'proposed-change',
-      fallbackStatus: 'proposed',
-      fallbackEvidenceTarget: 'Proposed task should produce focused verification evidence.',
-    });
-    if (normalized) items.push(normalized);
+  if (change) {
+    for (const task of openspecState?.tasks ?? []) {
+      const normalized = normalizeAcceptanceReference(task, {
+        fallbackSource: 'proposed-change',
+        fallbackStatus: 'proposed',
+        fallbackEvidenceTarget: 'Proposed task should produce focused verification evidence.',
+      });
+      if (normalized) items.push(normalized);
+    }
   }
 
   for (const expectation of phaseBundle.expectations) {
@@ -469,23 +471,23 @@ function normalizeSignalBundle(value) {
 }
 
 function normalizeChangeRequirements(openspecState, change) {
+  if (!change) return [];
+
   const directChange = openspecState?.change;
-  if (Array.isArray(directChange?.requirements)) return directChange.requirements;
-  if (change) {
-    const fallbackSpecPath = deriveChangeSpecPath({
-      changeId: change.id,
-      artifacts: [directChange?.artifacts, openspecState?.artifacts, change.artifacts],
-    });
-    return [
-      {
-        id: `${change.id}:packet-contract`,
-        title: 'Packet identifies its own kind',
-        evidenceTarget: 'tests/agent-preflight-packet.test.mjs verifies kind and absent brief fields.',
-        file: fallbackSpecPath,
-      },
-    ];
-  }
-  return [];
+  if (directChange?.id === change.id && Array.isArray(directChange.requirements)) return directChange.requirements;
+
+  const fallbackSpecPath = deriveChangeSpecPath({
+    changeId: change.id,
+    artifacts: [directChange?.artifacts, openspecState?.artifacts, change.artifacts],
+  });
+  return [
+    {
+      id: `${change.id}:packet-contract`,
+      title: 'Packet identifies its own kind',
+      evidenceTarget: 'tests/agent-preflight-packet.test.mjs verifies kind and absent brief fields.',
+      file: fallbackSpecPath,
+    },
+  ];
 }
 
 function normalizeAcceptanceReference(item, { fallbackSource, fallbackStatus, fallbackEvidenceTarget }) {

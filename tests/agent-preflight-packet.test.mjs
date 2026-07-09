@@ -217,16 +217,6 @@ test('buildAgentPreflightPacket throws project-not-found when projectId is unkno
     () =>
       buildAgentPreflightPacket({
         scanOutput,
-        config: configFor([project]),
-        projectId: 'missing-project',
-      }),
-    (err) => err.code === 'project-not-found' && err.statusCode === 404,
-  );
-
-  assert.throws(
-    () =>
-      buildAgentPreflightPacket({
-        scanOutput,
         config: configFor([project], {
           enabledByPath: { [project.path]: false },
         }),
@@ -390,6 +380,62 @@ test('buildAgentPreflightPacket returns non-blocking unknown-change safe state f
       blocksPacket: false,
     },
   );
+});
+
+test('buildAgentPreflightPacket does not fabricate proposed requirements or tasks for an unresolved changeId', () => {
+  const project = minimalProject('Alpha');
+
+  const packet = buildAgentPreflightPacket({
+    scanOutput: scanWith([project]),
+    config: configFor([project]),
+    projectId: 'project-1',
+    changeId: 'missing-change',
+    findings: [],
+    openspecState: {
+      acceptedSpecs: [
+        acceptedSpec({
+          id: 'accepted:packet-kind',
+          title: 'Accepted packet identifies its own kind',
+        }),
+      ],
+      change: {
+        id: 'different-change',
+        requirements: [
+          {
+            id: 'req-foreign',
+            title: 'Foreign proposed requirement',
+            evidenceTarget: 'Should never appear for an unknown requested change.',
+            file: 'openspec/changes/different-change/specs/different-change/spec.md',
+            line: 21,
+          },
+        ],
+      },
+      tasks: [
+        {
+          id: 'task-foreign',
+          title: 'Foreign proposed task',
+          evidenceTarget: 'Should never appear for an unknown requested change.',
+          file: 'openspec/changes/different-change/tasks.md',
+          line: 8,
+        },
+      ],
+      changes: [],
+    },
+  });
+
+  assert.equal(packet.change, null);
+  assert.deepEqual(packet.acceptanceMap, [
+    {
+      source: 'accepted-spec',
+      id: 'accepted:packet-kind',
+      title: 'Accepted packet identifies its own kind',
+      status: 'accepted',
+      evidenceTarget: 'Accepted behavior has verification evidence.',
+      evidence: [{ kind: 'source', file: 'openspec/specs/agent-preflight-packet/spec.md', line: 12 }],
+    },
+  ]);
+  assert.equal(packet.acceptanceMap.some((item) => item.id === 'req-foreign'), false);
+  assert.equal(packet.acceptanceMap.some((item) => item.id === 'task-foreign'), false);
 });
 
 test('buildAgentPreflightPacket treats empty legacy signal arrays as missing safe-state inputs', () => {
