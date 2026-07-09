@@ -110,7 +110,7 @@ export function buildAgentPreflightPacket({
     },
     acceptanceMap: buildAcceptanceMap({ openspecState, change, phaseBundle, checklistBundle }),
     attentionSignals: buildAttentionSignals({ project: generatedProject, findings, auditBundle, checklistBundle }),
-    verificationPlan: buildVerificationPlan({ openspecState, phaseBundle, checklistBundle, agentRole: normalizedRole }),
+    verificationPlan: buildVerificationPlan({ change, openspecState, phaseBundle, checklistBundle, agentRole: normalizedRole }),
     workBoundaries: WORK_BOUNDARIES,
     evidence: evidence.length > 0 ? evidence : [{ kind: 'derived-summary', text: generatedProject.statusReason ?? generatedProject.name }],
     derivedLabels: [
@@ -360,14 +360,14 @@ function attention(kind, severity, title, source, status, signal) {
   };
 }
 
-function buildVerificationPlan({ openspecState, phaseBundle, checklistBundle, agentRole }) {
+function buildVerificationPlan({ change, openspecState, phaseBundle, checklistBundle, agentRole }) {
   const checklistExpectations = checklistBundle.expectations.map((expectation) =>
     verificationExpectation(expectation, 'Advisory verification step from project expectations.'),
   );
   const phaseExpectations = phaseBundle.expectations.map((expectation) =>
     verificationExpectation(expectation, 'Advisory verification step from project expectations.'),
   );
-  const taskExpectations = (openspecState?.tasks ?? []).map((task) =>
+  const taskExpectations = (change ? (openspecState?.tasks ?? []) : []).map((task) =>
     verificationExpectation(
       {
         kind: task.kind ?? 'review',

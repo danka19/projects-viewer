@@ -436,6 +436,14 @@ test('buildAgentPreflightPacket does not fabricate proposed requirements or task
   ]);
   assert.equal(packet.acceptanceMap.some((item) => item.id === 'req-foreign'), false);
   assert.equal(packet.acceptanceMap.some((item) => item.id === 'task-foreign'), false);
+  assert.equal(
+    packet.verificationPlan.some(
+      (item) =>
+        item.expectedEvidence === 'Should never appear for an unknown requested change.' ||
+        item.reason === 'Foreign proposed task',
+    ),
+    false,
+  );
 });
 
 test('buildAgentPreflightPacket treats empty legacy signal arrays as missing safe-state inputs', () => {
