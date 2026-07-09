@@ -1,6 +1,6 @@
 # Phase 3. First Usable Workflow
 
-Status: completed pending human acceptance on 2026-07-09.
+Status: accepted and closed on 2026-07-09.
 
 ## Goal
 
@@ -292,7 +292,7 @@ OpenSpec and acceptance evidence:
 
 ### 3.6 Run Phase Gate And Prepare OpenSpec Follow-Through
 
-Status: completed pending human acceptance on 2026-07-09.
+Status: completed and accepted on 2026-07-09.
 
 Objective:
 
@@ -350,4 +350,5 @@ OpenSpec and acceptance evidence:
 
 - Decision: Phase 3 implements API/report JSON first.
 - Decision: Dashboard UI, Markdown rendering, scheduling, notifications, task/calendar integrations, external issue trackers, remote model providers, and findings-review UI remain out of scope.
-- Decision required after Phase 3 verification: human owner reviews the API/report output and decides whether the OpenSpec change is accepted for archival, needs another API/report iteration, or should proceed to a dashboard UI follow-up.
+- Decision: Human owner accepted the Phase 3 implementation gate on 2026-07-09. `add-project-brief-report` is ready for OpenSpec archival after branch review/merge.
+- Decision required for the next phase: choose whether the next product slice is dashboard UI, Markdown/rendered brief, or an agent preflight packet follow-up.
