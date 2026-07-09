@@ -4,7 +4,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Current Roadmap Validation
 
-- Current phase: Phase 3 First Usable Workflow, completed pending human acceptance.
+- Current phase: no active implementation phase. Phase 3 is accepted and closed; Phase 4 is not planned in detail yet.
 - Planning from this roadmap alone is forbidden. Detailed phase plans must reconcile roadmap intent, current docs, current implementation, environment evidence, audit findings, and human decisions.
 - Product behavior, requirements, proposed changes, and acceptance criteria belong in OpenSpec artifacts under `openspec/` when SDD applies.
 - New ideas during active phase work must go through change intake before they alter scope or plans.
@@ -61,7 +61,7 @@ Evidence:
 
 ## Phase 3. First Usable Workflow
 
-Status: completed pending human acceptance on 2026-07-09.
+Status: accepted and closed on 2026-07-09.
 
 Goal: implement the first end-to-end local project brief/report workflow from `openspec/changes/add-project-brief-report/`, starting with verified API/report output before dashboard UI.
 
@@ -77,7 +77,7 @@ Evidence:
 
 Decision required:
 
-- Human owner reviews the API/report output and decides whether `add-project-brief-report` is accepted for OpenSpec archival, needs another JSON report iteration, or should proceed to a dashboard UI follow-up.
+- `add-project-brief-report` is ready for OpenSpec archival after the phase branch is reviewed/merged. A future phase should decide whether the next product slice is dashboard UI, Markdown/rendered brief, or an agent preflight packet follow-up.
 
 ## Phase 4. Hardening And Pilot Readiness
 

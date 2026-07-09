@@ -12,8 +12,8 @@ Last updated: 2026-07-09.
 | Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer\.worktrees\phase-3-first-usable-workflow` |
 | Current branch | `phase-3/first-usable-workflow` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Latest known commit before this audit update | `0cd3eb5 Tighten project brief report API validation` |
-| Local divergence | Phase branch is local and not yet pushed during this audit update |
+| Latest known commit before this audit update | `df6aae0 Record project brief report review fixes` |
+| Local divergence | `phase-3/first-usable-workflow` tracks `origin/phase-3/first-usable-workflow`; no local divergence during this audit update |
 
 ## Useful Starting Points
 
@@ -60,6 +60,7 @@ Last updated: 2026-07-09.
 | Phase 3 work items 3.2-3.3 | Pure `server/project-brief-report.mjs` composition module implemented with ranking, safe states, evidence, derived labels, and advisory recommendation guards; focused module tests and `npm test` passed on 2026-07-09 |
 | Phase 3 work item 3.4 | `GET /api/project-brief-report` implemented in `server.mjs`; API tests cover safe params, missing scan data, no arbitrary paths, no snapshot/finding/report-history writes, and unchanged scanned project sentinel files; `npm test` and `npm run build` passed on 2026-07-09 |
 | Phase 3 review fix | Independent review found invalid generated-scan JSON and loose parseable `since` values could violate the API contract; `0cd3eb5` added regression tests and fixed both boundaries on 2026-07-09 |
+| Phase 3 acceptance | Human owner accepted closing Phase 3 on 2026-07-09 after project brief/report API implementation, verification, push, and review-fix evidence |
 
 ## Known Risks And Gaps
 
@@ -70,7 +71,8 @@ Last updated: 2026-07-09.
 | AUDIT-003 | Architecture decisions are partially documented in README/docs, but no ADR/OpenSpec exists for server/API/watcher contracts. | Phase 1/2 | open |
 | AUDIT-004 | Local branch had commits ahead of GitHub remote during early foundation work; `main` later matched `origin/main` before Phase 1 planning. | Human owner | closed 2026-07-08 |
 | AUDIT-005 | Manual browser verification for add project, restart persistence, workspace discovery, track selected, disable, and rescan. | Current feature | closed 2026-07-08 |
-| AUDIT-006 | Phase 3 project brief/report API is implemented and verified, but human owner still needs to review real report output before OpenSpec archival or UI follow-up. | Human owner | open |
+| AUDIT-006 | Phase 3 project brief/report API is implemented, verified, reviewed, pushed, and accepted as closed; `add-project-brief-report` remains ready for OpenSpec archival after branch review/merge. | Human owner / next OpenSpec archival step | closed 2026-07-09 |
+| AUDIT-007 | Next product slice is undecided: dashboard UI, Markdown/rendered brief, or agent preflight packet follow-up. | Human owner | open |
 
 ## Audit Rules
 
