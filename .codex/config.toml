@@ -1,0 +1,14 @@
+[mcp_servers.projects_viewer]
+command = "node"
+args = ["server/projects-viewer-mcp.mjs"]
+cwd = "C:/Users/danoc/Documents/projects/projects-viewer"
+startup_timeout_sec = 10
+tool_timeout_sec = 30
+default_tools_approval_mode = "approve"
+enabled_tools = [
+  "list_projects",
+  "get_agent_preflight_packet",
+  "get_project_brief_report",
+  "get_ai_context",
+  "get_ai_findings",
+]

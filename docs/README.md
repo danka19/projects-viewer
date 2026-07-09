@@ -57,6 +57,7 @@ v3 implemented on 2026-07-07:
 | `ROADMAP.md` | Phase-level project roadmap and current phase status |
 | `CURRENT_PROJECT_AUDIT.md` | Verified repository, runtime, command, and risk evidence |
 | `AI_STEP_VERIFICATION_CHECKLIST.md` | Required checks before claiming code or documentation work is complete |
+| `AGENTS_USAGE.md` | Codex and agent runbook for local startup, context packet API usage, MCP tools, and safety boundaries |
 | `CONTEXT.md` | Canonical terms and boundary rules for live/static scanning |
 | `phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 plan for users, workflows, data sources, AI use cases, and acceptance criteria |
 | `phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Accepted and closed Phase 2 plan for the project brief/report data contract, module boundaries, API surface, ranking rules, and Phase 3 readiness |
@@ -82,6 +83,7 @@ v3 implemented on 2026-07-07:
 - AI findings API: `GET /api/ai-findings?state=unresolved`, `PATCH /api/ai-findings/:id`.
 - Agent preflight packet API: `GET /api/agent-preflight-packet`, required `projectId`, optional `changeId`, optional `agentRole=implementation|reviewer|verification|handoff`.
 - Project brief report API: `GET /api/project-brief-report`, optional `mode=daily|weekly`, optional `since=<iso>`.
+- Agent/Codex usage and MCP runbook: `docs/AGENTS_USAGE.md`.
 - AI runtime files: `app-data/ai.context.snapshot.json` and `app-data/ai.findings.generated.json`.
 - Current configured scanned project: `Example Project` at `C:\Users\danoc\Documents\projects\AutoParts`, migrated from legacy config when `app-data/projects.config.json` is absent.
 
