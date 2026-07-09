@@ -155,11 +155,22 @@ function respond(id, result, error) {
 async function requestJson(pathname) {
   const response = await fetch(new URL(pathname, API_BASE_URL));
   const text = await response.text();
+  const contentType = response.headers.get('content-type') ?? 'unknown';
+  const isJson = /^\s*application\/json\b/i.test(contentType);
+
+  if (!isJson) {
+    throw new Error(
+      `Expected JSON response from Projects Viewer API for ${pathname}, got status ${response.status} with content-type ${contentType}. Start the local dashboard with "npm run dev" and retry.`,
+    );
+  }
+
   let body;
   try {
     body = text ? JSON.parse(text) : null;
-  } catch {
-    body = { raw: text };
+  } catch (err) {
+    throw new Error(
+      `Projects Viewer API returned malformed JSON for ${pathname} with status ${response.status}: ${err.message}`,
+    );
   }
   if (!response.ok) {
     throw new Error(

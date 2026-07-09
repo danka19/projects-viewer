@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
+import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import readline from 'node:readline';
@@ -207,5 +208,43 @@ test('projects viewer MCP server exposes read-only context tools and proxies loc
   } finally {
     await mcp.close();
     await server.close();
+  }
+});
+
+test('projects viewer MCP server returns a tool error when the local API responds with html', async () => {
+  const htmlServer = http.createServer((request, response) => {
+    if (request.url === '/api/projects') {
+      response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      response.end('<!doctype html><html><body>Not JSON</body></html>');
+      return;
+    }
+
+    response.writeHead(404, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ error: 'not-found' }));
+  });
+
+  await new Promise((resolve) => htmlServer.listen(0, '127.0.0.1', resolve));
+  const { port } = htmlServer.address();
+  const mcp = startMcpClient(`http://127.0.0.1:${port}`);
+
+  try {
+    await mcp.request('initialize', {
+      protocolVersion: '2024-11-05',
+      capabilities: {},
+      clientInfo: { name: 'projects-viewer-test', version: '0.1.0' },
+    });
+    mcp.notify('notifications/initialized');
+
+    const result = await mcp.request('tools/call', { name: 'list_projects', arguments: {} });
+    assert.equal(result.isError, true);
+    assert.match(result.content[0].text, /Expected JSON response/i);
+    assert.doesNotMatch(result.content[0].text, /"raw"/i);
+    assert.match(result.content[0].text, /text\/html/i);
+    assert.match(result.content[0].text, /\/api\/projects/i);
+  } finally {
+    await mcp.close();
+    await new Promise((resolve, reject) => {
+      htmlServer.close((err) => (err ? reject(err) : resolve()));
+    });
   }
 });
