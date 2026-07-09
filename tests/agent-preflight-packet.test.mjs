@@ -304,6 +304,78 @@ test('buildAgentPreflightPacket composes ordered required reading and non-blocki
   assert.equal(safePacket.safeStates.every((item) => item.blocksPacket === false), true);
 });
 
+test('buildAgentPreflightPacket treats empty legacy signal arrays as missing safe-state inputs', () => {
+  const project = minimalProject('Alpha');
+
+  const packet = buildAgentPreflightPacket({
+    scanOutput: scanWith([project]),
+    config: configFor([project]),
+    projectId: 'project-1',
+    findings: [],
+    openspecState: { changes: [] },
+    phaseSignals: [],
+    auditSignals: [],
+    checklistSignals: [],
+  });
+
+  assert.deepEqual(
+    packet.safeStates.map((item) => item.code),
+    [
+      'missing-phase-signals',
+      'missing-audit-signals',
+      'missing-checklist-signals',
+    ],
+  );
+});
+
+test('buildAgentPreflightPacket uses openspecState artifacts even without a resolved change object', () => {
+  const project = minimalProject('Alpha');
+
+  const packet = buildAgentPreflightPacket({
+    scanOutput: scanWith([project]),
+    config: configFor([project]),
+    projectId: 'project-1',
+    findings: [],
+    openspecState: {
+      artifacts: [
+        'openspec/changes/agent-preflight-packet/proposal.md',
+        'openspec/changes/agent-preflight-packet/design.md',
+        'openspec/changes/agent-preflight-packet/specs/agent-preflight-packet/spec.md',
+        'openspec/changes/agent-preflight-packet/tasks.md',
+      ],
+      changes: [],
+    },
+  });
+
+  assert.deepEqual(
+    packet.requiredReading.map((item) => item.path),
+    [
+      'AGENTS.md',
+      'docs/README.md',
+      'docs/00_FILE_STRUCTURE.md',
+      'docs/ROADMAP.md',
+      'openspec/changes/agent-preflight-packet/proposal.md',
+      'openspec/changes/agent-preflight-packet/design.md',
+      'openspec/changes/agent-preflight-packet/specs/agent-preflight-packet/spec.md',
+      'openspec/changes/agent-preflight-packet/tasks.md',
+      'docs/CURRENT_PROJECT_AUDIT.md',
+      'docs/AI_STEP_VERIFICATION_CHECKLIST.md',
+    ],
+  );
+  assert.deepEqual(
+    packet.requiredReading.slice(4, 8).map((item) => ({
+      kind: item.kind,
+      title: item.title,
+    })),
+    [
+      { kind: 'change-artifact', title: 'OpenSpec proposal' },
+      { kind: 'change-artifact', title: 'OpenSpec design' },
+      { kind: 'change-artifact', title: 'OpenSpec spec' },
+      { kind: 'change-artifact', title: 'OpenSpec tasks' },
+    ],
+  );
+});
+
 test('agent preflight composition module stays pure and avoids forbidden side-effect dependencies', async () => {
   const source = await fs.readFile(path.join(process.cwd(), 'server/agent-preflight-packet.mjs'), 'utf8');
   assert.equal(source.includes("from 'node:fs"), false);

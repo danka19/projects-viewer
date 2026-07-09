@@ -92,7 +92,13 @@ export function buildAgentPreflightPacket({
       auditSignalsPresent: auditBundle.present,
       checklistSignalsPresent: checklistBundle.present,
     }),
-    requiredReading: buildRequiredReading({ change, phaseBundle, auditBundle, checklistBundle }),
+    requiredReading: buildRequiredReading({
+      change,
+      openspecArtifacts: openspecState?.artifacts,
+      phaseBundle,
+      auditBundle,
+      checklistBundle,
+    }),
     projectState: {
       status: generatedProject.status ?? generatedProject.summary?.status ?? null,
       healthScore: generatedProject.summary?.healthScore ?? null,
@@ -151,15 +157,16 @@ function infoState(code, message) {
   return { code, severity: 'info', message, blocksPacket: false };
 }
 
-function buildRequiredReading({ change, phaseBundle, auditBundle, checklistBundle }) {
+function buildRequiredReading({ change, openspecArtifacts, phaseBundle, auditBundle, checklistBundle }) {
   const items = [];
+  const artifactPaths = dedupeArtifactPaths([...(openspecArtifacts ?? []), ...(change?.artifacts ?? [])]);
 
   items.push(baseReading('project-rule', 'Agent operating guide', 'AGENTS.md', 'Canonical project instructions.'));
   items.push(baseReading('project-doc', 'Documentation home', 'docs/README.md', 'Project overview and current state.'));
   items.push(baseReading('project-doc', 'File structure', 'docs/00_FILE_STRUCTURE.md', 'Repository map for safe navigation.'));
   items.push(baseReading('project-doc', 'Roadmap', 'docs/ROADMAP.md', 'Roadmap context and active phase references.'));
   items.push(...readingEntries(phaseBundle.requiredReading, 'phase-doc'));
-  items.push(...(change?.artifacts ?? []).map((artifactPath) => baseReading('change-artifact', artifactTitle(artifactPath), artifactPath, 'Active proposed change reference.')));
+  items.push(...artifactPaths.map((artifactPath) => baseReading('change-artifact', artifactTitle(artifactPath), artifactPath, 'Active proposed change reference.')));
   items.push(...withFallbackReading(auditBundle.requiredReading, baseReading('project-doc', 'Current audit', 'docs/CURRENT_PROJECT_AUDIT.md', 'Current evidence and known risks.')));
   items.push(
     ...withFallbackReading(
@@ -333,9 +340,13 @@ function dedupeByPath(entries = []) {
   return [...new Map(entries.map((entry) => [normalizePath(entry?.path), entry])).values()].filter((entry) => entry);
 }
 
+function dedupeArtifactPaths(paths = []) {
+  return [...new Map(paths.filter(Boolean).map((artifactPath) => [normalizePath(artifactPath), artifactPath])).values()];
+}
+
 function normalizeSignalBundle(value) {
   if (value == null) return { present: false, items: [], requiredReading: [] };
-  if (Array.isArray(value)) return { present: true, items: value, requiredReading: [] };
+  if (Array.isArray(value)) return { present: value.length > 0, items: value, requiredReading: [] };
   return {
     present: true,
     items: Array.isArray(value.signals) ? value.signals : [],
