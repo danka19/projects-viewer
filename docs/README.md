@@ -59,6 +59,7 @@ v3 implemented on 2026-07-07:
 | `AI_STEP_VERIFICATION_CHECKLIST.md` | Required checks before claiming code or documentation work is complete |
 | `AGENTS_USAGE.md` | Codex and agent runbook for local startup, context packet API usage, MCP tools, and safety boundaries |
 | `CONTEXT.md` | Canonical terms and boundary rules for live/static scanning |
+| `planning/MCP_CONTEXT_API_HARDENING_PLAN.md` | Planned cleanup for canonical config, compact project-id listing, agent preflight API routing, MCP non-JSON errors, and local HTTP diagnostics |
 | `phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 plan for users, workflows, data sources, AI use cases, and acceptance criteria |
 | `phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Accepted and closed Phase 2 plan for the project brief/report data contract, module boundaries, API surface, ranking rules, and Phase 3 readiness |
 | `phases/PHASE_3_FIRST_USABLE_WORKFLOW.md` | Accepted and closed Phase 3 implementation record for the JSON-first project brief/report API workflow |
@@ -84,8 +85,9 @@ v3 implemented on 2026-07-07:
 - Agent preflight packet API: `GET /api/agent-preflight-packet`, required `projectId`, optional `changeId`, optional `agentRole=implementation|reviewer|verification|handoff`.
 - Project brief report API: `GET /api/project-brief-report`, optional `mode=daily|weekly`, optional `since=<iso>`.
 - Agent/Codex usage and MCP runbook: `docs/AGENTS_USAGE.md`.
+- Planned MCP/API hardening: `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md`.
 - AI runtime files: `app-data/ai.context.snapshot.json` and `app-data/ai.findings.generated.json`.
-- Current configured scanned project: `Example Project` at `C:\Users\danoc\Documents\projects\AutoParts`, migrated from legacy config when `app-data/projects.config.json` is absent.
+- Canonical tracked-project config: `app-data/projects.config.json`. Planned hardening will remove the root `projects.config.json` runtime fallback; a clean setup should start with no default tracked projects, and any example config should be empty.
 
 ## Safety Summary
 
@@ -93,6 +95,7 @@ v3 implemented on 2026-07-07:
 - Scanned projects are read-only inputs.
 - Browser path input is accepted only by config-management endpoints that validate and save paths; scan and watcher code use saved enabled config paths only.
 - The API scans only enabled paths from `app-data/projects.config.json`.
+- The root `projects.config.json` is not an accepted future runtime source and should not seed or migrate an `Example Project`.
 - AI context uses only `app-data/projects.generated.json` and saved tracked project ids; it does not accept arbitrary project paths.
 - AI context changes-since compares saved compact context snapshots where available, rather than relying only on documentation modification times.
 - AI findings are review-required derived runtime records under `app-data/`; they do not modify scanned project folders and do not trigger agent actions.

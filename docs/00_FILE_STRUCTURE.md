@@ -13,7 +13,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `README.md` | User-facing app overview, setup, commands, live/static mode, and troubleshooting |
 | `package.json` / `package-lock.json` | Node scripts and dependency lockfile |
 | `app-data/` | Ignored local runtime data folder for canonical config and generated live scan data |
-| `projects.config.json` | Legacy seed/example config; migrated to `app-data/projects.config.json` when canonical config is missing |
+| `projects.config.json` | Legacy runtime fallback scheduled for removal; future clean setup should use only `app-data/projects.config.json` and, if needed, an empty `.example` config |
 | `scan-projects.mjs` | Read-only scanner CLI and exported `runScan()` API |
 | `server.mjs` | Local Express dashboard server, API endpoints, Vite middleware, built frontend serving, and watcher setup |
 | `vite.config.ts` / `tsconfig.json` | Frontend build and TypeScript configuration |
@@ -63,6 +63,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/AI_STEP_VERIFICATION_CHECKLIST.md` | Mandatory self-check for AI agents |
 | `docs/CONTEXT.md` | Active glossary and domain boundaries |
 | `docs/planning/` | Cross-phase planning notes and decision drafts |
+| `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md` | Planned cleanup for config source of truth, compact project-id listing, agent preflight API routing, MCP response validation, and HTTP diagnostics |
 | `docs/audits/` | Focused audit reports |
 | `docs/phases/` | Detailed phase plans and templates |
 | `docs/phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 discovery and requirements plan |
