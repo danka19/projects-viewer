@@ -50,6 +50,11 @@ v3 implemented on 2026-07-07:
 | `03-status-rules.md` | Status derivation rules |
 | `04-implementation-plan.md` | Early implementation plan and v1 acceptance criteria |
 
+## Active OpenSpec Changes
+
+- `openspec/changes/add-project-brief-report/`: proposed local daily/weekly human project brief/report workflow.
+- `openspec/changes/agent-preflight-packet/`: proposed local AI-agent preflight packet workflow, intentionally separate from the human brief/report contract.
+
 ## Operations Summary
 
 - Development server: `npm run dev`, default URL `http://127.0.0.1:5173`.

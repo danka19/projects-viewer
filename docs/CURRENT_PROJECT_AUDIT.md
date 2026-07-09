@@ -10,10 +10,10 @@ Last updated: 2026-07-09.
 |---|---|
 | Repository root | `C:\Users\danoc\Documents\projects\projects-viewer` |
 | Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer` |
-| Current branch | `phase-2/core-data-model` |
+| Current branch | `codex/agent-preflight-packet` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Latest known commit before this audit update | `e2d9d4e Define project brief ranking rules` |
-| Local divergence | `phase-2/core-data-model` tracks `origin/phase-2/core-data-model` |
+| Latest known commit before this audit update | `e14e29b` |
+| Local divergence | `codex/agent-preflight-packet` has no upstream yet |
 
 ## Useful Starting Points
 
@@ -56,6 +56,7 @@ Last updated: 2026-07-09.
 | Phase 2 work item 2.3 | Local API surface defined on 2026-07-09: future `GET /api/project-brief-report` returns report JSON, accepts only `since` and metadata-only `mode`, rejects unknown/path-like/repeated scalar query parameters, returns `404` for missing generated scan data, and does not write snapshot, findings, report-history, scanned-project, or external-action artifacts |
 | Phase 2 work item 2.4 | Ranking, empty-state, and baseline rules defined on 2026-07-09: report ranks review items deterministically without creating accepted decisions/actions, handles no-attention and missing-data states, and keeps report retrieval read-only for AI context snapshots and report history |
 | Phase 2 work item 2.5 | Phase 3 implementation plan created in `docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md` on 2026-07-09; plan maps `add-project-brief-report` OpenSpec tasks to shared types, pure report composition, local API route, focused tests, docs, final verification, and OpenSpec follow-through |
+| Agent preflight packet intake | Human owner requested a separate `agent-preflight-packet` OpenSpec proposal on 2026-07-09 so agent preflight behavior does not mix into the daily/weekly human brief; routing decision was `create_openspec_change` |
 
 ## Known Risks And Gaps
 
@@ -66,6 +67,7 @@ Last updated: 2026-07-09.
 | AUDIT-003 | Architecture decisions are partially documented in README/docs, but no ADR/OpenSpec exists for server/API/watcher contracts. | Phase 1/2 | open |
 | AUDIT-004 | Local branch had commits ahead of GitHub remote during early foundation work; `main` later matched `origin/main` before Phase 1 planning. | Human owner | closed 2026-07-08 |
 | AUDIT-005 | Manual browser verification for add project, restart persistence, workspace discovery, track selected, disable, and rescan. | Current feature | closed 2026-07-08 |
+| AUDIT-006 | `agent-preflight-packet` is proposed separately from `project-brief-report`; implementation must preserve separate contracts, endpoints, and no-action boundaries. | Future implementation | monitored |
 
 ## Audit Rules
 

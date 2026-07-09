@@ -67,6 +67,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/superpowers/plans/` | Implementation plans produced by the writing-plans workflow |
 | `openspec/changes/add-persistent-project-management/` | Completed OpenSpec change for persistent project/workspace management |
 | `openspec/changes/add-project-brief-report/` | Active proposed OpenSpec change for the local daily/weekly project brief/report workflow |
+| `openspec/changes/agent-preflight-packet/` | Active proposed OpenSpec change for a separate local AI-agent preflight packet workflow |
 | `openspec/changes/archive/2026-07-08-add-ai-context-findings-layer/` | Archived OpenSpec change for AI-readable project context and review-required findings |
 | `openspec/specs/ai-context/spec.md` | Accepted AI context requirements |
 | `openspec/specs/ai-findings/spec.md` | Accepted AI findings requirements |
