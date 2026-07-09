@@ -212,6 +212,98 @@ test('buildAgentPreflightPacket matches generated project by normalized saved co
   assert.equal(packet.project.path, 'c:\\projects\\alpha\\');
 });
 
+test('buildAgentPreflightPacket composes ordered required reading and non-blocking safe states', () => {
+  const project = minimalProject('Alpha');
+  const packet = buildAgentPreflightPacket({
+    scanOutput: scanWith([project]),
+    config: configFor([project]),
+    projectId: 'project-1',
+    changeId: 'agent-preflight-packet',
+    findings: [],
+    openspecState: {
+      changes: [
+        changeState({
+          artifacts: [
+            'openspec/changes/agent-preflight-packet/proposal.md',
+            'openspec/changes/agent-preflight-packet/design.md',
+            'openspec/changes/agent-preflight-packet/specs/agent-preflight-packet/spec.md',
+            'openspec/changes/agent-preflight-packet/tasks.md',
+          ],
+        }),
+      ],
+    },
+    phaseSignals: {
+      requiredReading: [
+        {
+          path: 'docs/phases/PHASE_3.md',
+          title: 'Phase 3 plan',
+          reason: 'Current roadmap phase implementation details.',
+          evidence: [{ kind: 'source', file: 'docs/phases/PHASE_3.md' }],
+        },
+      ],
+    },
+    auditSignals: {
+      requiredReading: [
+        {
+          path: 'docs/CURRENT_PROJECT_AUDIT.md',
+          title: 'Current project audit',
+          reason: 'Known findings and implementation risks.',
+          evidence: [{ kind: 'source', file: 'docs/CURRENT_PROJECT_AUDIT.md' }],
+        },
+      ],
+    },
+    checklistSignals: {
+      requiredReading: [
+        {
+          path: 'docs/AI_STEP_VERIFICATION_CHECKLIST.md',
+          title: 'AI verification checklist',
+          reason: 'Required verification guardrails.',
+          evidence: [{ kind: 'source', file: 'docs/AI_STEP_VERIFICATION_CHECKLIST.md' }],
+        },
+      ],
+    },
+  });
+
+  assert.deepEqual(
+    packet.requiredReading.map((item) => item.path),
+    [
+      'AGENTS.md',
+      'docs/README.md',
+      'docs/00_FILE_STRUCTURE.md',
+      'docs/ROADMAP.md',
+      'docs/phases/PHASE_3.md',
+      'openspec/changes/agent-preflight-packet/proposal.md',
+      'openspec/changes/agent-preflight-packet/design.md',
+      'openspec/changes/agent-preflight-packet/specs/agent-preflight-packet/spec.md',
+      'openspec/changes/agent-preflight-packet/tasks.md',
+      'docs/CURRENT_PROJECT_AUDIT.md',
+      'docs/AI_STEP_VERIFICATION_CHECKLIST.md',
+    ],
+  );
+  assert.deepEqual(
+    packet.requiredReading.map((item) => item.order),
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  );
+
+  const safePacket = buildAgentPreflightPacket({
+    scanOutput: scanWith([project]),
+    config: configFor([project]),
+    projectId: 'project-1',
+    openspecState: { changes: [] },
+  });
+
+  assert.deepEqual(
+    safePacket.safeStates.map((item) => item.code),
+    [
+      'missing-findings-store',
+      'missing-phase-signals',
+      'missing-audit-signals',
+      'missing-checklist-signals',
+    ],
+  );
+  assert.equal(safePacket.safeStates.every((item) => item.blocksPacket === false), true);
+});
+
 test('agent preflight composition module stays pure and avoids forbidden side-effect dependencies', async () => {
   const source = await fs.readFile(path.join(process.cwd(), 'server/agent-preflight-packet.mjs'), 'utf8');
   assert.equal(source.includes("from 'node:fs"), false);

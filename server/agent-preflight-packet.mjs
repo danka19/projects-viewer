@@ -31,11 +31,11 @@ export function buildAgentPreflightPacket({
   agentRole = 'implementation',
   changeId = null,
   aiContext = null,
-  findings = [],
+  findings,
   openspecState = null,
-  phaseSignals = [],
-  auditSignals = [],
-  checklistSignals = [],
+  phaseSignals = null,
+  auditSignals = null,
+  checklistSignals = null,
   now = () => new Date(),
 } = {}) {
   assertScanOutput(scanOutput);
@@ -49,6 +49,9 @@ export function buildAgentPreflightPacket({
 
   const normalizedRole = VALID_AGENT_ROLES.has(agentRole) ? agentRole : 'implementation';
   const change = findChange(openspecState, changeId);
+  const phaseBundle = normalizeSignalBundle(phaseSignals);
+  const auditBundle = normalizeSignalBundle(auditSignals);
+  const checklistBundle = normalizeSignalBundle(checklistSignals);
   const evidence = dedupeEvidence([
     ...signalEvidence(generatedProject.signalGroups?.realBlockers),
     ...signalEvidence(generatedProject.signalGroups?.approvalGates),
@@ -76,12 +79,20 @@ export function buildAgentPreflightPacket({
       aiContextAvailable: Boolean(aiContext),
       findingsAvailable: Array.isArray(findings),
       openspecAvailable: Boolean(openspecState),
-      phaseDocsAvailable: phaseSignals.length > 0,
-      auditDocsAvailable: auditSignals.length > 0,
-      checklistDocsAvailable: checklistSignals.length > 0,
+      phaseDocsAvailable: phaseBundle.requiredReading.length > 0 || phaseBundle.items.length > 0,
+      auditDocsAvailable: auditBundle.requiredReading.length > 0 || auditBundle.items.length > 0,
+      checklistDocsAvailable: checklistBundle.requiredReading.length > 0 || checklistBundle.items.length > 0,
     },
-    safeStates: buildSafeStates({ changeId, change, findings, openspecState, phaseSignals, auditSignals, checklistSignals }),
-    requiredReading: buildRequiredReading(changeId, change),
+    safeStates: buildSafeStates({
+      changeId,
+      change,
+      findings,
+      openspecState,
+      phaseSignalsPresent: phaseBundle.present,
+      auditSignalsPresent: auditBundle.present,
+      checklistSignalsPresent: checklistBundle.present,
+    }),
+    requiredReading: buildRequiredReading({ change, phaseBundle, auditBundle, checklistBundle }),
     projectState: {
       status: generatedProject.status ?? generatedProject.summary?.status ?? null,
       healthScore: generatedProject.summary?.healthScore ?? null,
@@ -93,7 +104,7 @@ export function buildAgentPreflightPacket({
     },
     acceptanceMap: buildAcceptanceMap(change),
     attentionSignals: buildAttentionSignals(generatedProject, findings),
-    verificationPlan: buildVerificationPlan(checklistSignals),
+    verificationPlan: buildVerificationPlan(checklistBundle),
     workBoundaries: WORK_BOUNDARIES,
     evidence: evidence.length > 0 ? evidence : [{ kind: 'derived-summary', text: generatedProject.statusReason ?? generatedProject.name }],
     derivedLabels: [
@@ -103,7 +114,15 @@ export function buildAgentPreflightPacket({
   };
 }
 
-function buildSafeStates({ changeId, change, findings, openspecState, phaseSignals, auditSignals, checklistSignals }) {
+function buildSafeStates({
+  changeId,
+  change,
+  findings,
+  openspecState,
+  phaseSignalsPresent,
+  auditSignalsPresent,
+  checklistSignalsPresent,
+}) {
   const safeStates = [];
   if (changeId && !change) {
     safeStates.push({
@@ -122,9 +141,9 @@ function buildSafeStates({ changeId, change, findings, openspecState, phaseSigna
     });
   }
   if (!openspecState) safeStates.push(infoState('missing-openspec-state', 'OpenSpec metadata was not provided.'));
-  if (phaseSignals.length === 0) safeStates.push(infoState('missing-phase-signals', 'Phase documentation signals were not provided.'));
-  if (auditSignals.length === 0) safeStates.push(infoState('missing-audit-signals', 'Audit documentation signals were not provided.'));
-  if (checklistSignals.length === 0) safeStates.push(infoState('missing-checklist-signals', 'Checklist documentation signals were not provided.'));
+  if (!phaseSignalsPresent) safeStates.push(infoState('missing-phase-signals', 'Phase documentation signals were not provided.'));
+  if (!auditSignalsPresent) safeStates.push(infoState('missing-audit-signals', 'Audit documentation signals were not provided.'));
+  if (!checklistSignalsPresent) safeStates.push(infoState('missing-checklist-signals', 'Checklist documentation signals were not provided.'));
   return safeStates;
 }
 
@@ -132,39 +151,60 @@ function infoState(code, message) {
   return { code, severity: 'info', message, blocksPacket: false };
 }
 
-function buildRequiredReading(changeId, change) {
-  const items = [
-    reading(1, 'project-rule', 'Agent operating guide', 'AGENTS.md', 'available', 'Canonical project instructions.'),
-    reading(2, 'project-doc', 'Documentation home', 'docs/README.md', 'available', 'Project overview and current state.'),
-    reading(3, 'project-doc', 'File structure', 'docs/00_FILE_STRUCTURE.md', 'available', 'Repository map for safe navigation.'),
-    reading(4, 'project-doc', 'Current audit', 'docs/CURRENT_PROJECT_AUDIT.md', 'available', 'Current evidence and known risks.'),
-    reading(5, 'checklist', 'AI verification checklist', 'docs/AI_STEP_VERIFICATION_CHECKLIST.md', 'available', 'Required verification guardrails.'),
-  ];
-  if (changeId) {
-    items.push(
-      reading(
-        items.length + 1,
-        'change-artifact',
-        change ? `OpenSpec change ${change.id}` : `Requested change ${changeId}`,
-        change?.artifacts?.[0] ?? `openspec/changes/${changeId}/proposal.md`,
-        change ? 'available' : 'missing',
-        change ? 'Requested proposed change context.' : 'Requested change id was not found locally.',
-      ),
-    );
-  }
-  return items;
+function buildRequiredReading({ change, phaseBundle, auditBundle, checklistBundle }) {
+  const items = [];
+
+  items.push(baseReading('project-rule', 'Agent operating guide', 'AGENTS.md', 'Canonical project instructions.'));
+  items.push(baseReading('project-doc', 'Documentation home', 'docs/README.md', 'Project overview and current state.'));
+  items.push(baseReading('project-doc', 'File structure', 'docs/00_FILE_STRUCTURE.md', 'Repository map for safe navigation.'));
+  items.push(baseReading('project-doc', 'Roadmap', 'docs/ROADMAP.md', 'Roadmap context and active phase references.'));
+  items.push(...readingEntries(phaseBundle.requiredReading, 'phase-doc'));
+  items.push(...(change?.artifacts ?? []).map((artifactPath) => baseReading('change-artifact', artifactTitle(artifactPath), artifactPath, 'Active proposed change reference.')));
+  items.push(...withFallbackReading(auditBundle.requiredReading, baseReading('project-doc', 'Current audit', 'docs/CURRENT_PROJECT_AUDIT.md', 'Current evidence and known risks.')));
+  items.push(
+    ...withFallbackReading(
+      checklistBundle.requiredReading,
+      baseReading('checklist', 'AI verification checklist', 'docs/AI_STEP_VERIFICATION_CHECKLIST.md', 'Required verification guardrails.'),
+    ),
+  );
+
+  return items.map((item, index) => ({ ...item, order: index + 1 }));
 }
 
-function reading(order, kind, title, filePath, status, reason) {
+function reading(kind, title, filePath, status, reason, evidence) {
   return {
-    order,
     kind,
     title,
     path: filePath,
     status,
     reason,
-    evidence: [{ kind: 'source', file: filePath }],
+    evidence: evidence?.length ? evidence : [{ kind: 'source', file: filePath }],
   };
+}
+
+function baseReading(kind, title, filePath, reason) {
+  return reading(kind, title, filePath, 'available', reason);
+}
+
+function readingEntries(entries, fallbackKind) {
+  return dedupeByPath(entries)
+    .filter((entry) => entry?.path)
+    .map((entry) =>
+      reading(
+        entry.kind ?? fallbackKind,
+        entry.title ?? artifactTitle(entry.path),
+        entry.path,
+        entry.status ?? 'available',
+        entry.reason ?? 'Relevant project reading reference.',
+        entry.evidence,
+      ),
+    );
+}
+
+function withFallbackReading(entries, fallbackEntry) {
+  const normalizedEntries = readingEntries(entries, fallbackEntry.kind);
+  if (normalizedEntries.length === 0) return [fallbackEntry];
+  return normalizedEntries;
 }
 
 function buildAcceptanceMap(change) {
@@ -228,9 +268,9 @@ function attention(kind, severity, title, source, status, signal) {
   };
 }
 
-function buildVerificationPlan(checklistSignals) {
+function buildVerificationPlan(checklistBundle) {
   const plan = [];
-  for (const signal of checklistSignals ?? []) {
+  for (const signal of checklistBundle.items) {
     if (signal?.command || signal?.reason || signal?.expectedEvidence) {
       plan.push({
         kind: signal.kind ?? 'command',
@@ -287,6 +327,30 @@ function signalEvidence(signals = []) {
 
 function dedupeEvidence(evidence) {
   return [...new Map(evidence.map((item) => [JSON.stringify(item), item])).values()];
+}
+
+function dedupeByPath(entries = []) {
+  return [...new Map(entries.map((entry) => [normalizePath(entry?.path), entry])).values()].filter((entry) => entry);
+}
+
+function normalizeSignalBundle(value) {
+  if (value == null) return { present: false, items: [], requiredReading: [] };
+  if (Array.isArray(value)) return { present: true, items: value, requiredReading: [] };
+  return {
+    present: true,
+    items: Array.isArray(value.signals) ? value.signals : [],
+    requiredReading: Array.isArray(value.requiredReading) ? value.requiredReading : [],
+  };
+}
+
+function artifactTitle(filePath) {
+  const normalized = String(filePath ?? '').replace(/\\/g, '/');
+  if (normalized.endsWith('/proposal.md')) return 'OpenSpec proposal';
+  if (normalized.endsWith('/design.md')) return 'OpenSpec design';
+  if (normalized.endsWith('/tasks.md')) return 'OpenSpec tasks';
+  if (normalized.endsWith('/spec.md')) return 'OpenSpec spec';
+  const fileName = normalized.split('/').pop() ?? normalized;
+  return fileName || 'Referenced document';
 }
 
 function samePath(left, right) {
