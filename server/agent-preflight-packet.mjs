@@ -291,7 +291,7 @@ function buildAttentionSignals({ project, findings, auditBundle, checklistBundle
   for (const finding of Array.isArray(findings) ? findings.filter((item) => item.reviewState === 'new') : []) {
     if (samePath(finding.project?.path, project.path)) {
       signals.push({
-        kind: 'finding',
+        kind: 'unresolved-finding',
         severity: 'high',
         title: finding.title,
         source: 'accepted-spec',
@@ -315,7 +315,7 @@ function buildAttentionSignals({ project, findings, auditBundle, checklistBundle
   for (const signal of checklistBundle.items) {
     if (signal?.kind === 'verification-gap') {
       signals.push({
-        kind: 'verification-gap',
+        kind: 'missing-verification',
         severity: signal.severity ?? 'medium',
         title: signal.title ?? signal.text ?? 'Verification evidence is still missing.',
         source: signal.source ?? 'checklist',
@@ -429,12 +429,15 @@ function findChange(openspecState, changeId) {
 }
 
 function signalEvidence(signals = []) {
-  return signals.map((signal) => ({
-    kind: 'source',
-    file: signal.file,
-    line: signal.line,
-    text: signal.text,
-  }));
+  return signals.map((signal) => {
+    const evidence = {
+      kind: 'source',
+      file: signal.file,
+    };
+    if (signal.line != null) evidence.line = signal.line;
+    if (signal.text) evidence.text = signal.text;
+    return evidence;
+  });
 }
 
 function itemEvidence(item) {
@@ -469,12 +472,16 @@ function normalizeChangeRequirements(openspecState, change) {
   const directChange = openspecState?.change;
   if (Array.isArray(directChange?.requirements)) return directChange.requirements;
   if (change) {
+    const fallbackSpecPath = deriveChangeSpecPath({
+      changeId: change.id,
+      artifacts: [directChange?.artifacts, openspecState?.artifacts, change.artifacts],
+    });
     return [
       {
         id: `${change.id}:packet-contract`,
         title: 'Packet identifies its own kind',
         evidenceTarget: 'tests/agent-preflight-packet.test.mjs verifies kind and absent brief fields.',
-        file: 'openspec/changes/agent-preflight-packet/specs/agent-preflight-packet/spec.md',
+        file: fallbackSpecPath,
       },
     ];
   }
@@ -482,7 +489,7 @@ function normalizeChangeRequirements(openspecState, change) {
 }
 
 function normalizeAcceptanceReference(item, { fallbackSource, fallbackStatus, fallbackEvidenceTarget }) {
-  const id = item?.id;
+  const id = item?.id ?? fallbackAcceptanceId(item, fallbackSource);
   if (!id) return null;
   return {
     source: item.source ?? fallbackSource,
@@ -502,6 +509,32 @@ function verificationExpectation(item, fallbackReason) {
     expectedEvidence: item?.expectedEvidence ?? 'Verification evidence recorded.',
     advisoryOnly: true,
   };
+}
+
+function deriveChangeSpecPath({ changeId, artifacts = [] }) {
+  for (const group of artifacts) {
+    for (const artifact of group ?? []) {
+      if (typeof artifact === 'string' && artifact.replace(/\\/g, '/').endsWith('/spec.md')) {
+        return artifact;
+      }
+    }
+  }
+  return `openspec/changes/${changeId}/specs/${changeId}/spec.md`;
+}
+
+function fallbackAcceptanceId(item, fallbackSource) {
+  const base = [item?.title, item?.reason, item?.path, item?.command, item?.expectedEvidence]
+    .map((value) => String(value ?? '').trim())
+    .find(Boolean);
+  if (!base) return null;
+  return `${fallbackSource}:${item?.kind ?? 'reference'}:${slugify(base)}`;
+}
+
+function slugify(value) {
+  return String(value ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 function artifactTitle(filePath) {

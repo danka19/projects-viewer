@@ -447,11 +447,19 @@ test('buildAgentPreflightPacket labels proposed change requirements and tasks wi
         },
       ],
     },
+    phaseSignals: {
+      expectations: [phaseExpectation()],
+    },
+    checklistSignals: {
+      expectations: [checklistExpectation()],
+    },
   });
 
   const proposedRequirement = packet.acceptanceMap.find((item) => item.id === 'req-1');
   const acceptedRequirement = packet.acceptanceMap.find((item) => item.id === 'accepted:packet-kind');
   const taskReference = packet.acceptanceMap.find((item) => item.id === '1.4');
+  const phaseReference = packet.acceptanceMap.find((item) => item.title === 'Phase expectation for the active work item.');
+  const checklistReference = packet.acceptanceMap.find((item) => item.title === 'Checklist verification guidance.');
 
   assert.equal(proposedRequirement?.source, 'proposed-change');
   assert.equal(proposedRequirement?.status, 'proposed');
@@ -459,6 +467,28 @@ test('buildAgentPreflightPacket labels proposed change requirements and tasks wi
   assert.equal(acceptedRequirement?.status, 'accepted');
   assert.match(taskReference?.evidenceTarget ?? '', /Focused task assertions cover acceptanceMap references only\./);
   assert.equal(taskReference?.title.includes('Long task body that must not be copied'), false);
+  assert.deepEqual(
+    phaseReference,
+    {
+      source: 'phase-plan',
+      id: 'phase-plan:review:phase-expectation-for-the-active-work-item',
+      title: 'Phase expectation for the active work item.',
+      status: 'planned',
+      evidenceTarget: 'Phase evidence recorded.',
+      evidence: [{ kind: 'source', file: 'docs/phases/PHASE_3.md', line: 1 }],
+    },
+  );
+  assert.deepEqual(
+    checklistReference,
+    {
+      source: 'checklist',
+      id: 'checklist:command:checklist-verification-guidance',
+      title: 'Checklist verification guidance.',
+      status: 'advisory',
+      evidenceTarget: 'Verification evidence recorded.',
+      evidence: [{ kind: 'source', file: 'docs/AI_STEP_VERIFICATION_CHECKLIST.md', line: 1 }],
+    },
+  );
 });
 
 test('buildAgentPreflightPacket ranks attention and verification first for verification role', () => {
@@ -598,12 +628,40 @@ test('buildAgentPreflightPacket ranks attention and verification first for verif
 
   assert.deepEqual(
     verificationPacket.attentionSignals.map((item) => item.kind),
-    ['blocker', 'approval-gate', 'finding', 'stale-doc', 'verification-gap', 'risk', 'documentation-gap'],
+    ['blocker', 'approval-gate', 'unresolved-finding', 'stale-doc', 'missing-verification', 'risk', 'documentation-gap'],
   );
   assert.equal(verificationPacket.workBoundaries, implementationPacket.workBoundaries);
   assert.equal(verificationPacket.generatedFrom.remoteServicesUsed, implementationPacket.generatedFrom.remoteServicesUsed);
   assert.match(verificationPacket.verificationPlan[0]?.expectedEvidence ?? '', /git diff --check exits cleanly\./);
   assert.match(implementationPacket.verificationPlan[0]?.expectedEvidence ?? '', /Task 1\.4 implementation is finished\./);
+  assert.equal(verificationPacket.attentionSignals[2]?.kind, 'unresolved-finding');
+  assert.equal(verificationPacket.attentionSignals[4]?.kind, 'missing-verification');
+});
+
+test('buildAgentPreflightPacket derives generic proposed-change fallback artifacts from the requested change id', () => {
+  const project = minimalProject('Alpha');
+
+  const packet = buildAgentPreflightPacket({
+    scanOutput: scanWith([project]),
+    config: configFor([project]),
+    projectId: 'project-1',
+    changeId: 'other-change',
+    findings: [],
+    openspecState: {
+      changes: [changeState({ id: 'other-change', artifacts: [] })],
+    },
+  });
+
+  assert.deepEqual(packet.acceptanceMap, [
+    {
+      source: 'proposed-change',
+      id: 'other-change:packet-contract',
+      title: 'Packet identifies its own kind',
+      status: 'proposed',
+      evidenceTarget: 'tests/agent-preflight-packet.test.mjs verifies kind and absent brief fields.',
+      evidence: [{ kind: 'source', file: 'openspec/changes/other-change/specs/other-change/spec.md' }],
+    },
+  ]);
 });
 
 test('agent preflight composition module stays pure and avoids forbidden side-effect dependencies', async () => {
