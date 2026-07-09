@@ -11,10 +11,14 @@ async function startTestServer(app) {
   const { port } = server.address();
   return {
     url: `http://127.0.0.1:${port}`,
-    close: () =>
-      new Promise((resolve, reject) => {
+    close: async () => {
+      await new Promise((resolve, reject) => {
         server.close((err) => (err ? reject(err) : resolve()));
-      }),
+      });
+      if (typeof app.locals.closeFrontend === 'function') {
+        await app.locals.closeFrontend();
+      }
+    },
   };
 }
 

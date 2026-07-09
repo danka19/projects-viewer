@@ -502,6 +502,7 @@ export async function createApp({
   logger = console,
 } = {}) {
   const app = express();
+  app.locals.closeFrontend = null;
   const configOptions = { appDataDir };
   await ensureProjectConfig(configOptions);
   const controller = createScanController({ runScan: createDashboardRunScan(configOptions), logger });
@@ -964,6 +965,7 @@ export async function createApp({
       server: { middlewareMode: true },
       appType: 'spa',
     });
+    app.locals.closeFrontend = () => vite.close();
     app.use(vite.middlewares);
   } else {
     app.use(express.static(DIST_DIR));
