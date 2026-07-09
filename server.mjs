@@ -12,6 +12,7 @@ import {
   addWorkspace,
   ensureProjectConfig,
   getConfigPaths,
+  getConfiguredProjectIdentities,
   getEnabledProjects,
   readProjectConfig,
   removeProject,
@@ -654,10 +655,34 @@ export async function createApp({
     return { projectId, changeId, agentRole };
   }
 
+  function parseConfiguredProjectsQuery(req) {
+    const url = new URL(req.originalUrl, 'http://127.0.0.1');
+    if ([...url.searchParams.keys()].length > 0) {
+      const err = new Error('Query parameters are not supported.');
+      err.code = 'invalid-query';
+      err.statusCode = 400;
+      throw err;
+    }
+  }
+
   app.get('/api/config', async (_req, res) => {
     try {
       res.json(await readProjectConfig(configOptions));
     } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.get('/api/configured-projects', async (req, res) => {
+    try {
+      parseConfiguredProjectsQuery(req);
+      const config = await readProjectConfig(configOptions);
+      res.json({ projects: getConfiguredProjectIdentities(config) });
+    } catch (err) {
+      if (isDomainError(err)) {
+        res.status(err.statusCode).json(serializeDomainError(err));
+        return;
+      }
       sendError(res, err);
     }
   });

@@ -183,3 +183,80 @@ test('browse folder API reports cancelled selection without error', async () => 
     await server.close();
   }
 });
+
+test('configured projects API returns compact configured project identities', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-configured-projects-api-'));
+  const appDataDir = path.join(tmp, 'app-data');
+  const alphaRoot = path.join(tmp, 'alpha');
+  const betaRoot = path.join(tmp, 'beta');
+  await fs.mkdir(alphaRoot, { recursive: true });
+  await fs.mkdir(betaRoot, { recursive: true });
+  const app = await createApp({
+    appDataDir,
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    await fetch(`${server.url}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: alphaRoot, name: 'Alpha', tags: ['docs', 'docs'] }),
+    });
+    await fetch(`${server.url}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: betaRoot, name: 'Beta', tags: ['api'] }),
+    });
+
+    const response = await fetch(`${server.url}/api/configured-projects`);
+    assert.equal(response.status, 200);
+    const body = await response.json();
+
+    assert.deepEqual(body, {
+      projects: [
+        {
+          id: 'alpha',
+          name: 'Alpha',
+          path: path.resolve(alphaRoot),
+          enabled: true,
+          tags: ['docs'],
+        },
+        {
+          id: 'beta',
+          name: 'Beta',
+          path: path.resolve(betaRoot),
+          enabled: true,
+          tags: ['api'],
+        },
+      ],
+    });
+  } finally {
+    await server.close();
+  }
+});
+
+test('configured projects API rejects unsupported query parameters including path-like input', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-configured-projects-query-api-'));
+  const app = await createApp({
+    appDataDir: path.join(tmp, 'app-data'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const response = await fetch(
+      `${server.url}/api/configured-projects?path=${encodeURIComponent('C:\\arbitrary\\path')}`,
+    );
+    assert.equal(response.status, 400);
+    const body = await response.json();
+    assert.deepEqual(body, {
+      error: 'Query parameters are not supported.',
+      code: 'invalid-query',
+    });
+  } finally {
+    await server.close();
+  }
+});
