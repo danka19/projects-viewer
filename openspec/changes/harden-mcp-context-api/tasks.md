@@ -22,7 +22,7 @@
 
 - [x] 4.1 Update MCP `requestJson()` to reject non-JSON responses even when HTTP status is 200.
 - [x] 4.2 Include status, content type, API path, and a short body preview in MCP errors.
-- [ ] 4.3 Add minimum response-shape validation for `list_projects`, `list_configured_projects`, `get_ai_context`, `get_ai_findings`, `get_project_brief_report`, and `get_agent_preflight_packet`.
+- [x] 4.3 Add minimum response-shape validation for `list_projects`, `list_configured_projects`, `get_ai_context`, `get_ai_findings`, `get_project_brief_report`, and `get_agent_preflight_packet`.
 - [ ] 4.4 Add MCP tests for HTML fallback, malformed JSON, wrong packet kind, and valid packet JSON.
 
 ## 5. Documentation And Verification
