@@ -645,8 +645,8 @@ export async function createApp({
 
     const changeId = getScalar('changeId');
     const agentRole = getScalar('agentRole') ?? 'implementation';
-    if (!['implementation', 'verification'].includes(agentRole)) {
-      const err = new Error('agentRole must be one of: implementation, verification.');
+    if (!['implementation', 'reviewer', 'verification', 'handoff'].includes(agentRole)) {
+      const err = new Error('agentRole must be one of: implementation, reviewer, verification, handoff.');
       err.code = 'invalid-query';
       err.statusCode = 400;
       throw err;

@@ -167,11 +167,16 @@ function buildRequiredReading({ change, openspecArtifacts, phaseBundle, auditBun
   items.push(baseReading('project-doc', 'Roadmap', 'docs/ROADMAP.md', 'Roadmap context and active phase references.'));
   items.push(...readingEntries(phaseBundle.requiredReading, 'phase-doc'));
   items.push(...artifactPaths.map((artifactPath) => baseReading('change-artifact', artifactTitle(artifactPath), artifactPath, 'Active proposed change reference.')));
-  items.push(...withFallbackReading(auditBundle.requiredReading, baseReading('project-doc', 'Current audit', 'docs/CURRENT_PROJECT_AUDIT.md', 'Current evidence and known risks.')));
+  items.push(
+    ...withFallbackReading(
+      auditBundle.requiredReading,
+      reading('project-doc', 'Current audit', 'docs/CURRENT_PROJECT_AUDIT.md', 'missing', 'Audit documentation signals were not provided; read this expected audit path if available.'),
+    ),
+  );
   items.push(
     ...withFallbackReading(
       checklistBundle.requiredReading,
-      baseReading('checklist', 'AI verification checklist', 'docs/AI_STEP_VERIFICATION_CHECKLIST.md', 'Required verification guardrails.'),
+      reading('checklist', 'AI verification checklist', 'docs/AI_STEP_VERIFICATION_CHECKLIST.md', 'missing', 'Checklist documentation signals were not provided; read this expected verification path if available.'),
     ),
   );
 
@@ -264,19 +269,7 @@ function buildAcceptanceMap({ openspecState, change, phaseBundle, checklistBundl
     if (normalized) items.push(normalized);
   }
 
-  if (items.length > 0) return items;
-
-  if (!change) return [];
-  return [
-    {
-      source: 'proposed-change',
-      id: `${change.id}:packet-contract`,
-      title: 'Packet identifies its own kind',
-      status: 'proposed',
-      evidenceTarget: 'tests/agent-preflight-packet.test.mjs verifies kind and absent brief fields.',
-      evidence: [{ kind: 'source', file: 'openspec/changes/agent-preflight-packet/specs/agent-preflight-packet/spec.md' }],
-    },
-  ];
+  return items;
 }
 
 function buildAttentionSignals({ project, findings, auditBundle, checklistBundle }) {
@@ -476,18 +469,10 @@ function normalizeChangeRequirements(openspecState, change) {
   const directChange = openspecState?.change;
   if (directChange?.id === change.id && Array.isArray(directChange.requirements)) return directChange.requirements;
 
-  const fallbackSpecPath = deriveChangeSpecPath({
-    changeId: change.id,
-    artifacts: [directChange?.artifacts, openspecState?.artifacts, change.artifacts],
-  });
-  return [
-    {
-      id: `${change.id}:packet-contract`,
-      title: 'Packet identifies its own kind',
-      evidenceTarget: 'tests/agent-preflight-packet.test.mjs verifies kind and absent brief fields.',
-      file: fallbackSpecPath,
-    },
-  ];
+  const listedChange = openspecState?.changes?.find((item) => item.id === change.id);
+  if (Array.isArray(listedChange?.requirements)) return listedChange.requirements;
+
+  return [];
 }
 
 function normalizeAcceptanceReference(item, { fallbackSource, fallbackStatus, fallbackEvidenceTarget }) {
@@ -511,17 +496,6 @@ function verificationExpectation(item, fallbackReason) {
     expectedEvidence: item?.expectedEvidence ?? 'Verification evidence recorded.',
     advisoryOnly: true,
   };
-}
-
-function deriveChangeSpecPath({ changeId, artifacts = [] }) {
-  for (const group of artifacts) {
-    for (const artifact of group ?? []) {
-      if (typeof artifact === 'string' && artifact.replace(/\\/g, '/').endsWith('/spec.md')) {
-        return artifact;
-      }
-    }
-  }
-  return `openspec/changes/${changeId}/specs/${changeId}/spec.md`;
 }
 
 function fallbackAcceptanceId(item, fallbackSource) {

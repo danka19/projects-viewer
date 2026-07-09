@@ -427,6 +427,15 @@ test('buildAgentPreflightPacket composes ordered required reading and non-blocki
     ],
   );
   assert.equal(safePacket.safeStates.every((item) => item.blocksPacket === false), true);
+  assert.deepEqual(
+    safePacket.requiredReading
+      .filter((item) => ['docs/CURRENT_PROJECT_AUDIT.md', 'docs/AI_STEP_VERIFICATION_CHECKLIST.md'].includes(item.path))
+      .map((item) => [item.path, item.status]),
+    [
+      ['docs/CURRENT_PROJECT_AUDIT.md', 'missing'],
+      ['docs/AI_STEP_VERIFICATION_CHECKLIST.md', 'missing'],
+    ],
+  );
 });
 
 test('buildAgentPreflightPacket returns non-blocking unknown-change safe state for an unresolved changeId', () => {
@@ -821,7 +830,7 @@ test('buildAgentPreflightPacket ranks attention and verification first for verif
   assert.equal(verificationPacket.attentionSignals[4]?.kind, 'missing-verification');
 });
 
-test('buildAgentPreflightPacket derives generic proposed-change fallback artifacts from the requested change id', () => {
+test('buildAgentPreflightPacket does not fabricate proposed requirements for a resolved change without parsed requirements', () => {
   const project = minimalProject('Alpha');
 
   const packet = buildAgentPreflightPacket({
@@ -835,16 +844,7 @@ test('buildAgentPreflightPacket derives generic proposed-change fallback artifac
     },
   });
 
-  assert.deepEqual(packet.acceptanceMap, [
-    {
-      source: 'proposed-change',
-      id: 'other-change:packet-contract',
-      title: 'Packet identifies its own kind',
-      status: 'proposed',
-      evidenceTarget: 'tests/agent-preflight-packet.test.mjs verifies kind and absent brief fields.',
-      evidence: [{ kind: 'source', file: 'openspec/changes/other-change/specs/other-change/spec.md' }],
-    },
-  ]);
+  assert.deepEqual(packet.acceptanceMap, []);
 });
 
 test('agent preflight composition module stays pure and avoids forbidden side-effect dependencies', async () => {
@@ -927,6 +927,15 @@ test('agent preflight packet API returns valid packet for saved project without 
   });
   const server = await startTestServer(app);
   try {
+    for (const agentRole of ['implementation', 'reviewer', 'verification', 'handoff']) {
+      const response = await fetch(
+        `${server.url}/api/agent-preflight-packet?projectId=project-1&agentRole=${agentRole}`,
+      );
+      assert.equal(response.status, 200, `expected 200 for agentRole=${agentRole}`);
+      const packet = await response.json();
+      assert.equal(packet.agentRole, agentRole);
+    }
+
     const response = await fetch(
       `${server.url}/api/agent-preflight-packet?projectId=project-1&changeId=agent-preflight-packet&agentRole=verification`,
     );
@@ -1014,7 +1023,7 @@ test('agent preflight packet API rejects unsafe or invalid query parameters', as
       const response = await fetch(url);
       assert.equal(response.status, 400, `expected 400 for query "${query || '<empty>'}"`);
       const body = await response.json();
-      assert.match(body.error, /Allowed parameters: projectId, changeId, agentRole|must be provided at most once|projectId is required|agentRole must be one of: implementation, verification\./);
+      assert.match(body.error, /Allowed parameters: projectId, changeId, agentRole|must be provided at most once|projectId is required|agentRole must be one of: implementation, reviewer, verification, handoff\./);
     }
   } finally {
     await server.close();

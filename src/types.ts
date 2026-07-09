@@ -586,35 +586,29 @@ export type AgentPreflightAttentionSignalKind =
   | 'risk'
   | 'blocker'
   | 'approval-gate'
-  | 'finding'
+  | 'needs-review'
+  | 'unresolved-finding'
   | 'documentation-gap'
-  | 'verification-gap'
-  | 'stale-doc'
-  | 'project-state';
+  | 'missing-verification'
+  | 'stale-doc';
 
 export type AgentPreflightVerificationExpectationKind = 'command' | 'manual-check' | 'review' | 'doc-read';
 
 export type AgentPreflightRequiredReadingKind =
   | 'project-rule'
-  | 'documentation-map'
-  | 'roadmap'
+  | 'project-doc'
   | 'phase-doc'
-  | 'openspec'
-  | 'audit'
-  | 'verification-checklist';
+  | 'change-artifact'
+  | 'checklist';
 
 export type AgentPreflightReadingStatus = 'available' | 'missing' | 'proposed' | 'accepted' | 'archived' | 'unavailable';
 
 export type AgentPreflightSafeStateCode =
-  | 'missing-generated-scan-data'
-  | 'missing-tracked-project'
-  | 'missing-project-config'
-  | 'missing-ai-context'
-  | 'missing-ai-findings'
-  | 'missing-openspec'
-  | 'missing-phase-docs'
-  | 'missing-audit-docs'
-  | 'missing-checklist-docs'
+  | 'missing-findings-store'
+  | 'missing-openspec-state'
+  | 'missing-phase-signals'
+  | 'missing-audit-signals'
+  | 'missing-checklist-signals'
   | 'unknown-change';
 
 export type AgentPreflightSafeStateSeverity = 'info' | 'warning' | 'error';
@@ -691,8 +685,8 @@ export interface AgentPreflightRequiredReading {
 }
 
 export interface AgentPreflightProjectState {
-  status: ProjectStatus;
-  healthScore: number;
+  status: ProjectStatus | null;
+  healthScore: number | null;
   currentPhase: string | null;
   nextAction: string | null;
   mainBlocker: string | null;
