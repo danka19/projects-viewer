@@ -13,7 +13,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `README.md` | User-facing app overview, setup, commands, live/static mode, and troubleshooting |
 | `package.json` / `package-lock.json` | Node scripts and dependency lockfile |
 | `app-data/` | Ignored local runtime data folder for canonical config and generated live scan data |
-| `projects.config.json` | Legacy runtime fallback scheduled for removal; future clean setup should use only `app-data/projects.config.json` and, if needed, an empty `.example` config |
+| `projects.config.example.json` | Versioned empty schema reference for manual edits to `app-data/projects.config.json` |
 | `scan-projects.mjs` | Read-only scanner CLI and exported `runScan()` API |
 | `server.mjs` | Local Express dashboard server, API endpoints, Vite middleware, built frontend serving, and watcher setup |
 | `vite.config.ts` / `tsconfig.json` | Frontend build and TypeScript configuration |
@@ -32,7 +32,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `src/components/` | Dashboard panels, tabs, status badges, drawer, skeletons, and project views |
 | `src/components/ManageProjects.tsx` | Live-mode tracked project/workspace management UI |
 | `server/scan-controller.mjs` | Single-flight scan controller with queue, delay, status, trigger, and throttle logic |
-| `server/project-config.mjs` | Canonical config path helpers, legacy migration, validation, project/workspace CRUD, enabled-project filtering |
+| `server/project-config.mjs` | Canonical config path helpers, validation, project/workspace CRUD, enabled-project filtering |
 | `server/project-discovery.mjs` | Safe workspace candidate discovery with marker reasons, depth caps, and excluded folders |
 | `server/ai-context.mjs` | Compact AI context mapping, source-evidence normalization, and changes-since category comparison |
 | `server/ai-findings.mjs` | Deterministic review-required findings generation and local review-state persistence |

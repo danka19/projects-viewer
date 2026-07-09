@@ -32,7 +32,7 @@ npm run scan     # reads app-data/projects.config.json -> writes app-data/projec
 npm run dev      # starts the live dashboard at http://127.0.0.1:5173
 ```
 
-On first local-server or scan startup, the app migrates a legacy root `projects.config.json` into `app-data/projects.config.json` if the new config does not exist. Use **Manage Projects** to add one project, add a workspace folder, discover candidates, and track selected projects without editing JSON by hand.
+Fresh setup starts with no tracked projects. Use **Manage Projects** to add one project, add a workspace folder, discover candidates, and track selected projects, or edit `app-data/projects.config.json` directly using `projects.config.example.json` as the schema reference.
 
 ## Project setup and command reference
 
@@ -172,7 +172,7 @@ Use **Remove** in **Manage Projects**. Removing a project from the dashboard rem
 
 ## Configuration: app-data/projects.config.json
 
-Manual editing is optional; the dashboard UI is the preferred path. The **Browse** button opens a native folder picker when supported by the local server environment, and manual path paste remains available as the fallback. If needed, edit `app-data/projects.config.json` while the server is stopped, then restart or rescan. Use absolute paths and escape backslashes on Windows (`\\`):
+Manual editing is optional; the dashboard UI is the preferred path. The **Browse** button opens a native folder picker when supported by the local server environment, and manual path paste remains available as the fallback. If needed, edit `app-data/projects.config.json` while the server is stopped, then restart or rescan. The versioned `projects.config.example.json` file shows the expected schema. Use absolute paths and escape backslashes on Windows (`\\`):
 
 ```json
 {
@@ -186,17 +186,7 @@ Manual editing is optional; the dashboard UI is the preferred path. The **Browse
       "allowNestedProjects": false
     }
   ],
-  "projects": [
-    {
-      "id": "example-project",
-      "name": "Example Project",
-      "path": "C:\\Users\\me\\Documents\\projects\\ExampleProject",
-      "enabled": true,
-      "tags": [],
-      "createdAt": "2026-07-08T00:00:00.000Z",
-      "updatedAt": "2026-07-08T00:00:00.000Z"
-    }
-  ],
+  "projects": [],
   "settings": {
     "watchDocs": true,
     "autoRescanIntervalSec": 0,
@@ -335,7 +325,8 @@ scan-projects.mjs        # read-only Node scanner (npm run scan)
 src/data/projects.json   # static fallback scan output
 src/App.tsx              # app shell: header, global search, layout, drawer state
 src/components/ManageProjects.tsx  # tracked project/workspace management UI
-server/project-config.mjs          # config migration, validation, CRUD helpers
+projects.config.example.json       # versioned empty config schema reference
+server/project-config.mjs          # canonical config path, validation, CRUD helpers
 server/project-discovery.mjs       # safe workspace candidate discovery
 server/ai-context.mjs              # compact AI context and changes-since helpers
 server/ai-findings.mjs             # deterministic findings and local review-state store
