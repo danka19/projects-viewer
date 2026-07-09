@@ -38,24 +38,17 @@ test('ensureProjectConfig creates an empty canonical config on clean startup', a
 
 test('ensureProjectConfig ignores root projects.config.json at runtime', async () => {
   const tmp = await makeTemp();
-  const projectRoot = path.join(tmp, 'sample-project');
-  await fs.mkdir(projectRoot, { recursive: true });
   const legacyConfigPath = path.join(tmp, 'projects.config.json');
   const appDataDir = path.join(tmp, 'app-data');
-  await fs.writeFile(
-    legacyConfigPath,
-    JSON.stringify({
-      activeDays: 7,
-      watchDocs: false,
-      projects: [{ name: 'Sample Project', path: projectRoot }],
+  await fs.writeFile(legacyConfigPath, '{ invalid json', 'utf8');
+
+  const config = await assert.doesNotReject(() =>
+    ensureProjectConfig({
+      appDataDir,
+      legacyConfigPath,
+      now: () => new Date('2026-07-08T00:00:00.000Z'),
     }),
   );
-
-  const config = await ensureProjectConfig({
-    appDataDir,
-    legacyConfigPath,
-    now: () => new Date('2026-07-08T00:00:00.000Z'),
-  });
 
   assert.deepEqual(config.projects, []);
   assert.deepEqual(config.workspaces, []);
