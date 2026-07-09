@@ -28,7 +28,7 @@ This document is the repository map for agents and humans. Keep it current whene
 |---|---|
 | `src/App.tsx` | App shell, live/static data loading, scan controls, search, layout, and drawer state |
 | `src/data/projects.json` | Static fallback data for browser-only mode |
-| `src/types.ts` | Scanner output and UI data contracts |
+| `src/types.ts` | Scanner output, AI context/findings, project brief/report, and UI data contracts |
 | `src/components/` | Dashboard panels, tabs, status badges, drawer, skeletons, and project views |
 | `src/components/ManageProjects.tsx` | Live-mode tracked project/workspace management UI |
 | `server/scan-controller.mjs` | Single-flight scan controller with queue, delay, status, trigger, and throttle logic |
@@ -36,6 +36,9 @@ This document is the repository map for agents and humans. Keep it current whene
 | `server/project-discovery.mjs` | Safe workspace candidate discovery with marker reasons, depth caps, and excluded folders |
 | `server/ai-context.mjs` | Compact AI context mapping, source-evidence normalization, and changes-since category comparison |
 | `server/ai-findings.mjs` | Deterministic review-required findings generation and local review-state persistence |
+| `server/project-brief-report.mjs` | Pure advisory project brief/report composition, ranking, safe states, evidence aggregation, and recommendation guards |
+| `tests/project-brief-report.test.mjs` | Pure composition and local API tests for project brief/report behavior and read-only side effects |
+| `tests/project-brief-report-types.ts` | Type-level contract sample for shared project brief/report TypeScript types |
 
 ## Local Runtime Data
 
@@ -60,8 +63,8 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/audits/` | Focused audit reports |
 | `docs/phases/` | Detailed phase plans and templates |
 | `docs/phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 discovery and requirements plan |
-| `docs/phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Current Phase 2 architecture and data model plan for the project brief/report workflow |
-| `docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md` | Planned Phase 3 implementation plan for the JSON-first project brief/report API workflow |
+| `docs/phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Accepted and closed Phase 2 architecture and data model plan for the project brief/report workflow |
+| `docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md` | Completed pending acceptance Phase 3 implementation record for the JSON-first project brief/report API workflow |
 | `docs/handoffs/` | Bounded task handoffs to Claude |
 | `docs/superpowers/specs/` | Approved design specs produced by the brainstorming workflow |
 | `docs/superpowers/plans/` | Implementation plans produced by the writing-plans workflow |

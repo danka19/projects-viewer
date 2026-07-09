@@ -1,6 +1,6 @@
 # Phase 3. First Usable Workflow
 
-Status: planned; ready for implementation after Phase 2 closes.
+Status: completed pending human acceptance on 2026-07-09.
 
 ## Goal
 
@@ -59,7 +59,7 @@ Verification evidence expected before completion:
   - `GET /api/project-brief-report?mode=weekly&since=<valid-iso>`
   - Invalid `since`, invalid `mode`, repeated params, and path-like params return `400`.
 
-## Current Baseline
+## Baseline Before Implementation
 
 - `src/types.ts` has shared scan, AI context, and AI finding contracts, but no project brief/report contract yet.
 - `server.mjs` owns Express route orchestration and existing local API endpoints.
@@ -67,6 +67,15 @@ Verification evidence expected before completion:
 - `server/ai-findings.mjs` generates/persists findings, reads findings state through `readFindingsStore()`, and supports review-state updates. Phase 3 report retrieval must use `readFindingsStore()` and must not call `generateFindings()` inside `GET /api/project-brief-report`.
 - `tests/ai-context.test.mjs` contains the closest fixture and local server test style for AI context/findings APIs.
 - Phase 2 resolved the JSON contract, module boundary, endpoint, safe parameters, ranking, empty-state, and baseline rules.
+
+## Implementation Evidence
+
+- Work item 3.1 completed: `src/types.ts` now exports shared `ProjectBriefReport` contract types, and `tests/project-brief-report-types.ts` provides a type-level contract sample.
+- Work items 3.2 and 3.3 completed: `server/project-brief-report.mjs` implements pure deterministic report composition, ranking, evidence aggregation, safe states, baseline state, derived labels, and advisory recommendation guards.
+- Work item 3.4 completed: `server.mjs` exposes `GET /api/project-brief-report`, validates only `mode` and `since`, rejects invalid/repeated/unknown/path-like parameters, reads existing findings state and snapshot state, and does not write report side effects.
+- `tests/project-brief-report.test.mjs` covers pure composition, ranking, safe states, missing generated data, module purity, API happy paths, invalid queries, missing scan data, no-attention reports, no snapshot write, no findings write, no report-history file, and unchanged scanned project sentinel files.
+- Implementation commits on branch `phase-3/first-usable-workflow`: `16af3e2` (shared types), `d119bf8` (composition module), `e43fa6e` (API endpoint), and `0cd3eb5` (post-review strict API validation for malformed generated scan data and ISO `since` parsing).
+- Phase gate verification passed on 2026-07-09: `npm test -- tests/project-brief-report.test.mjs` (7/7), `npm test` (38/38), `npm run build`, `openspec list`, `openspec list --specs`, `openspec validate --all --strict` (4/4), `git diff --check`, static forbidden-hook search, and local API smoke.
 
 ## Change Intake
 
@@ -88,6 +97,8 @@ Status:
 ## Work Items
 
 ### 3.1 Add Shared Report Types
+
+Status: completed on 2026-07-09.
 
 Objective:
 
@@ -121,6 +132,8 @@ OpenSpec and acceptance evidence:
 - `project-brief-report` scenarios for metadata, evidence, derived labels, recommendations, safe states, and no automatic action.
 
 ### 3.2 Implement Pure Report Composition Module
+
+Status: completed on 2026-07-09.
 
 Objective:
 
@@ -161,6 +174,8 @@ OpenSpec and acceptance evidence:
 
 ### 3.3 Implement Deterministic Ranking And Empty/Baseline States
 
+Status: completed on 2026-07-09.
+
 Objective:
 
 - Implement inclusion reasons, priority mapping, reason severity defaults, deterministic tie-breakers, no-attention states, missing/empty findings states, missing/corrupt baseline behavior, and current-signal-only behavior.
@@ -196,6 +211,8 @@ OpenSpec and acceptance evidence:
 - Prioritized project items, recommendation/action separation, missing baseline, no attention items, and no automatic action.
 
 ### 3.4 Add Local API Endpoint
+
+Status: completed on 2026-07-09.
 
 Objective:
 
@@ -238,6 +255,8 @@ OpenSpec and acceptance evidence:
 
 ### 3.5 Update User And Project Documentation
 
+Status: completed on 2026-07-09.
+
 Objective:
 
 - Document the implemented report endpoint, response purpose, safety boundaries, usage examples, and verification commands.
@@ -272,6 +291,8 @@ OpenSpec and acceptance evidence:
 - Documentation and phase follow-through tasks in `openspec/changes/add-project-brief-report/tasks.md`.
 
 ### 3.6 Run Phase Gate And Prepare OpenSpec Follow-Through
+
+Status: completed pending human acceptance on 2026-07-09.
 
 Objective:
 
@@ -316,13 +337,13 @@ OpenSpec and acceptance evidence:
 
 ## Phase Gate
 
-- Shared report types exist and match Phase 2 contract decisions.
-- Pure report composition module exists and has focused tests.
-- Deterministic ranking, empty-state, baseline, evidence, derived-label, recommendation, and guard-field behavior is tested.
-- `GET /api/project-brief-report` exists and accepts only safe parameters.
-- API tests prove missing data, invalid parameters, no arbitrary paths, no snapshot write, no findings write, no report-history store, and no scanned-project edits.
-- README/docs/audit/file-structure documents the implemented behavior.
-- `npm test`, `npm run build`, `openspec validate --all --strict`, and `git diff --check` pass.
+- Completed: Shared report types exist and match Phase 2 contract decisions.
+- Completed: Pure report composition module exists and has focused tests.
+- Completed: Deterministic ranking, empty-state, baseline, evidence, derived-label, recommendation, and guard-field behavior is tested.
+- Completed: `GET /api/project-brief-report` exists and accepts only safe parameters.
+- Completed: API tests prove missing data, invalid parameters, no arbitrary paths, no snapshot write, no findings write, no report-history store, and no scanned-project edits.
+- Completed: README/docs/audit/file-structure documents the implemented behavior.
+- Completed during phase gate: `npm test`, `npm run build`, `openspec validate --all --strict`, and `git diff --check` pass.
 - No cloud, auth, API keys, remote model calls, task/calendar integrations, shell commands, commits, scanned-project writes, report-history store, dashboard UI, or Markdown rendering is added without a new approved design decision.
 
 ## Human Decisions

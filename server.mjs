@@ -32,8 +32,11 @@ import {
 import {
   filterFindings,
   generateFindings,
+  getFindingsPath,
+  readFindingsStore,
   updateFindingReviewState,
 } from './server/ai-findings.mjs';
+import { buildProjectBriefReport } from './server/project-brief-report.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = path.join(__dirname, 'dist');
@@ -237,17 +240,88 @@ export async function createApp({
     res.status(err.statusCode ?? 500).json({ error: err.message });
   }
 
+  function sendProjectBriefReportError(res, err) {
+    if (err.code === 'missing-generated-scan-data' || err.statusCode === 404) {
+      res.status(404).json({
+        error: 'Generated scan data is missing. Run a scan before requesting a project brief report.',
+        code: 'missing-generated-scan-data',
+      });
+      return;
+    }
+    sendError(res, err);
+  }
+
   async function readGeneratedScan() {
     try {
       return await readProjectsOutput(configOptions);
     } catch (err) {
       if (err.code === 'ENOENT') {
         const missing = new Error('Generated scan data is missing. Run a scan before requesting AI context.');
+        missing.code = 'missing-generated-scan-data';
         missing.statusCode = 404;
         throw missing;
       }
+      if (err instanceof SyntaxError) {
+        const invalid = new Error('Generated scan data is missing or invalid.');
+        invalid.code = 'missing-generated-scan-data';
+        invalid.statusCode = 404;
+        throw invalid;
+      }
       throw err;
     }
+  }
+
+  async function readProjectBriefFindings() {
+    try {
+      await fs.access(getFindingsPath(configOptions));
+      const store = await readFindingsStore(configOptions);
+      return store.findings;
+    } catch {
+      return null;
+    }
+  }
+
+  async function readProjectBriefSnapshot() {
+    try {
+      return await readAiContextSnapshot(configOptions);
+    } catch {
+      return null;
+    }
+  }
+
+  function parseProjectBriefReportQuery(req) {
+    const url = new URL(req.originalUrl, 'http://127.0.0.1');
+    const allowed = new Set(['since', 'mode']);
+    for (const key of new Set(url.searchParams.keys())) {
+      if (!allowed.has(key)) {
+        const err = new Error('Unsupported parameter. Allowed parameters: since, mode.');
+        err.statusCode = 400;
+        throw err;
+      }
+      if (url.searchParams.getAll(key).length > 1) {
+        const err = new Error(`${key} must be provided at most once.`);
+        err.statusCode = 400;
+        throw err;
+      }
+    }
+
+    const mode = url.searchParams.get('mode') ?? 'daily';
+    if (!['daily', 'weekly'].includes(mode)) {
+      const err = new Error('mode must be daily or weekly.');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const sinceRaw = url.searchParams.get('since');
+    if (sinceRaw === null) return { mode, since: null };
+    const strictIsoWithZone = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+    const sinceDate = new Date(sinceRaw);
+    if (!strictIsoWithZone.test(sinceRaw) || !Number.isFinite(sinceDate.getTime())) {
+      const err = new Error('since must be a valid ISO timestamp.');
+      err.statusCode = 400;
+      throw err;
+    }
+    return { mode, since: sinceDate.toISOString() };
   }
 
   app.get('/api/config', async (_req, res) => {
@@ -364,6 +438,39 @@ export async function createApp({
       res.json(await readProjectsOutput(configOptions));
     } catch (err) {
       res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/project-brief-report', async (req, res) => {
+    try {
+      const { mode, since } = parseProjectBriefReportQuery(req);
+      const scan = await readGeneratedScan();
+      const config = await readProjectConfig(configOptions);
+      const findings = await readProjectBriefFindings();
+      const previousSnapshot = await readProjectBriefSnapshot();
+      const comparisonFindings = Array.isArray(findings) ? findings : [];
+      const changes =
+        since && previousSnapshot?.context
+          ? compareAiContextChanges(scan, {
+              since,
+              findings: comparisonFindings,
+              previousContext: previousSnapshot.context,
+              config,
+            })
+          : null;
+      res.json(
+        buildProjectBriefReport({
+          scanOutput: scan,
+          config,
+          findings,
+          changes,
+          previousSnapshotAvailable: Boolean(previousSnapshot?.context),
+          mode,
+          since,
+        }),
+      );
+    } catch (err) {
+      sendProjectBriefReportError(res, err);
     }
   });
 
