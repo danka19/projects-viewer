@@ -101,10 +101,15 @@ const handlers = {
     });
   },
   get_ai_context: (args) =>
-    requestJson(args.projectId ? `/api/ai-context/projects/${encodeURIComponent(String(args.projectId))}` : '/api/ai-context', {
-      contractName: 'AI context payload',
-      validate: validateAiContextPayload,
-    }),
+    args.projectId
+      ? requestJson(`/api/ai-context/projects/${encodeURIComponent(String(args.projectId))}`, {
+          contractName: 'project AI context payload',
+          validate: validateProjectAiContextPayload,
+        })
+      : requestJson('/api/ai-context', {
+          contractName: 'AI context payload',
+          validate: validateAllAiContextPayload,
+        }),
   get_ai_findings: (args) => {
     const params = new URLSearchParams();
     if (args.state) params.set('state', String(args.state));
@@ -255,19 +260,23 @@ function validateConfiguredProjectsPayload(body) {
   return null;
 }
 
-function validateAiContextPayload(body) {
+function validateAllAiContextPayload(body) {
   if (!isObject(body) || !isString(body.kind)) {
-    return 'all-project or single-project AI context contract';
+    return 'all-project AI context contract';
   }
   if (body.kind === 'all-project-ai-context') {
     return !isString(body.generatedAt) || !Array.isArray(body.projects) ? 'kind "all-project-ai-context" with generatedAt string and projects array' : null;
   }
-  if (body.kind === 'project-ai-context') {
-    return !isObject(body.identity) || !isString(body.identity.name) || !isString(body.identity.path)
-      ? 'kind "project-ai-context" with identity.name and identity.path strings'
-      : null;
+  return 'kind "all-project-ai-context"';
+}
+
+function validateProjectAiContextPayload(body) {
+  if (!isObject(body) || !isObject(body.project) || body.project.kind !== 'project-ai-context') {
+    return 'project object with kind "project-ai-context"';
   }
-  return 'kind "all-project-ai-context" or "project-ai-context"';
+  return !isObject(body.project.identity) || !isString(body.project.identity.name) || !isString(body.project.identity.path)
+    ? 'project object with kind "project-ai-context" and identity.name and identity.path strings'
+    : null;
 }
 
 function validateAiFindingsPayload(body) {

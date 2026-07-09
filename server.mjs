@@ -509,6 +509,16 @@ export async function createApp({
   let watcher = null;
 
   app.use(express.json({ limit: '16kb' }));
+  app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && err.type === 'entity.parse.failed' && req.path.startsWith('/api')) {
+      res.status(400).json({
+        error: 'Malformed JSON request body.',
+        code: 'malformed-json',
+      });
+      return;
+    }
+    next(err);
+  });
 
   async function restartWatcher() {
     if (skipWatcher) return;

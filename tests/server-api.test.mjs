@@ -311,3 +311,28 @@ test('unknown API routes return JSON 404 instead of the frontend HTML shell when
     await server.close();
   }
 });
+
+test('API routes return JSON 400 for malformed JSON request bodies when frontend fallback is enabled', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-api-malformed-json-'));
+  const app = await createApp({
+    appDataDir: path.join(tmp, 'app-data'),
+    skipStartupScan: true,
+    skipWatcher: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const response = await fetch(`${server.url}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{"path":',
+    });
+    assert.equal(response.status, 400);
+    assert.match(response.headers.get('content-type') ?? '', /^application\/json\b/i);
+    assert.deepEqual(await response.json(), {
+      error: 'Malformed JSON request body.',
+      code: 'malformed-json',
+    });
+  } finally {
+    await server.close();
+  }
+});

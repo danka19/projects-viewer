@@ -1334,7 +1334,6 @@ export async function runScan(options = {}) {
   if (configPath === DEFAULT_CONFIG_PATH) {
     await ensureProjectConfig({
       appDataDir: path.dirname(DEFAULT_CONFIG_PATH),
-      legacyConfigPath: path.join(__dirname, 'projects.config.json'),
     });
   }
   let config;
@@ -1428,7 +1427,6 @@ async function main() {
   const startedAt = Date.now();
   await ensureProjectConfig({
     appDataDir: path.dirname(CONFIG_PATH),
-    legacyConfigPath: path.join(__dirname, 'projects.config.json'),
   });
   let config;
   try {

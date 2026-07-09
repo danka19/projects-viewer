@@ -415,7 +415,7 @@ test('projects viewer MCP server rejects wrong-shape JSON responses with contrac
     ['/api/projects', { generatedAt: '2026-07-09T00:00:00.000Z' }],
     ['/api/configured-projects', { projects: [{ id: 'project-1', name: 'MCP Project', path: '/tmp/project' }] }],
     ['/api/ai-context', { kind: 'all-project-ai-context', generatedAt: '2026-07-09T00:00:00.000Z' }],
-    ['/api/ai-context/projects/project-1', { kind: 'project-ai-context', identity: { name: 'MCP Project' } }],
+    ['/api/ai-context/projects/project-1', { project: { kind: 'project-ai-context', identity: { name: 'MCP Project' } } }],
     ['/api/ai-findings', { generatedAt: '2026-07-09T00:00:00.000Z' }],
     ['/api/project-brief-report', { kind: 'project-brief-report', generatedAt: '2026-07-09T00:00:00.000Z' }],
     ['/api/agent-preflight-packet?projectId=project-1', { kind: 'project-brief-report', project: { id: 'project-1' } }],
@@ -466,6 +466,57 @@ test('projects viewer MCP server rejects wrong-shape JSON responses with contrac
     await mcp.close();
     await new Promise((resolve, reject) => {
       wrongShapeServer.close((err) => (err ? reject(err) : resolve()));
+    });
+  }
+});
+
+test('projects viewer MCP server accepts a valid project-specific AI context payload', async () => {
+  const aiContextServer = http.createServer((request, response) => {
+    if (request.url === '/api/ai-context/projects/project-1') {
+      response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      response.end(
+        JSON.stringify({
+          project: {
+            kind: 'project-ai-context',
+            identity: {
+              name: 'MCP Project',
+              path: 'C:/tracked/project',
+            },
+          },
+        }),
+      );
+      return;
+    }
+
+    response.writeHead(404, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ error: 'not-found' }));
+  });
+
+  await new Promise((resolve) => aiContextServer.listen(0, '127.0.0.1', resolve));
+  const { port } = aiContextServer.address();
+  const mcp = startMcpClient(`http://127.0.0.1:${port}`);
+
+  try {
+    await mcp.request('initialize', {
+      protocolVersion: '2024-11-05',
+      capabilities: {},
+      clientInfo: { name: 'projects-viewer-test', version: '0.1.0' },
+    });
+    mcp.notify('notifications/initialized');
+
+    const result = await mcp.request('tools/call', {
+      name: 'get_ai_context',
+      arguments: { projectId: 'project-1' },
+    });
+    assert.equal(result.isError, false);
+    const payload = JSON.parse(result.content[0].text);
+    assert.equal(payload.project.kind, 'project-ai-context');
+    assert.equal(payload.project.identity.name, 'MCP Project');
+    assert.equal(payload.project.identity.path, 'C:/tracked/project');
+  } finally {
+    await mcp.close();
+    await new Promise((resolve, reject) => {
+      aiContextServer.close((err) => (err ? reject(err) : resolve()));
     });
   }
 });
