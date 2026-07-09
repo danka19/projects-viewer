@@ -264,6 +264,11 @@ async function readAgentPreflightFindings(configOptions) {
   return readFindingsStore(configOptions);
 }
 
+async function readAgentPreflightAiContext(configOptions) {
+  const snapshot = await readAiContextSnapshot(configOptions);
+  return snapshot?.context ?? null;
+}
+
 async function readAgentPreflightOpenSpecState(changeId) {
   const specsRoot = path.join(__dirname, 'openspec', 'specs');
   const changesRoot = path.join(__dirname, 'openspec', 'changes');
@@ -779,10 +784,11 @@ export async function createApp({
   app.get('/api/agent-preflight-packet', async (req, res) => {
     try {
       const { projectId, changeId, agentRole } = parseAgentPreflightPacketQuery(req);
-      const [scan, config, findingsStore, openspecState, phaseSignals, auditSignals, checklistSignals] =
+      const [scan, config, aiContext, findingsStore, openspecState, phaseSignals, auditSignals, checklistSignals] =
         await Promise.all([
           readGeneratedScan(),
           readProjectConfig(configOptions),
+          readAgentPreflightAiContext(configOptions),
           readAgentPreflightFindings(configOptions),
           readAgentPreflightOpenSpecState(changeId),
           readAgentPreflightPhaseSignals(),
@@ -797,6 +803,7 @@ export async function createApp({
           projectId,
           changeId,
           agentRole,
+          aiContext,
           findings: findingsStore?.findings ?? null,
           openspecState,
           phaseSignals,

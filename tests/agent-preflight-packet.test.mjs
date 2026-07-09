@@ -839,6 +839,28 @@ test('agent preflight packet API returns valid packet for saved project without 
   const findingsPath = path.join(appDataDir, 'ai.findings.generated.json');
   await fs.writeFile(findingsPath, JSON.stringify(findingsStore, null, 2));
   const findingsBefore = await fs.readFile(findingsPath, 'utf8');
+  const aiContextSnapshot = {
+    savedAt: '2026-07-08T23:00:00.000Z',
+    context: {
+      kind: 'all-project-ai-context',
+      generatedAt: '2026-07-08T23:00:00.000Z',
+      activeDays: 14,
+      projectCount: 1,
+      projects: [
+        {
+          kind: 'project-ai-context',
+          identity: {
+            id: 'project-1',
+            name: project.name,
+            path: project.path,
+          },
+        },
+      ],
+    },
+  };
+  const aiContextPath = path.join(appDataDir, 'ai.context.snapshot.json');
+  await fs.writeFile(aiContextPath, `${JSON.stringify(aiContextSnapshot, null, 2)}\n`);
+  const aiContextBefore = await fs.readFile(aiContextPath, 'utf8');
 
   const app = await createApp({
     appDataDir,
@@ -856,12 +878,13 @@ test('agent preflight packet API returns valid packet for saved project without 
     const packet = await response.json();
     assert.equal(packet.kind, 'agent-preflight-packet');
     assert.equal(packet.project.id, 'project-1');
+    assert.equal(packet.inputState.aiContextAvailable, true);
     assert.equal(Object.hasOwn(packet, 'mode'), false);
     assert.equal(Object.hasOwn(packet, 'recommendedHumanDecision'), false);
     assert.equal(Object.hasOwn(packet, 'noAttentionMessage'), false);
 
     assert.equal(await fs.readFile(findingsPath, 'utf8'), findingsBefore);
-    await assert.rejects(fs.access(path.join(appDataDir, 'ai.context.snapshot.json')));
+    assert.equal(await fs.readFile(aiContextPath, 'utf8'), aiContextBefore);
     await assert.rejects(fs.access(path.join(appDataDir, 'report-history.json')));
     assert.equal(await fs.readFile(sentinelPath, 'utf8'), 'tracked project sentinel\n');
   } finally {
