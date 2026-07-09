@@ -45,7 +45,7 @@ Scaling rule: for small bounded tasks (typo fixes, single-file edits, doc correc
 
 - Projects Viewer is a local-only dashboard for reading documentation in configured local projects.
 - Scanned projects are read-only inputs. Never modify, move, delete, reformat, or create files inside scanned project paths as part of dashboard scans.
-- `projects.config.json` is the only source of scanned project paths. Browser/API requests must not provide arbitrary paths.
+- `app-data/projects.config.json` is the only source of scanned/tracked project paths/config. Browser/API requests must not provide arbitrary paths.
 - `npm run dev` starts `server.mjs`, Express API, Vite middleware, startup scan, and documentation watcher at `http://127.0.0.1:5173` by default.
 - Static mode is expected when the browser cannot reach the local API; rescan controls must stay disabled there.
 - Live rescan behavior must preserve single-flight scans, one queued/delayed rescan, and the 30 second minimum throttle.
