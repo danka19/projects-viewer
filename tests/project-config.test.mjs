@@ -17,7 +17,26 @@ async function makeTemp() {
   return fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-config-'));
 }
 
-test('ensureProjectConfig migrates legacy root config into app-data', async () => {
+test('ensureProjectConfig creates an empty canonical config on clean startup', async () => {
+  const tmp = await makeTemp();
+  const appDataDir = path.join(tmp, 'app-data');
+
+  const config = await ensureProjectConfig({
+    appDataDir,
+    legacyConfigPath: path.join(tmp, 'missing.json'),
+    now: () => new Date('2026-07-08T00:00:00.000Z'),
+  });
+
+  assert.deepEqual(config.projects, []);
+  assert.deepEqual(config.workspaces, []);
+  assert.deepEqual(config.settings, { watchDocs: true, autoRescanIntervalSec: 0 });
+  assert.deepEqual(
+    JSON.parse(await fs.readFile(path.join(appDataDir, 'projects.config.json'), 'utf8')),
+    config,
+  );
+});
+
+test('ensureProjectConfig ignores root projects.config.json at runtime', async () => {
   const tmp = await makeTemp();
   const projectRoot = path.join(tmp, 'sample-project');
   await fs.mkdir(projectRoot, { recursive: true });
@@ -38,14 +57,13 @@ test('ensureProjectConfig migrates legacy root config into app-data', async () =
     now: () => new Date('2026-07-08T00:00:00.000Z'),
   });
 
-  assert.equal(config.settings.watchDocs, false);
-  assert.equal(config.settings.activeDays, 7);
-  assert.equal(config.projects.length, 1);
-  assert.equal(config.projects[0].name, 'Sample Project');
-  assert.equal(config.projects[0].enabled, true);
-  assert.deepEqual(config.projects[0].tags, []);
-  assert.match(config.projects[0].id, /^sample-project/);
-  await assert.doesNotReject(fs.stat(path.join(appDataDir, 'projects.config.json')));
+  assert.deepEqual(config.projects, []);
+  assert.deepEqual(config.workspaces, []);
+  assert.deepEqual(config.settings, { watchDocs: true, autoRescanIntervalSec: 0 });
+  assert.deepEqual(
+    JSON.parse(await fs.readFile(path.join(appDataDir, 'projects.config.json'), 'utf8')),
+    config,
+  );
 });
 
 test('addProject validates directories and deduplicates by resolved path', async () => {
