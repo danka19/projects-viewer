@@ -81,23 +81,23 @@ export default function DocumentationCoverage({ project, onOpenDrawer }: Props) 
                 <span
                   className={`flex h-6 w-6 items-center justify-center rounded-md border text-xs ${
                     total > 0
-                      ? 'border-sky-400/30 bg-sky-400/10 text-sky-300'
-                      : 'border-slate-600/40 bg-slate-600/5 text-slate-600'
+                      ? 'border-info/40 bg-info/10 text-info'
+                      : 'border-dim/30 bg-dim/5 text-dim/70'
                   }`}
                   aria-hidden="true"
                 >
                   {meta.icon}
                 </span>
-                <span className="text-sm font-medium text-slate-200">{meta.label}</span>
+                <span className="text-sm font-medium text-ink">{meta.label}</span>
                 <span
                   className={`rounded-full px-2 py-0.5 font-mono text-[10px] ${
-                    total > 0 ? 'bg-slate-500/15 text-slate-300' : 'bg-slate-600/10 text-slate-600'
+                    total > 0 ? 'bg-dim/15 text-mute' : 'bg-dim/10 text-dim/70'
                   }`}
                 >
                   {q ? `${files.length}/${total}` : total}
                 </span>
                 {total === 0 && (
-                  <span className="font-mono text-[10px] text-rose-300/70">missing</span>
+                  <span className="font-mono text-[10px] text-danger/70">missing</span>
                 )}
                 <span
                   className={`ml-auto text-[10px] text-faint transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
@@ -113,7 +113,7 @@ export default function DocumentationCoverage({ project, onOpenDrawer }: Props) 
                         onClick={() => onOpenDrawer(docDrawer(d, project))}
                         className="flex w-full items-baseline gap-3 rounded-md px-2 py-1 text-left transition-colors hover:bg-void/50"
                       >
-                        <span className="min-w-0 truncate font-mono text-xs text-slate-300">
+                        <span className="min-w-0 truncate font-mono text-xs text-mute">
                           {d.file}
                         </span>
                         <span className="ml-auto font-mono text-[10px] whitespace-nowrap text-faint">
@@ -130,13 +130,13 @@ export default function DocumentationCoverage({ project, onOpenDrawer }: Props) 
       </div>
 
       {project.gaps.length > 0 && (
-        <div className="mt-4 rounded-lg border border-amber-400/20 bg-amber-400/5 px-3.5 py-2.5">
-          <p className="font-mono text-[10px] tracking-[0.18em] text-amber-300/80 uppercase">
+        <div className="mt-4 rounded-lg border border-warn/30 bg-warn/5 px-3.5 py-2.5">
+          <p className="font-mono text-[10px] tracking-[0.18em] text-warn/80 uppercase">
             Documentation gaps
           </p>
           <ul className="mt-1.5 space-y-1">
             {project.gaps.map((g, i) => (
-              <li key={i} className="text-sm text-slate-300">
+              <li key={i} className="text-sm text-mute">
                 {g}
               </li>
             ))}

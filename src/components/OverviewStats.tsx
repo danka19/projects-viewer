@@ -95,8 +95,8 @@ function MetricCard({
     <button
       onClick={onClick}
       aria-pressed={active}
-      className={`glass rise rounded-xl px-4 py-3 text-left transition-all duration-200 hover:-translate-y-px hover:border-slate-500/40 ${
-        active ? 'border-accent/50 shadow-[0_0_18px_rgba(167,139,250,0.12)]' : ''
+      className={`glass rise rounded-xl px-4 py-3 text-left transition-all duration-200 hover:-translate-y-px hover:border-line-strong ${
+        active ? 'border-accent/60' : ''
       } ${dim ? 'opacity-60' : ''}`}
       style={{ animationDelay: `${delay * 40}ms` }}
     >

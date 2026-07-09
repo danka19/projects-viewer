@@ -41,12 +41,12 @@ export default function SpecsPanel({ project, onOpenDrawer }: Props) {
                 <li key={i}>
                   <button
                     onClick={() => onOpenDrawer(specDrawer(sp, project))}
-                    className="flex w-full flex-wrap items-baseline gap-x-2.5 gap-y-1 rounded-lg border border-line bg-void/30 px-3 py-2 text-left transition-colors hover:border-slate-500/40"
+                    className="flex w-full flex-wrap items-baseline gap-x-2.5 gap-y-1 rounded-lg border border-line bg-void/30 px-3 py-2 text-left transition-colors hover:border-line-strong"
                   >
                     <span className="font-mono text-[10px] tracking-wider text-faint uppercase">
                       {sp.kind}
                     </span>
-                    <span className="text-sm font-medium text-slate-200">{sp.name}</span>
+                    <span className="text-sm font-medium text-ink">{sp.name}</span>
                     <span
                       className={`rounded border px-1.5 py-px font-mono text-[10px] ${SPEC_STATUS_CHIP[sp.status] ?? SPEC_STATUS_CHIP.unknown}`}
                     >
@@ -72,7 +72,7 @@ export default function SpecsPanel({ project, onOpenDrawer }: Props) {
               <li key={d.file}>
                 <button
                   onClick={() => onOpenDrawer(docDrawer(d, project))}
-                  className="w-full rounded-lg px-2.5 py-1.5 text-left font-mono text-xs text-slate-300 transition-colors hover:bg-void/40 hover:text-ink"
+                  className="w-full rounded-lg px-2.5 py-1.5 text-left font-mono text-xs text-mute transition-colors hover:bg-void/40 hover:text-ink"
                 >
                   {d.file}
                 </button>

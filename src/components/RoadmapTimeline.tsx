@@ -68,13 +68,13 @@ export default function RoadmapTimeline({ project, onOpenDrawer }: Props) {
     <div className="space-y-4">
       {/* Segmented progress: completed / pending approval / in progress / halted / planned */}
       <div className="glass rounded-xl p-5">
-        <div className="flex h-2 overflow-hidden rounded-full bg-slate-700/30">
-          <Segment count={groups.completed} total={phases.length} className="bg-emerald-400" />
-          <Segment count={groups.approval} total={phases.length} className="bg-violet-400" />
-          <Segment count={groups.inProgress} total={phases.length} className="bg-sky-400" />
-          <Segment count={groups.halted} total={phases.length} className="bg-amber-400" />
+        <div className="flex h-2 overflow-hidden rounded-full bg-dim/20">
+          <Segment count={groups.completed} total={phases.length} className="bg-ok" />
+          <Segment count={groups.approval} total={phases.length} className="bg-gate" />
+          <Segment count={groups.inProgress} total={phases.length} className="bg-info" />
+          <Segment count={groups.halted} total={phases.length} className="bg-warn" />
         </div>
-        <p className="mt-3 text-sm text-slate-300">{summaryParts.join(' · ')}</p>
+        <p className="mt-3 text-sm text-mute">{summaryParts.join(' · ')}</p>
         <p className="mt-1 font-mono text-[10px] text-faint">
           “Pending approval” phases are finished work waiting on the human owner — they are
           deliberately not counted as fully completed.
@@ -98,7 +98,7 @@ export default function RoadmapTimeline({ project, onOpenDrawer }: Props) {
               >
                 <span className={`h-2 w-2 flex-none rounded-full ${meta.dot}`} />
                 <span className="font-display text-sm font-semibold text-ink">{ph.id}</span>
-                <span className="min-w-0 flex-1 text-sm font-medium text-slate-200">
+                <span className="min-w-0 flex-1 text-sm font-medium text-ink">
                   {ph.name}
                 </span>
                 <span
@@ -108,9 +108,9 @@ export default function RoadmapTimeline({ project, onOpenDrawer }: Props) {
                 </span>
                 {progress !== null && (
                   <span className="flex items-center gap-1.5">
-                    <span className="h-1 w-12 overflow-hidden rounded-full bg-slate-700/40">
+                    <span className="h-1 w-12 overflow-hidden rounded-full bg-dim/25">
                       <span
-                        className={`block h-full rounded-full ${ph.status === 'completed' ? 'bg-emerald-400' : ph.status === 'completed_pending_approval' ? 'bg-violet-400' : 'bg-sky-400'}`}
+                        className={`block h-full rounded-full ${ph.status === 'completed' ? 'bg-ok' : ph.status === 'completed_pending_approval' ? 'bg-gate' : 'bg-info'}`}
                         style={{ width: `${progress}%` }}
                       />
                     </span>
@@ -144,7 +144,7 @@ export default function RoadmapTimeline({ project, onOpenDrawer }: Props) {
                     <p className="font-mono text-[10px] tracking-[0.2em] text-faint uppercase">
                       Why this status?
                     </p>
-                    <p className="mt-2 text-[13px] leading-relaxed text-slate-300">
+                    <p className="mt-2 text-[13px] leading-relaxed text-mute">
                       {ph.statusText || 'No Status: line was found under this phase heading.'}
                     </p>
                     <dl className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1.5 border-t border-line pt-2.5 text-[12px] sm:grid-cols-2">
@@ -160,26 +160,26 @@ export default function RoadmapTimeline({ project, onOpenDrawer }: Props) {
                       </div>
                       <div className="flex gap-2 sm:col-span-2">
                         <dt className="flex-none text-faint">Rule:</dt>
-                        <dd className="text-slate-300">{ph.rule}</dd>
+                        <dd className="text-mute">{ph.rule}</dd>
                       </div>
                       <div className="flex gap-2 sm:col-span-2">
                         <dt className="flex-none text-faint">Source:</dt>
-                        <dd className="font-mono text-[11px] text-slate-300">
+                        <dd className="font-mono text-[11px] text-mute">
                           {ph.file}:{ph.line}
                         </dd>
                       </div>
                       {ph.issue !== 'none' && (
                         <div className="flex gap-2 sm:col-span-2">
-                          <dt className="flex-none text-rose-300/80">
+                          <dt className="flex-none text-danger/80">
                             Suspected {ph.issue} issue:
                           </dt>
-                          <dd className="text-rose-200/90">{ph.issueNote}</dd>
+                          <dd className="text-danger/90">{ph.issueNote}</dd>
                         </div>
                       )}
                     </dl>
                     <button
                       onClick={() => onOpenDrawer(phaseDrawer(ph, project))}
-                      className="mt-3 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] text-violet-300 transition-colors hover:bg-accent/20"
+                      className="mt-3 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/20"
                     >
                       Open details →
                     </button>
@@ -195,7 +195,7 @@ export default function RoadmapTimeline({ project, onOpenDrawer }: Props) {
                         <StepCounts steps={ph.steps} />
                         <button
                           onClick={() => toggle(stepsShown, ph.id, setStepsShown)}
-                          className="ml-auto rounded-lg border border-line px-2.5 py-0.5 font-mono text-[10px] text-mute transition-colors hover:border-slate-500/40 hover:text-slate-300"
+                          className="ml-auto rounded-lg border border-line px-2.5 py-0.5 font-mono text-[10px] text-mute transition-colors hover:border-line-strong hover:text-ink"
                         >
                           {stepsShown.has(ph.id) ? 'Hide steps' : 'Show steps'}
                         </button>
@@ -217,7 +217,7 @@ export default function RoadmapTimeline({ project, onOpenDrawer }: Props) {
                                     {s.id}
                                   </span>
                                 )}
-                                <span className="min-w-0 flex-1 truncate text-[13px] text-slate-300">
+                                <span className="min-w-0 flex-1 truncate text-[13px] text-mute">
                                   {s.name}
                                 </span>
                                 <span
@@ -307,10 +307,10 @@ function RelatedItems({
               onClick={() => onOpenDrawer(decisionDrawer(d, project))}
               className="flex w-full items-baseline gap-2.5 rounded-lg px-2.5 py-1 text-left transition-colors hover:bg-void/40"
             >
-              <span className="flex-none font-mono text-[10px] text-violet-300/80">
+              <span className="flex-none font-mono text-[10px] text-accent-ink/80">
                 {d.date ?? 'decision'}
               </span>
-              <span className="line-clamp-1 min-w-0 text-[13px] text-slate-300">{d.text}</span>
+              <span className="line-clamp-1 min-w-0 text-[13px] text-mute">{d.text}</span>
             </button>
           </li>
         ))}
@@ -320,8 +320,8 @@ function RelatedItems({
               onClick={() => onOpenDrawer(auditDrawer(a, project))}
               className="flex w-full items-baseline gap-2.5 rounded-lg px-2.5 py-1 text-left transition-colors hover:bg-void/40"
             >
-              <span className="flex-none font-mono text-[10px] text-sky-300/80">audit</span>
-              <span className="line-clamp-1 min-w-0 text-[13px] text-slate-300">{a.title}</span>
+              <span className="flex-none font-mono text-[10px] text-info/80">audit</span>
+              <span className="line-clamp-1 min-w-0 text-[13px] text-mute">{a.title}</span>
             </button>
           </li>
         ))}

@@ -372,11 +372,11 @@ function AppShell({
                     onClick={() => openHit(hit)}
                     className="flex w-full items-baseline gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-void/50"
                   >
-                    <span className="w-16 flex-none font-mono text-[10px] tracking-wider text-violet-300/80 uppercase">
+                    <span className="w-16 flex-none font-mono text-[10px] tracking-wider text-accent-ink/90 uppercase">
                       {hit.kind}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm text-slate-200">{hit.label}</span>
+                      <span className="block truncate text-sm text-ink">{hit.label}</span>
                       <span className="block truncate font-mono text-[10px] text-faint">
                         {hit.sub}
                       </span>
@@ -407,6 +407,7 @@ function AppShell({
           >
             Manage Projects
           </button>
+          <ThemeToggle />
         </div>
       </header>
 
@@ -488,6 +489,31 @@ function AppShell({
   );
 }
 
+function ThemeToggle() {
+  const [light, setLight] = useState(() =>
+    document.documentElement.classList.contains('light'),
+  );
+
+  function toggle() {
+    const next = !light;
+    document.documentElement.classList.toggle('light', next);
+    window.localStorage.setItem('projects-viewer:theme', next ? 'light' : 'dark');
+    setLight(next);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      title={light ? 'Switch to dark theme' : 'Switch to light theme'}
+      aria-label={light ? 'Switch to dark theme' : 'Switch to light theme'}
+      className="rounded-md border border-line px-3 py-2 text-xs font-semibold text-mute transition hover:text-ink"
+    >
+      {light ? '◑ Dark' : '◐ Light'}
+    </button>
+  );
+}
+
 const INTERVAL_OPTIONS = [
   { label: 'Off', value: 0 },
   { label: '5 min', value: 5 * 60 * 1000 },
@@ -515,7 +541,7 @@ function LiveControls({
   const [busy, setBusy] = useState(false);
   const isScanning = scanStatus?.status === 'scanning' || busy;
   const modeLabel = liveMode ? 'Live' : 'Static';
-  const modeClass = liveMode ? 'border-emerald-400/30 text-emerald-200' : 'border-amber-300/30 text-amber-200';
+  const modeClass = liveMode ? 'border-ok/40 text-ok' : 'border-warn/40 text-warn';
   const message =
     scanStatus?.message ??
     scanStatus?.error ??
@@ -560,7 +586,7 @@ function LiveControls({
           onClick={handleRescan}
           disabled={!liveMode || isScanning}
           title={liveMode ? 'Rescan configured project docs' : 'Start local server to enable live rescan'}
-          className="rounded-md border border-violet-300/25 bg-violet-400/10 px-3 py-1.5 text-xs font-semibold text-violet-100 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:border-slate-500/20 disabled:bg-slate-500/10 disabled:text-faint"
+          className="rounded-md border border-accent/40 bg-accent/15 px-3 py-1.5 text-xs font-semibold text-accent-ink transition hover:bg-accent/25 disabled:cursor-not-allowed disabled:border-dim/20 disabled:bg-dim/10 disabled:text-faint"
         >
           {isScanning ? 'Scanning...' : 'Rescan docs'}
         </button>
@@ -603,10 +629,10 @@ function NoDataScreen() {
         <StatusOrb status="unknown" size={14} className="mx-auto" />
         <h2 className="mt-4 font-display text-lg font-semibold text-ink">No scan data yet</h2>
         <p className="mt-2 text-sm leading-relaxed text-mute">
-          The data file <code className="text-slate-300">src/data/projects.json</code> is
+          The data file <code className="text-mute">src/data/projects.json</code> is
           missing. Generate it, then reload this page:
         </p>
-        <pre className="mt-4 rounded-lg border border-line bg-void/60 px-4 py-2.5 text-left font-mono text-xs text-emerald-300">
+        <pre className="mt-4 rounded-lg border border-line bg-void/60 px-4 py-2.5 text-left font-mono text-xs text-ok">
           npm run scan
         </pre>
       </div>
@@ -623,10 +649,9 @@ function EmptyConfig() {
           No projects scanned yet
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-mute">
-          Add project paths to <code className="text-slate-300">projects.config.json</code>,
-          then generate the data file:
+          Use Manage Projects to add local project paths, then rescan docs or generate the data file:
         </p>
-        <pre className="mt-4 rounded-lg border border-line bg-void/60 px-4 py-2.5 text-left font-mono text-xs text-emerald-300">
+        <pre className="mt-4 rounded-lg border border-line bg-void/60 px-4 py-2.5 text-left font-mono text-xs text-ok">
           npm run scan
         </pre>
       </div>

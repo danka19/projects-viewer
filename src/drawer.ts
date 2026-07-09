@@ -101,8 +101,8 @@ export function blockedGatedCandidateDrawer(c: BlockedGatedCandidate, p: Project
     title: c.text.length > 80 ? c.text.slice(0, 80) + 'вЂ¦' : c.text,
     status: `${c.classification} В· ${c.confidence}`,
     statusChip: c.includedInProjectStatus
-      ? 'border-sky-400/30 bg-sky-400/10 text-sky-300'
-      : 'border-slate-500/30 bg-slate-500/10 text-slate-300',
+      ? 'border-info/40 bg-info/10 text-info'
+      : 'border-dim/40 bg-dim/10 text-dim',
     text:
       `${c.text}\n\nReason: ${c.reason}` +
       `\nMatched keywords: ${c.matchedKeywords.join(', ')}` +

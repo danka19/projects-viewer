@@ -51,7 +51,7 @@ export default function ProjectTabs({ project, activeTab, onSelectTab, onOpenDra
             className={`flex items-center gap-1.5 rounded-t-lg border-b-2 px-3.5 py-2 text-sm whitespace-nowrap transition-colors ${
               activeTab === t.id
                 ? 'border-accent font-medium text-ink'
-                : 'border-transparent text-mute hover:bg-void/40 hover:text-slate-300'
+                : 'border-transparent text-mute hover:bg-void/40 hover:text-ink'
             }`}
           >
             {t.label}
@@ -59,8 +59,8 @@ export default function ProjectTabs({ project, activeTab, onSelectTab, onOpenDra
               <span
                 className={`rounded-full px-1.5 py-px font-mono text-[10px] ${
                   activeTab === t.id
-                    ? 'bg-accent/15 text-violet-300'
-                    : 'bg-slate-500/15 text-faint'
+                    ? 'bg-accent/15 text-accent-ink'
+                    : 'bg-dim/15 text-faint'
                 }`}
               >
                 {t.count}

@@ -14,58 +14,51 @@ export const STATUS_META: Record<
 > = {
   active: {
     label: 'Active',
-    badge:
-      'border-emerald-400/30 bg-emerald-400/10 text-emerald-300 shadow-[0_0_16px_rgba(52,211,153,0.14)]',
-    text: 'text-emerald-300',
-    bar: 'bg-emerald-400',
+    badge: 'border-ok/40 bg-ok/10 text-ok',
+    text: 'text-ok',
+    bar: 'bg-ok',
   },
   stalled: {
     label: 'Stalled',
-    badge:
-      'border-amber-400/30 bg-amber-400/10 text-amber-300 shadow-[0_0_16px_rgba(251,191,36,0.12)]',
-    text: 'text-amber-300',
-    bar: 'bg-amber-400',
+    badge: 'border-warn/40 bg-warn/10 text-warn',
+    text: 'text-warn',
+    bar: 'bg-warn',
   },
   done: {
     label: 'Done',
-    badge:
-      'border-sky-400/30 bg-sky-400/10 text-sky-300 shadow-[0_0_16px_rgba(56,189,248,0.14)]',
-    text: 'text-sky-300',
-    bar: 'bg-sky-400',
+    badge: 'border-info/40 bg-info/10 text-info',
+    text: 'text-info',
+    bar: 'bg-info',
   },
   'pending-approval': {
     label: 'Pending approval',
-    badge:
-      'border-violet-400/30 bg-violet-400/10 text-violet-300 shadow-[0_0_16px_rgba(167,139,250,0.12)]',
-    text: 'text-violet-300',
-    bar: 'bg-violet-400',
+    badge: 'border-gate/40 bg-gate/10 text-gate',
+    text: 'text-gate',
+    bar: 'bg-gate',
   },
   'needs-review': {
     label: 'Needs review',
-    badge:
-      'border-orange-400/30 bg-orange-400/10 text-orange-300 shadow-[0_0_16px_rgba(251,146,60,0.12)]',
-    text: 'text-orange-300',
-    bar: 'bg-orange-400',
+    badge: 'border-review/40 bg-review/10 text-review',
+    text: 'text-review',
+    bar: 'bg-review',
   },
   paused: {
     label: 'Paused',
-    badge:
-      'border-amber-400/30 bg-amber-400/10 text-amber-300 shadow-[0_0_16px_rgba(251,191,36,0.12)]',
-    text: 'text-amber-300',
-    bar: 'bg-amber-400',
+    badge: 'border-warn/40 bg-warn/10 text-warn',
+    text: 'text-warn',
+    bar: 'bg-warn',
   },
   'needs-attention': {
     label: 'Needs attention',
-    badge:
-      'border-rose-400/30 bg-rose-400/10 text-rose-300 shadow-[0_0_16px_rgba(251,113,133,0.16)]',
-    text: 'text-rose-300',
-    bar: 'bg-rose-400',
+    badge: 'border-danger/40 bg-danger/10 text-danger',
+    text: 'text-danger',
+    bar: 'bg-danger',
   },
   unknown: {
     label: 'Unknown',
-    badge: 'border-slate-500/30 bg-slate-500/10 text-slate-400',
-    text: 'text-slate-400',
-    bar: 'bg-slate-500',
+    badge: 'border-dim/40 bg-dim/10 text-dim',
+    text: 'text-dim',
+    bar: 'bg-dim',
   },
 };
 
@@ -75,109 +68,109 @@ export const PHASE_META: Record<
 > = {
   completed: {
     label: 'completed',
-    chip: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300',
-    dot: 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.55)]',
+    chip: 'border-ok/40 bg-ok/10 text-ok',
+    dot: 'bg-ok',
   },
   completed_pending_approval: {
     label: 'completed · approval pending',
-    chip: 'border-violet-400/30 bg-violet-400/10 text-violet-300',
-    dot: 'bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.55)]',
+    chip: 'border-gate/40 bg-gate/10 text-gate',
+    dot: 'bg-gate',
   },
   pending_approval: {
     label: 'pending approval',
-    chip: 'border-violet-400/30 bg-violet-400/5 text-violet-300/90',
-    dot: 'border border-violet-400 bg-transparent',
+    chip: 'border-gate/40 bg-gate/5 text-gate/90',
+    dot: 'border border-gate bg-transparent',
   },
   in_progress: {
     label: 'in progress',
-    chip: 'border-sky-400/30 bg-sky-400/10 text-sky-300',
-    dot: 'bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]',
+    chip: 'border-info/40 bg-info/10 text-info',
+    dot: 'bg-info',
   },
   needs_review: {
     label: 'needs review',
-    chip: 'border-orange-400/30 bg-orange-400/10 text-orange-300',
-    dot: 'bg-orange-400',
+    chip: 'border-review/40 bg-review/10 text-review',
+    dot: 'bg-review',
   },
   paused: {
     label: 'paused',
-    chip: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
-    dot: 'bg-amber-400',
+    chip: 'border-warn/40 bg-warn/10 text-warn',
+    dot: 'bg-warn',
   },
   blocked: {
     label: 'blocked',
-    chip: 'border-rose-400/30 bg-rose-400/10 text-rose-300',
-    dot: 'bg-rose-400',
+    chip: 'border-danger/40 bg-danger/10 text-danger',
+    dot: 'bg-danger',
   },
   planned: {
     label: 'planned',
-    chip: 'border-slate-500/30 bg-slate-500/10 text-slate-400',
-    dot: 'border border-slate-500 bg-transparent',
+    chip: 'border-dim/40 bg-dim/10 text-dim',
+    dot: 'border border-dim bg-transparent',
   },
   unknown: {
     label: 'unknown',
-    chip: 'border-slate-600/40 bg-slate-600/10 text-slate-500',
-    dot: 'border border-slate-600 bg-transparent',
+    chip: 'border-dim/40 bg-dim/10 text-dim/80',
+    dot: 'border border-dim bg-transparent',
   },
 };
 
 export const STEP_META: Record<StepStatus, { label: string; dot: string; text: string }> = {
-  completed: { label: 'completed', dot: 'bg-emerald-400', text: 'text-emerald-300' },
+  completed: { label: 'completed', dot: 'bg-ok', text: 'text-ok' },
   completed_pending_approval: {
     label: 'completed · approval pending',
-    dot: 'bg-violet-400',
-    text: 'text-violet-300',
+    dot: 'bg-gate',
+    text: 'text-gate',
   },
-  in_progress: { label: 'in progress', dot: 'bg-sky-400', text: 'text-sky-300' },
-  pending: { label: 'pending', dot: 'bg-slate-500', text: 'text-slate-400' },
-  blocked: { label: 'blocked', dot: 'bg-rose-400', text: 'text-rose-300' },
-  paused: { label: 'paused', dot: 'bg-amber-400', text: 'text-amber-300' },
-  needs_review: { label: 'needs review', dot: 'bg-orange-400', text: 'text-orange-300' },
-  unknown: { label: 'unknown', dot: 'border border-slate-600 bg-transparent', text: 'text-slate-500' },
+  in_progress: { label: 'in progress', dot: 'bg-info', text: 'text-info' },
+  pending: { label: 'pending', dot: 'bg-dim', text: 'text-dim' },
+  blocked: { label: 'blocked', dot: 'bg-danger', text: 'text-danger' },
+  paused: { label: 'paused', dot: 'bg-warn', text: 'text-warn' },
+  needs_review: { label: 'needs review', dot: 'bg-review', text: 'text-review' },
+  unknown: { label: 'unknown', dot: 'border border-dim bg-transparent', text: 'text-dim/80' },
 };
 
 export const CONFIDENCE_META: Record<
   Confidence,
   { label: string; dot: string; text: string }
 > = {
-  high: { label: 'high confidence', dot: 'bg-emerald-400', text: 'text-emerald-300' },
-  medium: { label: 'medium confidence', dot: 'bg-amber-400', text: 'text-amber-300' },
-  low: { label: 'low confidence', dot: 'bg-rose-400', text: 'text-rose-300' },
+  high: { label: 'high confidence', dot: 'bg-ok', text: 'text-ok' },
+  medium: { label: 'medium confidence', dot: 'bg-warn', text: 'text-warn' },
+  low: { label: 'low confidence', dot: 'bg-danger', text: 'text-danger' },
 };
 
 export const BLOCKER_META: Record<string, { label: string; chip: string }> = {
   rejection: {
     label: 'rejection',
-    chip: 'border-rose-400/30 bg-rose-400/10 text-rose-300',
+    chip: 'border-danger/40 bg-danger/10 text-danger',
   },
   blocked: {
     label: 'real blocker',
-    chip: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
+    chip: 'border-warn/40 bg-warn/10 text-warn',
   },
   'approval-gate': {
     label: 'approval gate',
-    chip: 'border-violet-400/30 bg-violet-400/10 text-violet-300',
+    chip: 'border-gate/40 bg-gate/10 text-gate',
   },
   'needs-review': {
     label: 'needs review',
-    chip: 'border-orange-400/30 bg-orange-400/10 text-orange-300',
+    chip: 'border-review/40 bg-review/10 text-review',
   },
   'paused-deferred': {
     label: 'paused/deferred',
-    chip: 'border-slate-400/25 bg-slate-400/10 text-slate-300',
+    chip: 'border-dim/40 bg-dim/10 text-dim',
   },
 };
 
 export const SPEC_STATUS_CHIP: Record<string, string> = {
-  active: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300',
-  done: 'border-sky-400/30 bg-sky-400/10 text-sky-300',
-  archived: 'border-slate-500/30 bg-slate-500/10 text-slate-400',
-  unknown: 'border-slate-600/40 bg-slate-600/10 text-slate-500',
+  active: 'border-ok/40 bg-ok/10 text-ok',
+  done: 'border-info/40 bg-info/10 text-info',
+  archived: 'border-dim/40 bg-dim/10 text-dim',
+  unknown: 'border-dim/40 bg-dim/10 text-dim/80',
 };
 
 export const AUDIT_STATUS_CHIP: Record<string, string> = {
-  attention: 'border-rose-400/30 bg-rose-400/10 text-rose-300',
-  recorded: 'border-sky-400/30 bg-sky-400/10 text-sky-300',
-  archived: 'border-slate-500/30 bg-slate-500/10 text-slate-400',
+  attention: 'border-danger/40 bg-danger/10 text-danger',
+  recorded: 'border-info/40 bg-info/10 text-info',
+  archived: 'border-dim/40 bg-dim/10 text-dim',
 };
 
 export const DOC_CATEGORY_META: Record<string, { label: string; icon: string }> = {
@@ -191,15 +184,15 @@ export const DOC_CATEGORY_META: Record<string, { label: string; icon: string }> 
 };
 
 export function healthColor(score: number): string {
-  if (score >= 75) return 'text-emerald-300';
-  if (score >= 50) return 'text-amber-300';
-  return 'text-rose-300';
+  if (score >= 75) return 'text-ok';
+  if (score >= 50) return 'text-warn';
+  return 'text-danger';
 }
 
 export function healthStroke(score: number): string {
-  if (score >= 75) return '#34d399';
-  if (score >= 50) return '#fbbf24';
-  return '#fb7185';
+  if (score >= 75) return 'var(--ok)';
+  if (score >= 50) return 'var(--warn)';
+  return 'var(--danger)';
 }
 
 export const STATUS_ORDER: ProjectStatus[] = [

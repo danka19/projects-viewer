@@ -48,7 +48,7 @@ export default function DetailDrawer({ item, onNavigate, onClose }: Props) {
             </h3>
             {item.status && (
               <span
-                className={`mt-2 inline-block rounded border px-2 py-0.5 font-mono text-[11px] ${item.statusChip ?? 'border-slate-600/40 bg-slate-600/10 text-slate-400'}`}
+                className={`mt-2 inline-block rounded border px-2 py-0.5 font-mono text-[11px] ${item.statusChip ?? 'border-dim/40 bg-dim/10 text-dim'}`}
               >
                 {item.status}
               </span>
@@ -57,7 +57,7 @@ export default function DetailDrawer({ item, onNavigate, onClose }: Props) {
           <button
             onClick={onClose}
             aria-label="Close details"
-            className="rounded-lg border border-line px-2.5 py-1 text-sm text-mute transition-colors hover:border-slate-500/40 hover:text-ink"
+            className="rounded-lg border border-line px-2.5 py-1 text-sm text-mute transition-colors hover:border-line-strong hover:text-ink"
           >
             ✕
           </button>
@@ -65,20 +65,20 @@ export default function DetailDrawer({ item, onNavigate, onClose }: Props) {
 
         <div className="scroll-slim flex-1 overflow-y-auto px-5 py-4">
           {item.text && (
-            <p className="text-sm leading-relaxed whitespace-pre-line text-slate-300">
+            <p className="text-sm leading-relaxed whitespace-pre-line text-mute">
               {item.text}
             </p>
           )}
 
           <div className="mt-5 rounded-lg border border-line bg-void/40 p-3">
             <p className="font-mono text-[10px] tracking-[0.2em] text-faint uppercase">Source</p>
-            <p className="mt-1.5 font-mono text-xs break-all text-slate-300 select-all">
+            <p className="mt-1.5 font-mono text-xs break-all text-mute select-all">
               {item.file}
               {item.line ? `:${item.line}` : ''}
             </p>
             <button
               onClick={copyPath}
-              className="mt-2.5 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] text-violet-300 transition-colors hover:bg-accent/20"
+              className="mt-2.5 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/20"
             >
               {copied ? 'Copied ✓' : 'Copy full path'}
             </button>
@@ -94,7 +94,7 @@ export default function DetailDrawer({ item, onNavigate, onClose }: Props) {
                   <li key={i}>
                     <button
                       onClick={() => onNavigate(r.item)}
-                      className="w-full rounded-lg border border-line bg-slate-500/5 px-3 py-2 text-left text-sm text-slate-300 transition-colors hover:border-slate-500/40 hover:text-ink"
+                      className="w-full rounded-lg border border-line bg-dim/5 px-3 py-2 text-left text-sm text-mute transition-colors hover:border-line-strong hover:text-ink"
                     >
                       {r.label}
                     </button>

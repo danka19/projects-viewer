@@ -208,7 +208,7 @@ export default function ManageProjects({
         </div>
 
         {!liveMode && (
-          <div className="mt-4 rounded-lg border border-amber-300/30 bg-amber-300/10 px-3 py-2 text-sm text-amber-100">
+          <div className="mt-4 rounded-lg border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn">
             Static mode cannot write local config files. Start the local server to manage projects.
           </div>
         )}
@@ -217,8 +217,8 @@ export default function ManageProjects({
           <div
             className={`mt-4 rounded-lg border px-3 py-2 text-sm ${
               error
-                ? 'border-rose-300/30 bg-rose-300/10 text-rose-100'
-                : 'border-emerald-300/30 bg-emerald-300/10 text-emerald-100'
+                ? 'border-danger/40 bg-danger/10 text-danger'
+                : 'border-ok/40 bg-ok/10 text-ok'
             }`}
           >
             {error ?? message}
@@ -257,7 +257,7 @@ export default function ManageProjects({
                 type="button"
                 onClick={handleAddProject}
                 disabled={!liveMode || busy || !projectPath.trim()}
-                className="rounded-md border border-violet-300/25 bg-violet-400/10 px-3 py-2 text-xs font-semibold text-violet-100 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md border border-accent/40 bg-accent/15 px-3 py-2 text-xs font-semibold text-accent-ink transition hover:bg-accent/25 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Add project
               </button>
@@ -318,7 +318,7 @@ export default function ManageProjects({
                   type="button"
                   onClick={handleDiscoverWorkspace}
                   disabled={!liveMode || busy || !workspacePath.trim()}
-                  className="rounded-md border border-violet-300/25 bg-violet-400/10 px-3 py-2 text-xs font-semibold text-violet-100 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-md border border-accent/40 bg-accent/15 px-3 py-2 text-xs font-semibold text-accent-ink transition hover:bg-accent/25 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Discover projects
                 </button>
@@ -335,7 +335,7 @@ export default function ManageProjects({
                 type="button"
                 onClick={handleTrackSelected}
                 disabled={!liveMode || busy || selectedPaths.size === 0}
-                className="ml-auto rounded-md border border-emerald-300/25 bg-emerald-400/10 px-3 py-2 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+                className="ml-auto rounded-md border border-ok/40 bg-ok/15 px-3 py-2 text-xs font-semibold text-ok transition hover:bg-ok/25 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Track selected
               </button>
@@ -362,7 +362,7 @@ export default function ManageProjects({
                       {(candidate.badges ?? []).map((badge) => (
                         <span
                           key={badge}
-                          className="rounded border border-emerald-300/25 bg-emerald-400/10 px-2 py-0.5 font-mono text-[10px] text-emerald-100"
+                          className="rounded border border-ok/40 bg-ok/10 px-2 py-0.5 font-mono text-[10px] text-ok"
                         >
                           {badge}
                         </span>
@@ -421,8 +421,8 @@ export default function ManageProjects({
                     <span
                       className={`rounded border px-2 py-0.5 font-mono text-[10px] uppercase ${
                         project.enabled
-                          ? 'border-emerald-300/30 text-emerald-200'
-                          : 'border-slate-400/30 text-faint'
+                          ? 'border-ok/40 text-ok'
+                          : 'border-dim/40 text-faint'
                       }`}
                     >
                       {project.enabled ? 'enabled' : 'disabled'}
@@ -456,7 +456,7 @@ export default function ManageProjects({
                     type="button"
                     onClick={() => handleRemoveProject(project.id)}
                     disabled={!liveMode || busy}
-                    className="rounded-md border border-rose-300/25 bg-rose-400/10 px-3 py-1.5 text-xs font-semibold text-rose-100 transition hover:bg-rose-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-md border border-danger/40 bg-danger/15 px-3 py-1.5 text-xs font-semibold text-danger transition hover:bg-danger/25 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Remove
                   </button>

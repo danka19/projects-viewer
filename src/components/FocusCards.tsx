@@ -23,7 +23,7 @@ export default function FocusCards({ project, onOpenTab, onOpenDrawer }: Props) 
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <FocusCard
         title="Next up"
-        accent="text-violet-300"
+        accent="text-accent-ink"
         total={project.nextTasks.length}
         empty="No next actions detected."
         items={next.map((t) => ({
@@ -45,7 +45,7 @@ export default function FocusCards({ project, onOpenTab, onOpenDrawer }: Props) 
           <FocusCard
             title="Real blockers"
             tooltip="Actual inability to continue: blocked, failing, missing required data, unavailable dependency, or an acceptance gap that prevents completion."
-            accent={realBlockers.length > 0 ? 'text-rose-300' : 'text-mute'}
+            accent={realBlockers.length > 0 ? 'text-danger' : 'text-mute'}
             total={groups.realBlockers.length}
             empty="No real blockers detected."
             items={realBlockers.map((b) => ({
@@ -57,7 +57,7 @@ export default function FocusCards({ project, onOpenTab, onOpenDrawer }: Props) 
           <FocusCard
             title="Approval gates"
             tooltip="Normal owner/SDD approval gates: pending approval, merge approval, or completed work waiting for approval."
-            accent={approvalGates.length > 0 ? 'text-violet-300' : 'text-mute'}
+            accent={approvalGates.length > 0 ? 'text-accent-ink' : 'text-mute'}
             total={groups.approvalGates.length}
             empty="No approval gates detected."
             items={approvalGates.map((b) => ({
@@ -69,7 +69,7 @@ export default function FocusCards({ project, onOpenTab, onOpenDrawer }: Props) 
           <FocusCard
             title="Needs review"
             tooltip="Review or validation work: needs review, pending review, needs verification, requires validation, or final review."
-            accent={needsReview.length > 0 ? 'text-orange-300' : 'text-mute'}
+            accent={needsReview.length > 0 ? 'text-review' : 'text-mute'}
             total={groups.needsReview.length}
             empty="No review items detected."
             items={needsReview.map((b) => ({
@@ -81,7 +81,7 @@ export default function FocusCards({ project, onOpenTab, onOpenDrawer }: Props) 
           <FocusCard
             title="Paused / deferred"
             tooltip="Work intentionally paused, on hold, deferred, planned later, or marked resume later."
-            accent={pausedDeferred.length > 0 ? 'text-slate-300' : 'text-mute'}
+            accent={pausedDeferred.length > 0 ? 'text-mute' : 'text-mute'}
             total={groups.pausedDeferred.length}
             empty="No paused or deferred items detected."
             items={pausedDeferred.map((b) => ({
@@ -94,7 +94,7 @@ export default function FocusCards({ project, onOpenTab, onOpenDrawer }: Props) 
       </div>
       <FocusCard
         title="Needs attention"
-        accent={attention.length > 0 ? 'text-amber-300' : 'text-mute'}
+        accent={attention.length > 0 ? 'text-warn' : 'text-mute'}
         total={
           (project.stats.markerCounts.TODO ?? 0) +
           (project.stats.markerCounts.FIXME ?? 0) +
@@ -109,7 +109,7 @@ export default function FocusCards({ project, onOpenTab, onOpenDrawer }: Props) 
       />
       <FocusCard
         title="Recent decisions"
-        accent="text-sky-300"
+        accent="text-info"
         total={project.decisions.length}
         empty="No decisions recorded."
         items={decisions.map((d) => ({
@@ -152,7 +152,7 @@ function FocusCard({
         {total > 0 && (
           <button
             onClick={onViewAll}
-            className="rounded-lg border border-line px-2.5 py-1 font-mono text-[10px] text-mute transition-colors hover:border-accent/40 hover:text-violet-300"
+            className="rounded-lg border border-line px-2.5 py-1 font-mono text-[10px] text-mute transition-colors hover:border-accent/40 hover:text-accent-ink"
           >
             View all →
           </button>
@@ -160,7 +160,7 @@ function FocusCard({
       </header>
       {items.length === 0 ? (
         <div className="mt-3 flex items-center gap-2.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400/60" />
+          <span className="h-1.5 w-1.5 rounded-full bg-ok/60" />
           <p className="text-sm text-faint">{empty}</p>
         </div>
       ) : (
@@ -169,7 +169,7 @@ function FocusCard({
             <li key={i}>
               <button
                 onClick={it.onClick}
-                className="w-full rounded-lg border border-line bg-void/30 px-3 py-2 text-left text-sm leading-snug text-slate-300 transition-colors hover:border-slate-500/40 hover:text-ink"
+                className="w-full rounded-lg border border-line bg-void/30 px-3 py-2 text-left text-sm leading-snug text-mute transition-colors hover:border-line-strong hover:text-ink"
               >
                 <span className="line-clamp-2">{it.text}</span>
               </button>
