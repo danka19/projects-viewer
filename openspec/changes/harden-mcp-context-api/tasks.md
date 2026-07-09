@@ -15,7 +15,7 @@
 ## 3. API JSON Boundary Hardening
 
 - [x] 3.1 Add regression tests showing unknown `/api/*` routes return JSON `404`, not the Vite HTML shell.
-- [ ] 3.2 Ensure all API routes and the `/api/*` JSON error handler are mounted before Vite middleware or frontend fallback.
+- [x] 3.2 Ensure all API routes and the `/api/*` JSON error handler are mounted before Vite middleware or frontend fallback.
 - [ ] 3.3 Add focused tests proving `GET /api/agent-preflight-packet` returns JSON content type for success and structured errors.
 
 ## 4. MCP Adapter Hardening
