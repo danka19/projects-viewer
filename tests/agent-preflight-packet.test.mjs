@@ -13,10 +13,14 @@ async function startTestServer(app) {
   const { port } = server.address();
   return {
     url: `http://127.0.0.1:${port}`,
-    close: () =>
-      new Promise((resolve, reject) => {
+    close: async () => {
+      await new Promise((resolve, reject) => {
         server.close((err) => (err ? reject(err) : resolve()));
-      }),
+      });
+      if (typeof app.locals.closeFrontend === 'function') {
+        await app.locals.closeFrontend();
+      }
+    },
   };
 }
 
@@ -972,6 +976,40 @@ test('agent preflight packet API returns valid packet for saved project without 
   }
 });
 
+test('agent preflight packet API stays JSON on success when frontend fallback is enabled', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-agent-preflight-api-frontend-success-'));
+  const appDataDir = path.join(tmp, 'app-data');
+  const trackedProject = path.join(tmp, 'tracked-project');
+  await fs.mkdir(appDataDir, { recursive: true });
+  await fs.mkdir(trackedProject, { recursive: true });
+
+  const project = minimalProject('FrontendProject', { path: trackedProject });
+  await fs.writeFile(path.join(appDataDir, 'projects.config.json'), JSON.stringify(configFor([project])));
+  await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), JSON.stringify(scanWith([project])));
+
+  const app = await createApp({
+    appDataDir,
+    skipStartupScan: true,
+    skipWatcher: true,
+  });
+  const server = await startTestServer(app);
+
+  try {
+    const response = await fetch(
+      `${server.url}/api/agent-preflight-packet?projectId=project-1&agentRole=verification`,
+    );
+    assert.equal(response.status, 200);
+    assertJsonContentType(response);
+    const packet = await response.json();
+    assert.equal(packet.kind, 'agent-preflight-packet');
+    assert.equal(packet.agentRole, 'verification');
+    assert.equal(packet.project.id, 'project-1');
+    assert.equal(packet.project.path, trackedProject);
+  } finally {
+    await server.close();
+  }
+});
+
 test('agent preflight packet API rejects unsafe or invalid query parameters', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-agent-preflight-api-invalid-'));
   const appDataDir = path.join(tmp, 'app-data');
@@ -1031,6 +1069,37 @@ test('agent preflight packet API rejects unsafe or invalid query parameters', as
       assert.equal(body.code, 'invalid-query');
       assert.match(body.error, /Allowed parameters: projectId, changeId, agentRole|must be provided at most once|projectId is required|agentRole must be one of: implementation, reviewer, verification, handoff\./);
     }
+  } finally {
+    await server.close();
+  }
+});
+
+test('agent preflight packet API stays JSON on structured errors when frontend fallback is enabled', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-agent-preflight-api-frontend-error-'));
+  const appDataDir = path.join(tmp, 'app-data');
+  const trackedProject = path.join(tmp, 'tracked-project');
+  await fs.mkdir(appDataDir, { recursive: true });
+  await fs.mkdir(trackedProject, { recursive: true });
+
+  const project = minimalProject('FrontendProject', { path: trackedProject });
+  await fs.writeFile(path.join(appDataDir, 'projects.config.json'), JSON.stringify(configFor([project])));
+  await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), JSON.stringify(scanWith([project])));
+
+  const app = await createApp({
+    appDataDir,
+    skipStartupScan: true,
+    skipWatcher: true,
+  });
+  const server = await startTestServer(app);
+
+  try {
+    const response = await fetch(`${server.url}/api/agent-preflight-packet?projectId=missing-project`);
+    assert.equal(response.status, 404);
+    assertJsonContentType(response);
+    assert.deepEqual(await response.json(), {
+      error: 'Tracked project was not found.',
+      code: 'project-not-found',
+    });
   } finally {
     await server.close();
   }
