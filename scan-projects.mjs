@@ -293,78 +293,79 @@ function skip(ctx, filePath, reason) {
 function normalizePhase(text) {
   const t = (text ?? '').toLowerCase();
   if (!t) {
-    return { status: 'unknown', rule: 'no Status: line found', confidence: 'low' };
+    return { status: 'draft', rule: 'no Status: line found; defaulted to draft', confidence: 'low' };
   }
+  const draft = /\bdraft\b|not ready/.test(t);
+  const cancelled = /\bcancelled\b|\bcanceled\b/.test(t);
+  const superseded = /\bsuperseded\b|replaced by/.test(t);
+  const acceptedClosed = /accepted and closed|closed and accepted/.test(t);
+  const accepted = /\baccepted\b|human accepted|owner accepted/.test(t) && !/\bnot accepted\b/.test(t);
   const merged = /complete and merged|merged (in)?to `?main`?/.test(t);
   const negatedCompletion = /\bnot (yet )?complete(d)?\b|\bincomplete\b/.test(t);
   const completion =
     !negatedCompletion &&
-    /closed as|complete(d)? on|gate verified|verified on|\bcompleted\b|\bcomplete\b/.test(t);
+    /closed as|\bclosed\b|complete(d)? on|gate verified|verified on|\bcompleted\b|\bcomplete\b/.test(t);
   const approval =
-    /requires explicit human approval|approval pending|pending approval|requires [^.]{0,30}approval|human acceptance required/.test(t);
+    /pending_acceptance|pending acceptance|requires explicit human approval|approval pending|pending approval|requires [^.]{0,30}approval|human acceptance required/.test(t);
   const inProgress = /in progress|currently working/.test(t);
-  const paused = /\bpaused\b|on hold/.test(t);
-  const blocked = /\bblocked\b|must not start|waiting on|\bgated\b/.test(t);
+  const deferred = /\bdeferred\b|\bpaused\b|on hold|resume later|planned later/.test(t);
+  const blocked = /\bblocked\b|rejected|\bnot accepted\b|acceptance gap|must not start|waiting on/.test(t);
   const review = /needs review|under review|pending [^.]{0,24}review/.test(t);
+  const ready = /\bready\b|unblocked/.test(t) && !draft;
   const planned = /not planned|not started|\bplanned\b|scheduled/.test(t);
 
-  // Conflicts among primary states (completion vs in-progress vs paused vs
-  // blocked) mean the documentation contradicts itself.
-  const primaries = [merged || completion, inProgress, paused, blocked].filter(Boolean).length;
+  // Conflicts among final states and active/deferred/blocked states mean the
+  // documentation contradicts itself. Keep the safest non-final status.
+  const finalish = acceptedClosed || accepted || merged || completion;
+  const primaries = [finalish, inProgress, deferred, blocked].filter(Boolean).length;
   if (primaries > 1) {
-    const safest = inProgress ? 'in_progress' : paused ? 'paused' : 'blocked';
+    const safest = inProgress ? 'in_progress' : deferred ? 'deferred' : 'blocked';
     return {
       status: safest,
-      rule: `conflicting signals (completion + ${inProgress ? 'in-progress' : paused ? 'paused' : 'blocked'} wording); kept the safest non-final status`,
+      rule: `conflicting signals (final + ${inProgress ? 'in-progress' : deferred ? 'deferred' : 'blocked'} wording); kept the safest non-final status`,
       confidence: 'low',
     };
   }
-  if (merged) {
-    return review
+  if (cancelled) return { status: 'cancelled', rule: '"cancelled" wording', confidence: 'high' };
+  if (superseded) return { status: 'superseded', rule: '"superseded / replaced by" wording', confidence: 'high' };
+  if (approval || review) {
+    return {
+      status: 'pending_acceptance',
+      rule: 'approval/review wording maps to pending_acceptance',
+      confidence: approval ? 'high' : 'medium',
+    };
+  }
+  if (acceptedClosed || merged || completion) {
+    return accepted && !acceptedClosed && !merged && !completion
       ? {
-          status: 'completed',
-          rule: 'merged to main, with a pending-review caveat in the same line',
+          status: 'accepted',
+          rule: '"accepted" wording',
           confidence: 'medium',
         }
-      : { status: 'completed', rule: '"complete and merged to main" wording', confidence: 'high' };
+      : { status: 'closed', rule: 'completion/closed/merged wording without approval gate', confidence: 'high' };
   }
-  if (completion && approval) {
-    return {
-      status: 'completed_pending_approval',
-      rule: 'completion wording ("complete on / closed as / gate verified") plus explicit human-approval requirement',
-      confidence: 'high',
-    };
-  }
-  if (completion) {
-    return {
-      status: 'completed',
-      rule: 'completion wording without merge or approval context',
-      confidence: 'medium',
-    };
+  if (accepted) {
+    return { status: 'accepted', rule: '"accepted" wording', confidence: 'high' };
   }
   if (inProgress) {
     return { status: 'in_progress', rule: '"in progress" wording', confidence: 'high' };
   }
-  if (paused) {
-    return { status: 'paused', rule: '"paused / on hold" wording', confidence: 'high' };
-  }
   if (blocked) {
-    return { status: 'blocked', rule: 'blocked/gated/waiting-on wording', confidence: 'high' };
+    return { status: 'blocked', rule: 'blocked/rejected/waiting-on wording', confidence: 'high' };
   }
-  if (approval) {
-    return {
-      status: 'pending_approval',
-      rule: 'approval wording without clear completion wording',
-      confidence: 'medium',
-    };
+  if (deferred) {
+    return { status: 'deferred', rule: '"deferred / paused / on hold" wording', confidence: 'high' };
   }
-  if (review) {
-    return { status: 'needs_review', rule: 'review wording without completion wording', confidence: 'medium' };
+  if (ready) {
+    return { status: 'ready', rule: '"ready / unblocked" wording', confidence: 'high' };
   }
   if (planned) {
     return { status: 'planned', rule: '"planned / not started" wording', confidence: 'high' };
   }
-  return { status: 'unknown', rule: 'no known status vocabulary matched', confidence: 'low' };
+  if (draft) {
+    return { status: 'draft', rule: '"draft / not ready" wording', confidence: 'high' };
+  }
+  return { status: 'draft', rule: 'no known status vocabulary matched; defaulted to draft', confidence: 'low' };
 }
 
 // Steps/work items inside a phase: "### 4.7.1 Name" style headings.
@@ -372,12 +373,19 @@ const STEP_HEADING_RE = /^#{2,4}\s+(\d+(?:\.\d+)+)\s+(\D.+)$/;
 
 /** Classify a step from the text of its section. */
 function classifyStep(buffer) {
+  const explicitStatus = buffer.match(/\bStatus:\s*([^.;]+)/i)?.[1] ?? null;
+  if (explicitStatus) {
+    const norm = normalizePhase(explicitStatus);
+    return { status: norm.status, rule: `explicit step Status: ${norm.rule}` };
+  }
   const b = buffer.toLowerCase();
-  if (!b.trim()) return { status: 'unknown', rule: 'no section text captured' };
+  if (!b.trim()) return { status: 'draft', rule: 'no section text captured; defaulted to draft' };
   if (/\bblocked\b/.test(b) && !/unblocked/.test(b)) {
     return { status: 'blocked', rule: '"blocked" in step text' };
   }
-  if (/\bpaused\b|on hold/.test(b)) return { status: 'paused', rule: '"paused" in step text' };
+  if (/\bcancelled\b|\bcanceled\b/.test(b)) return { status: 'cancelled', rule: '"cancelled" in step text' };
+  if (/\bsuperseded\b|replaced by/.test(b)) return { status: 'superseded', rule: '"superseded / replaced by" in step text' };
+  if (/\bpaused\b|on hold|\bdeferred\b/.test(b)) return { status: 'deferred', rule: '"deferred / paused" in step text' };
   const negated = /\bnot (yet )?(implemented|completed?|done|verified)\b|remains? (pending|open)/.test(b);
   if (
     !negated &&
@@ -385,21 +393,21 @@ function classifyStep(buffer) {
   ) {
     return /approval|pending [^.]{0,24}review|receiving [^.]{0,24}review/.test(b)
       ? {
-          status: 'completed_pending_approval',
+          status: 'pending_acceptance',
           rule: 'completion wording plus approval/review wording in step text',
         }
-      : { status: 'completed', rule: 'completion wording in step text' };
+      : { status: 'pending_acceptance', rule: 'completion wording without explicit acceptance' };
   }
   if (/in progress|currently/.test(b)) {
     return { status: 'in_progress', rule: '"in progress" in step text' };
   }
   if (/needs (human )?review|awaiting review/.test(b)) {
-    return { status: 'needs_review', rule: 'review wording in step text' };
+    return { status: 'pending_acceptance', rule: 'review wording in step text' };
   }
   if (/\bpending\b|remaining|not started|\btodo\b/.test(b)) {
-    return { status: 'pending', rule: 'pending/remaining wording in step text' };
+    return { status: 'planned', rule: 'pending/remaining wording in step text' };
   }
-  return { status: 'unknown', rule: 'no status vocabulary in step text' };
+  return { status: 'draft', rule: 'no explicit step status; defaulted to draft' };
 }
 
 /** Collect a Status: value plus its wrapped continuation lines. */
@@ -597,8 +605,8 @@ function parseDoc(content, doc, acc) {
           id: phaseMatch[1].replace(/\.$/, ''),
           name: phaseMatch[2].trim().slice(0, 160),
           statusText: '',
-          status: 'unknown',
-          rule: 'no Status: line found',
+          status: 'draft',
+          rule: 'no Status: line found; defaulted to draft',
           confidence: 'low',
           issue: 'none',
           issueNote: null,
@@ -699,7 +707,7 @@ function parseDoc(content, doc, acc) {
           phaseId: filePhaseId,
           id: null,
           name: item.text.slice(0, 160),
-          status: task[1] === ' ' ? 'pending' : 'completed',
+          status: task[1] === ' ' ? 'planned' : 'closed',
           rule: 'markdown checkbox',
           evidence: item.text.slice(0, 240),
           file: doc.file,
@@ -864,7 +872,7 @@ function dedupePhases(phases) {
   });
 }
 
-const COMPLETED_PHASE = new Set(['completed', 'completed_pending_approval']);
+const RESOLVED_PHASE = new Set(['accepted', 'closed']);
 
 function buildSignalGroups(workSignals) {
   return {
@@ -920,23 +928,26 @@ function attachSteps(phases, steps) {
 }
 
 /**
- * Contradiction pass: a phase marked in_progress/planned while a LATER phase
- * is already completed usually means a stale Status: line in the docs. Keep
+ * Contradiction pass: a phase marked open while a LATER phase is already
+ * accepted/closed usually means a stale Status: line in the docs. Keep
  * the documented status (never invent one from ordering) but lower confidence
  * and flag the suspected issue.
  */
 function flagOrderingContradictions(phases) {
   let lastCompleted = -1;
   phases.forEach((p, i) => {
-    if (COMPLETED_PHASE.has(p.status)) lastCompleted = i;
+    if (RESOLVED_PHASE.has(p.status)) lastCompleted = i;
   });
   phases.forEach((p, i) => {
-    if (i < lastCompleted && (p.status === 'in_progress' || p.status === 'planned')) {
+    if (
+      i < lastCompleted &&
+      (p.status === 'draft' || p.status === 'planned' || p.status === 'ready' || p.status === 'in_progress')
+    ) {
       p.confidence = 'low';
       p.issue = 'documentation';
-      p.issueNote = `Phase ${phases[lastCompleted].id} (later in the roadmap) is already completed, but this Status: line still says "${p.status.replace('_', ' ')}" — likely stale documentation.`;
+      p.issueNote = `Phase ${phases[lastCompleted].id} (later in the roadmap) is already accepted/closed, but this Status: line still says "${p.status.replace('_', ' ')}" — likely stale documentation.`;
     }
-    if (p.status === 'unknown' && p.issue === 'none') {
+    if (p.status === 'draft' && p.confidence === 'low' && p.issue === 'none') {
       p.issue = 'parser';
       p.issueNote = p.statusText
         ? 'The Status: line uses vocabulary the parser does not recognize.'
@@ -1076,20 +1087,22 @@ function deriveStatus(acc, docs, lastModified, activeDays, signalGroups) {
     lastModified !== null &&
     Date.now() - Date.parse(lastModified) <= activeDays * 24 * 60 * 60 * 1000;
   const activePhases = acc.phases.filter((p) => p.status === 'in_progress');
-  const currentPhase = activePhases.at(-1) ?? acc.phases.filter((p) => p.status === 'paused').at(-1) ?? null;
-  if (currentPhase?.status === 'paused') {
+  const currentPhase = activePhases.at(-1) ?? acc.phases.filter((p) => p.status === 'deferred').at(-1) ?? null;
+  if (currentPhase?.status === 'deferred') {
     return {
       status: 'paused',
-      reason: `current phase ${currentPhase.id} is paused/deferred`,
+      reason: `current phase ${currentPhase.id} is deferred`,
     };
   }
-  const donePhases = acc.phases.filter(
-    (p) => COMPLETED_PHASE.has(p.status),
-  );
-  if (signalGroups.approvalGates.length > 0 && donePhases.length > 0 && activePhases.length === 0) {
+  const donePhases = acc.phases.filter((p) => RESOLVED_PHASE.has(p.status));
+  const pendingAcceptancePhases = acc.phases.filter((p) => p.status === 'pending_acceptance');
+  if (
+    (signalGroups.approvalGates.length > 0 || pendingAcceptancePhases.length > 0) &&
+    activePhases.length === 0
+  ) {
     return {
       status: 'pending-approval',
-      reason: `${signalGroups.approvalGates.length} approval gate${signalGroups.approvalGates.length === 1 ? '' : 's'} waiting on owner/SDD approval`,
+      reason: `${signalGroups.approvalGates.length + pendingAcceptancePhases.length} approval gate${signalGroups.approvalGates.length + pendingAcceptancePhases.length === 1 ? '' : 's'} waiting on owner/SDD approval`,
     };
   }
   const openWorkParts = [];
@@ -1136,7 +1149,7 @@ function computeHealthScore({ coverage, acc, attention, lastModified, status, si
   score -= Math.min(30, hardBlocks * 8);
   score -= Math.min(8, signalGroups.approvalGates.length * 2);
   score -= Math.min(10, signalGroups.needsReview.length * 3);
-  if (acc.phases.some((p) => p.status === 'paused')) score -= Math.min(6, signalGroups.pausedDeferred.length * 2);
+  if (acc.phases.some((p) => p.status === 'deferred')) score -= Math.min(6, signalGroups.pausedDeferred.length * 2);
   score -= Math.min(12, attention * 3);
 
   if (lastModified) {
@@ -1160,7 +1173,7 @@ function buildSummary({ acc, coverage, status, lastModified, attention, docs, si
   const currentPhase =
     activePhases.length > 0
       ? activePhases[activePhases.length - 1]
-      : (acc.phases.filter((p) => p.status === 'completed_pending_approval').at(-1) ?? null);
+      : (acc.phases.filter((p) => p.status === 'pending_acceptance').at(-1) ?? null);
 
   // Prefer live planning signals from roadmap docs over checklist meta-text.
   const scoreNext = (t) =>

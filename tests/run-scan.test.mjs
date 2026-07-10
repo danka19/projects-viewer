@@ -242,7 +242,20 @@ test('runScan can write generated data to app-data path', async () => {
   assert.equal(written.projects[0].name, 'Sample');
 });
 
-test('runScan treats bare complete phase status as completed', async () => {
+test('runScan normalizes phase statuses to the phase-status-audit lifecycle', async () => {
+  const allowed = new Set([
+    'draft',
+    'planned',
+    'ready',
+    'in_progress',
+    'blocked',
+    'pending_acceptance',
+    'accepted',
+    'closed',
+    'deferred',
+    'cancelled',
+    'superseded',
+  ]);
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-bare-complete-'));
   const projectRoot = path.join(tmp, 'sample');
   await fs.mkdir(path.join(projectRoot, 'docs'), { recursive: true });
@@ -256,7 +269,49 @@ test('runScan treats bare complete phase status as completed', async () => {
       '',
       'Status: complete.',
       '',
-      'Goal: prepare the repository foundation.',
+      '## Phase 1. Accepted And Closed',
+      '',
+      'Status: accepted and closed on 2026-07-09.',
+      '',
+      '## Phase 2. Human Accepted',
+      '',
+      'Status: accepted by the human owner.',
+      '',
+      '## Phase 3. Waiting Acceptance',
+      '',
+      'Status: completed but requires approval from the owner.',
+      '',
+      '## Phase 4. Deferred Work',
+      '',
+      'Status: paused until the next planning cycle.',
+      '',
+      '## Phase 5. Ready Work',
+      '',
+      'Status: ready to start.',
+      '',
+      '## Phase 6. Draft Work',
+      '',
+      'Status: draft, not ready for implementation.',
+      '',
+      '## Phase 7. Cancelled Work',
+      '',
+      'Status: cancelled by owner decision.',
+      '',
+      '## Phase 8. Superseded Work',
+      '',
+      'Status: superseded by Phase 9.',
+      '',
+      '## Phase 9. Blocked Work',
+      '',
+      'Status: blocked by missing required data.',
+      '',
+      '## Phase 10. Active Work',
+      '',
+      'Status: in progress on `phase-10/active-work`.',
+      '',
+      '## Phase 11. Planned Work',
+      '',
+      'Status: planned after Phase 10.',
       '',
     ].join('\n'),
   );
@@ -272,9 +327,23 @@ test('runScan treats bare complete phase status as completed', async () => {
   );
 
   const result = await runScan({ configPath, outputPath, quiet: true });
-  const phase = result.output.projects[0].phases[0];
+  const phases = result.output.projects[0].phases;
+  const statuses = Object.fromEntries(phases.map((phase) => [phase.id, phase.status]));
 
-  assert.equal(phase.status, 'completed');
-  assert.match(phase.rule, /completion wording/);
-  assert.equal(phase.issue, 'none');
+  assert.deepEqual(statuses, {
+    0: 'closed',
+    1: 'closed',
+    2: 'accepted',
+    3: 'pending_acceptance',
+    4: 'deferred',
+    5: 'ready',
+    6: 'draft',
+    7: 'cancelled',
+    8: 'superseded',
+    9: 'blocked',
+    10: 'in_progress',
+    11: 'planned',
+  });
+  assert.ok(phases.every((phase) => allowed.has(phase.status)));
+  assert.equal(phases[0].issue, 'none');
 });

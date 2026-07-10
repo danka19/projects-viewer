@@ -9,25 +9,30 @@ export type ProjectStatus =
   | 'unknown';
 
 export type PhaseStatus =
+  | 'draft'
   | 'planned'
+  | 'ready'
   | 'in_progress'
-  | 'paused'
   | 'blocked'
-  | 'completed'
-  | 'completed_pending_approval'
-  | 'pending_approval'
-  | 'needs_review'
-  | 'unknown';
+  | 'pending_acceptance'
+  | 'accepted'
+  | 'closed'
+  | 'deferred'
+  | 'cancelled'
+  | 'superseded';
 
 export type StepStatus =
-  | 'completed'
-  | 'completed_pending_approval'
+  | 'draft'
+  | 'planned'
+  | 'ready'
   | 'in_progress'
-  | 'pending'
   | 'blocked'
-  | 'paused'
-  | 'needs_review'
-  | 'unknown';
+  | 'pending_acceptance'
+  | 'accepted'
+  | 'closed'
+  | 'deferred'
+  | 'cancelled'
+  | 'superseded';
 
 export type Confidence = 'high' | 'medium' | 'low';
 

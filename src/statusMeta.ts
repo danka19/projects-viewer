@@ -66,66 +66,75 @@ export const PHASE_META: Record<
   PhaseStatus,
   { label: string; chip: string; dot: string }
 > = {
-  completed: {
-    label: 'completed',
-    chip: 'border-ok/40 bg-ok/10 text-ok',
-    dot: 'bg-ok',
-  },
-  completed_pending_approval: {
-    label: 'completed · approval pending',
-    chip: 'border-gate/40 bg-gate/10 text-gate',
-    dot: 'bg-gate',
-  },
-  pending_approval: {
-    label: 'pending approval',
-    chip: 'border-gate/40 bg-gate/5 text-gate/90',
-    dot: 'border border-gate bg-transparent',
-  },
-  in_progress: {
-    label: 'in progress',
-    chip: 'border-info/40 bg-info/10 text-info',
-    dot: 'bg-info',
-  },
-  needs_review: {
-    label: 'needs review',
-    chip: 'border-review/40 bg-review/10 text-review',
-    dot: 'bg-review',
-  },
-  paused: {
-    label: 'paused',
-    chip: 'border-warn/40 bg-warn/10 text-warn',
-    dot: 'bg-warn',
-  },
-  blocked: {
-    label: 'blocked',
-    chip: 'border-danger/40 bg-danger/10 text-danger',
-    dot: 'bg-danger',
+  draft: {
+    label: 'draft',
+    chip: 'border-dim/40 bg-dim/10 text-dim/80',
+    dot: 'border border-dim bg-transparent',
   },
   planned: {
     label: 'planned',
     chip: 'border-dim/40 bg-dim/10 text-dim',
     dot: 'border border-dim bg-transparent',
   },
-  unknown: {
-    label: 'unknown',
-    chip: 'border-dim/40 bg-dim/10 text-dim/80',
+  ready: {
+    label: 'ready',
+    chip: 'border-info/40 bg-info/5 text-info/90',
+    dot: 'border border-info bg-transparent',
+  },
+  in_progress: {
+    label: 'in progress',
+    chip: 'border-info/40 bg-info/10 text-info',
+    dot: 'bg-info',
+  },
+  blocked: {
+    label: 'blocked',
+    chip: 'border-danger/40 bg-danger/10 text-danger',
+    dot: 'bg-danger',
+  },
+  pending_acceptance: {
+    label: 'pending acceptance',
+    chip: 'border-gate/40 bg-gate/10 text-gate',
+    dot: 'bg-gate',
+  },
+  accepted: {
+    label: 'accepted',
+    chip: 'border-ok/40 bg-ok/5 text-ok/90',
+    dot: 'border border-ok bg-transparent',
+  },
+  closed: {
+    label: 'closed',
+    chip: 'border-ok/40 bg-ok/10 text-ok',
+    dot: 'bg-ok',
+  },
+  deferred: {
+    label: 'deferred',
+    chip: 'border-warn/40 bg-warn/10 text-warn',
+    dot: 'bg-warn',
+  },
+  cancelled: {
+    label: 'cancelled',
+    chip: 'border-dim/40 bg-dim/10 text-dim',
+    dot: 'border border-dim bg-transparent',
+  },
+  superseded: {
+    label: 'superseded',
+    chip: 'border-dim/40 bg-dim/10 text-dim',
     dot: 'border border-dim bg-transparent',
   },
 };
 
 export const STEP_META: Record<StepStatus, { label: string; dot: string; text: string }> = {
-  completed: { label: 'completed', dot: 'bg-ok', text: 'text-ok' },
-  completed_pending_approval: {
-    label: 'completed · approval pending',
-    dot: 'bg-gate',
-    text: 'text-gate',
-  },
+  draft: { label: 'draft', dot: 'border border-dim bg-transparent', text: 'text-dim/80' },
+  planned: { label: 'planned', dot: 'bg-dim', text: 'text-dim' },
+  ready: { label: 'ready', dot: 'border border-info bg-transparent', text: 'text-info' },
   in_progress: { label: 'in progress', dot: 'bg-info', text: 'text-info' },
-  pending: { label: 'pending', dot: 'bg-dim', text: 'text-dim' },
   blocked: { label: 'blocked', dot: 'bg-danger', text: 'text-danger' },
-  paused: { label: 'paused', dot: 'bg-warn', text: 'text-warn' },
-  needs_review: { label: 'needs review', dot: 'bg-review', text: 'text-review' },
-  unknown: { label: 'unknown', dot: 'border border-dim bg-transparent', text: 'text-dim/80' },
+  pending_acceptance: { label: 'pending acceptance', dot: 'bg-gate', text: 'text-gate' },
+  accepted: { label: 'accepted', dot: 'border border-ok bg-transparent', text: 'text-ok' },
+  closed: { label: 'closed', dot: 'bg-ok', text: 'text-ok' },
+  deferred: { label: 'deferred', dot: 'bg-warn', text: 'text-warn' },
+  cancelled: { label: 'cancelled', dot: 'border border-dim bg-transparent', text: 'text-dim' },
+  superseded: { label: 'superseded', dot: 'border border-dim bg-transparent', text: 'text-dim' },
 };
 
 export const CONFIDENCE_META: Record<

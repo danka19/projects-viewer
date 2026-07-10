@@ -16,25 +16,40 @@ async function loadPhaseProgress() {
   return import(`data:text/javascript;base64,${encoded}`);
 }
 
-test('phaseProgress trusts completed phase status over stale step details', async () => {
+test('phaseProgress trusts closed phase status over stale step details', async () => {
   const { phaseProgress } = await loadPhaseProgress();
   const progress = phaseProgress({
-    status: 'completed',
+    status: 'closed',
     steps: [
-      { status: 'unknown' },
-      { status: 'pending' },
+      { status: 'draft' },
+      { status: 'planned' },
     ],
   });
 
   assert.equal(progress, 100);
 });
 
-test('phaseProgress trusts approval-complete phase status over stale step details', async () => {
+test('phaseProgress treats pending acceptance as implemented but not closed', async () => {
   const { phaseProgress } = await loadPhaseProgress();
   const progress = phaseProgress({
-    status: 'completed_pending_approval',
-    steps: [{ status: 'unknown' }],
+    status: 'pending_acceptance',
+    steps: [{ status: 'draft' }],
   });
 
   assert.equal(progress, 100);
+});
+
+test('phaseProgress does not count deferred cancelled or superseded steps as implemented', async () => {
+  const { phaseProgress } = await loadPhaseProgress();
+  const progress = phaseProgress({
+    status: 'in_progress',
+    steps: [
+      { status: 'deferred' },
+      { status: 'cancelled' },
+      { status: 'superseded' },
+      { status: 'closed' },
+    ],
+  });
+
+  assert.equal(progress, 25);
 });

@@ -51,7 +51,7 @@ Design principles:
   },
 
   "counts": {                               // for dashboard cards
-    "phases": { "total": 13, "done": 4, "active": 1, "planned": 5, "paused": 1, "needsAttention": 2 },
+    "phases": { "total": 13, "closed": 4, "accepted": 1, "inProgress": 1, "pendingAcceptance": 2, "planned": 5, "deferred": 1 },
     "openWorkItems": 3,
     "openDecisions": 4,
     "activeHandoffs": 0,
@@ -79,7 +79,7 @@ Design principles:
   "sourceFile": "docs/ROADMAP.md",
   "detailPlanFile": "docs/phases/PHASE_4_7_CHECKPOINT_UI_STATE_ACCEPTANCE.md",
   "statusText": "in progress on `phase-4-7/checkpoint-ui-state-acceptance`; work items 4.7.1 through 4.7.4 ...",
-  "status": "active",                        // normalized: active | done | paused | planned | blocked | unknown
+  "status": "in_progress",                   // phase-status-audit lifecycle value
   "branch": "phase-4-7/checkpoint-ui-state-acceptance",
   "goal": "finish the employee-facing checkpoint workflow...",
   "lastMentionedDate": "2026-07-04",

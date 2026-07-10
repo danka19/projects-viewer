@@ -26,22 +26,24 @@ export default function RoadmapTimeline({ project, onOpenDrawer }: Props) {
 
   const phases = project.phases;
   const groups = {
-    completed: phases.filter((p) => p.status === 'completed').length,
-    approval: phases.filter(
-      (p) => p.status === 'completed_pending_approval' || p.status === 'pending_approval',
+    closed: phases.filter((p) => p.status === 'closed').length,
+    accepted: phases.filter((p) => p.status === 'accepted').length,
+    approval: phases.filter((p) => p.status === 'pending_acceptance').length,
+    inProgress: phases.filter((p) => p.status === 'in_progress').length,
+    halted: phases.filter((p) => p.status === 'blocked' || p.status === 'deferred').length,
+    planned: phases.filter(
+      (p) => p.status === 'draft' || p.status === 'planned' || p.status === 'ready',
     ).length,
-    inProgress: phases.filter(
-      (p) => p.status === 'in_progress' || p.status === 'needs_review',
-    ).length,
-    halted: phases.filter((p) => p.status === 'blocked' || p.status === 'paused').length,
-    planned: phases.filter((p) => p.status === 'planned' || p.status === 'unknown').length,
+    replaced: phases.filter((p) => p.status === 'cancelled' || p.status === 'superseded').length,
   };
   const summaryParts = [
-    groups.completed > 0 && `${groups.completed} fully completed`,
+    groups.closed > 0 && `${groups.closed} closed`,
+    groups.accepted > 0 && `${groups.accepted} accepted`,
     groups.approval > 0 && `${groups.approval} pending approval`,
     groups.inProgress > 0 && `${groups.inProgress} in progress`,
-    groups.halted > 0 && `${groups.halted} blocked/paused`,
-    groups.planned > 0 && `${groups.planned} planned`,
+    groups.halted > 0 && `${groups.halted} blocked/deferred`,
+    groups.planned > 0 && `${groups.planned} draft/planned/ready`,
+    groups.replaced > 0 && `${groups.replaced} cancelled/superseded`,
   ].filter(Boolean);
 
   function toggle(set: Set<string>, id: string, apply: (s: Set<string>) => void) {
@@ -53,18 +55,20 @@ export default function RoadmapTimeline({ project, onOpenDrawer }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Segmented progress: completed / pending approval / in progress / halted / planned */}
+      {/* Segmented progress: closed / accepted / pending acceptance / active / halted. */}
       <div className="glass rounded-xl p-5">
         <div className="flex h-2 overflow-hidden rounded-full bg-dim/20">
-          <Segment count={groups.completed} total={phases.length} className="bg-ok" />
+          <Segment count={groups.closed} total={phases.length} className="bg-ok" />
+          <Segment count={groups.accepted} total={phases.length} className="bg-info" />
           <Segment count={groups.approval} total={phases.length} className="bg-gate" />
           <Segment count={groups.inProgress} total={phases.length} className="bg-info" />
           <Segment count={groups.halted} total={phases.length} className="bg-warn" />
+          <Segment count={groups.replaced} total={phases.length} className="bg-dim" />
         </div>
         <p className="mt-3 text-sm text-mute">{summaryParts.join(' · ')}</p>
         <p className="mt-1 font-mono text-[10px] text-faint">
-          “Pending approval” phases are finished work waiting on the human owner — they are
-          deliberately not counted as fully completed.
+          Only closed phases are fully reconciled; pending acceptance is finished work still
+          waiting on the human owner.
         </p>
       </div>
 
@@ -97,7 +101,7 @@ export default function RoadmapTimeline({ project, onOpenDrawer }: Props) {
                   <span className="flex items-center gap-1.5">
                     <span className="h-1 w-12 overflow-hidden rounded-full bg-dim/25">
                       <span
-                        className={`block h-full rounded-full ${ph.status === 'completed' ? 'bg-ok' : ph.status === 'completed_pending_approval' ? 'bg-gate' : 'bg-info'}`}
+                        className={`block h-full rounded-full ${phaseProgressClass(ph.status)}`}
                         style={{ width: `${progress}%` }}
                       />
                     </span>
@@ -230,6 +234,14 @@ export default function RoadmapTimeline({ project, onOpenDrawer }: Props) {
       </ol>
     </div>
   );
+}
+
+function phaseProgressClass(status: PhaseItem['status']): string {
+  if (status === 'closed') return 'bg-ok';
+  if (status === 'pending_acceptance') return 'bg-gate';
+  if (status === 'blocked' || status === 'deferred') return 'bg-warn';
+  if (status === 'cancelled' || status === 'superseded') return 'bg-dim';
+  return 'bg-info';
 }
 
 function Segment({

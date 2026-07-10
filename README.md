@@ -11,7 +11,7 @@ The main screen is deliberately calm — details are one click away (progressive
 - **Project radar panel** — the selected project's summary: health ring, current phase, next action, main blocker, recent decision, recent change, and a 5-slot doc-coverage strip. Every tile is clickable and jumps to the right tab or opens the detail drawer.
 - **Focus cards (Overview tab)** — max 3 items each for Next up, Work constraints (Real blockers / Approval gates / Needs review / Paused), Needs attention, and Recent decisions, with "View all →" buttons.
 - **Tabs** — Overview · Roadmap · SDD/Specs (grouped by status) · Tasks · Decisions · Audits (grouped: attention/latest/recorded/archived) · Documentation (coverage map with per-category file lists and filename search) · Activity (change timeline). Only the selected tab renders its lists.
-- **Roadmap tab** — a segmented progress bar that separates fully-completed / pending-approval / in-progress / blocked-paused / planned phases (pending-approval work is deliberately *not* counted as finished), plus expandable phase cards. Collapsed: number, title, status badge, step-based progress %, confidence dot, source file. Expanded: a "Why this status?" panel (raw `Status:` text, matched parser rule, confidence, source `file:line`, suspected stale-doc warnings), detected steps with colored status dots and counts, and related decisions/audits. `npm run scan` also prints a **Roadmap Status Diagnostics** table per project with the same transparency data.
+- **Roadmap tab** — a segmented progress bar that separates closed / accepted / pending-acceptance / in-progress / blocked-deferred / planned-like phases using the `phase-status-audit` lifecycle. Collapsed: number, title, status badge, step-based progress %, confidence dot, source file. Expanded: a "Why this status?" panel (raw `Status:` text, matched parser rule, confidence, source `file:line`, suspected stale-doc warnings), detected steps with colored status dots and counts, and related decisions/audits. `npm run scan` also prints a **Roadmap Status Diagnostics** table per project with the same transparency data.
 - **Detail drawer** — click any phase, task, decision, blocker, audit, spec, or doc file to open a right-side drawer with its type, status, extracted text, `file:line` source, a copy-path button, and related items. Esc closes it.
 - **Global search** (`/` to focus) — searches projects, roadmap phases, tasks, blocked work, decisions, specs, and doc filenames across all projects; clicking a result selects the project, opens the right tab, and opens the drawer.
 - **Theme toggle** — switches between the default dark terminal palette and a light parchment palette. The choice is saved in `localStorage`.
@@ -274,8 +274,8 @@ Never scanned: `node_modules`, `.git`, `dist`, `build`, `.next`, `coverage`, `ve
 | Completed tasks | `- [x] ...` markdown checkboxes |
 | Next tasks / actions | unchecked tasks under a “Next” heading, `NEXT:` lines, and prose like “the next implementation step is …” |
 | Markers | `TODO`, `FIXME`, `BUG` (uppercase, anywhere); `NEXT:`, `DONE:` (colon required, since “next”/“done” are common words) |
-| Roadmap phases | `## Phase N. Name` sections in ROADMAP.md and `# Phase N - Name` plan files, with their prose `Status:` lines normalized to planned / in_progress / paused / blocked / completed / completed_pending_approval / pending_approval / needs_review / unknown — each with the matched parser rule, a confidence level (high/medium/low), and a suspected-issue flag when the docs contradict themselves (e.g. an early phase still marked "in progress" while later phases are completed) |
-| Phase steps | `### N.x Work Item` headings and checkboxes inside phase-plan files, classified by their section text (completed / pending / blocked / needs review / unknown) |
+| Roadmap phases | `## Phase N. Name` sections in ROADMAP.md and `# Phase N - Name` plan files, with their prose `Status:` lines normalized to the `phase-status-audit` lifecycle: `draft`, `planned`, `ready`, `in_progress`, `blocked`, `pending_acceptance`, `accepted`, `closed`, `deferred`, `cancelled`, `superseded` — each with the matched parser rule, a confidence level (high/medium/low), and a suspected-issue flag when the docs contradict themselves (e.g. an early phase still marked "in progress" while later phases are accepted/closed) |
+| Phase steps | `### N.x Work Item` headings and checkboxes inside phase-plan files, classified into the same `phase-status-audit` lifecycle; missing or unrecognized step status defaults to `draft` rather than fabricating completion |
 | Decisions | lines with a date plus decision vocabulary (“Human decisions 2026-06-29: …”, “product decision”, “clarification”), bullets in `## Human/Key Decisions` sections, and `*DECISIONS*` files |
 | Work constraints | a two-step blocked/gated classifier first records raw candidates (`block`, `gate`, `pending approval`, review/validation wording, pause/defer wording), then includes only concrete project-work signals in status and health: real blockers, approval gates, needs review/validation, and paused/deferred work |
 | Specs & proposals | OpenSpec change folders (`proposal/design/tasks` artifacts with checkbox progress), handoff files with their `Status: Active/Done/Archived` lifecycle, `specs/` and `openapi/` files |
@@ -291,13 +291,7 @@ Blocked/gated wording in agent rules, process policies, examples, templates, pro
 
 ## Status rules
 
-Evaluated top-down, first match wins:
-
-1. **unknown** — no documentation files found (or project path missing).
-2. **needs attention** — TODO/FIXME/BUG markers, owner rejections / acceptance gaps, or hard real-blocker project signals.
-3. **active** — open tasks or an in-progress roadmap phase, with doc changes within `activeDays`.
-4. **stalled** — open work but no recent doc changes.
-5. **done** — no open work; completed tasks or finished phases exist.
+Project badges are evaluated top-down, first match wins: `unknown` for missing/unreadable docs, `needs-attention` for rejection/acceptance-gap or hard blocker signals, `needs-review` for review/validation signals, `pending-approval` for human acceptance gates, `active` for recent open work, `paused` for deferred current work, `stalled` for stale open work, and `done` when no open work remains.
 
 Each project card shows the reason for its status and a “Doc intelligence” block: ROADMAP/README/CLAUDE/SPECS presence, task counts, attention markers, and the last documentation update.
 
