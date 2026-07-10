@@ -98,7 +98,7 @@ Status:
 
 ### 3.1 Add Shared Report Types
 
-Status: completed on 2026-07-09.
+Status: closed on 2026-07-09.
 
 Objective:
 
@@ -133,7 +133,7 @@ OpenSpec and acceptance evidence:
 
 ### 3.2 Implement Pure Report Composition Module
 
-Status: completed on 2026-07-09.
+Status: closed on 2026-07-09.
 
 Objective:
 
@@ -174,7 +174,7 @@ OpenSpec and acceptance evidence:
 
 ### 3.3 Implement Deterministic Ranking And Empty/Baseline States
 
-Status: completed on 2026-07-09.
+Status: closed on 2026-07-09.
 
 Objective:
 
@@ -212,7 +212,7 @@ OpenSpec and acceptance evidence:
 
 ### 3.4 Add Local API Endpoint
 
-Status: completed on 2026-07-09.
+Status: closed on 2026-07-09.
 
 Objective:
 
@@ -255,7 +255,7 @@ OpenSpec and acceptance evidence:
 
 ### 3.5 Update User And Project Documentation
 
-Status: completed on 2026-07-09.
+Status: closed on 2026-07-09.
 
 Objective:
 
@@ -292,7 +292,7 @@ OpenSpec and acceptance evidence:
 
 ### 3.6 Run Phase Gate And Prepare OpenSpec Follow-Through
 
-Status: completed and accepted on 2026-07-09.
+Status: accepted and closed on 2026-07-09.
 
 Objective:
 

@@ -54,7 +54,7 @@ Identify the first real users, workflows, data sources, AI-assisted use cases, c
 
 ### 1.1 Primary Users And Daily Decisions
 
-Status: completed for planning assumptions; human confirmation is still required before the Phase 1 gate closes.
+Status: closed on 2026-07-09 after the human owner accepted the Phase 1 gate.
 
 Source evidence:
 
@@ -117,7 +117,7 @@ Open questions for human confirmation:
 
 ### 1.2 Data Sources, Runtime Files, And Trust Boundaries
 
-Status: completed on 2026-07-08 for the current local-only architecture; revisit if a new data source is proposed.
+Status: closed on 2026-07-09 for the current local-only architecture; reopen through a new change if a data source is proposed.
 
 Source evidence:
 
@@ -156,7 +156,7 @@ Phase 2 readiness decision:
 
 ### 1.3 AI-Assisted Workflows And Review Policy
 
-Status: completed on 2026-07-08 for Phase 1 planning; user-visible brief/report behavior still needs an OpenSpec change before implementation.
+Status: closed on 2026-07-09 after the project brief/report behavior was captured in OpenSpec and the Phase 1 gate was accepted.
 
 Source evidence:
 
@@ -227,7 +227,7 @@ Status:
 
 ### 1.1 Identify Primary Users And Daily Decisions
 
-Status: completed on 2026-07-08 for planning assumptions; pending human confirmation of the open decisions above.
+Status: closed on 2026-07-09 after the human owner accepted the Phase 1 gate and approved Phase 2 planning.
 
 Objective:
 
@@ -266,7 +266,7 @@ OpenSpec and acceptance evidence:
 
 ### 1.2 Inventory Data Sources, Runtime Files, And Trust Boundaries
 
-Status: completed on 2026-07-08 for the current local-only architecture.
+Status: closed on 2026-07-09 for the current local-only architecture.
 
 Objective:
 
@@ -305,7 +305,7 @@ OpenSpec and acceptance evidence:
 
 ### 1.3 Define AI-Assisted Workflows And Review Policy
 
-Status: completed on 2026-07-08 for Phase 1 planning; future brief/report behavior requires an OpenSpec change before implementation.
+Status: closed on 2026-07-09 after the project brief/report OpenSpec change captured the proposed behavior.
 
 Objective:
 
@@ -342,7 +342,7 @@ OpenSpec and acceptance evidence:
 
 ### 1.4 Convert Discovery Into Requirements And Proposed Changes
 
-Status: completed on 2026-07-08 for the project brief/report workflow.
+Status: closed on 2026-07-09 for the project brief/report workflow.
 
 Objective:
 
@@ -384,7 +384,7 @@ OpenSpec and acceptance evidence:
 
 ### 1.5 Select The First Usable Workflow For Phase 3
 
-Status: completed on 2026-07-08 for Phase 1 gate planning.
+Status: closed on 2026-07-09 after human acceptance of the Phase 1 gate.
 
 Objective:
 

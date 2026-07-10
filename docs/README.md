@@ -6,6 +6,13 @@ Repo: https://github.com/danka19/projects-viewer
 
 ## Current State
 
+Planning update on 2026-07-10:
+
+- A live-browser UX/UI audit recorded that the dashboard is text-heavy and, more importantly, can promote historical plans, agent rules, examples, and low-confidence parser signals as current next actions, blockers, or tasks.
+- `docs/audits/UX_UI_AUDIT_2026-07-10.md` is the detailed evidence-backed audit; `docs/planning/DASHBOARD_REDESIGN_PLAN.md` decomposes the redesign into state trust, project timeline, overview, search/navigation, and responsive/accessibility work.
+- Proposed OpenSpec change `redesign-dashboard-project-timeline` defines a horizontal phase timeline with exclusive phase expansion and a nested horizontal step timeline while preserving the existing Projects Viewer theme and read-only evidence model.
+- No Phase 4 implementation phase was activated by this planning update. State-derivation trust remains a gate before the timeline can be promoted as authoritative on the main overview.
+
 v7 implemented on 2026-07-09:
 
 - JSON-first agent preflight packet workflow implemented for `GET /api/agent-preflight-packet`.
@@ -60,6 +67,8 @@ v3 implemented on 2026-07-07:
 | `AI_STEP_VERIFICATION_CHECKLIST.md` | Required checks before claiming code or documentation work is complete |
 | `AGENTS_USAGE.md` | Codex and agent runbook for local startup, context packet API usage, MCP tools, and safety boundaries |
 | `CONTEXT.md` | Canonical terms and boundary rules for live/static scanning |
+| `audits/UX_UI_AUDIT_2026-07-10.md` | Evidence-backed audit of first-glance state clarity, data trust, information density, interaction, responsive layout, and accessibility |
+| `planning/DASHBOARD_REDESIGN_PLAN.md` | Proposed redesign sequence and integration plan for state trust, overview hierarchy, Project Timeline, search/navigation, and acceptance gates |
 | `planning/MCP_CONTEXT_API_HARDENING_PLAN.md` | Planned cleanup for canonical config, compact project-id listing, agent preflight API routing, MCP non-JSON errors, and local HTTP diagnostics |
 | `phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 plan for users, workflows, data sources, AI use cases, and acceptance criteria |
 | `phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Accepted and closed Phase 2 plan for the project brief/report data contract, module boundaries, API surface, ranking rules, and Phase 3 readiness |
@@ -74,6 +83,7 @@ v3 implemented on 2026-07-07:
 - `openspec/changes/add-project-brief-report/`: proposed local daily/weekly human project brief/report workflow.
 - `openspec/changes/agent-preflight-packet/`: implemented proposed local AI-agent preflight packet workflow, ready for human acceptance review and intentionally separate from the human brief/report contract.
 - `openspec/changes/harden-mcp-context-api/`: proposed hardening change for canonical project config, compact saved project-id listing, JSON-only API boundaries, MCP response validation, and local API diagnostics.
+- `openspec/changes/redesign-dashboard-project-timeline/`: proposed horizontal project phase/step timeline for the dashboard redesign, with explicit trust, progress, interaction, responsive, accessibility, and acceptance requirements.
 
 ## Operations Summary
 

@@ -10,6 +10,8 @@ Prepare repository operating rules, documentation structure, initial roadmap, au
 
 ### 0.1 Documentation Foundation
 
+Status: closed on 2026-07-08 after human acceptance of the Phase 0 gate.
+
 Objective:
 
 - Establish `AGENTS.md`, `CLAUDE.md`, `docs/`, roadmap, audit, glossary, and phase template.

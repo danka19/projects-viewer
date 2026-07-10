@@ -90,7 +90,7 @@ Status:
 
 ### 2.1 Define Project Brief Data Contract
 
-Status: completed on 2026-07-09 for architecture/design; implementation types remain a Phase 3/OpenSpec task.
+Status: closed on 2026-07-09 for architecture/design; the planned implementation types were completed in Phase 3.
 
 Objective:
 
@@ -169,7 +169,7 @@ Notes deferred to later Phase 2 work items:
 
 ### 2.2 Design Report Composition Module Boundary
 
-Status: completed on 2026-07-09 for architecture/design; implementation remains a Phase 3/OpenSpec task.
+Status: closed on 2026-07-09 for architecture/design; the planned implementation was completed in Phase 3.
 
 Objective:
 
@@ -238,7 +238,7 @@ Verification mapping:
 
 ### 2.3 Design Local API Surface And Safe Parameters
 
-Status: completed on 2026-07-09 for architecture/design; implementation remains a Phase 3/OpenSpec task.
+Status: closed on 2026-07-09 for architecture/design; the planned implementation was completed in Phase 3.
 
 Objective:
 
@@ -319,7 +319,7 @@ Verification mapping:
 
 ### 2.4 Define Ranking, Empty-State, And Baseline Rules
 
-Status: completed on 2026-07-09 for architecture/design; implementation remains a Phase 3/OpenSpec task.
+Status: closed on 2026-07-09 for architecture/design; the planned implementation was completed in Phase 3.
 
 Objective:
 
@@ -421,7 +421,7 @@ Verification mapping:
 
 ### 2.5 Prepare Phase 3 Implementation Plan
 
-Status: completed on 2026-07-09.
+Status: closed on 2026-07-09 after the Phase 3 implementation plan was prepared and approved.
 
 Objective:
 

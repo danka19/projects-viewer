@@ -4,7 +4,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Current Roadmap Validation
 
-- Current phase: no active implementation phase. Phase 3 is accepted and closed; Phase 4 is not planned in detail yet. Proposed first hardening slice: `openspec/changes/harden-mcp-context-api/`.
+- Current phase: no active implementation phase. Phase 3 is accepted and closed; Phase 4 is not planned in detail yet. Proposed operational hardening slice: `openspec/changes/harden-mcp-context-api/`. Proposed UX work is documented separately in `docs/planning/DASHBOARD_REDESIGN_PLAN.md` and `openspec/changes/redesign-dashboard-project-timeline/`; this planning work does not activate Phase 4.
 - Planning from this roadmap alone is forbidden. Detailed phase plans must reconcile roadmap intent, current docs, current implementation, environment evidence, audit findings, and human decisions.
 - Product behavior, requirements, proposed changes, and acceptance criteria belong in OpenSpec artifacts under `openspec/` when SDD applies.
 - New ideas during active phase work must go through change intake before they alter scope or plans.
@@ -85,10 +85,17 @@ Status: not planned in detail yet.
 
 Goal: improve reliability, safety, UX, operations, and acceptance evidence.
 
-Proposed first slice:
+Proposed slices and ordering:
 
 - `openspec/changes/harden-mcp-context-api/` defines canonical config cleanup, compact saved project-id listing, JSON-only API boundaries, MCP response validation, agent preflight packet retrieval hardening, and local HTTP diagnostics.
 - This slice should be implemented before relying on Projects Viewer MCP preflight packets for everyday agent startup, because it addresses the observed HTML fallback, legacy config ambiguity, and project-id lookup friction.
+- `docs/audits/UX_UI_AUDIT_2026-07-10.md` records P0 data-trust/first-glance findings plus information-density, search, responsive, sticky-layout, accessibility, and frontend-test gaps.
+- `docs/planning/DASHBOARD_REDESIGN_PLAN.md` proposes the dashboard sequence: trusted state derivation, Project Timeline, overview integration, search/navigation state, then responsive/accessibility pilot acceptance.
+- `openspec/changes/redesign-dashboard-project-timeline/` is apply-ready planning for a horizontal phase timeline with one expanded phase and a nested horizontal step timeline. Component work may be verified behind the Roadmap surface, but overview promotion is gated on trustworthy explicit current phase/step inputs.
+
+Decision required before Phase 4 planning:
+
+- Confirm whether operational MCP/API hardening remains the first Phase 4 slice or whether isolated timeline work may proceed in parallel while dashboard state-derivation trust is designed. State trust must precede authoritative overview promotion in either sequence.
 
 ## Phase Planning Rule
 
