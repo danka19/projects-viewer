@@ -152,8 +152,10 @@ const NEXT_ACTION_RE =
 // is domain vocabulary in review-workflow projects (rejected analogs etc.).
 const REJECTION_RE =
   /\b(human|owner)\b[^.]{0,40}\breject(ed|ion)\b|\breject(ed|ion)\b[^.]{0,30}by the (human|owner)|\bnot accepted\b|not employee-ready|acceptance gap/i;
+// "failing" followed by test/spec/check vocabulary is TDD instruction
+// language ("add a failing test"), not a live blocker.
 const HARD_BLOCK_RE =
-  /must not start until|is blocked|remains blocked|stays blocked|blocked until|blocked rather than|cannot continue|failing|bug prevents progress|missing required data|dependency unavailable|acceptance gap[^.]{0,80}(prevents completion|blocks completion|blocking)/i;
+  /must not start until|is blocked|remains blocked|stays blocked|blocked until|blocked rather than|cannot continue|failing(?!\s+(?:unit\s+|component\s+|integration\s+)?(?:tests?|specs?|checks?)\b)|bug prevents progress|missing required data|dependency unavailable|acceptance gap[^.]{0,80}(prevents completion|blocks completion|blocking)/i;
 // "if/when/may be ... blocked" is conditional gate language, not a live blocker.
 const CONDITIONAL_BLOCK_RE = /\b(if|when|whether|unless|may be|could be|might be)\b[^.]{0,60}blocked/i;
 const HUMAN_GATE_RE =
@@ -530,6 +532,9 @@ function parseDoc(content, doc, acc) {
   const isHandoffFile = doc.category === 'handoff';
   const isDecisionFile = doc.category === 'decision';
   const isClaudeFile = fileLower === 'claude.md';
+  // Rule, checklist, and template documents describe how to work, not what
+  // the project's next action is: never source next-action signals from them.
+  const allowNextSignals = pathBias(doc.file) === null && doc.category !== 'audit';
 
   let pendingPhase = null;
   let currentStep = null; // step section being collected ("### 4.7.1 Name")
@@ -690,6 +695,7 @@ function parseDoc(content, doc, acc) {
         perDoc.open++;
         if (acc.openTasks.length < LIMITS.tasks) acc.openTasks.push(item);
         if (
+          allowNextSignals &&
           section &&
           NEXT_SECTION_RE.test(section) &&
           acc.nextTasks.length < LIMITS.nextTasks
@@ -730,7 +736,7 @@ function parseDoc(content, doc, acc) {
           line: lineNo,
         });
       }
-      if (type === 'NEXT' && acc.nextTasks.length < LIMITS.nextTasks) {
+      if (type === 'NEXT' && allowNextSignals && acc.nextTasks.length < LIMITS.nextTasks) {
         acc.nextTasks.push({
           text: line.trim().replace(/^.*?NEXT\s*:\s*/, '').slice(0, 300) || line.trim().slice(0, 300),
           file: doc.file,
@@ -798,7 +804,25 @@ function parseDoc(content, doc, acc) {
       });
       const candidateKey = candidate ? `${candidate.file}:${candidate.line}:${candidate.text}` : null;
       if (candidate && !acc.seenBlockedGatedCandidates.has(candidateKey)) {
-        const signal = candidate.includedInProjectStatus ? classifyWorkSignal(trimmed) : null;
+        let signal = candidate.includedInProjectStatus ? classifyWorkSignal(trimmed) : null;
+        // An unchecked plan checkbox is a task, not a live blocker: it only
+        // counts as a real blocker when it explicitly says blocked/blocker.
+        if (
+          signal &&
+          signal.group === 'realBlockers' &&
+          TASK_RE.test(line) &&
+          !/\bblock(?:ed|er|ers)\b/i.test(trimmed)
+        ) {
+          signal = null;
+          candidate = {
+            ...candidate,
+            classification: 'process_policy',
+            includedInProjectStatus: false,
+            confidence: 'low',
+            reason:
+              'unchecked plan checkbox with blocker-like wording is treated as a task, not a live blocker',
+          };
+        }
         if (candidate.includedInProjectStatus && !signal) {
           candidate = {
             ...candidate,
@@ -820,6 +844,7 @@ function parseDoc(content, doc, acc) {
 
     // Prose next actions: "the next implementation step is …", follow-ups.
     if (
+      allowNextSignals &&
       acc.nextTasks.length < LIMITS.nextTasks &&
       trimmed.length < 350 &&
       NEXT_ACTION_RE.test(trimmed) &&
@@ -1169,11 +1194,11 @@ function computeHealthScore({ coverage, acc, attention, lastModified, status, si
 
 function buildSummary({ acc, coverage, status, lastModified, attention, docs, signalGroups }) {
   const fileCategory = new Map((docs ?? []).map((d) => [d.file, d.category]));
+  // Current phase is an explicit trusted identity: exactly one in-progress
+  // phase. Ambiguity (several in progress) and gates (pending acceptance)
+  // stay null instead of fabricating a current phase.
   const activePhases = acc.phases.filter((p) => p.status === 'in_progress');
-  const currentPhase =
-    activePhases.length > 0
-      ? activePhases[activePhases.length - 1]
-      : (acc.phases.filter((p) => p.status === 'pending_acceptance').at(-1) ?? null);
+  const currentPhase = activePhases.length === 1 ? activePhases[0] : null;
 
   // Prefer live planning signals from roadmap docs over checklist meta-text.
   const scoreNext = (t) =>
