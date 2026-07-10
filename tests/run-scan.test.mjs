@@ -241,3 +241,40 @@ test('runScan can write generated data to app-data path', async () => {
 
   assert.equal(written.projects[0].name, 'Sample');
 });
+
+test('runScan treats bare complete phase status as completed', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-bare-complete-'));
+  const projectRoot = path.join(tmp, 'sample');
+  await fs.mkdir(path.join(projectRoot, 'docs'), { recursive: true });
+  await fs.writeFile(path.join(projectRoot, 'README.md'), '# Sample\n');
+  await fs.writeFile(
+    path.join(projectRoot, 'docs', 'ROADMAP.md'),
+    [
+      '# Roadmap',
+      '',
+      '## Phase 0. Project Foundation',
+      '',
+      'Status: complete.',
+      '',
+      'Goal: prepare the repository foundation.',
+      '',
+    ].join('\n'),
+  );
+
+  const configPath = path.join(tmp, 'projects.config.json');
+  const outputPath = path.join(tmp, 'projects.json');
+  await fs.writeFile(
+    configPath,
+    JSON.stringify({
+      activeDays: 7,
+      projects: [{ name: 'Sample', path: projectRoot }],
+    }),
+  );
+
+  const result = await runScan({ configPath, outputPath, quiet: true });
+  const phase = result.output.projects[0].phases[0];
+
+  assert.equal(phase.status, 'completed');
+  assert.match(phase.rule, /completion wording/);
+  assert.equal(phase.issue, 'none');
+});

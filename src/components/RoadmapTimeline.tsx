@@ -2,24 +2,11 @@ import { useState } from 'react';
 import type { DrawerItem, PhaseItem, PhaseStep, ProjectData } from '../types';
 import { CONFIDENCE_META, PHASE_META, STEP_META } from '../statusMeta';
 import { auditDrawer, decisionDrawer, phaseDrawer, stepDrawer } from '../drawer';
+import { phaseProgress } from '../phaseProgress';
 
 interface Props {
   project: ProjectData;
   onOpenDrawer: (item: DrawerItem) => void;
-}
-
-const DONE_STEP = new Set(['completed', 'completed_pending_approval']);
-
-function phaseProgress(ph: PhaseItem): number | null {
-  if (ph.steps.length > 0) {
-    return Math.round(
-      (ph.steps.filter((s) => DONE_STEP.has(s.status)).length / ph.steps.length) * 100,
-    );
-  }
-  if (ph.status === 'completed') return 100;
-  if (ph.status === 'completed_pending_approval') return 100;
-  if (ph.status === 'planned') return 0;
-  return null;
 }
 
 export default function RoadmapTimeline({ project, onOpenDrawer }: Props) {

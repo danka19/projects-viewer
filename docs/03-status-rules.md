@@ -1,7 +1,7 @@
 # Status Rules
 
 Status: proposed, not implemented.
-Last updated: 2026-07-07.
+Last updated: 2026-07-10.
 
 Two levels: **phase/item status** (normalized from prose) and **project status** (the dashboard badge). All thresholds are config values, defaults below.
 
@@ -12,12 +12,14 @@ Match keywords in `Status:` lines and work-item prose, case-insensitive, first m
 | Normalized | Trigger phrases (observed in real docs) |
 |---|---|
 | `blocked` | "blocked", "rejected", "not accepted", "acceptance gap", "must not start until", "stays paused until ... accepted" |
-| `done` | "complete and merged", "merged to `main`" |
+| `done` | "complete", "complete as ...", "completed", "complete and merged", "merged to `main`" |
 | `done_pending_approval` | "complete on `branch`", "closed as", "gate verified", "closed by", "Done (" (handoffs) — combined with "requires explicit human approval" |
 | `active` | "in progress", "implementation evidence" for recent items, "receiving ... review" |
 | `paused` | "paused" |
 | `planned` | "planned", "not planned in detail yet", "implementation not started", "scheduled after" |
 | `unknown` | no `Status:` line found, or no phrase matched (keep raw text, flag for review) |
+
+Phase progress display treats a normalized `done` or `done_pending_approval` phase as 100% complete even when historical detailed phase-plan steps are stale, incomplete, or only describe objectives. Step-derived percentages are used only when the phase itself is not already complete.
 
 ## 2. Project-level status (the five dashboard values)
 

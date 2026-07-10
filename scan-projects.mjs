@@ -296,7 +296,10 @@ function normalizePhase(text) {
     return { status: 'unknown', rule: 'no Status: line found', confidence: 'low' };
   }
   const merged = /complete and merged|merged (in)?to `?main`?/.test(t);
-  const completion = /closed as|complete(d)? on|gate verified|verified on|\bcompleted\b/.test(t);
+  const negatedCompletion = /\bnot (yet )?complete(d)?\b|\bincomplete\b/.test(t);
+  const completion =
+    !negatedCompletion &&
+    /closed as|complete(d)? on|gate verified|verified on|\bcompleted\b|\bcomplete\b/.test(t);
   const approval =
     /requires explicit human approval|approval pending|pending approval|requires [^.]{0,30}approval|human acceptance required/.test(t);
   const inProgress = /in progress|currently working/.test(t);
