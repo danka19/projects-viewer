@@ -1,23 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   DrawerItem,
-  KnowledgeViewId,
   ProjectConfig,
   ProjectData,
-  ProjectStatus,
   ScanOutput,
-  TabId,
 } from './types';
 import { formatDate, formatTime } from './statusMeta';
+import type { SearchHit } from './search';
 import {
-  blockedGatedCandidateDrawer,
-  blockerDrawer,
-  decisionDrawer,
-  docDrawer,
-  phaseDrawer,
-  specDrawer,
-  taskDrawer,
-} from './drawer';
+  createDrawerDescriptor,
+  pushHistoryUiState,
+  readHistoryUiState,
+  readInitialUiState,
+  replaceHistoryUiState,
+  resolveDrawerDescriptor,
+  validateUiState,
+  writeStoredUiState,
+} from './uiState';
+import type { DashboardUiState } from './uiState';
 import AttentionBrief from './components/AttentionBrief';
 import type { AttentionItem } from './components/AttentionBrief';
 import ProjectSidebar from './components/ProjectSidebar';
@@ -27,6 +27,8 @@ import DetailDrawer from './components/DetailDrawer';
 import SkeletonShell from './components/Skeleton';
 import StatusOrb from './components/StatusOrb';
 import ManageProjects from './components/ManageProjects';
+import GlobalSearch from './components/GlobalSearch';
+import ProjectTimeline from './timeline/ProjectTimeline';
 
 export default function App() {
   const [data, setData] = useState<ScanOutput | null>(null);
@@ -155,14 +157,20 @@ interface ScanStatus {
   queued?: boolean;
 }
 
-interface SearchHit {
-  kind: string;
-  label: string;
-  sub: string;
-  project: ProjectData;
-  tab?: TabId;
-  knowledgeView?: KnowledgeViewId;
-  drawer?: DrawerItem;
+function safeStorage(): Storage | null {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+function safeHistory(): History | null {
+  try {
+    return window.history;
+  } catch {
+    return null;
+  }
 }
 
 function AppShell({
@@ -184,170 +192,153 @@ function AppShell({
   onRefreshConfig: () => Promise<ProjectConfig>;
   onRefreshData: () => Promise<ScanOutput>;
 }) {
-  const [query, setQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
-  const [selectedPath, setSelectedPath] = useState<string | null>(
-    data.projects[0]?.path ?? null,
+  const [uiState, setUiState] = useState<DashboardUiState>(() =>
+    readInitialUiState(safeHistory(), safeStorage(), data.projects),
   );
-  const [activeTab, setActiveTab] = useState<TabId>('status');
-  const [knowledgeView, setKnowledgeView] = useState<KnowledgeViewId>('specs');
-  const [drawer, setDrawer] = useState<DrawerItem | null>(null);
+  const uiStateRef = useRef(uiState);
+  const [transientDrawer, setTransientDrawer] = useState<DrawerItem | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
-  const searchRef = useRef<HTMLInputElement>(null);
 
-  // "/" focuses search, Escape clears it (drawer handles its own Escape).
+  const commitUiState = useCallback(
+    (
+      update: (current: DashboardUiState) => DashboardUiState,
+      historyMode: 'push' | 'replace',
+    ) => {
+      const current = uiStateRef.current;
+      const next = validateUiState(update(current), data.projects);
+      if (JSON.stringify(next) === JSON.stringify(current)) return;
+      uiStateRef.current = next;
+      setUiState(next);
+      writeStoredUiState(safeStorage(), next);
+      if (historyMode === 'push') pushHistoryUiState(safeHistory(), next);
+      else replaceHistoryUiState(safeHistory(), next);
+    },
+    [data.projects],
+  );
+
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === '/' && document.activeElement !== searchRef.current) {
-        e.preventDefault();
-        searchRef.current?.focus();
-      } else if (e.key === 'Escape' && document.activeElement === searchRef.current) {
-        setQuery('');
-        searchRef.current?.blur();
-      }
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    writeStoredUiState(safeStorage(), uiStateRef.current);
+    replaceHistoryUiState(safeHistory(), uiStateRef.current);
   }, []);
 
-  const q = query.trim().toLowerCase();
+  useEffect(() => {
+    const next = validateUiState(uiStateRef.current, data.projects);
+    if (JSON.stringify(next) === JSON.stringify(uiStateRef.current)) return;
+    uiStateRef.current = next;
+    setUiState(next);
+    setTransientDrawer(null);
+    writeStoredUiState(safeStorage(), next);
+    replaceHistoryUiState(safeHistory(), next);
+  }, [data.projects]);
+
+  useEffect(() => {
+    function restoreFromHistory() {
+      const restored = readHistoryUiState(safeHistory(), data.projects);
+      uiStateRef.current = restored;
+      setUiState(restored);
+      setTransientDrawer(null);
+      writeStoredUiState(safeStorage(), restored);
+    }
+    window.addEventListener('popstate', restoreFromHistory);
+    return () => window.removeEventListener('popstate', restoreFromHistory);
+  }, [data.projects]);
+
+  const {
+    query,
+    includeDiagnostics,
+    statusFilter,
+    selectedPath,
+    activeTab,
+    knowledgeView,
+  } = uiState;
 
   const visible = data.projects.filter(
     (p) => statusFilter === 'all' || p.status === statusFilter,
   );
   const selected: ProjectData | null =
-    visible.find((p) => p.path === selectedPath) ?? visible[0] ?? null;
+    data.projects.find((p) => p.path === selectedPath) ?? data.projects[0] ?? null;
+  const restoredDrawer = useMemo(
+    () => (uiState.drawer ? resolveDrawerDescriptor(uiState.drawer, data.projects) : null),
+    [data.projects, uiState.drawer],
+  );
+  const drawer = transientDrawer ?? restoredDrawer;
+  const disconnectedWithRetainedData =
+    !liveMode && statusMessage?.startsWith('Live server disconnected') === true;
+  const timelineIsStale = scanStatus?.status === 'error' || disconnectedWithRetainedData;
+  const timelineSourceMode = timelineIsStale ? 'stale' : liveMode ? 'live' : 'static';
+  const timelineRefreshError =
+    scanStatus?.status === 'error'
+      ? (scanStatus.error ?? scanStatus.message ?? 'Documentation refresh failed')
+      : disconnectedWithRetainedData
+        ? statusMessage
+        : null;
+  const timelineError = timelineIsStale ? timelineRefreshError : selected?.error ?? null;
 
-  // Global search across projects, phases, tasks, decisions, specs, and docs.
-  const hits = useMemo<SearchHit[]>(() => {
-    if (q.length < 2) return [];
-    const out: SearchHit[] = [];
-    const push = (hit: SearchHit) => {
-      if (out.length < 40) out.push(hit);
-    };
-    for (const p of data.projects) {
-      if (p.name.toLowerCase().includes(q) || p.path.toLowerCase().includes(q)) {
-        push({ kind: 'Project', label: p.name, sub: p.path, project: p });
-      }
-      for (const ph of p.phases) {
-        if (`phase ${ph.id} ${ph.name}`.toLowerCase().includes(q)) {
-          push({
-            kind: 'Roadmap',
-            label: `Phase ${ph.id} — ${ph.name}`,
-            sub: p.name,
-            project: p,
-            tab: 'status',
-            drawer: phaseDrawer(ph, p),
-          });
-        }
-      }
-      for (const t of [...p.nextTasks, ...p.openTasks].slice(0, 400)) {
-        if (t.text.toLowerCase().includes(q)) {
-          push({
-            kind: 'Task',
-            label: t.text.slice(0, 90),
-            sub: p.name,
-            project: p,
-            tab: 'work',
-            drawer: taskDrawer(t, p),
-          });
-        }
-      }
-      for (const b of [
-        ...p.signalGroups.realBlockers,
-        ...p.signalGroups.approvalGates,
-        ...p.signalGroups.needsReview,
-        ...p.signalGroups.pausedDeferred,
-      ]) {
-        if (b.text.toLowerCase().includes(q)) {
-          push({
-            kind: b.kind === 'blocked' || b.kind === 'rejection' ? 'Blocker' : 'Signal',
-            label: b.text.slice(0, 90),
-            sub: p.name,
-            project: p,
-            tab: 'work',
-            drawer: blockerDrawer(b, p),
-          });
-        }
-      }
-      for (const candidate of [
-        ...p.blockedGatedDiagnostics.filteredAgentRules,
-        ...p.blockedGatedDiagnostics.filteredProcessPolicies,
-        ...p.blockedGatedDiagnostics.filteredExamplesOrTemplates,
-      ]) {
-        if (candidate.text.toLowerCase().includes(q) || candidate.reason.toLowerCase().includes(q)) {
-          push({
-            kind: 'Diagnostic',
-            label: candidate.text.slice(0, 90),
-            sub: `${p.name} · ${candidate.classification}`,
-            project: p,
-            tab: 'work',
-            drawer: blockedGatedCandidateDrawer(candidate, p),
-          });
-        }
-      }
-      for (const d of p.decisions) {
-        if (d.text.toLowerCase().includes(q)) {
-          push({
-            kind: 'Decision',
-            label: d.text.slice(0, 90),
-            sub: `${p.name}${d.date ? ` · ${d.date}` : ''}`,
-            project: p,
-            tab: 'decisions',
-            drawer: decisionDrawer(d, p),
-          });
-        }
-      }
-      for (const sp of p.specs) {
-        if (sp.name.toLowerCase().includes(q)) {
-          push({
-            kind: 'Spec',
-            label: sp.name,
-            sub: `${p.name} · ${sp.status}`,
-            project: p,
-            tab: 'knowledge',
-            knowledgeView: 'specs',
-            drawer: specDrawer(sp, p),
-          });
-        }
-      }
-      for (const doc of p.docs) {
-        if (doc.file.toLowerCase().includes(q)) {
-          push({
-            kind: 'Doc',
-            label: doc.file,
-            sub: p.name,
-            project: p,
-            tab: 'knowledge',
-            knowledgeView: 'docs',
-            drawer: docDrawer(doc, p),
-          });
-        }
-      }
-    }
-    return out;
-  }, [q, data]);
+  function persistableDrawer(item: DrawerItem | undefined) {
+    if (!item) return null;
+    const descriptor = createDrawerDescriptor(item);
+    return descriptor && resolveDrawerDescriptor(descriptor, data.projects)
+      ? descriptor
+      : null;
+  }
 
   function openHit(hit: SearchHit) {
-    setSelectedPath(hit.project.path);
-    setStatusFilter('all');
-    if (hit.tab) setActiveTab(hit.tab);
-    if (hit.knowledgeView) setKnowledgeView(hit.knowledgeView);
-    if (hit.drawer) setDrawer(hit.drawer);
-    setQuery('');
+    const descriptor = persistableDrawer(hit.drawer);
+    setTransientDrawer(hit.drawer && !descriptor ? hit.drawer : null);
+    commitUiState(
+      (current) => ({
+        ...current,
+        selectedPath: hit.project.path,
+        activeTab: hit.tab ?? current.activeTab,
+        knowledgeView: hit.knowledgeView ?? current.knowledgeView,
+        timeline:
+          hit.project.path === current.selectedPath ? current.timeline : null,
+        drawer: descriptor,
+      }),
+      'push',
+    );
   }
 
   function selectProject(path: string) {
-    setSelectedPath(path);
-    setActiveTab('status');
-    setDrawer(null);
+    setTransientDrawer(null);
+    commitUiState(
+      (current) => ({
+        ...current,
+        selectedPath: path,
+        activeTab: 'status',
+        timeline: null,
+        drawer: null,
+      }),
+      'push',
+    );
+  }
+
+  function openDrawer(item: DrawerItem) {
+    const descriptor = persistableDrawer(item);
+    setTransientDrawer(descriptor ? null : item);
+    commitUiState((current) => ({ ...current, drawer: descriptor }), 'push');
+  }
+
+  function closeDrawer() {
+    setTransientDrawer(null);
+    commitUiState((current) => ({ ...current, drawer: null }), 'push');
   }
 
   function openAttentionItem(item: AttentionItem) {
-    setSelectedPath(item.project.path);
-    setStatusFilter('all');
-    setActiveTab(item.tab);
-    if (item.drawer) setDrawer(item.drawer);
+    const descriptor = persistableDrawer(item.drawer);
+    setTransientDrawer(item.drawer && !descriptor ? item.drawer : null);
+    commitUiState(
+      (current) => ({
+        ...current,
+        selectedPath: item.project.path,
+        statusFilter: 'all',
+        activeTab: item.tab,
+        timeline:
+          item.project.path === current.selectedPath ? current.timeline : null,
+        drawer: descriptor,
+      }),
+      'push',
+    );
   }
 
   return (
@@ -369,44 +360,21 @@ function AppShell({
             </h1>
           </div>
 
-          <div className="relative order-last w-full min-w-40 flex-1 sm:order-none sm:w-auto">
-            <input
-              ref={searchRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search projects, tasks, decisions, docs"
-              aria-label="Search projects, tasks, roadmap items, decisions, specs, and docs"
-              className="glass w-full rounded-lg py-2 pr-9 pl-3 font-mono text-xs text-ink placeholder:text-faint focus:border-accent/50"
-            />
-            <kbd className="absolute top-1/2 right-2.5 -translate-y-1/2">/</kbd>
-
-            {hits.length > 0 && (
-              <div className="glass scroll-slim absolute top-full right-0 left-0 z-40 mt-2 max-h-96 overflow-y-auto rounded-xl p-2">
-                {hits.map((hit, i) => (
-                  <button
-                    key={i}
-                    onClick={() => openHit(hit)}
-                    className="flex w-full items-baseline gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-void/50"
-                  >
-                    <span className="w-16 flex-none font-mono text-[10px] tracking-wider text-accent-ink/90 uppercase">
-                      {hit.kind}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm text-ink">{hit.label}</span>
-                      <span className="block truncate font-mono text-[10px] text-faint">
-                        {hit.sub}
-                      </span>
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-            {q.length >= 2 && hits.length === 0 && (
-              <div className="glass absolute top-full right-0 left-0 z-40 mt-2 rounded-xl p-4">
-                <p className="text-sm text-mute">Nothing matches “{query.trim()}”.</p>
-              </div>
-            )}
-          </div>
+          <GlobalSearch
+            projects={data.projects}
+            query={query}
+            includeDiagnostics={includeDiagnostics}
+            onQueryChange={(nextQuery) =>
+              commitUiState((current) => ({ ...current, query: nextQuery }), 'replace')
+            }
+            onIncludeDiagnosticsChange={(include) =>
+              commitUiState(
+                (current) => ({ ...current, includeDiagnostics: include }),
+                'replace',
+              )
+            }
+            onOpenHit={openHit}
+          />
 
           <FreshnessControl
             liveMode={liveMode}
@@ -443,10 +411,17 @@ function AppShell({
                 statusFilter={statusFilter}
                 query=""
                 onSelect={selectProject}
-                onStatusFilter={setStatusFilter}
+                onStatusFilter={(filter) =>
+                  commitUiState(
+                    (current) => ({ ...current, statusFilter: filter }),
+                    'push',
+                  )
+                }
                 onClear={() => {
-                  setStatusFilter('all');
-                  setQuery('');
+                  commitUiState(
+                    (current) => ({ ...current, statusFilter: 'all', query: '' }),
+                    'push',
+                  );
                 }}
               />
             </div>
@@ -460,22 +435,53 @@ function AppShell({
               {selected ? (
                 <>
                   <SelectedProjectHeader
-                    key={selected.path}
+                    key={`header:${selected.path}`}
                     project={selected}
                     generatedAt={data.generatedAt}
                     liveMode={liveMode}
-                    onOpenTab={setActiveTab}
-                    onOpenDrawer={setDrawer}
+                    onOpenTab={(tab) =>
+                      commitUiState((current) => ({ ...current, activeTab: tab }), 'push')
+                    }
+                    onOpenDrawer={openDrawer}
+                  />
+                  <ProjectTimeline
+                    key={`timeline:${selected.path}`}
+                    project={selected}
+                    generatedAt={data.generatedAt}
+                    sourceMode={timelineSourceMode}
+                    refreshing={liveMode && scanStatus?.status === 'scanning'}
+                    error={timelineError}
+                    onRetry={liveMode ? () => void onRescan('manual') : undefined}
+                    restoredDescriptor={uiState.timeline}
+                    onDescriptorChange={(timeline, historyMode = 'push') =>
+                      commitUiState((current) => ({ ...current, timeline }), historyMode)
+                    }
+                    onOpenDrawer={openDrawer}
+                    onOpenDocs={() =>
+                      commitUiState(
+                        (current) => ({
+                          ...current,
+                          activeTab: 'knowledge',
+                          knowledgeView: 'docs',
+                        }),
+                        'push',
+                      )
+                    }
                   />
                   <ProjectTabs
                     project={selected}
                     activeTab={activeTab}
                     knowledgeView={knowledgeView}
-                    generatedAt={data.generatedAt}
-                    liveMode={liveMode}
-                    onSelectTab={setActiveTab}
-                    onSelectKnowledgeView={setKnowledgeView}
-                    onOpenDrawer={setDrawer}
+                    onSelectTab={(tab) =>
+                      commitUiState((current) => ({ ...current, activeTab: tab }), 'push')
+                    }
+                    onSelectKnowledgeView={(view) =>
+                      commitUiState(
+                        (current) => ({ ...current, knowledgeView: view }),
+                        'push',
+                      )
+                    }
+                    onOpenDrawer={openDrawer}
                   />
                 </>
               ) : (
@@ -495,7 +501,7 @@ function AppShell({
       </footer>
 
       {drawer && (
-        <DetailDrawer item={drawer} onNavigate={setDrawer} onClose={() => setDrawer(null)} />
+        <DetailDrawer item={drawer} onNavigate={openDrawer} onClose={closeDrawer} />
       )}
       {manageOpen && (
         <ManageProjects
@@ -686,7 +692,7 @@ function FreshnessControl({
               onClick={handleRescan}
               disabled={!liveMode || isScanning}
               title={liveMode ? 'Rescan configured project docs' : 'Start local server to enable live rescan'}
-              className="rounded-md border border-accent/40 bg-accent/15 px-3 py-1.5 text-xs font-semibold text-accent-ink transition hover:bg-accent/25 disabled:cursor-not-allowed disabled:border-dim/20 disabled:bg-dim/10 disabled:text-faint"
+              className="rounded-md border border-accent/40 bg-accent/15 px-3 py-1.5 text-xs font-semibold text-accent-ink transition hover:border-accent-ink disabled:cursor-not-allowed disabled:border-dim/20 disabled:bg-dim/10 disabled:text-faint"
             >
               {isScanning ? 'Scanning...' : 'Rescan docs'}
             </button>

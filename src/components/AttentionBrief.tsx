@@ -140,8 +140,12 @@ export default function AttentionBrief({ projects, onOpenItem }: Props) {
             onClick={() => setOpenGroup((prev) => (prev === group.id ? null : group.id))}
             disabled={group.items.length === 0}
             className={`glass rounded-xl px-4 py-3 text-left transition-all duration-150 ${
-              openGroup === group.id ? 'border-accent/60' : 'hover:border-line-strong'
-            } ${group.items.length === 0 ? 'opacity-55' : ''}`}
+              openGroup === group.id
+                ? 'border-accent/60'
+                : group.items.length === 0
+                  ? 'cursor-default border-line'
+                  : 'hover:border-line-strong'
+            }`}
           >
             <p className="truncate font-mono text-[10px] tracking-[0.16em] text-faint uppercase">
               {group.title}
@@ -184,7 +188,7 @@ export default function AttentionBrief({ projects, onOpenItem }: Props) {
                   onClick={() => onOpenItem(item)}
                   className="flex w-full items-baseline gap-3 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
                 >
-                  <span className="w-40 flex-none truncate font-mono text-[11px] text-accent-ink/90">
+                  <span className="w-40 flex-none truncate font-mono text-[11px] text-accent-ink">
                     {item.project.name}
                   </span>
                   <span className="min-w-0 flex-1">

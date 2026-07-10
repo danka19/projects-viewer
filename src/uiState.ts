@@ -16,6 +16,7 @@ import { initTimelineViewState } from './timeline/state';
 import type { TimelineViewState } from './timeline/state';
 import type {
   BlockerItem,
+  DrawerDescriptorKind,
   DrawerItem,
   KnowledgeViewId,
   ProjectData,
@@ -27,6 +28,8 @@ export const UI_STATE_VERSION = 1 as const;
 export const UI_STATE_STORAGE_KEY = 'projects-viewer.ui-state';
 export const UI_STATE_HISTORY_KEY = 'projectsViewer';
 
+export type { DrawerDescriptorKind } from './types';
+
 export type ProjectStatusFilter = ProjectStatus | 'all';
 
 export interface TimelineDescriptor {
@@ -34,22 +37,6 @@ export interface TimelineDescriptor {
   revision: string;
   expandedPhaseKey: string | null;
 }
-
-export type DrawerDescriptorKind =
-  | 'phase'
-  | 'step'
-  | 'task'
-  | 'next-action'
-  | 'blocker'
-  | 'signal'
-  | 'decision'
-  | 'spec'
-  | 'doc'
-  | 'audit'
-  | 'risk'
-  | 'marker'
-  | 'diagnostic'
-  | 'heading';
 
 export interface DrawerDescriptor {
   projectPath: string;
@@ -200,7 +187,9 @@ export function restoreUiState(value: unknown, projects: ProjectData[]): Dashboa
     KNOWLEDGE_VIEW_IDS.has(value.knowledgeView as KnowledgeViewId)
       ? (value.knowledgeView as KnowledgeViewId)
       : defaults.knowledgeView;
-  const timeline = parseTimelineDescriptor(value.timeline, projects);
+  const parsedTimeline = parseTimelineDescriptor(value.timeline, projects);
+  const timeline =
+    parsedTimeline?.projectId === selectedPath ? parsedTimeline : null;
   const drawer = parseDrawerDescriptor(value.drawer);
   const resolvedDrawer = drawer && resolveDrawerDescriptor(drawer, projects) ? drawer : null;
 
@@ -259,6 +248,32 @@ export function readHistoryUiState(
   }
 }
 
+export function readInitialUiState(
+  history: HistoryLike | null | undefined,
+  storage: StorageLike | null | undefined,
+  projects: ProjectData[],
+): DashboardUiState {
+  try {
+    const root = history?.state;
+    if (
+      isRecord(root) &&
+      Object.prototype.hasOwnProperty.call(root, UI_STATE_HISTORY_KEY)
+    ) {
+      return readHistoryUiState(history, projects);
+    }
+  } catch {
+    // Fall back to exception-safe local storage when history is unavailable.
+  }
+  return readStoredUiState(storage, projects);
+}
+
+export function validateUiState(
+  state: DashboardUiState,
+  projects: ProjectData[],
+): DashboardUiState {
+  return restoreUiState(toPersistedUiState(state), projects);
+}
+
 function writeHistoryUiState(
   history: HistoryLike | null | undefined,
   state: DashboardUiState,
@@ -291,11 +306,10 @@ export function replaceHistoryUiState(
   return writeHistoryUiState(history, state, 'replaceState');
 }
 
-export function createDrawerDescriptor(
-  kind: DrawerDescriptorKind,
-  item: DrawerItem,
-): DrawerDescriptor | null {
+export function createDrawerDescriptor(item: DrawerItem): DrawerDescriptor | null {
+  const kind = item.descriptorKind;
   if (
+    !kind ||
     !DRAWER_KINDS.has(kind) ||
     !isNonEmptyString(item.projectPath) ||
     !isNonEmptyString(item.file) ||
@@ -323,6 +337,7 @@ function allSignals(project: ProjectData): BlockerItem[] {
 function headingDrawer(project: ProjectData, index: number): DrawerItem {
   const heading = project.headings[index];
   return {
+    descriptorKind: 'heading',
     type: 'Heading',
     title: heading.text,
     file: heading.file,
@@ -345,7 +360,9 @@ function drawerCandidates(project: ProjectData, kind: DrawerDescriptorKind): Dra
         ...project.completedTasks.map((item) => taskDrawer(item, project, 'Completed task')),
       ];
     case 'next-action':
-      return project.nextTasks.map((item) => taskDrawer(item, project, 'Next action'));
+      return project.nextTasks.map((item) =>
+        taskDrawer(item, project, 'Next action', 'next-action'),
+      );
     case 'blocker':
       return allSignals(project)
         .filter((item) => item.kind === 'blocked' || item.kind === 'rejection')

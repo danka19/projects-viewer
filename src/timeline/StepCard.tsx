@@ -24,6 +24,7 @@ export default function StepCard({
 }: Props) {
   const meta = STEP_META[step.status];
   const visual = LIFECYCLE_VISUALS[step.status];
+  const statusTextClass = meta.text.replace(/\/\d+$/, '');
 
   return (
     <button
@@ -36,10 +37,10 @@ export default function StepCard({
       aria-current={isCurrent ? 'step' : undefined}
       aria-label={`Step ${step.id ? `${step.id} ` : ''}${step.name}, ${meta.label}${
         isCurrent ? ', current step' : ''
-      }. Opens read-only details.`}
+      }. Evidence: ${step.evidence}. Opens read-only details.`}
       data-step-key={step.key}
-      className={`tl-step-card glass flex w-full flex-col gap-1 rounded-lg p-2.5 text-left transition-colors hover:border-line-strong ${
-        isCurrent ? 'tl-current shadow-[0_0_0_1px_var(--accent)]' : ''
+      className={`tl-step-card glass flex w-full flex-1 flex-col gap-1 rounded-lg p-2.5 text-left transition-colors hover:border-line-strong ${
+        isCurrent ? 'tl-current shadow-[0_0_0_1px_var(--accent-ink)]' : ''
       }`}
     >
       <span className="flex items-center gap-1.5">
@@ -57,7 +58,12 @@ export default function StepCard({
         )}
       </span>
       <span className="line-clamp-2 text-[12px] leading-snug text-ink">{step.name}</span>
-      <span className={`font-mono text-[10px] ${meta.text}`}>{meta.label}</span>
+      <span className={`font-mono text-[10px] ${statusTextClass}`}>{meta.label}</span>
+      {step.evidence && (
+        <span className="line-clamp-1 text-[10px] leading-snug text-mute">
+          {step.evidence}
+        </span>
+      )}
     </button>
   );
 }

@@ -20,17 +20,17 @@ export interface LifecycleVisual {
 }
 
 export const LIFECYCLE_VISUALS: Record<PhaseStatus | StepStatus, LifecycleVisual> = {
-  closed: { icon: '✓', node: 'bg-ok border-ok text-void', connector: 'solid', connectorClass: 'border-ok/70' },
-  accepted: { icon: '✓', node: 'bg-ok/80 border-ok text-void', connector: 'solid', connectorClass: 'border-ok/60' },
-  in_progress: { icon: '●', node: 'bg-info border-info text-void', connector: 'solid', connectorClass: 'border-info/70' },
-  pending_acceptance: { icon: '◆', node: 'bg-gate border-gate text-void', connector: 'solid', connectorClass: 'border-gate/70' },
-  blocked: { icon: '!', node: 'bg-danger border-danger text-void', connector: 'solid', connectorClass: 'border-danger/70' },
-  ready: { icon: '○', node: 'bg-transparent border-info text-info', connector: 'dashed', connectorClass: 'border-info/50' },
-  planned: { icon: '○', node: 'bg-transparent border-line-strong text-mute', connector: 'dashed', connectorClass: 'border-line-strong' },
-  draft: { icon: '◌', node: 'bg-transparent border-dim/60 text-dim', connector: 'dashed', connectorClass: 'border-dim/40' },
-  deferred: { icon: '‖', node: 'bg-transparent border-warn text-warn', connector: 'dashed', connectorClass: 'border-warn/60' },
-  cancelled: { icon: '✕', node: 'bg-transparent border-dim/50 text-dim', connector: 'broken', connectorClass: 'border-dim/40' },
-  superseded: { icon: '↷', node: 'bg-transparent border-dim/50 text-dim', connector: 'broken', connectorClass: 'border-dim/40' },
+  closed: { icon: '✓', node: 'bg-ok border-ok text-void', connector: 'solid', connectorClass: 'border-ok' },
+  accepted: { icon: '✓', node: 'bg-ok border-ok text-void', connector: 'solid', connectorClass: 'border-ok' },
+  in_progress: { icon: '●', node: 'bg-info border-info text-void', connector: 'solid', connectorClass: 'border-info' },
+  pending_acceptance: { icon: '◆', node: 'bg-gate border-gate text-void', connector: 'solid', connectorClass: 'border-gate' },
+  blocked: { icon: '!', node: 'bg-danger border-danger text-void', connector: 'solid', connectorClass: 'border-danger' },
+  ready: { icon: '○', node: 'bg-transparent border-info text-info', connector: 'dashed', connectorClass: 'border-info' },
+  planned: { icon: '○', node: 'bg-transparent border-mute text-mute', connector: 'dashed', connectorClass: 'border-mute' },
+  draft: { icon: '◌', node: 'bg-transparent border-dim text-dim', connector: 'dashed', connectorClass: 'border-dim' },
+  deferred: { icon: '‖', node: 'bg-transparent border-warn text-warn', connector: 'dashed', connectorClass: 'border-warn' },
+  cancelled: { icon: '✕', node: 'bg-transparent border-dim text-dim', connector: 'broken', connectorClass: 'border-dim' },
+  superseded: { icon: '↷', node: 'bg-transparent border-dim text-dim', connector: 'broken', connectorClass: 'border-dim' },
 };
 
 /** True for lifecycle states rendered as resolved/muted history. */

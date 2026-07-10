@@ -816,8 +816,26 @@ export type TabId = 'status' | 'work' | 'decisions' | 'knowledge';
 /** Secondary view inside the Knowledge surface. */
 export type KnowledgeViewId = 'specs' | 'audits' | 'docs' | 'activity';
 
+/** Stable, non-localized identity used to persist and restore drawer sources. */
+export type DrawerDescriptorKind =
+  | 'phase'
+  | 'step'
+  | 'task'
+  | 'next-action'
+  | 'blocker'
+  | 'signal'
+  | 'decision'
+  | 'spec'
+  | 'doc'
+  | 'audit'
+  | 'risk'
+  | 'marker'
+  | 'diagnostic'
+  | 'heading';
+
 /** Item shown in the right-side detail drawer. */
 export interface DrawerItem {
+  descriptorKind?: DrawerDescriptorKind;
   type: string;
   title: string;
   status?: string;

@@ -82,7 +82,7 @@ export default function DocumentationCoverage({ project, onOpenDrawer }: Props) 
                   className={`flex h-6 w-6 items-center justify-center rounded-md border text-xs ${
                     total > 0
                       ? 'border-info/40 bg-info/10 text-info'
-                      : 'border-dim/30 bg-dim/5 text-dim/70'
+                      : 'border-dim/30 bg-dim/5 text-dim'
                   }`}
                   aria-hidden="true"
                 >
@@ -91,13 +91,13 @@ export default function DocumentationCoverage({ project, onOpenDrawer }: Props) 
                 <span className="text-sm font-medium text-ink">{meta.label}</span>
                 <span
                   className={`rounded-full px-2 py-0.5 font-mono text-[10px] ${
-                    total > 0 ? 'bg-dim/15 text-mute' : 'bg-dim/10 text-dim/70'
+                    total > 0 ? 'bg-dim/15 text-mute' : 'bg-dim/10 text-dim'
                   }`}
                 >
                   {q ? `${files.length}/${total}` : total}
                 </span>
                 {total === 0 && (
-                  <span className="font-mono text-[10px] text-danger/70">missing</span>
+                  <span className="font-mono text-[10px] text-danger">missing</span>
                 )}
                 <span
                   className={`ml-auto text-[10px] text-faint transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
@@ -131,7 +131,7 @@ export default function DocumentationCoverage({ project, onOpenDrawer }: Props) 
 
       {project.gaps.length > 0 && (
         <div className="mt-4 rounded-lg border border-warn/30 bg-warn/5 px-3.5 py-2.5">
-          <p className="font-mono text-[10px] tracking-[0.18em] text-warn/80 uppercase">
+          <p className="font-mono text-[10px] tracking-[0.18em] text-warn uppercase">
             Documentation gaps
           </p>
           <ul className="mt-1.5 space-y-1">

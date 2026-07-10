@@ -30,6 +30,7 @@ export default function TasksPanel({ project, onOpenDrawer }: Props) {
         <TaskButtons
           items={project.nextTasks}
           kind="Next action"
+          descriptorKind="next-action"
           project={project}
           onOpenDrawer={onOpenDrawer}
           empty="No next actions, NEXT markers, or tasks under a “Next” heading."
@@ -317,6 +318,7 @@ function TaskButtons({
   onOpenDrawer,
   empty,
   done = false,
+  descriptorKind = 'task',
 }: {
   items: TaskItem[];
   kind: string;
@@ -324,6 +326,7 @@ function TaskButtons({
   onOpenDrawer: (item: DrawerItem) => void;
   empty: string;
   done?: boolean;
+  descriptorKind?: 'task' | 'next-action';
 }) {
   if (items.length === 0) return <Empty text={empty} />;
   return (
@@ -331,7 +334,7 @@ function TaskButtons({
       {items.map((t, i) => (
         <li key={i}>
           <button
-            onClick={() => onOpenDrawer(taskDrawer(t, project, kind))}
+            onClick={() => onOpenDrawer(taskDrawer(t, project, kind, descriptorKind))}
             className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
           >
             <span className={`mt-px ${done ? 'text-ok' : 'text-faint'}`}>

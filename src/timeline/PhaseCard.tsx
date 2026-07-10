@@ -36,6 +36,13 @@ export default function PhaseCard({
   const resolved = RESOLVED_STATUSES.has(phase.status);
   const removed = REMOVED_STATUSES.has(phase.status);
   const showProse = !compact || isCurrent || isExpanded;
+  const statusChipClass = meta.chip.replace(/(text-(?:dim|info|ok))\/\d+/, '$1');
+  const integrityDescriptionId = `${buttonId}-integrity`;
+  const integrityDescription = `${conf.label}. ${
+    phase.issue === 'none'
+      ? 'No integrity issue reported.'
+      : `${phase.issue} issue: ${phase.issueNote ?? `suspected ${phase.issue} issue`}`
+  }`;
 
   const progressLabel =
     phase.progress.percent !== null
@@ -56,20 +63,23 @@ export default function PhaseCard({
       onFocus={onFocus}
       tabIndex={isFocused ? 0 : -1}
       aria-expanded={isExpanded}
-      aria-controls={isExpanded ? stepRegionId : undefined}
+      aria-controls={stepRegionId}
       aria-current={isCurrent ? 'step' : undefined}
+      aria-describedby={integrityDescriptionId}
       aria-label={`Phase ${phase.id} ${phase.name}, ${meta.label}${
         phase.progress.percent !== null ? `, ${progressLabel}` : ''
       }${isCurrent ? ', current phase' : ''}`}
       data-phase-key={phase.key}
       data-current={isCurrent || undefined}
       data-expanded={isExpanded || undefined}
-      className={`tl-phase-card glass flex w-full flex-col gap-1.5 rounded-xl p-3 text-left transition-colors ${
-        isExpanded ? 'border-accent/70' : 'hover:border-line-strong'
-      } ${isCurrent ? 'tl-current shadow-[0_0_0_1px_var(--accent)]' : ''} ${
-        resolved ? 'opacity-80' : ''
-      } ${removed ? 'opacity-50' : ''}`}
+      data-history={resolved ? 'resolved' : removed ? 'removed' : undefined}
+      className={`tl-phase-card glass relative flex w-full flex-col gap-1.5 rounded-xl p-3 text-left transition-colors ${
+        isExpanded ? 'border-accent-ink' : 'hover:border-line-strong'
+      } ${isCurrent ? 'tl-current shadow-[0_0_0_1px_var(--accent-ink)]' : ''}`}
     >
+      <span id={integrityDescriptionId} className="sr-only">
+        {integrityDescription}
+      </span>
       <span className="flex items-center gap-2">
         <span className="font-display text-[13px] font-semibold text-ink">{phase.id}</span>
         {isCurrent && (
@@ -87,7 +97,7 @@ export default function PhaseCard({
       </span>
       <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <span
-          className={`inline-flex items-center gap-1 rounded border px-1.5 py-px font-mono text-[10px] whitespace-nowrap ${meta.chip}`}
+          className={`inline-flex items-center gap-1 rounded border px-1.5 py-px font-mono text-[10px] whitespace-nowrap ${statusChipClass}`}
         >
           <span aria-hidden="true">{visual.icon}</span>
           {meta.label}
@@ -105,7 +115,7 @@ export default function PhaseCard({
         )}
         {phase.issue !== 'none' && (
           <span
-            className="font-mono text-[10px] text-danger/90"
+            className="font-mono text-[10px] text-danger"
             title={phase.issueNote ?? `suspected ${phase.issue} issue`}
           >
             ⚠ check

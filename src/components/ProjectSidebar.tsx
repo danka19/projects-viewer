@@ -57,7 +57,7 @@ export default function ProjectSidebar({
             </p>
             <button
               onClick={onClear}
-              className="mt-3 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/20"
+              className="mt-3 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/15"
             >
               Clear search and filters
             </button>

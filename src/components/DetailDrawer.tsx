@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { DrawerItem } from '../types';
 
 interface Props {
@@ -9,11 +9,35 @@ interface Props {
 
 export default function DetailDrawer({ item, onNavigate, onClose }: Props) {
   const [copied, setCopied] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Focus returns to the control that opened the drawer when it closes.
+  // The drawer owns focus while open, then restores the exact invoking control.
   useEffect(() => {
     const origin = document.activeElement as HTMLElement | null;
+    const root = rootRef.current;
+    const siblings = root?.parentElement
+      ? Array.from(root.parentElement.children).filter((element) => element !== root)
+      : [];
+    const previous = siblings.map((element) => ({
+      element,
+      inert: element.getAttribute('inert'),
+      ariaHidden: element.getAttribute('aria-hidden'),
+    }));
+
+    for (const sibling of siblings) {
+      sibling.setAttribute('inert', '');
+      sibling.setAttribute('aria-hidden', 'true');
+    }
+    closeButtonRef.current?.focus();
+
     return () => {
+      for (const state of previous) {
+        if (state.inert === null) state.element.removeAttribute('inert');
+        else state.element.setAttribute('inert', state.inert);
+        if (state.ariaHidden === null) state.element.removeAttribute('aria-hidden');
+        else state.element.setAttribute('aria-hidden', state.ariaHidden);
+      }
       if (origin && document.contains(origin)) origin.focus();
     };
   }, []);
@@ -23,6 +47,7 @@ export default function DetailDrawer({ item, onNavigate, onClose }: Props) {
 
   useEffect(() => {
     setCopied(false);
+    closeButtonRef.current?.focus();
   }, [item]);
 
   useEffect(() => {
@@ -42,8 +67,36 @@ export default function DetailDrawer({ item, onNavigate, onClose }: Props) {
     }
   }
 
+  function trapFocus(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== 'Tab') return;
+    const root = rootRef.current;
+    if (!root) return;
+    const focusable = Array.from(
+      root.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((element) => !element.hasAttribute('hidden'));
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   return (
-    <div className="fixed inset-0 z-40" role="dialog" aria-modal="true" aria-label={item.title}>
+    <div
+      ref={rootRef}
+      className="fixed inset-0 z-40"
+      role="dialog"
+      aria-modal="true"
+      aria-label={item.title}
+      onKeyDown={trapFocus}
+    >
       <div className="backdrop-in absolute inset-0 bg-black/50" onClick={onClose} />
       <aside className="drawer-in glass absolute top-0 right-0 flex h-full w-full max-w-md flex-col border-l border-line">
         <header className="flex items-start gap-3 border-b border-line px-5 py-4">
@@ -63,6 +116,8 @@ export default function DetailDrawer({ item, onNavigate, onClose }: Props) {
             )}
           </div>
           <button
+            ref={closeButtonRef}
+            type="button"
             onClick={onClose}
             aria-label="Close details"
             className="rounded-lg border border-line px-2.5 py-1 text-sm text-mute transition-colors hover:border-line-strong hover:text-ink"
@@ -86,7 +141,7 @@ export default function DetailDrawer({ item, onNavigate, onClose }: Props) {
             </p>
             <button
               onClick={copyPath}
-              className="mt-2.5 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/20"
+              className="mt-2.5 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/15"
             >
               {copied ? 'Copied ✓' : 'Copy full path'}
             </button>

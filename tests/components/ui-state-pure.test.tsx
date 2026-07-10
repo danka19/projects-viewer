@@ -156,8 +156,7 @@ describe('versioned local UI state', () => {
   it('round-trips all supported fields under one versioned storage contract', () => {
     const project = makeEvidenceProject();
     const drawer = createDrawerDescriptor(
-      'next-action',
-      taskDrawer(project.nextTasks[0], project, 'Next action'),
+      taskDrawer(project.nextTasks[0], project, 'Next action', 'next-action'),
     );
     expect(drawer).not.toBeNull();
     const state = fullState(project, drawer!);
@@ -220,6 +219,35 @@ describe('versioned local UI state', () => {
     });
   });
 
+  it('drops a timeline descriptor that belongs to a loaded but unselected project', () => {
+    const alpha = makeEvidenceProject();
+    const beta = makeProject({ name: 'beta', path: 'C:/projects/beta' });
+    const storage = new MemoryStorage();
+    storage.values.set(
+      UI_STATE_STORAGE_KEY,
+      JSON.stringify({
+        version: UI_STATE_VERSION,
+        selectedPath: alpha.path,
+        statusFilter: 'all',
+        activeTab: 'status',
+        knowledgeView: 'specs',
+        query: '',
+        includeDiagnostics: false,
+        timeline: {
+          projectId: beta.path,
+          revision: 'beta-revision',
+          expandedPhaseKey: null,
+        },
+        drawer: null,
+      }),
+    );
+
+    expect(readStoredUiState(storage, [alpha, beta])).toMatchObject({
+      selectedPath: alpha.path,
+      timeline: null,
+    });
+  });
+
   it('falls back safely for corrupt JSON, unknown versions, and unavailable storage', () => {
     const project = makeEvidenceProject();
     const expected = createDefaultUiState([project]);
@@ -246,7 +274,7 @@ describe('versioned local UI state', () => {
 describe('namespaced history state', () => {
   it('pushes and replaces the same validated state without adding a URL', () => {
     const project = makeEvidenceProject();
-    const descriptor = createDrawerDescriptor('doc', docDrawer(project.docs[0], project))!;
+    const descriptor = createDrawerDescriptor(docDrawer(project.docs[0], project))!;
     const state = fullState(project, descriptor);
     const history: HistoryLike = {
       state: { foreignFeature: { keep: true } },
@@ -306,19 +334,13 @@ describe('stable drawer descriptors', () => {
   it('round-trips every supported stable kind through current project evidence', () => {
     const project = makeEvidenceProject();
     const phase = project.phases[0];
-    const heading: DrawerItem = {
-      type: 'Heading',
-      title: project.headings[0].text,
-      file: project.headings[0].file,
-      line: project.headings[0].line,
-      projectPath: project.path,
-    };
+    const heading = docDrawer(project.docs[0], project).related![0].item;
     const cases: Array<[DrawerItem, DrawerDescriptorKind]> = [
       [phaseDrawer(phase, project), 'phase'],
       [stepDrawer(phase.steps[0], project), 'step'],
       [taskDrawer(project.openTasks[0], project, 'Open task'), 'task'],
       [taskDrawer(project.completedTasks[0], project, 'Completed task'), 'task'],
-      [taskDrawer(project.nextTasks[0], project, 'Next action'), 'next-action'],
+      [taskDrawer(project.nextTasks[0], project, 'Next action', 'next-action'), 'next-action'],
       [blockerDrawer(project.signalGroups.realBlockers[0], project), 'blocker'],
       [blockerDrawer(project.signalGroups.needsReview[0], project), 'signal'],
       [decisionDrawer(project.decisions[0], project), 'decision'],
@@ -338,7 +360,16 @@ describe('stable drawer descriptors', () => {
     ];
 
     for (const [item, expectedKind] of cases) {
-      const descriptor = createDrawerDescriptor(expectedKind, item);
+      expect(item).toHaveProperty('descriptorKind', expectedKind);
+      expect(
+        (createDrawerDescriptor as unknown as (value: DrawerItem) => DrawerDescriptor | null)(item),
+        item.type,
+      ).toMatchObject({
+        projectPath: project.path,
+        kind: expectedKind,
+        file: item.file,
+      });
+      const descriptor = createDrawerDescriptor(item);
       expect(descriptor, item.type).toMatchObject({
         projectPath: project.path,
         kind: expectedKind,
@@ -394,9 +425,23 @@ describe('stable drawer descriptors', () => {
     expect(resolveDrawerDescriptor(docDescriptor, [ambiguous])).toBeNull();
     const relabelled = docDrawer(project.docs[0], project);
     relabelled.type = 'Localized human-facing label';
-    expect(createDrawerDescriptor('doc', relabelled)).toEqual(docDescriptor);
     expect(
-      createDrawerDescriptor('unknown' as DrawerDescriptorKind, relabelled),
+      (createDrawerDescriptor as unknown as (value: DrawerItem) => DrawerDescriptor | null)(
+        relabelled,
+      ),
+    ).toEqual(docDescriptor);
+    expect(createDrawerDescriptor(relabelled)).toEqual(docDescriptor);
+    const invalidKind = {
+      ...relabelled,
+      descriptorKind: 'unknown' as DrawerDescriptorKind,
+    };
+    expect(createDrawerDescriptor(invalidKind)).toBeNull();
+    const transientOnly = { ...relabelled } as DrawerItem & { descriptorKind?: string };
+    delete transientOnly.descriptorKind;
+    expect(
+      (createDrawerDescriptor as unknown as (value: DrawerItem) => DrawerDescriptor | null)(
+        transientOnly,
+      ),
     ).toBeNull();
 
     const sameFileTasks = makeProject({

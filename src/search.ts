@@ -131,7 +131,7 @@ export function searchProjects(
           score: 84,
           project: p,
           tab: 'work',
-          drawer: taskDrawer(t, p, 'Next action'),
+          drawer: taskDrawer(t, p, 'Next action', 'next-action'),
         });
       }
     }

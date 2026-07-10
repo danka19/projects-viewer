@@ -47,6 +47,7 @@ export function phaseDrawer(ph: PhaseItem, p: ProjectData, withRelated = true): 
     `\n\nParser rule: ${ph.rule}\nConfidence: ${ph.confidence}` +
     (ph.issue !== 'none' ? `\nSuspected ${ph.issue} issue: ${ph.issueNote ?? ''}` : '');
   return {
+    descriptorKind: 'phase',
     type: 'Roadmap phase',
     title: `Phase ${ph.id} — ${ph.name}`,
     status: PHASE_META[ph.status].label,
@@ -61,6 +62,7 @@ export function phaseDrawer(ph: PhaseItem, p: ProjectData, withRelated = true): 
 
 export function stepDrawer(step: PhaseStep, p: ProjectData): DrawerItem {
   return {
+    descriptorKind: 'step',
     type: `Phase ${step.phaseId} step`,
     title: `${step.id ? step.id + ' ' : ''}${step.name}`,
     status: STEP_META[step.status].label,
@@ -74,8 +76,14 @@ export function stepDrawer(step: PhaseStep, p: ProjectData): DrawerItem {
   };
 }
 
-export function taskDrawer(t: TaskItem, p: ProjectData, kind = 'Task'): DrawerItem {
+export function taskDrawer(
+  t: TaskItem,
+  p: ProjectData,
+  kind = 'Task',
+  descriptorKind: 'task' | 'next-action' = 'task',
+): DrawerItem {
   return {
+    descriptorKind,
     type: kind,
     title: t.text.length > 80 ? t.text.slice(0, 80) + '…' : t.text,
     text: t.text + (t.section ? `\n\nSection: ${t.section}` : ''),
@@ -87,6 +95,7 @@ export function taskDrawer(t: TaskItem, p: ProjectData, kind = 'Task'): DrawerIt
 
 export function decisionDrawer(d: DecisionItem, p: ProjectData): DrawerItem {
   return {
+    descriptorKind: 'decision',
     type: 'Decision',
     title: d.date ? `Decision · ${d.date}` : 'Decision',
     text: d.text,
@@ -98,6 +107,8 @@ export function decisionDrawer(d: DecisionItem, p: ProjectData): DrawerItem {
 
 export function blockerDrawer(b: BlockerItem, p: ProjectData): DrawerItem {
   return {
+    descriptorKind:
+      b.kind === 'blocked' || b.kind === 'rejection' ? 'blocker' : 'signal',
     type: BLOCKER_META[b.kind]?.label ?? 'Work signal',
     title: b.text.length > 80 ? b.text.slice(0, 80) + '…' : b.text,
     status: BLOCKER_META[b.kind]?.label ?? b.kind,
@@ -111,6 +122,7 @@ export function blockerDrawer(b: BlockerItem, p: ProjectData): DrawerItem {
 
 export function blockedGatedCandidateDrawer(c: BlockedGatedCandidate, p: ProjectData): DrawerItem {
   return {
+    descriptorKind: 'diagnostic',
     type: c.includedInProjectStatus ? 'Work constraint signal' : 'Filtered constraint candidate',
     title: c.text.length > 80 ? c.text.slice(0, 80) + 'вЂ¦' : c.text,
     status: `${c.classification} В· ${c.confidence}`,
@@ -130,6 +142,7 @@ export function blockedGatedCandidateDrawer(c: BlockedGatedCandidate, p: Project
 
 export function riskDrawer(r: RiskItem, p: ProjectData): DrawerItem {
   return {
+    descriptorKind: 'risk',
     type: r.kind === 'open-question' ? 'Open question' : 'Risk',
     title: r.text.length > 80 ? r.text.slice(0, 80) + '…' : r.text,
     text: r.text,
@@ -141,6 +154,7 @@ export function riskDrawer(r: RiskItem, p: ProjectData): DrawerItem {
 
 export function markerDrawer(m: Marker, p: ProjectData): DrawerItem {
   return {
+    descriptorKind: 'marker',
     type: `${m.type} marker`,
     title: m.text.length > 80 ? m.text.slice(0, 80) + '…' : m.text,
     text: m.text,
@@ -157,6 +171,7 @@ export function specDrawer(sp: SpecItem, p: ProjectData): DrawerItem {
     parts.push(`Tasks: ${sp.completedTasks}/${(sp.openTasks ?? 0) + (sp.completedTasks ?? 0)} done`);
   }
   return {
+    descriptorKind: 'spec',
     type: sp.kind === 'handoff' ? 'Handoff' : 'OpenSpec change',
     title: sp.name,
     status: sp.status,
@@ -176,6 +191,7 @@ export function auditDrawer(a: AuditDoc, p: ProjectData): DrawerItem {
       item: blockerDrawer(b, p),
     }));
   return {
+    descriptorKind: 'audit',
     type: 'Audit / verification doc',
     title: a.title,
     status: a.status,
@@ -194,6 +210,7 @@ export function docDrawer(doc: DocFile, p: ProjectData): DrawerItem {
     .map((h) => ({
       label: h.text,
       item: {
+        descriptorKind: 'heading',
         type: 'Heading',
         title: h.text,
         file: h.file,
@@ -203,6 +220,7 @@ export function docDrawer(doc: DocFile, p: ProjectData): DrawerItem {
     }));
   const tasks = (doc.openTaskCount ?? 0) + (doc.completedTaskCount ?? 0);
   return {
+    descriptorKind: 'doc',
     type: 'Documentation file',
     title: doc.file.split('/').pop() ?? doc.file,
     status: doc.category,

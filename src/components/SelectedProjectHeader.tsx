@@ -60,7 +60,7 @@ export default function SelectedProjectHeader({
             type="button"
             onClick={() => onOpenTab('status')}
             title="Timeline data integrity issues — details in Status"
-            className="rounded border border-warn/40 bg-warn/10 px-2 py-0.5 font-mono text-[10px] text-warn transition-colors hover:bg-warn/20"
+            className="rounded border border-warn/40 bg-warn/10 px-2 py-0.5 font-mono text-[10px] text-warn transition-colors hover:border-warn"
           >
             ⚠ {issueCount} data {issueCount === 1 ? 'issue' : 'issues'}
           </button>
@@ -83,7 +83,9 @@ export default function SelectedProjectHeader({
           {nextItem && (
             <button
               type="button"
-              onClick={() => onOpenDrawer(taskDrawer(nextItem, project, 'Next action'))}
+              onClick={() =>
+                onOpenDrawer(taskDrawer(nextItem, project, 'Next action', 'next-action'))
+              }
               className="rounded-lg border border-line bg-void/30 px-3 py-2 text-left transition-colors hover:border-line-strong"
             >
               <p className="font-mono text-[10px] tracking-[0.18em] text-accent-ink uppercase">

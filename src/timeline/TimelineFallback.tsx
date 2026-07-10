@@ -28,7 +28,7 @@ export function TimelineEmpty({ onOpenDocs }: { onOpenDocs?: () => void }) {
         <button
           type="button"
           onClick={onOpenDocs}
-          className="mt-4 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/20"
+          className="mt-4 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/15"
         >
           Open documentation
         </button>
@@ -54,7 +54,7 @@ export function TimelineError({
         <button
           type="button"
           onClick={onRetry}
-          className="mt-3 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/20"
+          className="mt-3 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/15"
         >
           Retry
         </button>
@@ -115,7 +115,7 @@ export function TimelineNoSteps({
       <button
         type="button"
         onClick={onOpenDetails}
-        className="mt-3 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/20"
+        className="mt-3 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/15"
       >
         Open phase details →
       </button>

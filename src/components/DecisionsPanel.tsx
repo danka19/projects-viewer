@@ -53,7 +53,7 @@ function DecisionList({
             onClick={() => onOpenDrawer(decisionDrawer(d, project))}
             className="flex w-full items-start gap-3 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-void/40"
           >
-            <span className="mt-0.5 w-20 flex-none font-mono text-[10px] text-accent-ink/80">
+            <span className="mt-0.5 w-20 flex-none font-mono text-[10px] text-accent-ink">
               {d.date ?? '—'}
             </span>
             <span className="line-clamp-2 min-w-0 text-sm leading-snug text-mute">

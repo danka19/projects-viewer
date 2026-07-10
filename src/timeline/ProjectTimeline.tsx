@@ -1,18 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { DrawerItem, ProjectData } from '../types';
+import type { RefObject } from 'react';
+import type { DrawerItem, PhaseStatus, ProjectData, StepStatus } from '../types';
 import { phaseDrawer, stepDrawer } from '../drawer';
 import { buildProjectTimelineModel } from './model';
 import type { ProjectTimelineModel, TimelinePhaseModel, TimelineSourceMode } from './model';
 import {
   betweenPhasesAnchor,
   focusItem,
-  initTimelineViewState,
   reconcileTimelineViewState,
   togglePhase,
 } from './state';
 import type { TimelineViewState } from './state';
 import { LIFECYCLE_VISUALS } from './statusVisuals';
 import { PHASE_META, formatDate } from '../statusMeta';
+import { restoreTimelineViewState } from '../uiState';
+import type { TimelineDescriptor } from '../uiState';
 import PhaseCard from './PhaseCard';
 import StepCard from './StepCard';
 import TimelineLegend from './TimelineLegend';
@@ -36,6 +38,11 @@ interface Props {
   onRetry?: () => void;
   onOpenDrawer: (item: DrawerItem) => void;
   onOpenDocs?: () => void;
+  restoredDescriptor?: TimelineDescriptor | null;
+  onDescriptorChange?: (
+    descriptor: TimelineDescriptor,
+    historyMode?: 'push' | 'replace',
+  ) => void;
 }
 
 const COMPACT_THRESHOLD = 12;
@@ -52,6 +59,62 @@ function prefersReducedMotion(): boolean {
   );
 }
 
+interface OverflowEdges {
+  start: boolean;
+  end: boolean;
+}
+
+function measureOverflowEdges(container: HTMLElement): OverflowEdges {
+  const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth);
+  return {
+    start: container.scrollLeft > 1,
+    end: maxScroll - container.scrollLeft > 1,
+  };
+}
+
+/** Keep visual edge cues tied to the local viewport's real geometry. */
+function useOverflowEdges(
+  viewportRef: RefObject<HTMLDivElement | null>,
+  contentSignature: string,
+): OverflowEdges {
+  const [edges, setEdges] = useState<OverflowEdges>({ start: false, end: false });
+
+  useEffect(() => {
+    const container = viewportRef.current;
+    if (!container) {
+      setEdges((previous) =>
+        previous.start || previous.end ? { start: false, end: false } : previous,
+      );
+      return;
+    }
+
+    const update = () => {
+      const next = measureOverflowEdges(container);
+      setEdges((previous) =>
+        previous.start === next.start && previous.end === next.end ? previous : next,
+      );
+    };
+    update();
+    container.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+
+    const observer =
+      typeof window.ResizeObserver === 'function' ? new window.ResizeObserver(update) : null;
+    observer?.observe(container);
+    if (container.firstElementChild instanceof Element) {
+      observer?.observe(container.firstElementChild);
+    }
+
+    return () => {
+      container.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+      observer?.disconnect();
+    };
+  }, [viewportRef, contentSignature]);
+
+  return edges;
+}
+
 export default function ProjectTimeline({
   project,
   generatedAt,
@@ -62,16 +125,75 @@ export default function ProjectTimeline({
   onRetry,
   onOpenDrawer,
   onOpenDocs,
+  restoredDescriptor = null,
+  onDescriptorChange,
 }: Props) {
   const model = useMemo(
     () => buildProjectTimelineModel(project, { generatedAt, sourceMode }),
     [project, generatedAt, sourceMode],
   );
 
-  const [view, setView] = useState<TimelineViewState>(() => initTimelineViewState(model));
+  const [view, setView] = useState<TimelineViewState>(() =>
+    restoreTimelineViewState(restoredDescriptor, model),
+  );
+  const modelIdentity = `${model.projectId}|${model.revision}`;
+  const descriptorSignature = JSON.stringify(restoredDescriptor);
+  const previousModelRef = useRef(model);
+  const previousModelIdentityRef = useRef(modelIdentity);
+  const previousDescriptorSignatureRef = useRef<string | null>(null);
+
   useEffect(() => {
-    setView((prev) => reconcileTimelineViewState(prev, model));
-  }, [model]);
+    const modelObjectChanged = previousModelRef.current !== model;
+    const modelIdentityChanged = previousModelIdentityRef.current !== modelIdentity;
+    const descriptorChanged =
+      previousDescriptorSignatureRef.current !== descriptorSignature;
+    previousModelRef.current = model;
+    previousModelIdentityRef.current = modelIdentity;
+    previousDescriptorSignatureRef.current = descriptorSignature;
+
+    if (!modelObjectChanged && !descriptorChanged) return;
+
+    const descriptorMatchesModel =
+      restoredDescriptor?.projectId === model.projectId &&
+      restoredDescriptor.revision === model.revision;
+    let next: TimelineViewState;
+    let normalizeDescriptor = false;
+
+    if (descriptorChanged) {
+      next = restoreTimelineViewState(restoredDescriptor, model);
+      normalizeDescriptor = restoredDescriptor !== null && !descriptorMatchesModel;
+    } else if (modelIdentityChanged && descriptorMatchesModel) {
+      next = restoreTimelineViewState(restoredDescriptor, model);
+    } else {
+      next = reconcileTimelineViewState(view, model);
+      normalizeDescriptor = modelIdentityChanged && restoredDescriptor !== null;
+    }
+
+    if (
+      view.projectId !== next.projectId ||
+      view.revision !== next.revision ||
+      view.expandedPhaseKey !== next.expandedPhaseKey
+    ) {
+      setView(next);
+    }
+    if (normalizeDescriptor) {
+      onDescriptorChange?.(
+        {
+          projectId: next.projectId,
+          revision: next.revision,
+          expandedPhaseKey: next.expandedPhaseKey,
+        },
+        'replace',
+      );
+    }
+  }, [
+    descriptorSignature,
+    model,
+    modelIdentity,
+    onDescriptorChange,
+    restoredDescriptor,
+    view,
+  ]);
 
   const [announcement, setAnnouncement] = useState('');
   const [currentOffscreen, setCurrentOffscreen] = useState(false);
@@ -81,10 +203,20 @@ export default function ProjectTimeline({
   const phaseButtonRefs = useRef(new Map<string, HTMLButtonElement>());
   const stepButtonRefs = useRef(new Map<string, HTMLButtonElement>());
   const lastCenteredRef = useRef<string>('');
+  const lastStepCenteredRef = useRef<string>('');
+  const pendingActivationCenterRef = useRef<string | null>(null);
 
   const expandedPhase: TimelinePhaseModel | null =
     model.phases.find((ph) => ph.key === view.expandedPhaseKey) ?? null;
-  const stepRegionId = expandedPhase ? domId('tl-steps', expandedPhase.key) : 'tl-steps-none';
+  const expandedStepRegionId = expandedPhase
+    ? domId('tl-steps', expandedPhase.key)
+    : 'tl-steps-none';
+  const renderMode = initialLoading ? 'loading' : 'ready';
+  const phaseOverflow = useOverflowEdges(phaseViewportRef, `${renderMode}|${model.revision}`);
+  const stepOverflow = useOverflowEdges(
+    stepViewportRef,
+    `${renderMode}|${expandedPhase?.key ?? 'none'}|${expandedPhase?.steps.length ?? 0}`,
+  );
 
   const centerElement = useCallback((container: HTMLElement | null, el: HTMLElement | null) => {
     if (!container || !el) return;
@@ -121,16 +253,52 @@ export default function ProjectTimeline({
   // Center only on project change or current-phase change — never on
   // ordinary refresh, so manual scrolling is preserved.
   useEffect(() => {
+    if (initialLoading || !phaseViewportRef.current) return;
     const trigger = `${model.projectId}|${model.currentPhaseId ?? 'none'}`;
     if (lastCenteredRef.current === trigger) return;
     lastCenteredRef.current = trigger;
     centerCurrent();
-  }, [model.projectId, model.currentPhaseId, centerCurrent]);
+  }, [initialLoading, model.projectId, model.currentPhaseId, centerCurrent]);
+
+  // A nested viewport is mounted only for the expanded phase. Center its
+  // explicit current step once per identity, then preserve manual scrolling.
+  useEffect(() => {
+    if (initialLoading || !stepViewportRef.current) return;
+    if (!expandedPhase?.currentStepId) {
+      lastStepCenteredRef.current = '';
+      return;
+    }
+    const trigger = `${model.projectId}|${expandedPhase.key}|${expandedPhase.currentStepId}`;
+    if (lastStepCenteredRef.current === trigger) return;
+    lastStepCenteredRef.current = trigger;
+    centerElement(
+      stepViewportRef.current,
+      stepButtonRefs.current.get(expandedPhase.currentStepId) ?? null,
+    );
+  }, [centerElement, expandedPhase, initialLoading, model.projectId]);
+
+  // Pointer activation can reveal an offscreen phase. Center that newly
+  // expanded phase once, after React has committed the expanded view.
+  useEffect(() => {
+    const pendingPhaseKey = pendingActivationCenterRef.current;
+    if (
+      initialLoading ||
+      !pendingPhaseKey ||
+      view.expandedPhaseKey !== pendingPhaseKey ||
+      !phaseViewportRef.current
+    ) {
+      return;
+    }
+    const phaseButton = phaseButtonRefs.current.get(pendingPhaseKey);
+    if (!phaseButton) return;
+    pendingActivationCenterRef.current = null;
+    centerElement(phaseViewportRef.current, phaseButton);
+  }, [centerElement, initialLoading, view.expandedPhaseKey]);
 
   // Track whether the explicit current phase is outside the visible area.
   useEffect(() => {
     const container = phaseViewportRef.current;
-    if (!container || !model.currentPhaseId) {
+    if (initialLoading || !container || !model.currentPhaseId) {
       setCurrentOffscreen(false);
       return;
     }
@@ -145,26 +313,49 @@ export default function ProjectTimeline({
     }
     check();
     container.addEventListener('scroll', check, { passive: true });
-    return () => container.removeEventListener('scroll', check);
-  }, [model.currentPhaseId, model.revision]);
+    window.addEventListener('resize', check);
+    const current = model.currentPhaseId
+      ? phaseButtonRefs.current.get(model.currentPhaseId)
+      : null;
+    const observer =
+      typeof window.ResizeObserver === 'function' ? new window.ResizeObserver(check) : null;
+    observer?.observe(container);
+    if (current) observer?.observe(current);
+    return () => {
+      container.removeEventListener('scroll', check);
+      window.removeEventListener('resize', check);
+      observer?.disconnect();
+    };
+  }, [initialLoading, model.currentPhaseId, model.revision]);
+
+  const emitDescriptor = useCallback(
+    (expandedPhaseKey: string | null) => {
+      onDescriptorChange?.({
+        projectId: model.projectId,
+        revision: model.revision,
+        expandedPhaseKey,
+      });
+    },
+    [model.projectId, model.revision, onDescriptorChange],
+  );
 
   const activatePhase = useCallback(
     (phase: TimelinePhaseModel) => {
-      setView((prev) => {
-        const next = togglePhase(prev, phase.key);
-        setAnnouncement(
-          next.expandedPhaseKey === phase.key
-            ? `Phase ${phase.id} ${phase.name} expanded: ${
-                phase.steps.length > 0
-                  ? `${phase.steps.length} step${phase.steps.length === 1 ? '' : 's'} shown`
-                  : 'no steps documented'
-              }`
-            : `Phase ${phase.id} ${phase.name} collapsed`,
-        );
-        return next;
-      });
+      const expandedPhaseKey = view.expandedPhaseKey === phase.key ? null : phase.key;
+      pendingActivationCenterRef.current = expandedPhaseKey;
+      setView((previous) => togglePhase(previous, phase.key));
+      setAnnouncement(
+        expandedPhaseKey === phase.key
+          ? `Phase ${phase.id} ${phase.name} expanded: ${
+              phase.steps.length > 0
+                ? `${phase.steps.length} step${phase.steps.length === 1 ? '' : 's'} shown`
+                : 'no steps documented'
+            }`
+          : `Phase ${phase.id} ${phase.name} collapsed`,
+      );
+      emitDescriptor(expandedPhaseKey);
     },
-    [setView],
+    [emitDescriptor, view.expandedPhaseKey],
   );
 
   const focusPhaseByIndex = useCallback(
@@ -212,8 +403,14 @@ export default function ProjectTimeline({
       case 'Escape':
         if (view.expandedPhaseKey) {
           event.preventDefault();
+          const collapsedPhase = model.phases.find(
+            (candidate) => candidate.key === view.expandedPhaseKey,
+          );
           setView((prev) => ({ ...prev, expandedPhaseKey: null }));
-          setAnnouncement(`Phase ${phase.id} ${phase.name} collapsed`);
+          if (collapsedPhase) {
+            setAnnouncement(`Phase ${collapsedPhase.id} ${collapsedPhase.name} collapsed`);
+          }
+          emitDescriptor(null);
         }
         break;
       case 'ArrowDown':
@@ -255,6 +452,7 @@ export default function ProjectTimeline({
         event.preventDefault();
         setView((prev) => ({ ...prev, expandedPhaseKey: null }));
         setAnnouncement(`Phase ${phase.id} ${phase.name} collapsed`);
+        emitDescriptor(null);
         focusPhaseByIndex(model.phases.findIndex((ph) => ph.key === phase.key));
         break;
       default:
@@ -275,7 +473,7 @@ export default function ProjectTimeline({
     );
   }
 
-  if (error && model.phases.length === 0) {
+  if (error && model.phases.length === 0 && sourceMode !== 'stale') {
     return (
       <section aria-label={`Project timeline for ${project.name}`} className="glass rounded-xl p-4">
         <TimelineError message={error} canRetry={sourceMode === 'live'} onRetry={onRetry} />
@@ -286,6 +484,12 @@ export default function ProjectTimeline({
   if (model.phases.length === 0) {
     return (
       <section aria-label={`Project timeline for ${project.name}`} className="glass rounded-xl p-4">
+        {sourceMode === 'stale' && error && <RetainedTimelineAlert message={error} />}
+        {sourceMode === 'stale' && (
+          <div className="mt-3">
+            <TimelineWarnings model={model} />
+          </div>
+        )}
         <TimelineEmpty onOpenDocs={onOpenDocs} />
       </section>
     );
@@ -334,7 +538,7 @@ export default function ProjectTimeline({
           <button
             type="button"
             onClick={centerCurrent}
-            className="rounded-lg border border-accent/40 bg-accent/10 px-2.5 py-1 font-mono text-[10px] text-accent-ink transition-colors hover:bg-accent/20"
+            className="rounded-lg border border-accent/40 bg-accent/10 px-2.5 py-1 font-mono text-[10px] text-accent-ink transition-colors hover:bg-accent/15"
           >
             Jump to current
           </button>
@@ -350,17 +554,30 @@ export default function ProjectTimeline({
       )}
 
       <div className="mt-3">
+        {sourceMode === 'stale' && error && <RetainedTimelineAlert message={error} />}
         <TimelineWarnings model={model} />
       </div>
 
       {/* Phase axis */}
-      <div
-        ref={phaseViewportRef}
-        className="tl-viewport scroll-slim relative -mx-1 overflow-x-auto px-1 pb-1"
-        aria-label="Phase timeline, scrolls horizontally"
-        tabIndex={-1}
-      >
-        <ol className="tl-track flex items-stretch gap-0" aria-label={`${model.phases.length} phases`}>
+      <div className="relative -mx-1">
+        {phaseOverflow.start && (
+          <span
+            aria-hidden="true"
+            data-testid="phase-overflow-start"
+            className="tl-overflow-edge tl-overflow-start"
+          />
+        )}
+        <div
+          ref={phaseViewportRef}
+          role="region"
+          className="tl-viewport scroll-slim overflow-x-auto px-1 pb-1"
+          aria-label="Phase timeline, scrolls horizontally"
+          tabIndex={0}
+        >
+          <ol
+            className="tl-phase-track flex flex-nowrap items-stretch gap-0"
+            aria-label={`${model.phases.length} phases`}
+          >
           {model.phases.map((ph, index) => {
             const nextPh = model.phases[index + 1];
             const isCurrent = model.currentPhaseId === ph.key;
@@ -373,7 +590,7 @@ export default function ProjectTimeline({
                   isExpanded={isExpanded}
                   isFocused={focusedPhaseKey === ph.key}
                   compact={compact}
-                  stepRegionId={stepRegionId}
+                  stepRegionId={domId('tl-steps', ph.key)}
                   buttonId={domId('tl-phase', ph.key)}
                   onActivate={() => activatePhase(ph)}
                   onKeyDown={(event) => onPhaseKeyDown(event, ph, index)}
@@ -383,22 +600,22 @@ export default function ProjectTimeline({
                     else phaseButtonRefs.current.delete(ph.key);
                   }}
                 />
-                <div className="mt-2.5 flex h-4 items-center" aria-hidden="true">
+                <div className="-mx-1.5 mt-2.5 flex h-4 items-center" aria-hidden="true">
                   <span
                     className={`tl-seg h-0 flex-1 border-t-2 ${
-                      index === 0 ? 'border-transparent' : segClass(ph)
+                      index === 0 ? 'border-transparent' : segClass(ph.status)
                     }`}
                   />
                   <span
                     className={`inline-flex h-4 w-4 flex-none items-center justify-center rounded-full border text-[9px] leading-none ${LIFECYCLE_VISUALS[ph.status].node} ${
-                      isCurrent ? 'ring-2 ring-[var(--accent)] ring-offset-1 ring-offset-[var(--panel)]' : ''
+                      isCurrent ? 'ring-2 ring-[var(--accent-ink)] ring-offset-1 ring-offset-[var(--panel)]' : ''
                     }`}
                   >
                     {LIFECYCLE_VISUALS[ph.status].icon}
                   </span>
                   <span
                     className={`tl-seg h-0 flex-1 border-t-2 ${
-                      !nextPh ? 'border-transparent' : segClass(nextPh)
+                      !nextPh ? 'border-transparent' : segClass(nextPh.status)
                     }`}
                   />
                 </div>
@@ -406,19 +623,27 @@ export default function ProjectTimeline({
                 <div
                   aria-hidden="true"
                   className={`mx-auto h-3 w-0 border-l-2 ${
-                    isExpanded ? 'border-accent/70' : 'border-transparent'
+                    isExpanded ? 'border-accent-ink' : 'border-transparent'
                   }`}
                 />
               </li>
             );
           })}
-        </ol>
+          </ol>
+        </div>
+        {phaseOverflow.end && (
+          <span
+            aria-hidden="true"
+            data-testid="phase-overflow-end"
+            className="tl-overflow-edge tl-overflow-end"
+          />
+        )}
       </div>
 
       {/* Nested step region */}
       {expandedPhase && (
         <div
-          id={stepRegionId}
+          id={expandedStepRegionId}
           role="region"
           aria-label={`Steps of phase ${expandedPhase.id} ${expandedPhase.name}`}
           className="mt-1 rounded-xl border border-accent/30 bg-void/20 p-3"
@@ -448,18 +673,33 @@ export default function ProjectTimeline({
               />
             </div>
           ) : (
-            <div
-              ref={stepViewportRef}
-              className="tl-viewport scroll-slim mt-2.5 overflow-x-auto pb-1"
-              aria-label="Step timeline, scrolls horizontally"
-              tabIndex={-1}
-            >
-              <ol className="flex items-stretch gap-2.5">
-                {expandedPhase.steps.map((s, index) => (
-                  <li key={s.key} className="flex-none">
+            <div className="relative mt-2.5">
+              {stepOverflow.start && (
+                <span
+                  aria-hidden="true"
+                  data-testid="step-overflow-start"
+                  className="tl-overflow-edge tl-overflow-start"
+                />
+              )}
+              <div
+                ref={stepViewportRef}
+                role="region"
+                className="tl-viewport scroll-slim overflow-x-auto pb-1"
+                aria-label="Step timeline, scrolls horizontally"
+                tabIndex={0}
+              >
+                <ol
+                  className="tl-step-track flex flex-nowrap items-stretch gap-0"
+                  aria-label={`${expandedPhase.steps.length} steps for phase ${expandedPhase.id} ${expandedPhase.name}`}
+                >
+                {expandedPhase.steps.map((s, index) => {
+                  const nextStep = expandedPhase.steps[index + 1];
+                  const isCurrentStep = expandedPhase.currentStepId === s.key;
+                  return (
+                  <li key={s.key} className="flex flex-none flex-col px-[5px]">
                     <StepCard
                       step={s}
-                      isCurrent={expandedPhase.currentStepId === s.key}
+                      isCurrent={isCurrentStep}
                       isFocused={
                         view.focused?.kind === 'step'
                           ? view.focused.key === s.key
@@ -473,9 +713,40 @@ export default function ProjectTimeline({
                         else stepButtonRefs.current.delete(s.key);
                       }}
                     />
+                    <div className="-mx-[5px] mt-2 flex h-3 items-center" aria-hidden="true">
+                      <span
+                        className={`tl-step-seg h-0 flex-1 border-t-2 ${
+                          index === 0 ? 'border-transparent' : segClass(s.status)
+                        }`}
+                      />
+                      <span
+                        data-step-axis-node="true"
+                        className={`inline-flex h-3.5 w-3.5 flex-none items-center justify-center rounded-full border text-[8px] leading-none ${LIFECYCLE_VISUALS[s.status].node} ${
+                          isCurrentStep
+                            ? 'ring-2 ring-[var(--accent-ink)] ring-offset-1 ring-offset-[var(--panel)]'
+                            : ''
+                        }`}
+                      >
+                        {LIFECYCLE_VISUALS[s.status].icon}
+                      </span>
+                      <span
+                        className={`tl-step-seg h-0 flex-1 border-t-2 ${
+                          !nextStep ? 'border-transparent' : segClass(nextStep.status)
+                        }`}
+                      />
+                    </div>
                   </li>
-                ))}
-              </ol>
+                  );
+                })}
+                </ol>
+              </div>
+              {stepOverflow.end && (
+                <span
+                  aria-hidden="true"
+                  data-testid="step-overflow-end"
+                  className="tl-overflow-edge tl-overflow-end"
+                />
+              )}
             </div>
           )}
         </div>
@@ -490,8 +761,19 @@ export default function ProjectTimeline({
   );
 }
 
-function segClass(ph: TimelinePhaseModel): string {
-  const visual = LIFECYCLE_VISUALS[ph.status];
+function RetainedTimelineAlert({ message }: { message: string }) {
+  return (
+    <div
+      role="alert"
+      className="mb-3 rounded-lg border border-danger/40 bg-danger/5 px-3 py-2 text-[12px] leading-snug text-danger"
+    >
+      Refresh failed — showing last loaded timeline: {message}
+    </div>
+  );
+}
+
+function segClass(status: PhaseStatus | StepStatus): string {
+  const visual = LIFECYCLE_VISUALS[status];
   const style =
     visual.connector === 'solid'
       ? 'border-solid'

@@ -68,7 +68,7 @@ export const PHASE_META: Record<
 > = {
   draft: {
     label: 'draft',
-    chip: 'border-dim/40 bg-dim/10 text-dim/80',
+    chip: 'border-dim/40 bg-dim/10 text-dim',
     dot: 'border border-dim bg-transparent',
   },
   planned: {
@@ -78,7 +78,7 @@ export const PHASE_META: Record<
   },
   ready: {
     label: 'ready',
-    chip: 'border-info/40 bg-info/5 text-info/90',
+    chip: 'border-info/40 bg-info/5 text-info',
     dot: 'border border-info bg-transparent',
   },
   in_progress: {
@@ -98,7 +98,7 @@ export const PHASE_META: Record<
   },
   accepted: {
     label: 'accepted',
-    chip: 'border-ok/40 bg-ok/5 text-ok/90',
+    chip: 'border-ok/40 bg-ok/5 text-ok',
     dot: 'border border-ok bg-transparent',
   },
   closed: {
@@ -124,7 +124,7 @@ export const PHASE_META: Record<
 };
 
 export const STEP_META: Record<StepStatus, { label: string; dot: string; text: string }> = {
-  draft: { label: 'draft', dot: 'border border-dim bg-transparent', text: 'text-dim/80' },
+  draft: { label: 'draft', dot: 'border border-dim bg-transparent', text: 'text-dim' },
   planned: { label: 'planned', dot: 'bg-dim', text: 'text-dim' },
   ready: { label: 'ready', dot: 'border border-info bg-transparent', text: 'text-info' },
   in_progress: { label: 'in progress', dot: 'bg-info', text: 'text-info' },
@@ -173,7 +173,7 @@ export const SPEC_STATUS_CHIP: Record<string, string> = {
   active: 'border-ok/40 bg-ok/10 text-ok',
   done: 'border-info/40 bg-info/10 text-info',
   archived: 'border-dim/40 bg-dim/10 text-dim',
-  unknown: 'border-dim/40 bg-dim/10 text-dim/80',
+  unknown: 'border-dim/40 bg-dim/10 text-dim',
 };
 
 export const AUDIT_STATUS_CHIP: Record<string, string> = {

@@ -257,7 +257,7 @@ export default function ManageProjects({
                 type="button"
                 onClick={handleAddProject}
                 disabled={!liveMode || busy || !projectPath.trim()}
-                className="rounded-md border border-accent/40 bg-accent/15 px-3 py-2 text-xs font-semibold text-accent-ink transition hover:bg-accent/25 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md border border-accent/40 bg-accent/15 px-3 py-2 text-xs font-semibold text-accent-ink transition hover:border-accent-ink disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Add project
               </button>
@@ -318,7 +318,7 @@ export default function ManageProjects({
                   type="button"
                   onClick={handleDiscoverWorkspace}
                   disabled={!liveMode || busy || !workspacePath.trim()}
-                  className="rounded-md border border-accent/40 bg-accent/15 px-3 py-2 text-xs font-semibold text-accent-ink transition hover:bg-accent/25 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-md border border-accent/40 bg-accent/15 px-3 py-2 text-xs font-semibold text-accent-ink transition hover:border-accent-ink disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Discover projects
                 </button>
@@ -335,7 +335,7 @@ export default function ManageProjects({
                 type="button"
                 onClick={handleTrackSelected}
                 disabled={!liveMode || busy || selectedPaths.size === 0}
-                className="ml-auto rounded-md border border-ok/40 bg-ok/15 px-3 py-2 text-xs font-semibold text-ok transition hover:bg-ok/25 disabled:cursor-not-allowed disabled:opacity-50"
+                className="ml-auto rounded-md border border-ok/40 bg-ok/10 px-3 py-2 text-xs font-semibold text-ok transition hover:border-ok disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Track selected
               </button>
@@ -456,7 +456,7 @@ export default function ManageProjects({
                     type="button"
                     onClick={() => handleRemoveProject(project.id)}
                     disabled={!liveMode || busy}
-                    className="rounded-md border border-danger/40 bg-danger/15 px-3 py-1.5 text-xs font-semibold text-danger transition hover:bg-danger/25 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-md border border-danger/40 bg-danger/10 px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Remove
                   </button>

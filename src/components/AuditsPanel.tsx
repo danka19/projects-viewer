@@ -65,7 +65,7 @@ function AuditList({
             onClick={() => onOpenDrawer(auditDrawer(a, project))}
             className="flex w-full flex-wrap items-baseline gap-x-2.5 gap-y-1 rounded-lg border border-line bg-void/30 px-3 py-2 text-left transition-colors hover:border-line-strong"
           >
-            <span className="font-mono text-[10px] text-accent-ink/80">{a.date}</span>
+            <span className="font-mono text-[10px] text-accent-ink">{a.date}</span>
             <span className="min-w-0 text-sm font-medium text-ink">{a.title}</span>
             <span
               className={`rounded border px-1.5 py-px font-mono text-[10px] ${AUDIT_STATUS_CHIP[a.status]}`}
@@ -73,7 +73,7 @@ function AuditList({
               {a.status}
             </span>
             {a.severeSignals > 0 && (
-              <span className="font-mono text-[10px] text-danger/80">
+              <span className="font-mono text-[10px] text-danger">
                 {a.severeSignals} signal{a.severeSignals === 1 ? '' : 's'}
               </span>
             )}
