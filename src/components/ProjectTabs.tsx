@@ -1,6 +1,6 @@
 import type { DrawerItem, ProjectData, TabId } from '../types';
 import FocusCards from './FocusCards';
-import RoadmapTimeline from './RoadmapTimeline';
+import ProjectTimeline from '../timeline/ProjectTimeline';
 import SpecsPanel from './SpecsPanel';
 import TasksPanel from './TasksPanel';
 import DecisionsPanel from './DecisionsPanel';
@@ -11,11 +11,20 @@ import ActivityPanel from './ActivityPanel';
 interface Props {
   project: ProjectData;
   activeTab: TabId;
+  generatedAt: string;
+  liveMode: boolean;
   onSelectTab: (tab: TabId) => void;
   onOpenDrawer: (item: DrawerItem) => void;
 }
 
-export default function ProjectTabs({ project, activeTab, onSelectTab, onOpenDrawer }: Props) {
+export default function ProjectTabs({
+  project,
+  activeTab,
+  generatedAt,
+  liveMode,
+  onSelectTab,
+  onOpenDrawer,
+}: Props) {
   const tabs: { id: TabId; label: string; count?: number }[] = [
     { id: 'overview', label: 'Overview' },
     { id: 'roadmap', label: 'Roadmap', count: project.phases.length },
@@ -75,7 +84,13 @@ export default function ProjectTabs({ project, activeTab, onSelectTab, onOpenDra
           <FocusCards project={project} onOpenTab={onSelectTab} onOpenDrawer={onOpenDrawer} />
         )}
         {activeTab === 'roadmap' && (
-          <RoadmapTimeline project={project} onOpenDrawer={onOpenDrawer} />
+          <ProjectTimeline
+            project={project}
+            generatedAt={generatedAt}
+            sourceMode={liveMode ? 'live' : 'static'}
+            onOpenDrawer={onOpenDrawer}
+            onOpenDocs={() => onSelectTab('docs')}
+          />
         )}
         {activeTab === 'specs' && <SpecsPanel project={project} onOpenDrawer={onOpenDrawer} />}
         {activeTab === 'tasks' && <TasksPanel project={project} onOpenDrawer={onOpenDrawer} />}

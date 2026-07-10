@@ -449,6 +449,8 @@ function AppShell({
                   <ProjectTabs
                     project={selected}
                     activeTab={activeTab}
+                    generatedAt={data.generatedAt}
+                    liveMode={liveMode}
                     onSelectTab={setActiveTab}
                     onOpenDrawer={setDrawer}
                   />

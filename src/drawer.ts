@@ -22,11 +22,25 @@ import {
 } from './statusMeta';
 
 export function phaseDrawer(ph: PhaseItem, p: ProjectData, withRelated = true): DrawerItem {
+  const marker = `phase ${ph.id}`;
   const related = withRelated
-    ? p.phases
-        .filter((x) => x.id !== ph.id && x.id.startsWith(ph.id.split('.')[0]))
-        .slice(0, 5)
-        .map((x) => ({ label: `Phase ${x.id} — ${x.name}`, item: phaseDrawer(x, p, false) }))
+    ? [
+        ...p.phases
+          .filter((x) => x.id !== ph.id && x.id.startsWith(ph.id.split('.')[0]))
+          .slice(0, 5)
+          .map((x) => ({ label: `Phase ${x.id} — ${x.name}`, item: phaseDrawer(x, p, false) })),
+        ...p.decisions
+          .filter((d) => d.text.toLowerCase().includes(marker))
+          .slice(0, 3)
+          .map((d) => ({
+            label: `Decision${d.date ? ` · ${d.date}` : ''}: ${d.text.slice(0, 60)}`,
+            item: decisionDrawer(d, p),
+          })),
+        ...p.audits
+          .filter((a) => a.title.toLowerCase().includes(ph.id) || a.file === ph.file)
+          .slice(0, 3)
+          .map((a) => ({ label: `Audit: ${a.title.slice(0, 60)}`, item: auditDrawer(a, p) })),
+      ]
     : [];
   const why =
     `Raw status: ${ph.statusText || '(no Status: line found)'}` +

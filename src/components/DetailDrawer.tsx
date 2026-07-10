@@ -9,6 +9,14 @@ interface Props {
 
 export default function DetailDrawer({ item, onNavigate, onClose }: Props) {
   const [copied, setCopied] = useState(false);
+
+  // Focus returns to the control that opened the drawer when it closes.
+  useEffect(() => {
+    const origin = document.activeElement as HTMLElement | null;
+    return () => {
+      if (origin && document.contains(origin)) origin.focus();
+    };
+  }, []);
   const fullPath = `${item.projectPath.replace(/[\\/]+$/, '')}\\${item.file.replace(/\//g, '\\')}${
     item.line ? `:${item.line}` : ''
   }`;

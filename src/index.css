@@ -269,6 +269,42 @@ kbd {
   color: var(--mute);
 }
 
+/* Project timeline: single-row horizontal axes with proximity snapping.
+   Card widths follow the dashboard-project-timeline spec:
+   mobile min(78vw,280px) / tablet 208px / desktop 220px (current up to 252px);
+   steps: mobile min(72vw,240px) / desktop 184px. */
+.tl-viewport {
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+}
+.tl-track > li,
+.tl-viewport ol > li {
+  scroll-snap-align: center;
+}
+.tl-phase-card {
+  width: min(78vw, 280px);
+}
+.tl-step-card {
+  width: min(72vw, 240px);
+}
+@media (min-width: 768px) {
+  .tl-phase-card {
+    width: 208px;
+  }
+  .tl-step-card {
+    width: 184px;
+  }
+}
+@media (min-width: 1280px) {
+  .tl-phase-card {
+    width: 220px;
+  }
+  .tl-phase-card[data-current],
+  .tl-phase-card[data-expanded] {
+    width: 252px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .orb-ring,
   .orb-core,
