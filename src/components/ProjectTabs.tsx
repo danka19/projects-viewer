@@ -1,5 +1,4 @@
-import type { DrawerItem, ProjectData, TabId } from '../types';
-import FocusCards from './FocusCards';
+import type { DrawerItem, KnowledgeViewId, ProjectData, TabId } from '../types';
 import ProjectTimeline from '../timeline/ProjectTimeline';
 import SpecsPanel from './SpecsPanel';
 import TasksPanel from './TasksPanel';
@@ -7,38 +6,51 @@ import DecisionsPanel from './DecisionsPanel';
 import AuditsPanel from './AuditsPanel';
 import DocumentationCoverage from './DocumentationCoverage';
 import ActivityPanel from './ActivityPanel';
+import { blockerDrawer, taskDrawer } from '../drawer';
 
 interface Props {
   project: ProjectData;
   activeTab: TabId;
+  knowledgeView: KnowledgeViewId;
   generatedAt: string;
   liveMode: boolean;
   onSelectTab: (tab: TabId) => void;
+  onSelectKnowledgeView: (view: KnowledgeViewId) => void;
   onOpenDrawer: (item: DrawerItem) => void;
 }
 
 export default function ProjectTabs({
   project,
   activeTab,
+  knowledgeView,
   generatedAt,
   liveMode,
   onSelectTab,
+  onSelectKnowledgeView,
   onOpenDrawer,
 }: Props) {
+  const workCount =
+    project.nextTasks.length +
+    project.signalGroups.realBlockers.length +
+    project.signalGroups.approvalGates.length +
+    project.signalGroups.needsReview.length;
   const tabs: { id: TabId; label: string; count?: number }[] = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'roadmap', label: 'Roadmap', count: project.phases.length },
+    { id: 'status', label: 'Status', count: project.phases.length },
+    { id: 'work', label: 'Work', count: workCount },
+    { id: 'decisions', label: 'Decisions', count: project.decisions.length },
+    {
+      id: 'knowledge',
+      label: 'Knowledge',
+      count: project.docs.length,
+    },
+  ];
+
+  const knowledgeViews: { id: KnowledgeViewId; label: string; count?: number }[] = [
     {
       id: 'specs',
       label: 'SDD / Specs',
       count: project.specs.length + project.docs.filter((d) => d.category === 'spec').length,
     },
-    {
-      id: 'tasks',
-      label: 'Tasks',
-      count: project.openTasks.length + project.nextTasks.length,
-    },
-    { id: 'decisions', label: 'Decisions', count: project.decisions.length },
     { id: 'audits', label: 'Audits', count: project.audits.length },
     { id: 'docs', label: 'Documentation', count: project.docs.length },
     { id: 'activity', label: 'Activity' },
@@ -48,7 +60,7 @@ export default function ProjectTabs({
     <div>
       <div
         role="tablist"
-        aria-label="Project detail tabs"
+        aria-label="Project detail surfaces"
         className="scroll-slim flex gap-1 overflow-x-auto border-b border-line pb-px"
       >
         {tabs.map((t) => (
@@ -67,9 +79,7 @@ export default function ProjectTabs({
             {typeof t.count === 'number' && t.count > 0 && (
               <span
                 className={`rounded-full px-1.5 py-px font-mono text-[10px] ${
-                  activeTab === t.id
-                    ? 'bg-accent/15 text-accent-ink'
-                    : 'bg-dim/15 text-faint'
+                  activeTab === t.id ? 'bg-accent/15 text-accent-ink' : 'bg-dim/15 text-faint'
                 }`}
               >
                 {t.count}
@@ -80,33 +90,152 @@ export default function ProjectTabs({
       </div>
 
       <div className="mt-4">
-        {activeTab === 'overview' && (
-          <FocusCards project={project} onOpenTab={onSelectTab} onOpenDrawer={onOpenDrawer} />
+        {activeTab === 'status' && (
+          <div className="space-y-4">
+            <ProjectTimeline
+              project={project}
+              generatedAt={generatedAt}
+              sourceMode={liveMode ? 'live' : 'static'}
+              onOpenDrawer={onOpenDrawer}
+              onOpenDocs={() => {
+                onSelectTab('knowledge');
+                onSelectKnowledgeView('docs');
+              }}
+            />
+            <StatusEvidence project={project} onSelectTab={onSelectTab} onOpenDrawer={onOpenDrawer} />
+          </div>
         )}
-        {activeTab === 'roadmap' && (
-          <ProjectTimeline
-            project={project}
-            generatedAt={generatedAt}
-            sourceMode={liveMode ? 'live' : 'static'}
-            onOpenDrawer={onOpenDrawer}
-            onOpenDocs={() => onSelectTab('docs')}
-          />
-        )}
-        {activeTab === 'specs' && <SpecsPanel project={project} onOpenDrawer={onOpenDrawer} />}
-        {activeTab === 'tasks' && <TasksPanel project={project} onOpenDrawer={onOpenDrawer} />}
+        {activeTab === 'work' && <TasksPanel project={project} onOpenDrawer={onOpenDrawer} />}
         {activeTab === 'decisions' && (
           <DecisionsPanel project={project} onOpenDrawer={onOpenDrawer} />
         )}
-        {activeTab === 'audits' && (
-          <AuditsPanel project={project} onOpenDrawer={onOpenDrawer} />
-        )}
-        {activeTab === 'docs' && (
-          <DocumentationCoverage project={project} onOpenDrawer={onOpenDrawer} />
-        )}
-        {activeTab === 'activity' && (
-          <ActivityPanel project={project} onOpenDrawer={onOpenDrawer} />
+        {activeTab === 'knowledge' && (
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Knowledge views">
+              {knowledgeViews.map((view) => (
+                <button
+                  key={view.id}
+                  role="tab"
+                  aria-selected={knowledgeView === view.id}
+                  onClick={() => onSelectKnowledgeView(view.id)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[11px] transition-colors ${
+                    knowledgeView === view.id
+                      ? 'border-accent/50 bg-accent/15 text-accent-ink'
+                      : 'border-line bg-dim/5 text-mute hover:border-line-strong hover:text-ink'
+                  }`}
+                >
+                  {view.label}
+                  {typeof view.count === 'number' && view.count > 0 && (
+                    <span className="text-[10px] text-faint">{view.count}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+            {knowledgeView === 'specs' && (
+              <SpecsPanel project={project} onOpenDrawer={onOpenDrawer} />
+            )}
+            {knowledgeView === 'audits' && (
+              <AuditsPanel project={project} onOpenDrawer={onOpenDrawer} />
+            )}
+            {knowledgeView === 'docs' && (
+              <DocumentationCoverage project={project} onOpenDrawer={onOpenDrawer} />
+            )}
+            {knowledgeView === 'activity' && (
+              <ActivityPanel project={project} onOpenDrawer={onOpenDrawer} />
+            )}
+          </div>
         )}
       </div>
     </div>
+  );
+}
+
+/** Focused evidence under the timeline: top next actions and real blockers. */
+function StatusEvidence({
+  project,
+  onSelectTab,
+  onOpenDrawer,
+}: {
+  project: ProjectData;
+  onSelectTab: (tab: TabId) => void;
+  onOpenDrawer: (item: DrawerItem) => void;
+}) {
+  const next = project.nextTasks.slice(0, 3);
+  const blockers = project.signalGroups.realBlockers.slice(0, 3);
+  if (next.length === 0 && blockers.length === 0) return null;
+  return (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <EvidenceCard
+        title="Next up"
+        accent="text-accent-ink"
+        total={project.nextTasks.length}
+        items={next.map((t) => ({
+          text: t.text,
+          onClick: () => onOpenDrawer(taskDrawer(t, project, 'Next action')),
+        }))}
+        onViewAll={() => onSelectTab('work')}
+      />
+      <EvidenceCard
+        title="Real blockers"
+        accent={blockers.length > 0 ? 'text-danger' : 'text-mute'}
+        total={project.signalGroups.realBlockers.length}
+        items={blockers.map((b) => ({
+          text: b.text,
+          onClick: () => onOpenDrawer(blockerDrawer(b, project)),
+        }))}
+        onViewAll={() => onSelectTab('work')}
+        empty="No real blockers recorded."
+      />
+    </div>
+  );
+}
+
+function EvidenceCard({
+  title,
+  accent,
+  total,
+  items,
+  onViewAll,
+  empty,
+}: {
+  title: string;
+  accent: string;
+  total: number;
+  items: { text: string; onClick: () => void }[];
+  onViewAll: () => void;
+  empty?: string;
+}) {
+  return (
+    <section className="glass rounded-xl p-4">
+      <header className="flex items-baseline justify-between gap-3">
+        <h3 className="font-mono text-[11px] font-medium tracking-[0.18em] text-mute uppercase">
+          {title} <span className={`ml-1 font-display text-sm tracking-normal ${accent}`}>{total}</span>
+        </h3>
+        {total > items.length && (
+          <button
+            onClick={onViewAll}
+            className="rounded-lg border border-line px-2.5 py-1 font-mono text-[10px] text-mute transition-colors hover:border-accent/40 hover:text-accent-ink"
+          >
+            View all in Work →
+          </button>
+        )}
+      </header>
+      {items.length === 0 ? (
+        <p className="mt-3 text-sm text-faint">{empty ?? 'Nothing recorded.'}</p>
+      ) : (
+        <ul className="mt-3 space-y-2">
+          {items.map((it, i) => (
+            <li key={i}>
+              <button
+                onClick={it.onClick}
+                className="w-full rounded-lg border border-line bg-void/30 px-3 py-2 text-left text-sm leading-snug text-mute transition-colors hover:border-line-strong hover:text-ink"
+              >
+                <span className="line-clamp-2">{it.text}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

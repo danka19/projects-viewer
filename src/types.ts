@@ -810,15 +810,11 @@ export interface SkippedInternalFolder {
   reason: string;
 }
 
-export type TabId =
-  | 'overview'
-  | 'roadmap'
-  | 'specs'
-  | 'tasks'
-  | 'decisions'
-  | 'audits'
-  | 'docs'
-  | 'activity';
+/** Consolidated detail surfaces: Status, Work, Decisions, Knowledge. */
+export type TabId = 'status' | 'work' | 'decisions' | 'knowledge';
+
+/** Secondary view inside the Knowledge surface. */
+export type KnowledgeViewId = 'specs' | 'audits' | 'docs' | 'activity';
 
 /** Item shown in the right-side detail drawer. */
 export interface DrawerItem {

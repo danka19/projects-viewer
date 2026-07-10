@@ -1,185 +1,157 @@
+import { useMemo } from 'react';
 import type { DrawerItem, ProjectData, TabId } from '../types';
-import { daysAgo, healthColor, healthStroke } from '../statusMeta';
-import { blockerDrawer, decisionDrawer, taskDrawer } from '../drawer';
+import { daysAgo } from '../statusMeta';
+import { blockerDrawer, taskDrawer } from '../drawer';
+import { buildProjectTimelineModel } from '../timeline/model';
 import StatusBadge from './StatusBadge';
 import StatusOrb from './StatusOrb';
 
 interface Props {
   project: ProjectData;
+  generatedAt: string;
+  liveMode: boolean;
   onOpenTab: (tab: TabId) => void;
   onOpenDrawer: (item: DrawerItem) => void;
 }
 
-export default function SelectedProjectHeader({ project, onOpenTab, onOpenDrawer }: Props) {
-  const s = project.summary;
-  const cov = s.docsCoverage;
-  const covCount = Object.values(cov).filter(Boolean).length;
+/**
+ * Compact trusted state header: one lifecycle sentence, one next action, one
+ * blocker/gate, freshness, and integrity disclosure. No repeated tile prose
+ * and no unexplained health score.
+ */
+export default function SelectedProjectHeader({
+  project,
+  generatedAt,
+  liveMode,
+  onOpenTab,
+  onOpenDrawer,
+}: Props) {
+  const model = useMemo(
+    () =>
+      buildProjectTimelineModel(project, {
+        generatedAt,
+        sourceMode: liveMode ? 'live' : 'static',
+      }),
+    [project, generatedAt, liveMode],
+  );
 
-  const nextItem = project.nextTasks.find((t) => t.text === s.nextAction);
-  const blockerItem = project.blockers.find((b) => b.text === s.mainBlocker);
-  const decisionItem = project.decisions.find((d) => d.text === s.recentDecision);
+  const lifecycle = lifecycleSentence(project, model.currentPhaseId !== null);
+  const nextItem =
+    project.nextTasks.find((t) => t.text === project.summary.nextAction) ??
+    project.nextTasks[0] ??
+    null;
+  const blockerItem = project.signalGroups.realBlockers[0] ?? null;
+  const gateItem = blockerItem ? null : (project.signalGroups.approvalGates[0] ?? null);
+  const issueCount = model.integrityIssues.length;
 
   return (
-    <div className="glass rounded-xl p-5">
-      <div className="flex flex-wrap items-center gap-3">
-        <StatusOrb status={project.status} size={13} />
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+    <div className="glass rounded-xl p-4">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <StatusOrb status={project.status} size={12} />
+        <h2 className="font-display text-lg leading-tight font-semibold tracking-tight text-ink">
           {project.name}
         </h2>
         <StatusBadge status={project.status} />
         <span className="font-mono text-[11px] text-faint">
           updated {daysAgo(project.lastModified) || '—'}
         </span>
-        <div className="ml-auto">
-          <HealthRing score={s.healthScore} />
-        </div>
-      </div>
-      <p className="mt-1.5 font-mono text-xs break-all text-faint">{project.path}</p>
-      {project.error && <p className="mt-2 text-sm text-danger">{project.error}</p>}
-
-      <div className="mt-4 grid grid-cols-1 gap-2.5 border-t border-line pt-4 sm:grid-cols-2 lg:grid-cols-3">
-        <SummaryTile
-          label="Current phase"
-          value={s.currentPhase ?? 'No active phase detected'}
-          muted={!s.currentPhase}
-          onClick={() => onOpenTab('roadmap')}
-        />
-        <SummaryTile
-          label="Next action"
-          value={s.nextAction ?? 'No next action detected'}
-          muted={!s.nextAction}
-          onClick={
-            nextItem
-              ? () => onOpenDrawer(taskDrawer(nextItem, project, 'Next action'))
-              : () => onOpenTab('tasks')
-          }
-        />
-        <SummaryTile
-          label="Main real blocker"
-          value={s.mainBlocker ?? 'No real blockers'}
-          muted={!s.mainBlocker}
-          tone={s.mainBlocker ? 'text-danger' : undefined}
-          onClick={
-            blockerItem
-              ? () => onOpenDrawer(blockerDrawer(blockerItem, project))
-              : () => onOpenTab('tasks')
-          }
-        />
-        <SummaryTile
-          label="Recent decision"
-          value={s.recentDecision ?? 'No decisions recorded'}
-          muted={!s.recentDecision}
-          onClick={
-            decisionItem
-              ? () => onOpenDrawer(decisionDrawer(decisionItem, project))
-              : () => onOpenTab('decisions')
-          }
-        />
-        <SummaryTile
-          label="Recent change"
-          value={s.recentChange ?? '—'}
-          muted={!s.recentChange}
-          mono
-          onClick={() => onOpenTab('activity')}
-        />
+        {issueCount > 0 && (
+          <button
+            type="button"
+            onClick={() => onOpenTab('status')}
+            title="Timeline data integrity issues — details in Status"
+            className="rounded border border-warn/40 bg-warn/10 px-2 py-0.5 font-mono text-[10px] text-warn transition-colors hover:bg-warn/20"
+          >
+            ⚠ {issueCount} data {issueCount === 1 ? 'issue' : 'issues'}
+          </button>
+        )}
         <button
-          onClick={() => onOpenTab('docs')}
-          className="rounded-lg border border-line bg-void/30 px-3.5 py-2.5 text-left transition-colors hover:border-line-strong"
+          type="button"
+          onClick={() => onOpenTab('knowledge')}
+          title={project.path}
+          className="ml-auto max-w-[40%] truncate rounded border border-line px-2 py-0.5 font-mono text-[10px] text-faint transition-colors hover:text-ink"
         >
-          <p className="font-mono text-[10px] tracking-[0.18em] text-faint uppercase">
-            Doc coverage · {covCount}/5
-          </p>
-          <span className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
-            <CovDot label="README" ok={cov.readme} />
-            <CovDot label="CLAUDE" ok={cov.claude} />
-            <CovDot label="ROADMAP" ok={cov.roadmap} />
-            <CovDot label="SPECS" ok={cov.sddOrSpecs} />
-            <CovDot label="AUDITS" ok={cov.audits} />
-          </span>
+          {project.path}
         </button>
       </div>
+
+      <p className="mt-2 text-[13px] leading-snug text-mute">{lifecycle}</p>
+      {project.error && <p className="mt-1.5 text-sm text-danger">{project.error}</p>}
+
+      {(nextItem || blockerItem || gateItem) && (
+        <div className="mt-3 grid grid-cols-1 gap-2 border-t border-line pt-3 sm:grid-cols-2">
+          {nextItem && (
+            <button
+              type="button"
+              onClick={() => onOpenDrawer(taskDrawer(nextItem, project, 'Next action'))}
+              className="rounded-lg border border-line bg-void/30 px-3 py-2 text-left transition-colors hover:border-line-strong"
+            >
+              <p className="font-mono text-[10px] tracking-[0.18em] text-accent-ink uppercase">
+                Next action
+              </p>
+              <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-ink">
+                {nextItem.text}
+              </p>
+              <p className="mt-1 truncate font-mono text-[10px] text-faint">
+                {nextItem.file}:{nextItem.line}
+              </p>
+            </button>
+          )}
+          {(blockerItem ?? gateItem) && (
+            <button
+              type="button"
+              onClick={() => onOpenDrawer(blockerDrawer((blockerItem ?? gateItem)!, project))}
+              className="rounded-lg border border-line bg-void/30 px-3 py-2 text-left transition-colors hover:border-line-strong"
+            >
+              <p
+                className={`font-mono text-[10px] tracking-[0.18em] uppercase ${
+                  blockerItem ? 'text-danger' : 'text-gate'
+                }`}
+              >
+                {blockerItem ? 'Real blocker' : 'Approval gate'}
+              </p>
+              <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-ink">
+                {(blockerItem ?? gateItem)!.text}
+              </p>
+              <p className="mt-1 truncate font-mono text-[10px] text-faint">
+                {(blockerItem ?? gateItem)!.file}:{(blockerItem ?? gateItem)!.line}
+              </p>
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-function SummaryTile({
-  label,
-  value,
-  muted = false,
-  mono = false,
-  tone,
-  onClick,
-}: {
-  label: string;
-  value: string;
-  muted?: boolean;
-  mono?: boolean;
-  tone?: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="rounded-lg border border-line bg-void/30 px-3.5 py-2.5 text-left transition-colors hover:border-line-strong"
-    >
-      <p className="font-mono text-[10px] tracking-[0.18em] text-faint uppercase">{label}</p>
-      <p
-        className={`mt-1 line-clamp-2 text-[13px] leading-snug ${
-          muted ? 'text-faint' : (tone ?? 'text-ink')
-        } ${mono ? 'font-mono text-xs' : ''}`}
-      >
-        {value}
-      </p>
-    </button>
-  );
-}
+function lifecycleSentence(project: ProjectData, hasCurrent: boolean): string {
+  const phases = project.phases;
+  if (phases.length === 0) {
+    return 'No roadmap phases documented — lifecycle position unknown.';
+  }
+  const parts: string[] = [];
+  const resolved = phases.filter((ph) => ph.status === 'closed' || ph.status === 'accepted');
+  const lastResolved = resolved.at(-1);
+  if (lastResolved) parts.push(`Phase ${lastResolved.id} ${lastResolved.status}`);
 
-function CovDot({ label, ok }: { label: string; ok: boolean }) {
-  return (
-    <span className="inline-flex items-center gap-1.5" title={`${label} ${ok ? 'found' : 'missing'}`}>
-      <span
-        className={`h-1.5 w-1.5 rounded-full ${
-          ok
-            ? 'bg-info'
-            : 'border border-danger/50'
-        }`}
-      />
-      <span className={`font-mono text-[10px] ${ok ? 'text-mute' : 'text-danger/80'}`}>
-        {label}
-      </span>
-    </span>
-  );
-}
+  if (hasCurrent && project.summary.currentPhase) {
+    parts.push(`phase ${project.summary.currentPhase} is in progress`);
+  } else {
+    const pending = phases.filter((ph) => ph.status === 'pending_acceptance');
+    if (pending.length > 0) {
+      parts.push(
+        `${pending.length} phase${pending.length === 1 ? '' : 's'} awaiting owner acceptance`,
+      );
+    } else {
+      parts.push('no active phase');
+    }
+  }
 
-function HealthRing({ score }: { score: number }) {
-  const r = 20;
-  const c = 2 * Math.PI * r;
-  return (
-    <div
-      className="relative h-14 w-14"
-      role="img"
-      aria-label={`Health score ${score} out of 100`}
-      title="Health: doc coverage, blockers, staleness, next-action clarity"
-    >
-      <svg viewBox="0 0 48 48" className="h-full w-full -rotate-90">
-        <circle cx="24" cy="24" r={r} fill="none" stroke="rgb(148 163 184 / 0.15)" strokeWidth="3.5" />
-        <circle
-          cx="24"
-          cy="24"
-          r={r}
-          fill="none"
-          stroke={healthStroke(score)}
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          strokeDasharray={`${(score / 100) * c} ${c}`}
-          style={{ filter: `drop-shadow(0 0 4px ${healthStroke(score)}66)` }}
-        />
-      </svg>
-      <span
-        className={`absolute inset-0 flex items-center justify-center font-display text-sm font-bold ${healthColor(score)}`}
-      >
-        {score}
-      </span>
-    </div>
+  const nextPlanned = phases.find(
+    (ph) => ph.status === 'planned' || ph.status === 'ready' || ph.status === 'draft',
   );
+  if (nextPlanned) parts.push(`next planned: Phase ${nextPlanned.id} ${nextPlanned.name}`);
+
+  const sentence = parts.join(' · ');
+  return sentence.charAt(0).toUpperCase() + sentence.slice(1) + '.';
 }

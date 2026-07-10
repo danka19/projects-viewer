@@ -27,7 +27,9 @@ export default function ProjectSidebar({
   for (const p of projects) counts[p.status] = (counts[p.status] ?? 0) + 1;
 
   return (
-    <aside className="lg:sticky lg:top-[70px]">
+    // Sticky offset matches the compact single-row system bar (~53px) plus
+    // breathing room; verified against the measured header height in browser.
+    <aside className="lg:sticky lg:top-[66px]">
       <div className="mb-3 flex flex-wrap items-center gap-1.5">
         <FilterChip
           label={`All ${projects.length}`}
@@ -47,7 +49,7 @@ export default function ProjectSidebar({
         )}
       </div>
 
-      <div className="scroll-slim space-y-2.5 lg:max-h-[calc(100vh-190px)] lg:overflow-y-auto lg:pr-1 lg:pb-2">
+      <div className="scroll-slim space-y-2.5 lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-1 lg:pb-2">
         {visible.length === 0 ? (
           <div className="glass rounded-xl p-6 text-center">
             <p className="text-sm text-mute">
