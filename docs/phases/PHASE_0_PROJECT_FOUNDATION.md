@@ -36,6 +36,8 @@ Evidence:
 
 ## Phase Gate
 
+Status: accepted. Human acceptance and continuation into Phase 1 are recorded.
+
 - Project rules are clear.
 - Secret and private-data handling is documented.
 - Initial open decisions and risks are recorded.

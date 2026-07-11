@@ -337,6 +337,8 @@ OpenSpec and acceptance evidence:
 
 ## Phase Gate
 
+Status: accepted. Human acceptance of the project brief/report workflow was recorded on 2026-07-09.
+
 - Completed: Shared report types exist and match Phase 2 contract decisions.
 - Completed: Pure report composition module exists and has focused tests.
 - Completed: Deterministic ranking, empty-state, baseline, evidence, derived-label, recommendation, and guard-field behavior is tested.

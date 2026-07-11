@@ -466,6 +466,8 @@ Phase 3 implementation target:
 
 ## Phase Gate
 
+Status: accepted. Human acceptance and approval to proceed into Phase 2 are recorded.
+
 - Primary users and daily/weekly decisions are documented.
 - Data sources, runtime stores, trust boundaries, and forbidden flows are documented.
 - AI-assisted workflows are ranked with accepted, deferred, and rejected behaviors.
