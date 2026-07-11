@@ -93,6 +93,19 @@ Sequential work: timeline archival/integration is blocked only by explicit human
 | Dashboard redesign plan | `docs/planning/DASHBOARD_REDESIGN_PLAN.md` records the bounded sequence and the reopened axis acceptance gate while keeping MCP/API hardening and roadmap Phase 4 separate. |
 | Documentation/phase status sync | On 2026-07-10 the stale audit branch baseline was corrected to `main`; Phase 0-3 work-item status lines were normalized from legacy `completed`/pending wording to explicit closed/accepted lifecycle wording supported by existing human gate evidence. No Phase 4 status was inferred. |
 
+## Change Intake: Selectable Roadmap And Specs Views (2026-07-11)
+
+- Idea: let the primary project visualization switch between roadmap phases and specification-led work so a project remains useful when no canonical roadmap exists.
+- Source: human owner. `teamSsdCli` is the representative spec-first analytics project; analytics documentation is expected to contain specifications rather than a custom roadmap, while developer roadmaps may exist separately beside implementation code.
+- Type: `new_feature`, `architecture_change`, `data_contract_change`.
+- Decision: `create_openspec_change` after the view semantics and source boundaries are approved through design discovery.
+- Reason: the current primary Timeline is built only from `project.phases`; generic spec documents are available only in the secondary Knowledge surface, and the current `SpecItem` contract does not preserve structured requirements, tasks, hierarchy, or source scope needed for an equivalent primary view.
+- Affected specs: the new change must define selectable primary views, spec/task lifecycle mapping, roadmap/spec relationships, empty and mixed-source behavior, persistence, navigation, accessibility, and source evidence. It must reference rather than silently extend the accepted timeline behavior.
+- Affected architecture: scanner normalization, generated project data, primary-view presentation model, persisted UI state, drawer/search navigation, and optional per-project documentation-source boundaries.
+- Data contract impact: add a structured spec-work model instead of coercing specs into `PhaseItem`; preserve source kind and evidence, attach tasks to their owning spec when evidenced, and keep unowned tasks explicit rather than fabricating a roadmap hierarchy.
+- Verification impact: cover roadmap-only, spec-only, mixed roadmap/spec, task-only, and no-structured-work fixtures, including the representative `teamSsdCli` source layout.
+- Status: design discovery in progress; no implementation is authorized until the design is approved.
+
 ## Known Risks And Gaps
 
 | ID | Risk | Owner | Status |
