@@ -29,11 +29,11 @@
 - Consumes: approved workflow design in `docs/superpowers/specs/2026-07-12-evidence-audit-workflow-design.md`.
 - Produces: a discoverable `evidence-audit` skill and a non-duplicating `session-report` completion hook.
 
-- [ ] **Step 1: Record the baseline failure**
+- [x] **Step 1: Record the baseline failure**
 
 Use the 2026-07-12 session evidence: the substantial API/UX verification defined criteria and produced confirmed findings, but initially ended with only a chat report, no dated audit artifact, and no explicit offer to create remediation tasks.
 
-- [ ] **Step 2: Initialize the skill**
+- [x] **Step 2: Initialize the skill**
 
 Run:
 
@@ -43,15 +43,15 @@ python C:\Users\danoc\.codex\skills\.system\skill-creator\scripts\init_skill.py 
 
 Expected: `evidence-audit/SKILL.md` and `evidence-audit/agents/openai.yaml` are created with valid names and no unused resource folders.
 
-- [ ] **Step 3: Replace the generated skill body with the approved workflow**
+- [x] **Step 3: Replace the generated skill body with the approved workflow**
 
 The skill must define the substantial-audit trigger, criteria/evidence workflow, canonical audit ownership, duplicate search, finding fields, read-only authorization boundary, remediation question, and explicit exception when remediation is already authorized. Keep the skill concise and place no project-specific findings in it.
 
-- [ ] **Step 4: Add the session-report hook**
+- [x] **Step 4: Add the session-report hook**
 
 Add one conditional rule to `session-report`: when a session performed a substantial audit, require `evidence-audit`, name the durable audit file in the final report, and include the remediation decision or question. Do not copy the audit workflow into `session-report`.
 
-- [ ] **Step 5: Validate both skill folders**
+- [x] **Step 5: Validate both skill folders**
 
 Run:
 
@@ -60,7 +60,7 @@ python C:\Users\danoc\.codex\skills\.system\skill-creator\scripts\quick_validate
 python C:\Users\danoc\.codex\skills\.system\skill-creator\scripts\quick_validate.py C:\Users\danoc\.codex\skills\session-report
 ```
 
-Expected: both commands report valid skills. Inspect `agents/openai.yaml` to confirm it matches the final skill. Record that subagent forward-testing was not run because the current collaboration policy did not authorize subagents.
+Expected: both commands report valid skills. Inspect `agents/openai.yaml` to confirm it matches the final skill. Record the later-authorized fresh-agent behavioral cycle: the first replay supplied RED evidence by omitting the explicit remediation question, the skill wording was refactored, and the second replay supplied GREEN evidence by creating the durable audit, preserving the authorization boundary, and ending with the required remediation question.
 
 ### Task 2: Write The Durable Projects Viewer Audit
 
@@ -72,21 +72,21 @@ Expected: both commands report valid skills. Inspect `agents/openai.yaml` to con
 - Consumes: fresh API matrix, `npm test`, build, browser, responsive, console, scanner, and search evidence from the 2026-07-12 verification.
 - Produces: the canonical record of criteria, evidence, confirmed findings, positive results, scope limits, and remediation routing.
 
-- [ ] **Step 1: Search existing audit and plan coverage**
+- [x] **Step 1: Search existing audit and plan coverage**
 
 Run focused `rg` searches for the HTML API fallback, false blocker extraction, false next actions, and invisible search-match context across `docs/audits`, `docs/planning`, `docs/ROADMAP.md`, and `openspec/changes`.
 
 Expected: the API fallback maps to `harden-mcp-context-api`; the exact checked-task, cross-line OpenSpec conditional, and match-visibility findings have no existing remediation owner.
 
-- [ ] **Step 2: Write the audit**
+- [x] **Step 2: Write the audit**
 
 Include scope, criteria, environment, exact commands/evidence, 198/198 test result, successful build, API matrix, no-side-effect hashes, desktop/dark/mobile checks, 390 px overflow measurement, console result, four confirmed findings with severity and root cause, limitations, and remediation routing. Reference existing docs instead of copying their requirements.
 
-- [ ] **Step 3: Add the audit to the documentation index**
+- [x] **Step 3: Add the audit to the documentation index**
 
 Add one row to `docs/README.md` describing the audit as the evidence source for API boundary, scanner trust, search explanation, usability, and responsive checks.
 
-- [ ] **Step 4: Commit the audit record**
+- [x] **Step 4: Commit the audit record**
 
 Run:
 
@@ -107,7 +107,7 @@ Expected: one documentation commit with no product behavior changes.
 - Consumes: `API_UX_TRUST_AUDIT_2026-07-12.md`, `harden-dashboard-state-derivation`, `improve-dashboard-search-navigation`, and `harden-mcp-context-api`.
 - Produces: proposal, design, delta specs, and executable tasks for scanner and search trust only.
 
-- [ ] **Step 1: Create and inspect the change scaffold**
+- [x] **Step 1: Create and inspect the change scaffold**
 
 Run:
 
@@ -118,7 +118,7 @@ openspec status --change "improve-dashboard-evidence-trust" --json
 
 Expected: a repo-local change root and artifact order from the configured OpenSpec schema.
 
-- [ ] **Step 2: Generate artifacts in CLI dependency order**
+- [x] **Step 2: Generate artifacts in CLI dependency order**
 
 For each ready artifact, run `openspec instructions <artifact-id> --change "improve-dashboard-evidence-trust" --json`, follow the returned template, and re-run status. The change must require:
 
@@ -130,11 +130,11 @@ For each ready artifact, run `openspec instructions <artifact-id> --change "impr
 - regression fixtures use the real 2026-07-12 false-positive shapes;
 - the API fallback remains owned only by `harden-mcp-context-api` and is referenced, not respecified.
 
-- [ ] **Step 3: Write implementation tasks**
+- [x] **Step 3: Write implementation tasks**
 
 Tasks must include RED/GREEN scanner fixtures, search model/component fixtures, real-project rescan evidence, focused/full tests, browser verification, audit/current-state updates, and OpenSpec validation. Do not mark implementation tasks complete.
 
-- [ ] **Step 4: Confirm apply-ready status**
+- [x] **Step 4: Confirm apply-ready status**
 
 Run:
 
@@ -155,19 +155,19 @@ Expected: all artifacts required for apply are complete and implementation tasks
 - Consumes: dated audit and completed OpenSpec proposal artifacts.
 - Produces: one Phase 4 roadmap slice, current-state risk summary, and active-change index entries that link to canonical details.
 
-- [ ] **Step 1: Add the Phase 4 roadmap slice**
+- [x] **Step 1: Add the Phase 4 roadmap slice**
 
 Add one bullet for `improve-dashboard-evidence-trust`, ordered after `harden-mcp-context-api`, stating that it restores scanner/search evidence trust and linking to the dated audit. Do not repeat scenarios or implementation tasks.
 
-- [ ] **Step 2: Update current-state indexes**
+- [x] **Step 2: Update current-state indexes**
 
 Add the new OpenSpec change to `docs/README.md`. Add a concise dated audit/risk entry to `docs/CURRENT_PROJECT_AUDIT.md` that links to the audit and names the two remediation owners: existing API hardening and new evidence-trust change.
 
-- [ ] **Step 3: Run a duplicate-content audit**
+- [x] **Step 3: Run a duplicate-content audit**
 
 Use `rg` to inspect repeated exact finding sentences and requirement language across the new audit, roadmap, current audit, README, and OpenSpec. Keep detailed observations in the audit, normative behavior in OpenSpec, and links/status only elsewhere.
 
-- [ ] **Step 4: Validate documentation and OpenSpec**
+- [x] **Step 4: Validate documentation and OpenSpec**
 
 Run:
 
@@ -181,7 +181,7 @@ git status --short --branch
 
 Expected: strict validation passes, no whitespace errors, and only intentional documentation/OpenSpec files are modified.
 
-- [ ] **Step 5: Commit the proposal and project documentation**
+- [x] **Step 5: Commit the proposal and project documentation**
 
 Run:
 
@@ -201,16 +201,16 @@ Expected: the new change is apply-ready, roadmap-linked, and no implementation i
 - Consumes: validated skills and committed project documentation.
 - Produces: evidence-backed completion report and clean tracked working tree.
 
-- [ ] **Step 1: Re-run skill and project validation**
+- [x] **Step 1: Re-run skill and project validation**
 
 Run both `quick_validate.py` commands, `openspec validate --all --strict`, `git diff --check`, and `git status --short --branch`.
 
 Expected: both skills valid, OpenSpec strict validation successful, no diff errors, clean tracked working tree.
 
-- [ ] **Step 2: Verify canonical ownership**
+- [x] **Step 2: Verify canonical ownership**
 
 Confirm the audit owns observations, `harden-mcp-context-api` owns the API fallback fix, `improve-dashboard-evidence-trust` owns scanner/search remediation, and roadmap/current docs contain only status plus links.
 
-- [ ] **Step 3: Report remaining limitations**
+- [x] **Step 3: Report remaining limitations**
 
-State that skill forward-testing with fresh subagents was not performed because subagents were not authorized, and that no defect implementation was performed. End with the recommended next action: apply `improve-dashboard-evidence-trust`, while `harden-mcp-context-api` remains the API prerequisite.
+Report the completed fresh-agent RED → wording refactor → GREEN forward-test cycle, including the durable audit, preserved authorization boundary, and explicit remediation question demonstrated by the GREEN replay. State separately that no product defect implementation was performed. End with the recommended next action: apply `improve-dashboard-evidence-trust`, while `harden-mcp-context-api` remains the API prerequisite.
