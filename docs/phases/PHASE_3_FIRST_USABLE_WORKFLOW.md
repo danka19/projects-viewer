@@ -1,6 +1,6 @@
 # Phase 3. First Usable Workflow
 
-Status: accepted and closed on 2026-07-09.
+Status: closed. Human acceptance was recorded on 2026-07-09.
 
 ## Goal
 
@@ -292,7 +292,7 @@ OpenSpec and acceptance evidence:
 
 ### 3.6 Run Phase Gate And Prepare OpenSpec Follow-Through
 
-Status: accepted and closed on 2026-07-09.
+Status: closed. Human acceptance was recorded on 2026-07-09.
 
 Objective:
 

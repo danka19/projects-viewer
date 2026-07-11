@@ -1,6 +1,6 @@
 # UX/UI Audit — Dashboard State Clarity
 
-Status: recorded baseline; agent-verifiable remediation completed 2026-07-11, with UX-002/UX-005 human clarity acceptance still open.
+Status: in_progress. Most remediation is complete, but UX-005 mixed-height axis geometry and renewed human clarity acceptance are open through timeline tasks 5.6-5.7 and 7.6.
 
 Date: 2026-07-10.
 
@@ -45,7 +45,7 @@ The redesign must therefore start with state trust and information hierarchy. A 
 | UX-002 | Closed: compact freshness and the four-group attention brief are in the first viewport; the delivered redesign received human at-a-glance acceptance on 2026-07-11. |
 | UX-003 | Closed: the old mixed metric bar was replaced by labelled attention actions that open matching cross-project sets. |
 | UX-004 | Closed: one selected-project state header, primary timeline, and progressive detail surfaces replace repeated primary tiles. |
-| UX-005 | Closed: horizontal parent/child timelines are primary, browser-verified, and human-accepted through OpenSpec task 7.6. |
+| UX-005 | Reopened: the owner reported a broken straight-axis geometry with mixed-height cards; OpenSpec tasks 5.6-5.7 and 7.6 remain open. |
 | UX-006 | Closed: deterministic ranking, stable identity, visible totals/truncation, keyboard control, and diagnostic opt-in are implemented and tested. |
 | UX-007 | Closed: measured mobile order is project switcher, selected header, timeline, then detail tabs, without page-level overflow. |
 | UX-008 | Closed: the compact responsive shell removes the measured header/sidebar collision at desktop and tablet breakpoints. |
@@ -138,7 +138,7 @@ Required direction: one primary project-state surface, one prioritized cross-pro
 
 Severity: P1.
 
-Status: closed 2026-07-11 after implementation, agent verification, browser evidence, and human OpenSpec task 7.6 acceptance.
+Status: in_progress. Mixed-height straight-axis correction, fresh browser evidence, and explicit task 7.6 acceptance remain open.
 
 The existing Roadmap tab contains the best lifecycle data but renders it as another vertical list and is not visible on the first screen. `No active phase detected` hides the more useful state: closed prior phase, no active implementation phase, next planned phase, and required decision/gate.
 
@@ -195,7 +195,7 @@ Required direction: use a readable sans-serif for prose and keep monospace for p
 
 Severity: P2.
 
-Status: partially remediated; Manage Projects modal semantics remain a separate follow-up.
+Status: in_progress. Selected-project navigation remediation is complete; Manage Projects modal semantics remain a separate follow-up.
 
 Selected project, tab, filter, drawer item, and timeline context are not represented in a durable URL/state model. Current tabs lack the full arrow-key/ARIA relationship pattern. The detail drawer lacks a complete focus trap/return contract, and Manage Projects is visually modal without a fully specified dialog behavior.
 
@@ -232,4 +232,4 @@ Required direction: introduce the smallest compatible component test harness and
 
 ## Recommended Next Decision
 
-Keep `harden-mcp-context-api` as a separate operational hardening change. The dashboard redesign has no remaining implementation or human-acceptance gate: task 7.6 was accepted on 2026-07-11. The timeline change is ready for a separately authorized OpenSpec archival/sync review and remains unarchived in this work session.
+Keep `harden-mcp-context-api` as a separate operational hardening change. The dashboard redesign still has reopened tasks 5.6-5.7 and human-acceptance task 7.6. The timeline change is not ready for OpenSpec archival/sync review until those gates close.

@@ -1,6 +1,6 @@
 # Dashboard Redesign Acceptance Evidence
 
-Status: agent verification and human timeline acceptance complete; OpenSpec change intentionally unarchived.
+Status: superseded as final acceptance evidence. Commit `bd815b8` reopened timeline tasks 5.6-5.7 and 7.6 after the owner reported a visible broken-axis defect.
 
 Date: 2026-07-11.
 
@@ -10,7 +10,7 @@ The bounded dashboard redesign is implemented on `dashboard-redesign/ui-rebuild`
 
 The redesign preserves the existing local-only and read-only boundaries: projects are selected from saved config, browser requests do not introduce arbitrary filesystem paths, scanned project folders are not modified, and no cloud, auth, remote model, task/calendar, or command-execution behavior was added.
 
-The timeline OpenSpec change remains active and unarchived. The human owner accepted the delivered redesign in direct response to this acceptance report on 2026-07-11, closing task 7.6 without requesting any contract deviation.
+The timeline OpenSpec change remains active and unarchived. This report records valid evidence for the pre-defect build, but it no longer closes task 7.6: mixed-height axis correction and fresh acceptance are required by the reopened OpenSpec tasks.
 
 ## Implemented UX
 
@@ -70,11 +70,11 @@ The page-level overflow regression caused by screen-reader-only absolute element
 
 ## Human Acceptance And Residual Risks
 
-- OpenSpec timeline task 7.6 is complete: the owner accepted the delivered completed/current/planned hierarchy, current step, exclusive expansion, and no-active-phase presentation on 2026-07-11.
-- `redesign-dashboard-project-timeline` is ready for later OpenSpec archival/sync review but remains active and unarchived because archival was explicitly excluded from this work session.
+- OpenSpec timeline task 7.6 is `pending_acceptance` after the broken-axis report reopened the geometry gate.
+- `redesign-dashboard-project-timeline` is `in_progress` with tasks 5.6, 5.7, and 7.6 open; it is not ready for archival/sync review.
 - Manage Projects still has the older visually-modal implementation; the redesign fixed drawer semantics but did not claim a separate Manage Projects dialog/focus contract.
 - Browser layout evidence is representative rather than a replacement for future automated end-to-end visual regression infrastructure.
 
 ## Next Step
 
-No dashboard-redesign implementation or acceptance task remains. The next bounded action, only when explicitly requested, is OpenSpec archival/sync review followed by integration into `main`; it is not performed in this work session.
+The next bounded action is to complete task 5.6, run the task 5.7 mixed-height geometry checks in dark/light at desktop, tablet, and mobile sizes, and obtain explicit human acceptance for task 7.6. OpenSpec archival/sync and integration remain blocked until then.
