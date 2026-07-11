@@ -4,7 +4,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Current Roadmap Validation
 
-- Current phase: no active roadmap implementation phase. Phase 3 is closed; Phase 4 remains draft. The bounded dashboard redesign workstream continues on `dashboard-redesign/ui-rebuild` through reopened timeline tasks 5.6-5.7 and 7.6; this does not activate or close Phase 4. Fresh mixed-height geometry verification and human clarity acceptance remain open.
+- Current phase: no active roadmap implementation phase. Phase 3 is closed; Phase 4 remains draft. The bounded dashboard redesign workstream is technically complete on `dashboard-redesign/ui-rebuild` at 42/43 timeline tasks; only explicit human clarity acceptance task 7.6 remains open. This does not activate or close Phase 4.
 - Planning from this roadmap alone is forbidden. Detailed phase plans must reconcile roadmap intent, current docs, current implementation, environment evidence, audit findings, and human decisions.
 - Product behavior, requirements, proposed changes, and acceptance criteria belong in OpenSpec artifacts under `openspec/` when SDD applies.
 - New ideas during active phase work must go through change intake before they alter scope or plans.
@@ -91,12 +91,12 @@ Proposed slices and ordering:
 - This slice should be implemented before relying on Projects Viewer MCP preflight packets for everyday agent startup, because it addresses the observed HTML fallback, legacy config ambiguity, and project-id lookup friction.
 - `docs/audits/UX_UI_AUDIT_2026-07-10.md` is the redesign baseline; `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records implementation and browser evidence.
 - `docs/planning/DASHBOARD_REDESIGN_PLAN.md` records the bounded sequence: trusted state derivation, Project Timeline, overview integration, search/navigation state, then responsive/accessibility acceptance.
-- `openspec/changes/redesign-dashboard-project-timeline/` is `in_progress` with 40/43 tasks complete. Commit `bd815b8` reopened mixed-height axis correction tasks 5.6-5.7 and human acceptance task 7.6 after the owner reported a visible broken-axis defect. The current worktree contains an uncommitted candidate implementation for task 5.6; this roadmap audit does not claim or commit that implementation.
+- `openspec/changes/redesign-dashboard-project-timeline/` is `pending_acceptance` with 42/43 tasks complete. Commit `9cfb550` fixed the mixed-height axis and fresh dark/light desktop, tablet, and mobile checks measured 0 px axis deviation with no clipping or page overflow. Human acceptance task 7.6 remains open.
 - `openspec/changes/improve-dashboard-search-navigation/` records ranked diagnostic-aware search and safe versioned local/history presentation state. It preserves configured-path, read-only, and local-only boundaries.
 
 Decision required before Phase 4 planning:
 
-- Finish and freshly verify the reopened timeline axis work, then obtain explicit human acceptance for task 7.6.
+- Obtain explicit human acceptance or rejection for timeline task 7.6 after reviewing the corrected straight-axis presentation.
 - Decide the detailed Phase 4 scope independently of the timeline workstream and of the still-separate `harden-mcp-context-api` proposal. Any later OpenSpec archival/sync is a separate action and does not silently activate Phase 4.
 
 ## Phase Planning Rule

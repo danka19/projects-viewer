@@ -1,6 +1,6 @@
 # Dashboard Redesign Plan
 
-Status: in_progress on `dashboard-redesign/ui-rebuild`. Commit `bd815b8` reopened mixed-height axis tasks 5.6-5.7 and explicit human acceptance task 7.6 after a visible broken-axis report.
+Status: pending_acceptance on `dashboard-redesign/ui-rebuild`. Commit `9cfb550` closes mixed-height axis tasks 5.6-5.7; explicit human acceptance task 7.6 remains open.
 
 Date: 2026-07-10. Implementation evidence updated 2026-07-11.
 
@@ -88,7 +88,7 @@ Always-visible phase axis:
 - Nested horizontal steps beneath the axis.
 - Source/confidence/integrity access through the read-only details flow.
 
-The timeline appears after the state header and before secondary details. It was promoted after the state-trust and initial browser gates passed. The owner accepted the delivered hierarchy and interaction, but later reported a visible mixed-height broken-axis defect; task 7.6 is therefore reopened until corrected geometry receives fresh evidence and explicit acceptance.
+The timeline appears after the state header and before secondary details. It was promoted after the state-trust and initial browser gates passed. The owner accepted the delivered hierarchy and interaction, but later reported a visible mixed-height broken-axis defect. Corrected geometry now has fresh evidence; task 7.6 remains open only for explicit owner acceptance.
 
 ### 5. Secondary detail navigation
 
@@ -125,7 +125,7 @@ This change must precede authoritative overview promotion of the timeline.
 
 ### Change B — Project Timeline / Roadmap
 
-In-progress proposal with 40/43 tasks complete: `openspec/changes/redesign-dashboard-project-timeline/`.
+Pending-acceptance proposal with 42/43 tasks complete: `openspec/changes/redesign-dashboard-project-timeline/`.
 
 Scope:
 
@@ -263,7 +263,7 @@ For representative projects, the human owner must be able to identify without op
 6. real blocker versus diagnostic warning;
 7. source/confidence when state is uncertain.
 
-Outcome 2026-07-11: the earlier acceptance inference was superseded by the owner's visible broken-axis report. Commit `bd815b8` reopened tasks 5.6-5.7 and 7.6; corrected geometry now requires fresh browser evidence and explicit human acceptance.
+Outcome 2026-07-11: the earlier acceptance inference was superseded by the owner's visible broken-axis report. Commit `9cfb550` closes tasks 5.6-5.7 with a red-green regression and six dark/light viewport checks; explicit human task 7.6 remains open.
 
 ## Redesign Acceptance Matrix
 
@@ -290,4 +290,4 @@ Outcome 2026-07-11: the earlier acceptance inference was superseded by the owner
 
 ## Human Acceptance Outcome
 
-OpenSpec task 7.6 is reopened. The completed/current/planned hierarchy, current step, exclusive phase expansion, and no-active-phase state retain their earlier evidence, but the mixed-height straight-axis geometry does not. `redesign-dashboard-project-timeline` remains active with tasks 5.6-5.7 and 7.6 open; archival and integration are blocked until corrected geometry has fresh browser evidence and explicit human acceptance.
+OpenSpec task 7.6 remains open. The completed/current/planned hierarchy, current step, exclusive phase expansion, no-active-phase state, and corrected mixed-height straight-axis geometry now have agent evidence. `redesign-dashboard-project-timeline` remains active at 42/43 tasks; archival and integration are blocked only until explicit human acceptance.

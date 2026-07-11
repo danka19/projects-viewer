@@ -70,6 +70,25 @@ The page-level overflow regression caused by screen-reader-only absolute element
 - The temporary second development server exposed an expected Vite HMR WebSocket collision because the primary dev server already owned the HMR port. Product state checks were repeated against the production build before completion so this environment-only message was not treated as an application regression.
 - The primary local development server remains running at `http://127.0.0.1:5173` as required by the project runbook.
 
+## Technical Acceptance Matrix
+
+| Requirement / redesign intent | Status | Evidence / remaining gap |
+|---|---|---|
+| Trusted lifecycle state before visual promotion | Passed | Explicit current IDs, integrity handling, state-trust fixtures, and no prose inference pass automated coverage. |
+| First-screen information hierarchy | Passed technically | Compact system bar, four-group attention brief, selected-project header, timeline, then secondary tabs; renewed human clarity judgment remains task 7.6. |
+| Completed/current/planned and exceptional lifecycle vocabulary | Passed | All phase and step statuses have visible text/icon cues and semantic connectors; ambiguous current state fabricates no marker. |
+| Exclusive phase expansion and nested steps | Passed | Click/re-click/switch, no-steps, current-step, independent child viewport, and focus preservation have component/browser evidence. |
+| Deterministic implementation progress | Passed | Lifecycle and step-derived calculations, unknown evidence, exclusions, and project averaging pass pure tests. |
+| Loading/refresh/error/stale/partial/empty states | Passed | Component suites cover every required fallback without fabricated progress or status. |
+| Large-roadmap geometry and responsive overflow | Passed | Commit `9cfb550`; 0 px axis deviation, no clipping, and local-only overflow in all six dark/light viewport checks. |
+| Timeline keyboard, ARIA, motion, and drawer semantics | Passed with monitored race | Component/accessibility tests and stable browser paths pass; refresh-while-drawer-open focus return still needs a targeted regression. |
+| Ranked search and count-to-result integrity | Passed | Pure/integration tests, two-result keyboard flow, true totals/truncation, diagnostic opt-in, and fresh 27-to-27 browser evidence. |
+| Durable safe UI state and history | Passed | Versioned state, stable descriptors, Back/Forward, invalid-state rejection, and no local paths in the URL pass tests/browser checks. |
+| Existing visual identity, dark/light contrast, and readable prose | Passed | Existing theme/status tokens retained; semantic/composite contrast tests pass both themes. |
+| Manage Projects dialog accessibility | Not completed | Visually modal only: missing dialog semantics, inert background, focus lifecycle, Escape, and focus trap/return. This is the remaining UX-010 follow-up outside the timeline OpenSpec. |
+| Human at-a-glance clarity | Pending acceptance | OpenSpec task 7.6 can be closed only by explicit owner acceptance after reviewing the corrected axis. |
+| OpenSpec sync/archive and integration to `main` | Not performed | Intentionally requires separate authorization and remains blocked by task 7.6. |
+
 ## Human Acceptance And Residual Risks
 
 - OpenSpec timeline task 7.6 remains `pending_acceptance`; the agent can accept the technical implementation but cannot substitute for explicit human clarity acceptance.

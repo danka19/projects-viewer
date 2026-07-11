@@ -86,7 +86,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `openspec/changes/agent-preflight-packet/` | Implemented proposed OpenSpec change for a separate local AI-agent preflight packet workflow, ready for human acceptance review |
 | `openspec/changes/harden-mcp-context-api/` | Proposed OpenSpec change for canonical config cleanup, compact project-id listing, API JSON boundary hardening, MCP response validation, and diagnostics |
 | `openspec/changes/harden-dashboard-state-derivation/` | Implemented dashboard source-trust/current-state filtering change |
-| `openspec/changes/redesign-dashboard-project-timeline/` | Implemented and human-accepted horizontal phase/step timeline change; 41/41 tasks complete and intentionally unarchived |
+| `openspec/changes/redesign-dashboard-project-timeline/` | Technically implemented horizontal phase/step timeline change; 42/43 tasks complete, explicit human acceptance open, and intentionally unarchived |
 | `openspec/changes/improve-dashboard-search-navigation/` | Implemented ranked search and safe versioned presentation-state persistence change |
 | `openspec/changes/archive/2026-07-08-add-ai-context-findings-layer/` | Archived OpenSpec change for AI-readable project context and review-required findings |
 | `openspec/specs/ai-context/spec.md` | Accepted AI context requirements |

@@ -15,11 +15,11 @@ Last updated: 2026-07-11.
 | `agent-preflight-packet` | `pending_acceptance` | Tasks are complete and verification evidence exists; the audit still records human acceptance as outstanding. |
 | `harden-dashboard-state-derivation` | `accepted` | The trust gate was implemented and included in the accepted redesign evidence; archival remains separate. |
 | `improve-dashboard-search-navigation` | `accepted` | Implementation and verification are included in the accepted redesign evidence; archival remains separate. |
-| `redesign-dashboard-project-timeline` | `in_progress` | `openspec list` reports 40/43 tasks. Commit `bd815b8` reopened tasks 5.6, 5.7, and 7.6; the worktree has an uncommitted candidate for 5.6 that this audit does not claim or commit. |
+| `redesign-dashboard-project-timeline` | `pending_acceptance` | `openspec list` reports 42/43 tasks. Commit `9cfb550` and fresh six-viewport/theme geometry evidence close tasks 5.6-5.7; explicit human task 7.6 remains open. |
 | `harden-mcp-context-api` | `planned` | 0/19 tasks; implementation has not started. |
 | Accepted specs `ai-context`, `ai-findings` | `accepted` | Present under `openspec/specs/` and validated by OpenSpec. |
 
-Sequential work: timeline archival/integration is blocked until tasks 5.6-5.7 pass fresh verification and task 7.6 receives explicit human acceptance. MCP/API hardening is parallel-independent because its config/API/MCP boundaries do not depend on timeline geometry, but it remains only `planned` until intentionally started.
+Sequential work: timeline archival/integration is blocked only by explicit human acceptance task 7.6. MCP/API hardening is parallel-independent because its config/API/MCP boundaries do not depend on timeline geometry, but it remains only `planned` until intentionally started.
 
 ## Repository Baseline
 
@@ -29,8 +29,8 @@ Sequential work: timeline archival/integration is blocked until tasks 5.6-5.7 pa
 | Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer` |
 | Current branch | `dashboard-redesign/ui-rebuild` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Latest commit before this audit update | `bd815b8 docs: reopen timeline axis acceptance` |
-| Local divergence | Redesign branch contains intentional local commits over `main`; no push was performed. `src/timeline/PhaseCard.tsx` and `tests/components/project-timeline.test.tsx` contain pre-existing uncommitted candidate work for reopened task 5.6 and are excluded from this documentation-only status commit. |
+| Latest implementation commit before this audit update | `9cfb550 fix: keep timeline phase axis level` |
+| Local divergence | Redesign branch contains intentional local commits over `main`; no push was performed. The mixed-height axis implementation and evidence are committed. |
 
 ## Useful Starting Points
 
@@ -85,10 +85,10 @@ Sequential work: timeline archival/integration is blocked until tasks 5.6-5.7 pa
 | MCP/API hardening OpenSpec | Proposed change `openspec/changes/harden-mcp-context-api/` now captures the hardening work as formal OpenSpec artifacts: proposal, design, tasks, and delta specs for `local-project-config`, `mcp-context-api`, and `agent-preflight-packet`. The planning doc records why the OpenSpec was not created in the first documentation-only follow-up. |
 | UX/UI live-browser audit | On 2026-07-10 the dashboard was inspected at 1280x720 and 390x844. Evidence recorded false current next-action/blocker/task promotion, repeated dense text, global-to-local metric actions, noisy 40-result search saturation, a 340 px mobile header, selected-project content below y=1500 on mobile, and a desktop sticky sidebar/header overlap. Full evidence is in `docs/audits/UX_UI_AUDIT_2026-07-10.md`. |
 | Dashboard state-trust gate | `harden-dashboard-state-derivation` implemented trusted constraint filtering/current-state derivation before overview promotion; representative trust fixtures and the full suite pass. |
-| Project Timeline implementation | `src/timeline/` provides the trusted model/state, horizontal phase/step axes, current/expanded separation, edge states, keyboard/reduced-motion behavior, responsive overflow, integrity disclosure, and read-only drawer integration. Commit `bd815b8` reopened mixed-height axis correction and human acceptance; current status is 40/43 tasks. |
+| Project Timeline implementation | `src/timeline/` provides the trusted model/state, horizontal phase/step axes, current/expanded separation, edge states, keyboard/reduced-motion behavior, responsive overflow, integrity disclosure, and read-only drawer integration. Commit `9cfb550` adds the equal-height card contract; current status is 42/43 tasks with human acceptance open. |
 | Dashboard overview implementation | The compact system bar, four-group attention brief, selected-project state header, primary timeline placement, four semantic detail surfaces, and mobile project switcher are implemented. |
 | Search/navigation implementation | `src/search.ts`, `GlobalSearch.tsx`, and `src/uiState.ts` provide deterministic ranked search, explicit diagnostic opt-in, true totals/truncation, keyboard navigation, safe versioned local/history state, Back/Forward behavior, and stable drawer/timeline descriptors. |
-| Dashboard browser acceptance | The earlier dark/light desktop, tablet, and mobile checks remain evidence for the pre-defect build. Fresh mixed-height axis verification is required by task 5.7 before renewed acceptance. |
+| Dashboard browser acceptance | Fresh dark/light checks at 1280x720, 1024x768, and 390x844 measured 0 px axis deviation, one shared card height per row, zero clipped phase cards, zero page-level overflow, and no console warnings/errors. |
 | Dashboard redesign plan | `docs/planning/DASHBOARD_REDESIGN_PLAN.md` records the bounded sequence and the reopened axis acceptance gate while keeping MCP/API hardening and roadmap Phase 4 separate. |
 | Documentation/phase status sync | On 2026-07-10 the stale audit branch baseline was corrected to `main`; Phase 0-3 work-item status lines were normalized from legacy `completed`/pending wording to explicit closed/accepted lifecycle wording supported by existing human gate evidence. No Phase 4 status was inferred. |
 
@@ -107,9 +107,11 @@ Sequential work: timeline archival/integration is blocked until tasks 5.6-5.7 pa
 | AUDIT-009 | Unrelated uncommitted UI/worktree changes were present during the earlier agent-preflight feature session; by 2026-07-10 `main` matched `origin/main` and the worktree was clean before new intentional documentation changes. | Human owner | closed 2026-07-10 |
 | AUDIT-010 | MCP/API hardening is needed before agents can rely on preflight packet retrieval in everyday workflow: remove root legacy config fallback, expose compact saved project ids, prevent `/api/*` HTML fallback from masquerading as success, and improve local HTTP diagnostics. OpenSpec proposal now exists as `harden-mcp-context-api`; implementation remains open. | Next bounded change | open |
 | AUDIT-011 | Dashboard trust filtering/current-state derivation is implemented and regression-tested before overview promotion. | Dashboard redesign | closed 2026-07-11 |
-| AUDIT-012 | First-glance hierarchy and mobile ordering were previously accepted, but mixed-height cards exposed a broken-axis defect. Tasks 5.6-5.7 and 7.6 are reopened. | Dashboard redesign | in_progress |
+| AUDIT-012 | First-glance hierarchy, mobile ordering, and corrected straight-axis geometry are implemented and freshly browser-verified; explicit human clarity acceptance remains open. | Dashboard redesign | pending_acceptance |
 | AUDIT-013 | Component, accessibility, search/state, responsive-contract, theme-contrast, and live-browser coverage now exists and passes. | Dashboard redesign | closed 2026-07-11 |
-| AUDIT-014 | Previous task 7.6 acceptance was inferred too broadly. Commit `bd815b8` records the owner's visible broken-axis report and reopens explicit acceptance until corrected geometry is freshly verified. | Human owner | pending_acceptance |
+| AUDIT-014 | Previous task 7.6 acceptance was inferred too broadly. Corrected geometry is now verified in `9cfb550`, but explicit owner acceptance is still required before archival/integration. | Human owner | pending_acceptance |
+| AUDIT-015 | Manage Projects remains visually modal without `role="dialog"`, `aria-modal`, inert background, initial focus transfer, focus trap, Escape contract, or exact focus return. This is the remaining UX-010 accessibility gap outside the timeline. | Future bounded accessibility change | open |
+| AUDIT-016 | One phase-details focus-return check during live refresh returned focus to the page body; stable search, step, and phase-details runs passed. Add a refresh-while-drawer-open integration test before claiming the race is impossible. | Future bounded verification change | monitored |
 
 ## Audit Rules
 
