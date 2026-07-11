@@ -104,7 +104,21 @@ Sequential work: timeline archival/integration is blocked only by explicit human
 - Affected architecture: scanner normalization, generated project data, primary-view presentation model, persisted UI state, drawer/search navigation, and optional per-project documentation-source boundaries.
 - Data contract impact: add a structured spec-work model instead of coercing specs into `PhaseItem`; preserve source kind and evidence, attach tasks to their owning spec when evidenced, and keep unowned tasks explicit rather than fabricating a roadmap hierarchy.
 - Verification impact: cover roadmap-only, spec-only, mixed roadmap/spec, task-only, and no-structured-work fixtures, including the representative `teamSsdCli` source layout.
-- Status: design discovery in progress; no implementation is authorized until the design is approved.
+- Human source-boundary decision: support both configured per-view documentation roots and mixed repositories. A project may map `Specs` and `Roadmap` to separate roots when analytics and developer documentation are separated, while the same views must also classify and filter co-located documents when both kinds live in one repository. These are complementary source strategies, not mutually exclusive project modes.
+- Status: source-boundary direction accepted; spec hierarchy, default view selection, and fallback behavior remain in design discovery. No implementation is authorized until the design is approved.
+
+## Change Intake: Safe Modal Backdrop Dismissal (2026-07-11)
+
+- Idea: Manage Projects should close when the user clicks the backdrop only if the modal has no unsaved changes.
+- Source: human owner.
+- Type: `scope_refinement`, `new_feature`, `verification_change`.
+- Decision: `create_openspec_change` as a small modal-interaction change rather than broadening the Project Timeline specification.
+- Reason: the current modal has no dirty-state model, does not handle backdrop clicks, and always closes on Escape or the Close button. Dismissal paths need one consistent safety contract before backdrop dismissal is added.
+- Affected specs: modal dismissal, dirty-state definition, busy-state behavior, discard confirmation or blocked-dismissal feedback, exact focus return, and keyboard/pointer parity.
+- Affected architecture: local Manage Projects presentation state only; no scanned-project writes or remote behavior are introduced.
+- Data contract impact: no persisted server contract is expected; the UI must derive ephemeral dirty state from unsaved form and selection values while distinguishing already-saved API mutations.
+- Verification impact: cover clean backdrop dismissal, clicks inside the panel, dirty backdrop behavior, Escape and Close parity, busy operations, focus containment, and exact return focus.
+- Status: behavior accepted in principle; dirty-dismissal feedback remains in design discovery.
 
 ## Known Risks And Gaps
 
