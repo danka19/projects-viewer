@@ -118,7 +118,8 @@ Sequential work: timeline archival/integration is blocked only by explicit human
 - Affected architecture: local Manage Projects presentation state only; no scanned-project writes or remote behavior are introduced.
 - Data contract impact: no persisted server contract is expected; the UI must derive ephemeral dirty state from unsaved form and selection values while distinguishing already-saved API mutations.
 - Verification impact: cover clean backdrop dismissal, clicks inside the panel, dirty backdrop behavior, Escape and Close parity, busy operations, focus containment, and exact return focus.
-- Status: behavior accepted in principle; dirty-dismissal feedback remains in design discovery.
+- Human dismissal decision: use one confirmation contract for every dismissal path. When the modal is clean, backdrop click, Escape, and Close dismiss immediately. When it is dirty, each path opens an accessible confirmation with explicit **Discard changes** and **Continue editing** actions; no path may discard silently. Clicking inside the panel never requests dismissal.
+- Status: dismissal behavior accepted; exact dirty-state inputs and busy-state handling remain to be specified before implementation.
 
 ## Known Risks And Gaps
 
