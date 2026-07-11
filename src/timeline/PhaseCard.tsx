@@ -73,7 +73,7 @@ export default function PhaseCard({
       data-current={isCurrent || undefined}
       data-expanded={isExpanded || undefined}
       data-history={resolved ? 'resolved' : removed ? 'removed' : undefined}
-      className={`tl-phase-card glass relative flex w-full flex-col gap-1.5 rounded-xl p-3 text-left transition-colors ${
+      className={`tl-phase-card glass relative flex w-full flex-1 flex-col gap-1.5 rounded-xl p-3 text-left transition-colors ${
         isExpanded ? 'border-accent-ink' : 'hover:border-line-strong'
       } ${isCurrent ? 'tl-current shadow-[0_0_0_1px_var(--accent-ink)]' : ''}`}
     >

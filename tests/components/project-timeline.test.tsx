@@ -572,6 +572,22 @@ describe('keyboard interaction', () => {
 });
 
 describe('horizontal viewport behavior', () => {
+  it('stretches every phase card so the shared axis stays level with mixed content', () => {
+    renderTimeline(projectWithCurrent());
+
+    const phaseTrack = screen
+      .getByRole('region', { name: 'Phase timeline, scrolls horizontally' })
+      .querySelector('ol');
+    expect(phaseTrack).toHaveClass('items-stretch');
+
+    const phaseCards = screen.getAllByRole('button', { name: /^Phase \d/ });
+    expect(phaseCards.length).toBeGreaterThan(1);
+    for (const card of phaseCards) {
+      expect(card).toHaveClass('flex-1');
+      expect(card.parentElement).toHaveClass('flex-col');
+    }
+  });
+
   it('exposes named focusable local scroll regions with non-wrapping centered tracks', () => {
     renderTimeline(projectWithCurrent());
 

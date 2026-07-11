@@ -42,8 +42,10 @@
 - [x] 5.4 Implement proximity scroll snapping, manual-scroll preservation, current/focus centering triggers, compact metadata above twelve phases, and bounded rendering through scanner limits.
 - [x] 5.5 Verify the selected-project header and phase axis fit the first 1280x720 viewport and the mobile timeline precedes the full project list/detail navigation. (Gated on the overview redesign slice.)
       Evidence 2026-07-11: component geometry contracts pass; live browser at 1280x720 measured the header at y=183-382, timeline at y=398-712, and detail tabs at y=728. At 390x844 the project switcher, selected header, timeline, and tabs appeared in that order; document width remained 380/380 while the phase row scrolled only inside its 314 px viewport.
-- [ ] 5.6 Add a failing regression test and stretch every phase card to the tallest card in its row without fixed heights or clipping.
-- [ ] 5.7 Verify in dark/light at 1280x720, 1024x768, and 390x844 that mixed-content phase cards share one axis baseline with no more than 1 px node deviation.
+- [x] 5.6 Add a failing regression test and stretch every phase card to the tallest card in its row without fixed heights or clipping.
+      Evidence 2026-07-11: the new component test failed with `Expected flex-1` against the pre-fix `PhaseCard`, then passed 40/40 after the card adopted the existing equal-height flex contract. No fixed height or overflow clipping was added.
+- [x] 5.7 Verify in dark/light at 1280x720, 1024x768, and 390x844 that mixed-content phase cards share one axis baseline with no more than 1 px node deviation.
+      Evidence 2026-07-11: all six dark/light viewport combinations measured 0 px phase-axis deviation, one shared card height per row, zero vertically clipped phase cards, and zero page-level horizontal overflow. Desktop/tablet card height was 131.25 px; mobile was 112.25 px.
 
 ## 6. Accessibility And Motion
 
