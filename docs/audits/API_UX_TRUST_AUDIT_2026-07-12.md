@@ -54,6 +54,7 @@ The API matrix exercised direct `GET` requests to the routes listed below and in
 | `npm run build` | TypeScript no-emit and Vite production build passed; 65 modules transformed | Pass |
 | `git diff --check` | Passed | Pass |
 | Scan behavior coverage | Automated tests cover report/preflight read-only boundaries and single-flight scanning with one queued rescan | Pass for covered scenarios |
+| 30-second minimum rescan throttle | `server/scan-controller.mjs` defaults `minIntervalMs` to `30_000`, but the concurrency test sets it to `0`; this session did not separately exercise the 30-second delay | Verified limitation |
 
 ### API Matrix
 
@@ -77,14 +78,14 @@ A fresh final spot-check reproduced API-001 while `/api/projects`, invalid repor
 
 ### Read-Only Side-Effect Evidence
 
-Three repeated daily-report and verification-preflight requests left the SHA-256 values of the two existing runtime files unchanged:
+The paired before/after check established that three repeated daily-report and verification-preflight requests did not change either existing runtime file. The raw verification record did not retain the paired hash strings. A later Task 2 documentation check recorded these current SHA-256 values separately:
 
-| File | SHA-256 before and after |
+| File | SHA-256 at the later documentation check |
 |---|---|
 | `app-data/projects.config.json` | `C02AFE93F5CF0A277CEED07E7404688E34FB8714AE4E0101A9127D376B940C6D` |
 | `app-data/projects.generated.json` | `4344FEB50ADA7E39F597FFD3D2CB74979D3628C272B4959050057118A725F6C8` |
 
-This proves no changes to those two files in the exercised calls. It does not assert that every possible file or mutation endpoint was observed live; the broader read-only boundary is supported by the focused automated tests noted above.
+The paired check, not the later values, proves no changes to those two files in the exercised calls. It does not assert that every possible file or mutation endpoint was observed live; the broader read-only boundary is supported by the focused automated tests noted above.
 
 ### Browser, Responsive, And Console Evidence
 
@@ -113,7 +114,7 @@ This proves no changes to those two files in the exercised calls. It does not as
 ### DATA-001 — False real blockers enter trusted project state
 
 - **Classification / severity:** confirmed defect / high.
-- **Affected behavior and impact:** all three displayed real blockers for `projects-viewer` were false positives and were included in project status, health, and `summary.mainBlocker`. The dashboard therefore presents non-blocking specification/task text with the authority of current project state.
+- **Affected behavior and impact:** all three displayed real blockers for `projects-viewer` were false positives and affected blocker count, project status, and health. Only `**THEN** its dependent remains blocked` became the scalar `summary.mainBlocker`. The dashboard therefore presents non-blocking specification/task text with the authority of current project state.
 - **Reproducible evidence:** `signalGroups.realBlockers` contained (1) `**THEN** its dependent remains blocked` from `openspec/changes/add-selectable-specs-canvas/specs/spec-work-model/spec.md:37`, whose preceding line is the normative `WHEN`; and completed items (2) `[x] 1.1 ... checkbox blocker ...` and (3) `[x] 1.3 ... hard-block pattern.` from `openspec/changes/harden-dashboard-state-derivation/tasks.md:3,5`. All had `includedInProjectStatus=true`.
 - **Verified root cause:** `TASK_RE` matches both `[ ]` and `[x]`, and the later blocker guard does not inspect the captured completion state. Separately, `CONDITIONAL_BLOCK_RE` evaluates only the current line, so it misses cross-line OpenSpec `WHEN`/`THEN` normative context.
 - **Residual uncertainty:** semantic blocker accuracy was not manually audited across the other five configured projects, so this finding does not establish that all 28 cross-project blocker items are false.
@@ -153,6 +154,7 @@ This proves no changes to those two files in the exercised calls. It does not as
 
 - Full semantic accuracy of blocker and action extraction across the other five configured projects was not manually audited. The cross-project count must not be treated as a confirmed false-positive count.
 - API mutation endpoints were exercised through isolated automated tests rather than against the live saved config.
+- The scan-controller test proves single-flight execution and one queued rescan with throttling disabled. Although the implementation default is 30 seconds, this audit did not separately establish the real 30-second delay behavior.
 - Response times are single local observations, not a benchmark or service-level guarantee.
 - Browser checks are representative manual evidence, not visual-regression automation across all content states and browsers.
 - External integrations, cloud, authentication, arbitrary-path scanning, and scanned-project writes were not tested because they are outside the current approved product scope.
