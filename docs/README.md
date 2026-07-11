@@ -70,6 +70,7 @@ v3 implemented on 2026-07-07:
 | `CONTEXT.md` | Canonical terms and boundary rules for live/static scanning |
 | `audits/UX_UI_AUDIT_2026-07-10.md` | Evidence-backed audit of first-glance state clarity, data trust, information density, interaction, responsive layout, and accessibility |
 | `audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` | Implementation, automated verification, browser matrix, representative lifecycle states, pending human acceptance, and residual risks |
+| `audits/API_UX_TRUST_AUDIT_2026-07-12.md` | Evidence source for API boundary, scanner trust, search explanation, usability, theme, and responsive checks |
 | `planning/DASHBOARD_REDESIGN_PLAN.md` | Implemented redesign sequence and integration record for state trust, overview hierarchy, Project Timeline, search/navigation, and acceptance gates |
 | `planning/MCP_CONTEXT_API_HARDENING_PLAN.md` | Planned cleanup for canonical config, compact project-id listing, agent preflight API routing, MCP non-JSON errors, and local HTTP diagnostics |
 | `phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 plan for users, workflows, data sources, AI use cases, and acceptance criteria |
