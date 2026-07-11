@@ -336,3 +336,28 @@ test('API routes return JSON 400 for malformed JSON request bodies when frontend
     await server.close();
   }
 });
+
+test('API routes return JSON 413 for oversized JSON request bodies when frontend fallback is enabled', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-api-oversized-json-'));
+  const app = await createApp({
+    appDataDir: path.join(tmp, 'app-data'),
+    skipStartupScan: true,
+    skipWatcher: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const response = await fetch(`${server.url}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: 'x'.repeat(17 * 1024) }),
+    });
+    assert.equal(response.status, 413);
+    assert.match(response.headers.get('content-type') ?? '', /^application\/json\b/i);
+    assert.deepEqual(await response.json(), {
+      error: 'JSON request body exceeds the 16 KB limit.',
+      code: 'request-body-too-large',
+    });
+  } finally {
+    await server.close();
+  }
+});

@@ -27,6 +27,8 @@
 
 ## 5. Documentation And Verification
 
+Implementation verification is complete. The checked tasks below record completed evidence; reviewer confirmation, human acceptance, and OpenSpec archival remain outside this implementation checklist.
+
 - [x] 5.1 Update `README.md`, `docs/README.md`, `docs/00_FILE_STRUCTURE.md`, `docs/AGENTS_USAGE.md`, and `docs/CURRENT_PROJECT_AUDIT.md`.
 - [x] 5.2 Record the implementation result and close or revise `AUDIT-010`.
 - [x] 5.3 Run `npm test -- tests/project-config.test.mjs`, `npm test -- tests/server-api.test.mjs`, `npm test -- tests/projects-viewer-mcp.test.mjs`, and `npm test -- tests/agent-preflight-packet.test.mjs`.

@@ -510,14 +510,32 @@ export async function createApp({
 
   app.use(express.json({ limit: '16kb' }));
   app.use((err, req, res, next) => {
-    if (err instanceof SyntaxError && err.status === 400 && err.type === 'entity.parse.failed' && req.path.startsWith('/api')) {
+    if (!req.path.startsWith('/api')) {
+      next(err);
+      return;
+    }
+
+    if (err.type === 'entity.parse.failed') {
       res.status(400).json({
         error: 'Malformed JSON request body.',
         code: 'malformed-json',
       });
       return;
     }
-    next(err);
+
+    if (err.type === 'entity.too.large') {
+      res.status(413).json({
+        error: 'JSON request body exceeds the 16 KB limit.',
+        code: 'request-body-too-large',
+      });
+      return;
+    }
+
+    const status = Number.isInteger(err.status) && err.status >= 400 && err.status < 500 ? err.status : 400;
+    res.status(status).json({
+      error: 'Invalid JSON request body.',
+      code: 'invalid-json-body',
+    });
   });
 
   async function restartWatcher() {

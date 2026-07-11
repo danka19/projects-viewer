@@ -2,7 +2,7 @@
 
 Status: active.
 
-Last updated: 2026-07-09.
+Last updated: 2026-07-12.
 
 ## Repository Baseline
 
@@ -81,7 +81,7 @@ Last updated: 2026-07-09.
 | AUDIT-007 | `agent-preflight-packet` is implemented separately from `project-brief-report`; final acceptance still requires full verification evidence and human review before archiving the OpenSpec change. | Current feature | monitored |
 | AUDIT-008 | Next implementation step remains a human/product decision: archive `add-project-brief-report`, accept/archive `agent-preflight-packet` after final verification, or continue with dashboard/brief UI. | Human owner | open |
 | AUDIT-009 | Unrelated uncommitted UI/worktree changes were present while implementing `agent-preflight-packet`; they were not reverted or included in feature commits, and final verification must distinguish them from this change. | Human owner / current session | monitored |
-| AUDIT-010 | MCP/API hardening implementation has landed in branch `harden-mcp-context-api`: root legacy config fallback is removed, compact saved project ids are exposed, `/api/*` HTML fallback no longer masquerades as success, and local HTTP diagnostics guidance is updated. The original audit risk is mitigated by the implementation; remaining final verification is tracked separately by OpenSpec tasks 5.3 and 5.4. | Task 17 docs/audit | closed 2026-07-09 |
+| AUDIT-010 | MCP/API hardening implementation and implementation verification are complete on branch `harden-mcp-context-api`: root legacy config fallback is removed, compact saved project ids are exposed, `/api/*` parser and routing failures stay JSON, MCP response validation is hardened, and local HTTP diagnostics guidance is updated. OpenSpec tasks 5.3 and 5.4 record completed verification evidence; reviewer confirmation, human acceptance, and archival remain. | Final review / human owner | closed 2026-07-12 |
 
 ## Audit Rules
 

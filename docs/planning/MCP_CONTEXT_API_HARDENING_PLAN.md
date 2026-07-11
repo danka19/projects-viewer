@@ -1,6 +1,6 @@
 # MCP Context API Hardening Plan
 
-Status: implemented; final verification pending via OpenSpec tasks 5.3 and 5.4.
+Status: implementation and implementation verification complete; final-review fixes are complete pending reviewer confirmation. Human acceptance and OpenSpec archival remain.
 
 Decision date: 2026-07-09.
 
