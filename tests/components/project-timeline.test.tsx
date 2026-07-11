@@ -231,7 +231,12 @@ describe('expansion behavior', () => {
     await user.click(planned);
 
     expect(screen.getByText(/No steps documented for this phase/i)).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /Open phase details/i }));
+    const phaseDetails = screen.getByRole('button', { name: /^Phase details/i });
+    const emptyPhaseDetails = screen.getByRole('button', { name: /Open phase details/i });
+    expect(phaseDetails.id).toMatch(/^tl-phase-details-/);
+    expect(emptyPhaseDetails.id).toMatch(/^tl-phase-empty-details-/);
+    expect(emptyPhaseDetails.id).not.toBe(phaseDetails.id);
+    await user.click(emptyPhaseDetails);
     expect(onOpenDrawer).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'Roadmap phase', title: expect.stringContaining('Hardening') }),
     );

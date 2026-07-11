@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { DrawerItem } from '../types';
 
 interface Props {
@@ -11,10 +11,17 @@ export default function DetailDrawer({ item, onNavigate, onClose }: Props) {
   const [copied, setCopied] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const generatedOriginId = `detail-drawer-origin-${useId().replace(/:/g, '')}`;
 
   // The drawer owns focus while open, then restores the exact invoking control.
   useEffect(() => {
-    const origin = document.activeElement as HTMLElement | null;
+    const activeElement =
+      document.activeElement instanceof HTMLElement && document.activeElement !== document.body
+        ? document.activeElement
+        : null;
+    const originId = activeElement?.id || (activeElement ? generatedOriginId : null);
+    const assignedOriginId = Boolean(activeElement && !activeElement.id && originId);
+    if (activeElement && assignedOriginId && originId) activeElement.id = originId;
     const root = rootRef.current;
     const siblings = root?.parentElement
       ? Array.from(root.parentElement.children).filter((element) => element !== root)
@@ -38,9 +45,11 @@ export default function DetailDrawer({ item, onNavigate, onClose }: Props) {
         if (state.ariaHidden === null) state.element.removeAttribute('aria-hidden');
         else state.element.setAttribute('aria-hidden', state.ariaHidden);
       }
-      if (origin && document.contains(origin)) origin.focus();
+      const focusOrigin = originId ? document.getElementById(originId) : null;
+      focusOrigin?.focus();
+      if (assignedOriginId && focusOrigin?.id === originId) focusOrigin.removeAttribute('id');
     };
-  }, []);
+  }, [generatedOriginId]);
   const fullPath = `${item.projectPath.replace(/[\\/]+$/, '')}\\${item.file.replace(/\//g, '\\')}${
     item.line ? `:${item.line}` : ''
   }`;

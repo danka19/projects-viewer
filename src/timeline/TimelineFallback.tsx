@@ -96,9 +96,11 @@ export function TimelineWarnings({ model }: { model: ProjectTimelineModel }) {
 /** Expanded phase without documented steps. */
 export function TimelineNoSteps({
   phase,
+  buttonId,
   onOpenDetails,
 }: {
   phase: TimelinePhaseModel;
+  buttonId: string;
   onOpenDetails: () => void;
 }) {
   return (
@@ -113,6 +115,7 @@ export function TimelineNoSteps({
           : ' · progress unknown'}
       </p>
       <button
+        id={buttonId}
         type="button"
         onClick={onOpenDetails}
         className="mt-3 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-[11px] text-accent-ink transition-colors hover:bg-accent/15"

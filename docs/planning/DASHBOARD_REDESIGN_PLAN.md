@@ -1,6 +1,6 @@
 # Dashboard Redesign Plan
 
-Status: pending_acceptance on `dashboard-redesign/ui-rebuild`. Commit `9cfb550` closes mixed-height axis tasks 5.6-5.7; explicit human acceptance task 7.6 remains open.
+Status: pending_acceptance on `dashboard-redesign/ui-rebuild`. Commit `9cfb550` closes mixed-height axis tasks 5.6-5.7; the remaining Manage Projects and refresh-safe drawer focus gaps are technically closed; explicit human acceptance task 7.6 remains open.
 
 Date: 2026-07-10. Implementation evidence updated 2026-07-11.
 
@@ -263,7 +263,7 @@ For representative projects, the human owner must be able to identify without op
 6. real blocker versus diagnostic warning;
 7. source/confidence when state is uncertain.
 
-Outcome 2026-07-11: the earlier acceptance inference was superseded by the owner's visible broken-axis report. Commit `9cfb550` closes tasks 5.6-5.7 with a red-green regression and six dark/light viewport checks; explicit human task 7.6 remains open.
+Outcome 2026-07-11: the earlier acceptance inference was superseded by the owner's visible broken-axis report. Commit `9cfb550` closes tasks 5.6-5.7 with a red-green regression and six dark/light viewport checks. A subsequent bounded pass closed Manage Projects modal semantics/focus and the live-refresh drawer return-focus race with component, integration, and six-point browser evidence. Explicit human task 7.6 remains open.
 
 ## Redesign Acceptance Matrix
 
@@ -290,4 +290,4 @@ Outcome 2026-07-11: the earlier acceptance inference was superseded by the owner
 
 ## Human Acceptance Outcome
 
-OpenSpec task 7.6 remains open. The completed/current/planned hierarchy, current step, exclusive phase expansion, no-active-phase state, and corrected mixed-height straight-axis geometry now have agent evidence. `redesign-dashboard-project-timeline` remains active at 42/43 tasks; archival and integration are blocked only until explicit human acceptance.
+OpenSpec task 7.6 remains open. The completed/current/planned hierarchy, current step, exclusive phase expansion, no-active-phase state, corrected mixed-height straight-axis geometry, modal keyboard lifecycle, and refresh-safe drawer focus now have agent evidence. `redesign-dashboard-project-timeline` remains active at 42/43 tasks; archival and integration are blocked only until explicit human acceptance.

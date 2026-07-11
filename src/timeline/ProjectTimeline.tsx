@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 import type { DrawerItem, PhaseStatus, ProjectData, StepStatus } from '../types';
-import { phaseDrawer, stepDrawer } from '../drawer';
+import { drawerFocusOriginId, phaseDrawer, stepDrawer } from '../drawer';
 import { buildProjectTimelineModel } from './model';
 import type { ProjectTimelineModel, TimelinePhaseModel, TimelineSourceMode } from './model';
 import {
@@ -208,6 +208,13 @@ export default function ProjectTimeline({
 
   const expandedPhase: TimelinePhaseModel | null =
     model.phases.find((ph) => ph.key === view.expandedPhaseKey) ?? null;
+  const expandedPhaseDrawer = expandedPhase ? phaseDrawer(expandedPhase.raw, project) : null;
+  const phaseDetailsButtonId = expandedPhaseDrawer
+    ? drawerFocusOriginId('tl-phase-details', expandedPhaseDrawer)
+    : 'tl-phase-details-none';
+  const emptyPhaseDetailsButtonId = expandedPhaseDrawer
+    ? drawerFocusOriginId('tl-phase-empty-details', expandedPhaseDrawer)
+    : 'tl-phase-empty-details-none';
   const expandedStepRegionId = expandedPhase
     ? domId('tl-steps', expandedPhase.key)
     : 'tl-steps-none';
@@ -658,8 +665,9 @@ export default function ProjectTimeline({
                 : 'no steps'}
             </span>
             <button
+              id={phaseDetailsButtonId}
               type="button"
-              onClick={() => onOpenDrawer(phaseDrawer(expandedPhase.raw, project))}
+              onClick={() => expandedPhaseDrawer && onOpenDrawer(expandedPhaseDrawer)}
               className="ml-auto rounded-lg border border-line px-2.5 py-0.5 font-mono text-[10px] text-mute transition-colors hover:border-line-strong hover:text-ink"
             >
               Phase details →
@@ -669,7 +677,8 @@ export default function ProjectTimeline({
             <div className="mt-2.5">
               <TimelineNoSteps
                 phase={expandedPhase}
-                onOpenDetails={() => onOpenDrawer(phaseDrawer(expandedPhase.raw, project))}
+                buttonId={emptyPhaseDetailsButtonId}
+                onOpenDetails={() => expandedPhaseDrawer && onOpenDrawer(expandedPhaseDrawer)}
               />
             </div>
           ) : (

@@ -1,6 +1,6 @@
 # UX/UI Audit — Dashboard State Clarity
 
-Status: pending_acceptance. Agent-verifiable remediation, including mixed-height axis geometry, is complete; UX-005 still requires explicit human clarity acceptance through timeline task 7.6, and UX-010 retains the Manage Projects dialog gap.
+Status: pending_acceptance. Agent-verifiable remediation, including mixed-height axis geometry and UX-010 modal/focus behavior, is complete; UX-005 still requires explicit human clarity acceptance through timeline task 7.6.
 
 Date: 2026-07-10.
 
@@ -50,7 +50,7 @@ The redesign must therefore start with state trust and information hierarchy. A 
 | UX-007 | Closed: measured mobile order is project switcher, selected header, timeline, then detail tabs, without page-level overflow. |
 | UX-008 | Closed: the compact responsive shell removes the measured header/sidebar collision at desktop and tablet breakpoints. |
 | UX-009 | Closed: body prose uses system sans; semantic tokens and composited interaction tints pass automated AA checks in both themes. |
-| UX-010 | Partially remediated: safe versioned state, semantic tabs, search/history, and drawer isolation/trap/return are implemented; Manage Projects modal semantics remain a separate follow-up. |
+| UX-010 | Closed: safe versioned state, semantic tabs, search/history, Manage Projects modal behavior, and drawer isolation/trap/stable return focus are implemented and regression-tested. |
 | UX-011 | Closed: Node plus component/accessibility/search/theme coverage and live-browser acceptance now exist. |
 
 ## Quantitative Observations
@@ -195,11 +195,13 @@ Required direction: use a readable sans-serif for prose and keep monospace for p
 
 Severity: P2.
 
-Status: in_progress. Selected-project navigation remediation is complete; Manage Projects modal semantics remain a separate follow-up.
+Status: closed 2026-07-11. Selected-project navigation, Manage Projects modal semantics/focus lifecycle, and refresh-safe drawer return focus have automated and live-browser evidence.
 
-Selected project, tab, filter, drawer item, and timeline context are not represented in a durable URL/state model. Current tabs lack the full arrow-key/ARIA relationship pattern. The detail drawer lacks a complete focus trap/return contract, and Manage Projects is visually modal without a fully specified dialog behavior.
+Baseline finding: selected project, tab, filter, drawer item, and timeline context were not represented in a durable URL/state model. Tabs lacked the full arrow-key/ARIA relationship pattern. The detail drawer lacked a complete focus trap/return contract, and Manage Projects was visually modal without a fully specified dialog behavior.
 
 Required direction: URL/local state for selected context where safe; semantic composite keyboard patterns; focus transfer/return; dialog background isolation; no hover-only essential information.
+
+Closure evidence: Manage Projects is a named modal dialog with initial focus, Tab/Shift+Tab containment, Escape, inert background, and exact Manage-button return. Drawer focus origin is resolved through a stable source-derived ID; a real-App live-refresh regression replaces the opener node and confirms return focus reaches its replacement. Both dialogs passed keyboard checks at 1280x720, 1024x768, and 390x844 in dark and light themes.
 
 ### UX-011 — Frontend behavior lacks automated regression coverage
 
@@ -232,4 +234,4 @@ Required direction: introduce the smallest compatible component test harness and
 
 ## Recommended Next Decision
 
-Keep `harden-mcp-context-api` as a separate operational hardening change. The dashboard redesign has 42/43 timeline tasks complete; only human-acceptance task 7.6 blocks OpenSpec archival/sync review. Manage Projects dialog semantics remain a separate UX-010 accessibility follow-up.
+Keep `harden-mcp-context-api` as a separate operational hardening change. The dashboard redesign has 42/43 timeline tasks complete; only human-acceptance task 7.6 blocks OpenSpec archival/sync review.

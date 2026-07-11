@@ -21,7 +21,8 @@ The timeline OpenSpec change remains active and unarchived. Tasks 5.6 and 5.7 no
 - Phase cards share the tallest card height in their row, so variable content cannot bend the phase axis; the implementation uses the existing flex contract rather than a fixed height.
 - Ranked search exposes true totals and forty-result truncation, excludes diagnostics by default, supports full keyboard navigation, and preserves query/filter context when opening evidence.
 - Versioned presentation state restores valid selection, filters, tabs, query, compatible timeline expansion, and stable-kind drawer descriptors through local storage and browser history without putting local paths in the URL.
-- The read-only drawer transfers focus to Close, contains focus, isolates background content, supports related navigation, and returns focus to the exact origin.
+- The read-only drawer transfers focus to Close, contains focus, isolates background content, supports related navigation, and returns focus to a stable source-derived origin even when live refresh replaces the invoking DOM node.
+- Manage Projects is a named modal dialog with initial focus transfer, bidirectional focus containment, Escape dismissal, inert background content, and exact focus return to the Manage control.
 - Body prose uses the system sans stack; display/technical text retains the established display/mono styling. Dark/light semantic tokens and composited interaction tints pass automated AA checks.
 
 ## Automated Evidence
@@ -30,11 +31,13 @@ The timeline OpenSpec change remains active and unarchived. Tasks 5.6 and 5.7 no
 |---|---|
 | Timeline component suite | 40/40 passed, including the red-green equal-height regression |
 | Search/state/navigation focused suites | 26/26 passed |
+| Manage Projects modal suite | 4/4 passed |
+| Navigation accessibility suite | 9/9 passed, including generated-origin cleanup and real-App live-refresh focus return |
 | Theme contrast suite | 4/4 passed |
 | TypeScript | `npx tsc --noEmit` passed |
 | Independent search review | PASS; no Critical, Important, or Minor findings |
 | Independent timeline/accessibility review | PASS after loading-to-ready centering, pointer centering, descriptor priority, and composite-contrast fixes |
-| Full test suite | `npm test`: 97 Node + 71 Vitest passed |
+| Full test suite | `npm test`: 97 Node + 78 Vitest passed |
 
 ## Browser Matrix
 
@@ -48,10 +51,14 @@ The live dashboard was inspected in the in-app browser. Geometry values use CSS 
 
 The page-level overflow regression caused by screen-reader-only absolute elements was reproduced and fixed by containing each phase card. The document now remains viewport-bounded while phase/step axes retain their own horizontal scrolling and edge affordances.
 
+At every dark/light matrix point, Manage Projects and the detail drawer transferred initial focus to their Close control, kept Shift+Tab inside the dialog, restored focus to the exact stable opener on Escape, and isolated the background with `inert` plus `aria-hidden`. The console produced no warnings or errors.
+
 ## Search, History, And Focus
 
 - Query `Parsed Relationship Evidence` produced two ranked results. ArrowDown kept DOM focus on the combobox and set a stable `aria-activedescendant`; Enter opened the phase drawer.
 - Drawer focus moved to Close. Shift+Tab from Close wrapped to the last related action. Escape closed the drawer and returned focus to the search input.
+- A real-App polling integration test replaced the open phase-details control during live refresh, kept the drawer open, then verified Escape returned focus to the replacement control through the same source-derived ID rather than a stale element reference.
+- Manage Projects exposed `role="dialog"`, `aria-modal="true"`, and the `Manage Projects` accessible name; Close received initial focus, Tab/Shift+Tab stayed contained, Escape and Close restored exact focus to Manage, and background semantics were restored after dismissal.
 - Browser Back reopened the exact phase drawer with query/project context intact; Forward closed it and restored the search state.
 - Query `status` disclosed `Showing 40 of 60 results` with `87 matching diagnostics available`. Enabling diagnostics changed the truthful total to `Showing 40 of 147 results`.
 - Semantic project/detail tab navigation was exercised with ArrowRight; the selected tab and tabpanel changed together.
@@ -81,11 +88,11 @@ The page-level overflow regression caused by screen-reader-only absolute element
 | Deterministic implementation progress | Passed | Lifecycle and step-derived calculations, unknown evidence, exclusions, and project averaging pass pure tests. |
 | Loading/refresh/error/stale/partial/empty states | Passed | Component suites cover every required fallback without fabricated progress or status. |
 | Large-roadmap geometry and responsive overflow | Passed | Commit `9cfb550`; 0 px axis deviation, no clipping, and local-only overflow in all six dark/light viewport checks. |
-| Timeline keyboard, ARIA, motion, and drawer semantics | Passed with monitored race | Component/accessibility tests and stable browser paths pass; refresh-while-drawer-open focus return still needs a targeted regression. |
+| Timeline keyboard, ARIA, motion, and drawer semantics | Passed | Component/accessibility tests, all six browser matrix points, and the real-App refresh-while-drawer-open regression pass with source-derived focus identity. |
 | Ranked search and count-to-result integrity | Passed | Pure/integration tests, two-result keyboard flow, true totals/truncation, diagnostic opt-in, and fresh 27-to-27 browser evidence. |
 | Durable safe UI state and history | Passed | Versioned state, stable descriptors, Back/Forward, invalid-state rejection, and no local paths in the URL pass tests/browser checks. |
 | Existing visual identity, dark/light contrast, and readable prose | Passed | Existing theme/status tokens retained; semantic/composite contrast tests pass both themes. |
-| Manage Projects dialog accessibility | Not completed | Visually modal only: missing dialog semantics, inert background, focus lifecycle, Escape, and focus trap/return. This is the remaining UX-010 follow-up outside the timeline OpenSpec. |
+| Manage Projects dialog accessibility | Passed | Named modal semantics, initial focus, bidirectional focus trap, Escape, inert background, exact return focus, four component scenarios, and all six live-browser matrix points pass. |
 | Human at-a-glance clarity | Pending acceptance | OpenSpec task 7.6 can be closed only by explicit owner acceptance after reviewing the corrected axis. |
 | OpenSpec sync/archive and integration to `main` | Not performed | Intentionally requires separate authorization and remains blocked by task 7.6. |
 
@@ -93,10 +100,10 @@ The page-level overflow regression caused by screen-reader-only absolute element
 
 - OpenSpec timeline task 7.6 remains `pending_acceptance`; the agent can accept the technical implementation but cannot substitute for explicit human clarity acceptance.
 - `redesign-dashboard-project-timeline` has 42/43 tasks complete and is not ready for archival/sync review until task 7.6 is explicitly accepted.
-- Manage Projects still has the older visually-modal implementation. Fresh browser inspection confirmed zero `role="dialog"`, zero `aria-modal="true"`, no inert background, and no initial focus transfer; this is the remaining UX-010 accessibility gap outside the timeline component.
-- Exact drawer focus return passed for search, step details, and a stable phase-details run. One phase-details run during live refresh returned focus to the page body, then could not be reproduced after refresh completed; add a targeted refresh-while-drawer-open integration test before claiming that race is impossible.
+- The previously observed Manage Projects modal gap is closed by component and six-point live-browser evidence.
+- The previously observed live-refresh drawer race is closed by a real-App polling regression that proves return focus is resolved by stable source identity after opener replacement.
 - Browser layout evidence is representative rather than a replacement for future automated end-to-end visual regression infrastructure.
 
 ## Next Step
 
-The next required action is explicit human acceptance or rejection of task 7.6 after reviewing the corrected straight axis. Manage Projects dialog semantics and the refresh-while-drawer-open focus race should be handled as separate bounded follow-ups. OpenSpec archival/sync and integration remain blocked until task 7.6 closes.
+The next required action is explicit human acceptance or rejection of task 7.6 after reviewing the corrected straight axis. OpenSpec archival/sync and integration remain blocked until task 7.6 closes.

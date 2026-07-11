@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   DiscoveredProjectCandidate,
   ProjectConfig,
@@ -8,6 +8,7 @@ import type {
 import { formatDate } from '../statusMeta';
 
 interface ManageProjectsProps {
+  returnFocusId: string;
   liveMode: boolean;
   config: ProjectConfig | null;
   projects: ProjectData[];
@@ -22,6 +23,7 @@ interface ApiError {
 }
 
 export default function ManageProjects({
+  returnFocusId,
   liveMode,
   config,
   projects,
@@ -29,6 +31,8 @@ export default function ManageProjects({
   onConfigChanged,
   onRescan,
 }: ManageProjectsProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [projectPath, setProjectPath] = useState('');
   const [projectName, setProjectName] = useState('');
   const [workspacePath, setWorkspacePath] = useState('');
@@ -41,6 +45,63 @@ export default function ManageProjects({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    const siblings = root?.parentElement
+      ? Array.from(root.parentElement.children).filter((element) => element !== root)
+      : [];
+    const previous = siblings.map((element) => ({
+      element,
+      inert: element.getAttribute('inert'),
+      ariaHidden: element.getAttribute('aria-hidden'),
+    }));
+
+    for (const sibling of siblings) {
+      sibling.setAttribute('inert', '');
+      sibling.setAttribute('aria-hidden', 'true');
+    }
+    closeButtonRef.current?.focus();
+
+    return () => {
+      for (const state of previous) {
+        if (state.inert === null) state.element.removeAttribute('inert');
+        else state.element.setAttribute('inert', state.inert);
+        if (state.ariaHidden === null) state.element.removeAttribute('aria-hidden');
+        else state.element.setAttribute('aria-hidden', state.ariaHidden);
+      }
+      document.getElementById(returnFocusId)?.focus();
+    };
+  }, [returnFocusId]);
+
+  function handleDialogKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      onClose();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+
+    const root = rootRef.current;
+    if (!root) return;
+    const focusable = Array.from(
+      root.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((element) => !element.hasAttribute('hidden'));
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
 
   const lastScannedByPath = useMemo(() => {
     const map = new Map<string, string | null>();
@@ -188,17 +249,30 @@ export default function ManageProjects({
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 px-4 py-6 backdrop-blur-sm">
+    <div
+      ref={rootRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="manage-projects-title"
+      onKeyDown={handleDialogKeyDown}
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/50 px-4 py-6 backdrop-blur-sm"
+    >
       <div className="mx-auto max-w-5xl rounded-xl border border-line bg-void p-5 shadow-2xl">
         <div className="flex flex-wrap items-start gap-3 border-b border-line pb-4">
           <div>
-            <h2 className="font-display text-lg font-semibold text-ink">Manage Projects</h2>
+            <h2
+              id="manage-projects-title"
+              className="font-display text-lg font-semibold text-ink"
+            >
+              Manage Projects
+            </h2>
             <p className="mt-1 text-xs text-mute">
               Tracked projects are saved in <code>app-data/projects.config.json</code> and will
               remain after restart.
             </p>
           </div>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             className="ml-auto rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-mute transition hover:text-ink"

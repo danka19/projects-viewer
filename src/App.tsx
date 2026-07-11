@@ -30,6 +30,8 @@ import ManageProjects from './components/ManageProjects';
 import GlobalSearch from './components/GlobalSearch';
 import ProjectTimeline from './timeline/ProjectTimeline';
 
+const MANAGE_PROJECTS_TRIGGER_ID = 'manage-projects-trigger';
+
 export default function App() {
   const [data, setData] = useState<ScanOutput | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -384,6 +386,7 @@ function AppShell({
             onRescan={onRescan}
           />
           <button
+            id={MANAGE_PROJECTS_TRIGGER_ID}
             type="button"
             onClick={() => setManageOpen(true)}
             title={liveMode ? 'Manage tracked projects' : 'Start local server to manage projects'}
@@ -505,6 +508,7 @@ function AppShell({
       )}
       {manageOpen && (
         <ManageProjects
+          returnFocusId={MANAGE_PROJECTS_TRIGGER_ID}
           liveMode={liveMode}
           config={config}
           projects={data.projects}

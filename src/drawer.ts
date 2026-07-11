@@ -21,6 +21,20 @@ import {
   STEP_META,
 } from './statusMeta';
 
+/** Stable DOM identity for focus return; derived data labels/revisions are intentionally excluded. */
+export function drawerFocusOriginId(prefix: string, item: DrawerItem): string {
+  const sourceIdentity = [
+    item.projectPath,
+    item.descriptorKind,
+    item.file,
+    item.line ?? '',
+    prefix,
+  ]
+    .map((part) => encodeURIComponent(String(part)))
+    .join('--');
+  return `${prefix}-${sourceIdentity}`;
+}
+
 export function phaseDrawer(ph: PhaseItem, p: ProjectData, withRelated = true): DrawerItem {
   const marker = `phase ${ph.id}`;
   const related = withRelated

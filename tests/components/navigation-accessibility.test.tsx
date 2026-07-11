@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../../src/App';
 import type { DrawerItem, KnowledgeViewId, ScanOutput, TabId } from '../../src/types';
 import DetailDrawer from '../../src/components/DetailDrawer';
 import ProjectTabs from '../../src/components/ProjectTabs';
-import { makePhase, makeProject } from './fixtures';
+import { makePhase, makeProject, makeStep } from './fixtures';
 import { UI_STATE_HISTORY_KEY } from '../../src/uiState';
 
 afterEach(() => {
@@ -265,10 +265,45 @@ function DrawerHarness() {
   return (
     <div>
       <div data-testid="drawer-background">
-        <button type="button" onClick={() => setItem(drawerItem)}>
+        <button id="drawer-test-origin" type="button" onClick={() => setItem(drawerItem)}>
           Open details
         </button>
       </div>
+      {item && (
+        <DetailDrawer item={item} onNavigate={setItem} onClose={() => setItem(null)} />
+      )}
+    </div>
+  );
+}
+
+function RefreshingDrawerHarness({ revision }: { revision: string }) {
+  const [item, setItem] = useState<DrawerItem | null>(null);
+  return (
+    <div>
+      <div data-testid="refreshing-drawer-background">
+        <button
+          key={revision}
+          id="phase-details-focus-origin"
+          type="button"
+          onClick={() => setItem(drawerItem)}
+        >
+          Phase details
+        </button>
+      </div>
+      {item && (
+        <DetailDrawer item={item} onNavigate={setItem} onClose={() => setItem(null)} />
+      )}
+    </div>
+  );
+}
+
+function GeneratedOriginDrawerHarness() {
+  const [item, setItem] = useState<DrawerItem | null>(null);
+  return (
+    <div>
+      <button type="button" onClick={() => setItem(drawerItem)}>
+        Open generated origin
+      </button>
       {item && (
         <DetailDrawer item={item} onNavigate={setItem} onClose={() => setItem(null)} />
       )}
@@ -305,5 +340,143 @@ describe('read-only detail drawer focus contract', () => {
     expect(opener).toHaveFocus();
     expect(screen.getByTestId('drawer-background')).not.toHaveAttribute('inert');
     expect(screen.getByTestId('drawer-background')).not.toHaveAttribute('aria-hidden');
+  });
+
+  it('returns focus by stable opener identity when live refresh replaces the opener node', async () => {
+    const user = userEvent.setup();
+    const view = render(<RefreshingDrawerHarness revision="before-refresh" />);
+
+    const originalOpener = screen.getByRole('button', { name: 'Phase details' });
+    await user.click(originalOpener);
+    expect(screen.getByRole('button', { name: 'Close details' })).toHaveFocus();
+
+    view.rerender(<RefreshingDrawerHarness revision="after-refresh" />);
+    const refreshedOpener = screen.getByRole('button', {
+      name: 'Phase details',
+      hidden: true,
+    });
+    expect(refreshedOpener).not.toBe(originalOpener);
+    expect(refreshedOpener).toHaveAttribute('id', 'phase-details-focus-origin');
+
+    await user.keyboard('{Escape}');
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(refreshedOpener).toHaveFocus();
+  });
+
+  it('removes a generated fallback origin id after restoring focus', async () => {
+    const user = userEvent.setup();
+    render(<GeneratedOriginDrawerHarness />);
+
+    const opener = screen.getByRole('button', { name: 'Open generated origin' });
+    expect(opener).not.toHaveAttribute('id');
+    await user.click(opener);
+
+    expect(opener.id).toMatch(/^detail-drawer-origin-/);
+    await user.keyboard('{Escape}');
+
+    expect(opener).toHaveFocus();
+    expect(opener).not.toHaveAttribute('id');
+  });
+
+  it('keeps the real App drawer focus origin stable across a live project refresh', async () => {
+    const user = userEvent.setup();
+    const initialProject = makeProject({
+      name: 'refresh-focus-project',
+      path: 'C:/projects/refresh-focus-project',
+      phases: [
+        makePhase({
+          id: '1',
+          name: 'Active delivery',
+          status: 'in_progress',
+          statusText: 'Status: in progress.',
+          steps: [makeStep({ phaseId: '1', id: '1.1', status: 'in_progress' })],
+        }),
+      ],
+    });
+    const refreshedProject = makeProject({
+      ...initialProject,
+      phases: [
+        makePhase({
+          id: '1a',
+          name: 'Active delivery refreshed',
+          status: 'in_progress',
+          statusText: 'Status: in progress after live refresh.',
+          steps: [makeStep({ phaseId: '1a', id: '1a.1', status: 'in_progress' })],
+        }),
+      ],
+    });
+    let currentData: ScanOutput = {
+      generatedAt: '2026-07-11T00:00:00.000Z',
+      activeDays: 14,
+      projects: [initialProject],
+    };
+    const refreshedData: ScanOutput = {
+      generatedAt: '2026-07-11T00:01:00.000Z',
+      activeDays: 14,
+      projects: [refreshedProject],
+    };
+    let poll: (() => void) | null = null;
+    vi.spyOn(window, 'setInterval').mockImplementation(
+      ((handler: TimerHandler, timeout?: number) => {
+        if (timeout === 2000 && typeof handler === 'function' && poll === null) {
+          poll = handler as () => void;
+        }
+        return 1;
+      }) as typeof window.setInterval,
+    );
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.endsWith('/api/projects')) return jsonResponse(currentData);
+        if (url.endsWith('/api/scan-status')) {
+          return jsonResponse({
+            status: 'success',
+            lastScannedAt: currentData.generatedAt,
+            durationMs: 1,
+            scannedFilesCount: 1,
+            skippedFilesCount: 0,
+            error: null,
+            trigger: 'watcher',
+          });
+        }
+        if (url.endsWith('/api/config')) {
+          return jsonResponse({
+            workspaces: [],
+            projects: [],
+            settings: { watchDocs: true, autoRescanIntervalSec: 0 },
+          });
+        }
+        return jsonResponse({}, false, 404);
+      }),
+    );
+    render(<App />);
+
+    const originalOpener = await screen.findByRole('button', { name: /^Phase details/i });
+    await waitFor(() => expect(poll).not.toBeNull());
+    expect(originalOpener.id).not.toBe('');
+    await user.click(originalOpener);
+    expect(screen.getByRole('button', { name: 'Close details' })).toHaveFocus();
+
+    currentData = refreshedData;
+    await act(async () => {
+      poll?.();
+      await Promise.resolve();
+    });
+
+    await waitFor(() => expect(document.contains(originalOpener)).toBe(false));
+    const refreshedOpener = await screen.findByRole(
+      'button',
+      { name: /^Phase details/i, hidden: true },
+    );
+    expect(refreshedOpener).not.toBe(originalOpener);
+    expect(refreshedOpener.id).toBe(originalOpener.id);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(refreshedOpener).toHaveFocus();
   });
 });
