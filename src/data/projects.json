@@ -3,6 +3,7 @@
   "activeDays": 14,
   "projects": [
     {
+      "id": "example-project",
       "name": "Example Project",
       "path": "C:\\Users\\danoc\\Documents\\projects\\AutoParts",
       "status": "needs-attention",

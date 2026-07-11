@@ -155,6 +155,8 @@ For code, contract, API, MCP, or documentation workflow changes, run the narrowe
 ```powershell
 npm test -- tests/projects-viewer-mcp.test.mjs
 npm test -- tests/agent-preflight-packet.test.mjs
+npm test -- tests/project-config.test.mjs tests/run-scan.test.mjs tests/spec-work-scan.test.mjs
+npx vitest run tests/components/spec-model.test.tsx tests/components/spec-geometry.test.tsx tests/components/specs-canvas.test.tsx
 npm test
 npm run build
 openspec list
@@ -162,6 +164,10 @@ openspec list --specs
 openspec validate --all --strict
 git diff --check
 ```
+
+For primary-work/Specs Canvas changes, also inspect dark and light at 1280×720, 1024×768, and 390×844. Verify view fallback/persistence, card expansion, explicit dependency text and geometry, Fit all/Center active, keyboard navigation, drawer focus return, mobile vertical layout, zero page-level horizontal overflow, and an empty console.
+
+Saved `defaultView` and `documentationViews.<roadmap|specs>.roots` are optional tracked-project config. Roots must be project-relative directories validated by `PATCH /api/projects/:id`; never pass ad hoc roots to scan/rescan APIs or MCP tools.
 
 If a command cannot run, record the exact command, blocker, and remaining risk in the final report.
 

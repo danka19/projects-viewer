@@ -76,4 +76,15 @@ describe('spec canvas model', () => {
     expect(resolvePrimaryView({ saved: null, configured: null, roadmapCount: 2, specsCount: 3 }).view).toBe('roadmap');
     expect(resolvePrimaryView({ saved: null, configured: null, roadmapCount: 0, specsCount: 0 }).view).toBeNull();
   });
+
+  it('keeps the checked-in legacy static spec list useful without inventing dependencies', () => {
+    const project = makeProject({
+      specWork: undefined,
+      specs: [{ kind: 'openspec', name: 'legacy-change', file: 'openspec/changes/legacy-change/proposal.md', status: 'active' }],
+    });
+    const model = buildSpecCanvasModel(project, { generatedAt: 'static', sourceMode: 'static' });
+    expect(model.specifications).toHaveLength(1);
+    expect(model.specifications[0]).toMatchObject({ id: 'legacy-change', lifecycleStatus: 'in_progress', dependencyState: 'unknown' });
+    expect(model.dependencies).toEqual([]);
+  });
 });

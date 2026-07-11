@@ -78,5 +78,9 @@ describe('Specs Canvas', () => {
     expect(screen.getAllByRole('status').find((node) => /Partial scan/.test(node.textContent ?? ''))).toHaveTextContent(/stale.*Partial scan.*Dependency cycle/i);
     expect(screen.getByText('Unassigned work · 1')).toBeInTheDocument();
     expect(container.querySelector('[data-compact="true"]')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show archived specifications (6)' })).toBeInTheDocument();
+    expect(container.querySelectorAll('.spec-card')).toHaveLength(26);
+    fireEvent.click(screen.getByRole('button', { name: 'Show archived specifications (6)' }));
+    expect(container.querySelectorAll('.spec-card')).toHaveLength(32);
   });
 });

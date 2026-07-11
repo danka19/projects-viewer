@@ -8,6 +8,7 @@ Repo: https://github.com/danka19/projects-viewer
 
 Dashboard redesign update on 2026-07-11:
 
+- Selectable Roadmap/Specs primary work and the responsive Specs Canvas are implemented under active change `add-selectable-specs-canvas` on `dashboard-redesign/ui-rebuild`. Scanner/config/model/geometry/state/component tests, the full suite/build, and the six-point dark/light browser matrix pass; the change remains intentionally unarchived pending human product acceptance.
 - The 2026-07-10 UX/UI audit remains the baseline. State-derivation trust, overview hierarchy, the horizontal phase/step timeline, ranked search, safe UI-state persistence, responsive ordering, focus handling, and contrast were implemented on `dashboard-redesign/ui-rebuild`.
 - `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records automated and browser evidence across dark/light desktop, tablet, mobile, history/focus flows, overflow measurements, and representative lifecycle states.
 - Active OpenSpec changes `redesign-dashboard-project-timeline` and `improve-dashboard-search-navigation` remain unarchived. The timeline is technically complete at 42/43 tasks after the straight-axis fix in `9cfb550`; explicit human clarity acceptance task 7.6 remains open, and archival remains a separate authorized action.

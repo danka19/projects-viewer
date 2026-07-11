@@ -10,7 +10,9 @@ The main screen uses progressive disclosure: trusted state and lifecycle come fi
 - **Cross-project attention brief** - owner decisions, real blockers, active work, and between-phase projects. Each enabled card opens the matching cross-project evidence list.
 - **Project navigation** - a filtered sidebar on wider screens and a compact project switcher on mobile. Selecting a project is independent from the current sidebar filter.
 - **Selected-project state header** - concise lifecycle position, status, freshness, next action, and real blocker without repeating the full document inventory.
-- **Project Timeline** - a horizontal, no-wrap phase axis immediately below the state header. Exactly one phase may expand to an independent horizontal step axis. Current phase/step, lifecycle state, progress basis, confidence, ambiguity, no-phase, no-active-phase, no-steps, stale, loading, and error states remain explicit and read-only.
+- **Selectable primary work** - each project exposes counted `Roadmap` and `Specs` choices. The choice persists per stable project id and through Back/Forward; a configured default, only-available view, and Roadmap compatibility tie-breaker resolve first visits safely.
+- **Project Timeline** - the preserved horizontal, no-wrap phase axis. Exactly one phase may expand to an independent horizontal step axis. Current phase/step, lifecycle state, progress basis, confidence, ambiguity, no-phase, no-active-phase, no-steps, stale, loading, and error states remain explicit and read-only.
+- **Specs Canvas** - evidence-backed OpenSpec/generic specification cards with owned task previews, explicit-only dependencies, deterministic routed connectors, zoom/fit/center controls, keyboard spatial navigation, a mobile vertical fallback, integrity/partial states, and unassigned-work disclosure.
 - **Four detail surfaces** - Status, Work, Decisions, and Knowledge use semantic tab/tabpanel relationships and arrow-key navigation. The timeline stays visible above these secondary surfaces.
 - **Detail drawer** - phase, step, task, decision, blocker, audit, spec, or document evidence opens in a modal read-only drawer. Focus moves inside, is contained, and returns to the exact originating control on Escape or close.
 - **Ranked global search** (`/` to focus) - searches projects, roadmap phases, steps, tasks, blockers, decisions, specs, and docs with deterministic relevance, stable result identity, visible totals/truncation, keyboard navigation, and diagnostics excluded unless explicitly enabled. Result activation preserves query/filter context and participates in browser Back/Forward state.
@@ -33,7 +35,7 @@ npm run scan     # reads app-data/projects.config.json -> writes app-data/projec
 npm run dev      # starts the live dashboard at http://127.0.0.1:5173
 ```
 
-On first local-server or scan startup, the app migrates a legacy root `projects.config.json` into `app-data/projects.config.json` if the new config does not exist. Use **Manage Projects** to add one project, add a workspace folder, discover candidates, and track selected projects without editing JSON by hand.
+On first local-server or scan startup, the app migrates a legacy root `projects.config.json` into `app-data/projects.config.json` if the new config does not exist. Use **Manage Projects** to add/discover projects and to configure an optional default primary view plus project-relative Roadmap and Specs roots. Empty roots use safe mixed-repository classification; invalid, missing, absolute, traversing, and symlink-escaping roots are rejected before scanning.
 
 ## Project setup and command reference
 

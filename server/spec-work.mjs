@@ -156,7 +156,22 @@ export function buildSpecWork({ projectId, docs = [], documentationViews, trunca
     const match = doc.file.match(/^(?:\.?)openspec\/changes\/(?:archive\/)?([^/]+)\/tasks\.md$/i);
     if (match) {
       const owner = [...byId.values()].find((item) => item.kind === 'openspec-change' && (item.id === match[1] || item.source.file.includes(`/changes/${match[1]}/`)));
-      if (owner) owner.tasks.push(...tasksFrom(doc, owner.id));
+      if (owner) {
+        const secondary = parseFrontmatter(doc.content).work;
+        if (secondary && (
+          (secondary.id && secondary.id !== owner.id) ||
+          (secondary.group && secondary.group !== owner.groupId) ||
+          secondary.dependsOn.some((id) => !owner.dependsOnIds.includes(id)) ||
+          owner.dependsOnIds.some((id) => !secondary.dependsOn.includes(id))
+        )) {
+          integrityIssues.push({
+            kind: 'contradictory-metadata',
+            message: `Identity metadata in ${owner.source.file} overrides contradictory work metadata in ${doc.file}`,
+            source: { file: doc.file, line: 1 },
+          });
+        }
+        owner.tasks.push(...tasksFrom(doc, owner.id));
+      }
     }
     const genericOwner = [...byId.values()].find((item) => item.kind === 'generic-spec' && item.source.file === doc.file);
     if (genericOwner) genericOwner.tasks.push(...tasksFrom(doc, genericOwner.id));

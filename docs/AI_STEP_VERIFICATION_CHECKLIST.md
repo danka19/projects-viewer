@@ -54,6 +54,7 @@ Whenever the human owner explains how the product should work, rejects behavior,
 - Add or update tests proportional to risk.
 - Cover negative cases where the system must not infer too much.
 - Run the narrowest meaningful tests first, then broader tests when shared behavior changes.
+- For Specs Canvas work, include explicit-dependency non-inference, invalid/cyclic dependency evidence, dense 30+ fixtures, 2 px port/4 px obstacle geometry, per-project history state, mobile fallback, keyboard navigation, and exact drawer focus-return evidence.
 - Run `git diff --check` before completion when files changed.
 - For SDD/OpenSpecs changes, run `openspec list`, `openspec list --specs`, and `openspec validate --all --strict`.
 - If a test or check cannot run, record the exact command and blocker.

@@ -4,7 +4,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Current Roadmap Validation
 
-- Current phase: no active roadmap implementation phase. Phase 3 is closed; Phase 4 remains draft. The bounded dashboard redesign workstream is technically complete on `dashboard-redesign/ui-rebuild` at 42/43 timeline tasks; only explicit human clarity acceptance task 7.6 remains open. This does not activate or close Phase 4.
+- Current phase: no active roadmap implementation phase. Phase 3 is closed; Phase 4 remains draft. The bounded dashboard redesign workstream is technically complete on `dashboard-redesign/ui-rebuild` at 42/43 timeline tasks; only explicit human clarity acceptance task 7.6 remains open. The separate `add-selectable-specs-canvas` OpenSpec change is implemented and technically verified but remains active for human product acceptance. Neither workstream activates or closes Phase 4.
 - Planning from this roadmap alone is forbidden. Detailed phase plans must reconcile roadmap intent, current docs, current implementation, environment evidence, audit findings, and human decisions.
 - Product behavior, requirements, proposed changes, and acceptance criteria belong in OpenSpec artifacts under `openspec/` when SDD applies.
 - New ideas during active phase work must go through change intake before they alter scope or plans.

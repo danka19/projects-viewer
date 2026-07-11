@@ -30,13 +30,15 @@ This document is the repository map for agents and humans. Keep it current whene
 | `src/data/projects.json` | Static fallback data for browser-only mode |
 | `src/types.ts` | Scanner output, AI context/findings, project brief/report, drawer descriptor, and UI data contracts |
 | `src/search.ts` | Pure cross-project search indexing, ranking, deduplication, diagnostic opt-in, totals, and stable hit identity |
-| `src/uiState.ts` | Versioned validated local/history UI-state restoration and safe timeline/drawer descriptor contracts |
+| `src/uiState.ts` | Versioned validated local/history UI-state restoration, per-project primary view/canvas state, and safe timeline/drawer descriptor contracts |
 | `src/timeline/` | Trusted timeline presentation model/state, phase/step cards, horizontal axes, lifecycle visuals, legend, and fallback states |
+| `src/specs/` | Pure specification model, stable layered layout, obstacle-aware connector routing, responsive Canvas Focus cards, controls, and accessibility behavior |
 | `src/components/` | Dashboard panels, tabs, status badges, drawer, skeletons, and project views |
 | `src/components/GlobalSearch.tsx` | Accessible controlled search combobox/listbox with keyboard navigation and diagnostic disclosure |
 | `src/components/ManageProjects.tsx` | Live-mode tracked project/workspace management UI |
 | `server/scan-controller.mjs` | Single-flight scan controller with queue, delay, status, trigger, and throttle logic |
 | `server/project-config.mjs` | Canonical config path helpers, legacy migration, validation, project/workspace CRUD, enabled-project filtering |
+| `server/spec-work.mjs` | Narrow explicit work-frontmatter parser and evidence-backed specification/task/dependency extraction without filesystem writes |
 | `server/project-discovery.mjs` | Safe workspace candidate discovery with marker reasons, depth caps, and excluded folders |
 | `server/ai-context.mjs` | Compact AI context mapping, source-evidence normalization, and changes-since category comparison |
 | `server/ai-findings.mjs` | Deterministic review-required findings generation and local review-state persistence |
@@ -48,6 +50,8 @@ This document is the repository map for agents and humans. Keep it current whene
 | `tests/project-brief-report-types.ts` | Type-level contract sample for shared project brief/report TypeScript types |
 | `tests/components/` | Timeline, search, UI state, tab, drawer focus, responsive contract, and dashboard component tests |
 | `tests/theme-contrast.test.mjs` | Dark/light semantic-token, composite tint, axis, focus, and interaction contrast checks |
+| `tests/spec-work-scan.test.mjs` | OpenSpec/generic specification identity, ownership, lifecycle, dependency, integrity, archive, and non-inference contract tests |
+| `tests/components/spec-*.test.tsx` / `specs-canvas.test.tsx` | Pure model, deterministic layout/routing geometry, dense fixture, interaction, responsive, and accessibility checks |
 
 ## Local Runtime Data
 

@@ -85,7 +85,22 @@ export function buildSpecCanvasModel(
   project: ProjectData,
   options: { generatedAt: string; sourceMode: 'live' | 'static' | 'stale' },
 ): SpecCanvasModel {
-  const raw = project.specWork ?? { projectId: project.path, specifications: [], dependencies: [], unassignedTasks: [], integrityIssues: [], isPartial: false };
+  const legacySpecifications: RawSpecWorkItem[] = project.specs
+    .filter((item) => item.kind === 'openspec')
+    .map((item) => ({
+      key: `${project.id ?? project.path}:${item.file}`,
+      id: item.name,
+      name: item.name,
+      kind: 'openspec-change',
+      lifecycleStatus: item.status === 'active' ? 'in_progress' : item.status === 'archived' ? 'archived' : item.status === 'done' ? 'pending_acceptance' : 'planned',
+      confidence: 'medium',
+      source: { file: item.file },
+      sourceScopeId: item.file.split('/').slice(0, 2).join('/'),
+      groupId: null,
+      tasks: [],
+      dependsOnIds: [],
+    }));
+  const raw = project.specWork ?? { projectId: project.id ?? project.path, specifications: legacySpecifications, dependencies: [], unassignedTasks: [], integrityIssues: [], isPartial: false };
   const sorted = [...raw.specifications].sort((a, b) => a.key.localeCompare(b.key));
   const byId = new Map(sorted.map((item) => [item.id, item]));
   const cycleIds = new Set<string>();

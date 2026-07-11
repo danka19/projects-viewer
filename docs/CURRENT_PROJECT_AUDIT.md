@@ -16,6 +16,7 @@ Last updated: 2026-07-11.
 | `harden-dashboard-state-derivation` | `accepted` | The trust gate was implemented and included in the accepted redesign evidence; archival remains separate. |
 | `improve-dashboard-search-navigation` | `accepted` | Implementation and verification are included in the accepted redesign evidence; archival remains separate. |
 | `redesign-dashboard-project-timeline` | `pending_acceptance` | `openspec list` reports 42/43 tasks. Commit `9cfb550` and fresh six-viewport/theme geometry evidence close tasks 5.6-5.7; explicit human task 7.6 remains open. |
+| `add-selectable-specs-canvas` | `pending_acceptance` | OpenSpec artifacts validate strictly; scanner/config/model/layout/routing/state/search/UI implementation is complete with 107 Node + 91 component tests, production build, and dark/light 1280×720, 1024×768, 390×844 browser evidence. Archive/push/merge were not performed. |
 | `harden-mcp-context-api` | `planned` | 0/19 tasks; implementation has not started. |
 | Accepted specs `ai-context`, `ai-findings` | `accepted` | Present under `openspec/specs/` and validated by OpenSpec. |
 

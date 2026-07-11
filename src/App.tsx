@@ -272,7 +272,7 @@ function AppShell({
         saved: savedPrimary?.view ?? null,
         configured: selectedConfig?.defaultView ?? null,
         roadmapCount: selected.phases.length,
-        specsCount: selected.specWork?.specifications.length ?? 0,
+        specsCount: selected.specWork?.specifications.length ?? selected.specs.filter((item) => item.kind === 'openspec').length,
       })
     : { view: null, reason: null };
   const restoredDrawer = useMemo(
@@ -503,7 +503,7 @@ function AppShell({
                     <PrimaryViewSelector
                       value={primaryResolution.view ?? 'roadmap'}
                       roadmapCount={selected.phases.length}
-                      specsCount={selected.specWork?.specifications.length ?? 0}
+                      specsCount={selected.specWork?.specifications.length ?? selected.specs.filter((item) => item.kind === 'openspec').length}
                       onChange={selectPrimaryView}
                     />
                     {primaryResolution.reason && <p role="status" className="text-xs text-warn">{primaryResolution.reason}</p>}

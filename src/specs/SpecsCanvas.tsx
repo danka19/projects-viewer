@@ -104,6 +104,7 @@ export default function SpecsCanvas({
   const model = useMemo(() => buildSpecCanvasModel(project, { generatedAt, sourceMode }), [project, generatedAt, sourceMode]);
   const [viewState, setViewState] = useState<PrimaryViewDescriptor>(() => state ?? defaultState(model));
   const [announcement, setAnnouncement] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
   const cardRefs = useRef(new Map<string, HTMLButtonElement>());
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -118,15 +119,25 @@ export default function SpecsCanvas({
     });
   }, [model.revision, state]);
 
+  const archivedCount = model.specifications.filter((item) => item.lifecycleStatus === 'archived').length;
+  const visibleSpecifications = useMemo(
+    () => model.specifications.filter((item) => showArchived || item.lifecycleStatus !== 'archived'),
+    [model.specifications, showArchived],
+  );
+  const visibleKeys = useMemo(() => new Set(visibleSpecifications.map((item) => item.key)), [visibleSpecifications]);
+  const visibleDependencies = useMemo(
+    () => model.dependencies.filter((edge) => edge.state !== 'invalid' && visibleKeys.has(edge.prerequisiteKey) && visibleKeys.has(edge.dependentKey)),
+    [model.dependencies, visibleKeys],
+  );
   const layout = useMemo(() => layoutSpecCards(
-    model.specifications.map((item) => ({ key: item.key, width: 280, height: viewState.expandedSpecKey === item.key ? 880 : 220 })),
-    model.dependencies.filter((edge) => edge.state !== 'invalid').map((edge) => ({ prerequisiteKey: edge.prerequisiteKey, dependentKey: edge.dependentKey })),
+    visibleSpecifications.map((item) => ({ key: item.key, width: 280, height: viewState.expandedSpecKey === item.key ? 880 : 220 })),
+    visibleDependencies.map((edge) => ({ prerequisiteKey: edge.prerequisiteKey, dependentKey: edge.dependentKey })),
     { focusKey: viewState.selectedSpecKey },
-  ), [model, viewState.expandedSpecKey, viewState.selectedSpecKey]);
+  ), [visibleSpecifications, visibleDependencies, viewState.expandedSpecKey, viewState.selectedSpecKey]);
   const routes = useMemo(() => routeDependencies(
-    model.dependencies.filter((edge) => edge.state !== 'invalid').map((edge) => ({ key: edge.key, prerequisiteKey: edge.prerequisiteKey, dependentKey: edge.dependentKey, label: edge.label })),
+    visibleDependencies.map((edge) => ({ key: edge.key, prerequisiteKey: edge.prerequisiteKey, dependentKey: edge.dependentKey, label: edge.label })),
     layout,
-  ), [model.dependencies, layout]);
+  ), [visibleDependencies, layout]);
   const width = Math.max(760, ...[...layout.values()].map((rect) => rect.x + rect.width + 48));
   const height = Math.max(420, ...[...layout.values()].map((rect) => rect.y + rect.height + 48));
 
@@ -167,7 +178,7 @@ export default function SpecsCanvas({
   }
 
   function navigate(event: KeyboardEvent<HTMLButtonElement>, item: SpecWorkItemModel) {
-    const order = model.specifications.map((candidate) => candidate.key);
+    const order = visibleSpecifications.map((candidate) => candidate.key);
     let target: string | undefined;
     if (event.key === 'Home') target = order[0];
     if (event.key === 'End') target = order.at(-1);
@@ -208,6 +219,7 @@ export default function SpecsCanvas({
           <button type="button" aria-label="Zoom in" onClick={() => commit({ ...viewState, zoom: Math.min(150, viewState.zoom + 10) }, 'replace')} className="spec-control">+</button>
           <button type="button" aria-label="Fit all" onClick={fitAll} className="spec-control px-2">Fit all</button>
           {model.explicitCurrentSpecKey && <button type="button" aria-label="Center active specification" onClick={centerActive} className="spec-control px-2">Center active</button>}
+          {archivedCount > 0 && <button type="button" aria-label={`${showArchived ? 'Hide' : 'Show'} archived specifications (${archivedCount})`} aria-pressed={showArchived} onClick={() => setShowArchived((value) => !value)} className="spec-control px-2">Archived {archivedCount}</button>}
         </div>
       </header>
       {(model.isPartial || model.integrityIssues.length > 0 || sourceMode === 'stale') && (
@@ -216,7 +228,7 @@ export default function SpecsCanvas({
         </div>
       )}
       <p className="sr-only" aria-live="polite">{announcement}</p>
-      <div ref={viewportRef} className="spec-canvas-viewport scroll-slim overflow-auto" data-compact={model.specifications.length > 24 || undefined}>
+      <div ref={viewportRef} className="spec-canvas-viewport scroll-slim overflow-auto" data-compact={visibleSpecifications.length > 24 || undefined}>
         <div className="spec-canvas-stage relative" style={{ width, height, transform: `translate(${viewState.panX}px, ${viewState.panY}px) scale(${viewState.zoom / 100})`, transformOrigin: '0 0' }}>
           <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
             <defs><marker id="spec-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" /></marker></defs>
@@ -225,7 +237,7 @@ export default function SpecsCanvas({
               return <g key={route.key} className={selected ? 'text-accent-ink' : 'text-faint'}><polyline points={route.points.map((point) => `${point.x},${point.y}`).join(' ')} fill="none" stroke="var(--panel)" strokeWidth="7" /><polyline points={route.points.map((point) => `${point.x},${point.y}`).join(' ')} fill="none" stroke="currentColor" strokeWidth={selected ? 2.5 : 1.5} markerEnd="url(#spec-arrow)" />{route.labelRect && <text x={route.labelRect.x + route.labelRect.width / 2} y={route.labelRect.y + 13} textAnchor="middle" className="fill-current text-[10px]">{route.label}</text>}</g>;
             })}
           </svg>
-          {model.specifications.map((item) => {
+          {visibleSpecifications.map((item) => {
             const rect = layout.get(item.key)!;
             const selected = viewState.selectedSpecKey === item.key;
             const expanded = viewState.expandedSpecKey === item.key;

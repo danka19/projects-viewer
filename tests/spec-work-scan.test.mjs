@@ -59,6 +59,21 @@ test('buildSpecWork emits only explicit dependencies and preserves invalid evide
   assert.equal(model.dependencies.some((edge) => edge.prerequisiteId === 'similar-2'), false);
 });
 
+test('buildSpecWork keeps identity metadata authoritative and discloses contradictory secondary declarations', () => {
+  const model = buildSpecWork({
+    projectId: 'fixture',
+    docs: [
+      doc('openspec/changes/feature/proposal.md', '---\nwork:\n  id: feature\n  dependsOn: [base]\n  group: product\n---\n# Feature'),
+      doc('openspec/changes/feature/tasks.md', '---\nwork:\n  id: other\n  dependsOn: [wrong]\n  group: other\n---\n- [ ] Task'),
+      doc('openspec/changes/base/proposal.md', '---\nwork:\n  id: base\n---\n# Base'),
+    ],
+  });
+  const feature = model.specifications.find((item) => item.id === 'feature');
+  assert.deepEqual(feature.dependsOnIds, ['base']);
+  assert.equal(feature.groupId, 'product');
+  assert.ok(model.integrityIssues.some((issue) => issue.kind === 'contradictory-metadata'));
+});
+
 test('buildSpecWork reports self edges, cycles, duplicate ids, and partial input', () => {
   const model = buildSpecWork({
     projectId: 'fixture',

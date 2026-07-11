@@ -104,6 +104,28 @@ At every dark/light matrix point, Manage Projects and the detail drawer transfer
 - The previously observed live-refresh drawer race is closed by a real-App polling regression that proves return focus is resolved by stable source identity after opener replacement.
 - Browser layout evidence is representative rather than a replacement for future automated end-to-end visual regression infrastructure.
 
+## Selectable Specs Canvas Addendum
+
+The `add-selectable-specs-canvas` implementation adds a counted Roadmap/Specs selector without replacing the accepted timeline. Saved per-project view state uses stable project ids and versioned local/history state. Manage Projects now edits optional default view and validated project-relative roots; scanner input remains canonical saved config and scanned projects stay read-only.
+
+Automated evidence on 2026-07-11:
+
+- `npm test`: 107 Node tests and 91 Vitest tests passed.
+- `npm run build`: TypeScript and Vite production build passed.
+- Focused scanner/config/spec-work suites cover both OpenSpec spellings, scoped/mixed roots, generic/archived specs, owned/unassigned tasks, explicit dependency chains, missing/self/cycle/duplicate/contradictory evidence, and non-inference.
+- Pure model/geometry/state suites cover stable revisions, progress/current identity, dense 32-card fixture, topological layout, 2 px ports, 4 px obstacle clearance, label/card exclusion, card expansion, per-project/history persistence, and search routing.
+- Component/browser checks cover exclusive expansion, up-to-six task preview, zoom/Fit all/Center active, exact drawer focus return, semantic dependency text, roving spatial focus, partial/stale/integrity states, and mobile vertical fallback.
+
+Browser matrix evidence:
+
+| Viewport | Dark | Light | Result |
+|---|---|---|---|
+| 1280×720 | Passed | Passed | 11 full specifications / 10 visible cards with one archived card collapsed, Specs selected, SVG routes enabled, zero card overlaps, zero page overflow. |
+| 1024×768 | Passed | Passed | Spatial canvas retained, zero card overlaps, zero page overflow. |
+| 390×844 | Passed | Passed | Cards switched to relative vertical flow, SVG hidden, dependency text retained, zero page overflow. |
+
+The final live browser run produced no warnings/errors. A real expanded 24-task card initially exposed two card collisions because its actual six-task preview exceeded the reserved height; the reservation was corrected and final remeasurement reported zero overlaps at all six matrix points. Closing a task drawer returned focus to the exact stable task control. Manage Projects exposed six Documentation views editors in the current six-project config. The final canvas disclosed 11 full specifications, kept one archived card behind an explicit counted control, and rendered 10 active/reference cards by default. The OpenSpec change remains active and unarchived for explicit human product acceptance.
+
 ## Next Step
 
-The next required action is explicit human acceptance or rejection of task 7.6 after reviewing the corrected straight axis. OpenSpec archival/sync and integration remain blocked until task 7.6 closes.
+The next required actions are explicit human acceptance/rejection of timeline task 7.6 and product acceptance of the finished Specs Canvas. OpenSpec archival/sync and integration remain separate authorized actions; `add-selectable-specs-canvas` must not be archived, pushed, or merged without the requested approval.
