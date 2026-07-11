@@ -88,6 +88,70 @@ test('updateProject changes editable fields and removeProject only updates confi
   assert.equal(removed.config.projects.length, 0);
 });
 
+test('updateProject saves normalized documentation views and rejects unsafe roots atomically', async () => {
+  const tmp = await makeTemp();
+  const appDataDir = path.join(tmp, 'app-data');
+  const projectRoot = path.join(tmp, 'sample');
+  await fs.mkdir(path.join(projectRoot, 'docs', 'phases'), { recursive: true });
+  await fs.mkdir(path.join(projectRoot, 'openspec'), { recursive: true });
+  await ensureProjectConfig({ appDataDir, legacyConfigPath: path.join(tmp, 'missing.json') });
+  const { project } = await addProject({ path: projectRoot, name: 'Sample' }, { appDataDir });
+
+  const updated = await updateProject(
+    project.id,
+    {
+      defaultView: 'specs',
+      documentationViews: {
+        roadmap: { roots: ['docs\\phases', 'docs/phases/'] },
+        specs: { roots: ['openspec'] },
+      },
+    },
+    { appDataDir },
+  );
+  assert.equal(updated.project.defaultView, 'specs');
+  assert.deepEqual(updated.project.documentationViews, {
+    roadmap: { roots: ['docs/phases'] },
+    specs: { roots: ['openspec'] },
+  });
+
+  await assert.rejects(
+    updateProject(
+      project.id,
+      { documentationViews: { specs: { roots: ['../outside'] } } },
+      { appDataDir },
+    ),
+    /project-relative|inside/i,
+  );
+  const after = await readProjectConfig({ appDataDir });
+  assert.deepEqual(after.projects[0].documentationViews, updated.project.documentationViews);
+});
+
+test('updateProject rejects missing roots and symlink escapes', async (t) => {
+  const tmp = await makeTemp();
+  const appDataDir = path.join(tmp, 'app-data');
+  const projectRoot = path.join(tmp, 'sample');
+  const outside = path.join(tmp, 'outside');
+  await fs.mkdir(projectRoot, { recursive: true });
+  await fs.mkdir(outside, { recursive: true });
+  await ensureProjectConfig({ appDataDir, legacyConfigPath: path.join(tmp, 'missing.json') });
+  const { project } = await addProject({ path: projectRoot }, { appDataDir });
+
+  await assert.rejects(
+    updateProject(project.id, { documentationViews: { specs: { roots: ['missing'] } } }, { appDataDir }),
+    /exist|directory/i,
+  );
+  try {
+    await fs.symlink(outside, path.join(projectRoot, 'escape'), 'junction');
+  } catch (error) {
+    t.skip(`symlink creation unavailable: ${error.message}`);
+    return;
+  }
+  await assert.rejects(
+    updateProject(project.id, { documentationViews: { specs: { roots: ['escape'] } } }, { appDataDir }),
+    /inside|escape/i,
+  );
+});
+
 test('addWorkspace validates directory and normalizes discovery depth', async () => {
   const tmp = await makeTemp();
   const appDataDir = path.join(tmp, 'app-data');

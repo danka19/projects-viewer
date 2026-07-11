@@ -30,6 +30,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ensureProjectConfig } from './server/project-config.mjs';
+import { buildSpecWork } from './server/spec-work.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_APP_DATA_DIR = path.join(__dirname, 'app-data');
@@ -49,7 +50,7 @@ const ROOT_DOC_FILES = new Set([
   'roadmap.md',
   'changelog.md',
 ]);
-const DOC_DIRS = new Set(['docs', 'specs', '.openspec', 'openapi']);
+const DOC_DIRS = new Set(['docs', 'specs', '.openspec', 'openspec', 'openapi']);
 const EXCLUDED_DIRS = new Set([
   'node_modules',
   '.git',
@@ -196,14 +197,14 @@ const EXAMPLE_TEMPLATE_PATH_RE = /(^|\/)(templates?|examples?)(\/|$)|(^|\/)docs\
 
 // ------------------------------------------------------------------ walking
 
-async function collectDocs(projectRoot) {
+async function collectDocs(projectRoot, documentationViews = null) {
   let entries;
   try {
     entries = await fs.readdir(projectRoot, { withFileTypes: true });
   } catch {
     return null; // project path missing/unreadable
   }
-  const ctx = { docs: [], skipped: [], truncated: false, projectRoot };
+  const ctx = { docs: [], skipped: [], truncated: false, projectRoot, seen: new Set() };
   for (const entry of entries) {
     if (entry.isSymbolicLink()) {
       skip(ctx, path.join(projectRoot, entry.name), 'symlink');
@@ -218,6 +219,34 @@ async function collectDocs(projectRoot) {
     } else {
       skip(ctx, full, entry.isDirectory() ? 'root directory is outside scan rules' : 'root file is outside scan rules');
     }
+  }
+  const configuredRoots = [
+    ...(documentationViews?.roadmap?.roots ?? []),
+    ...(documentationViews?.specs?.roots ?? []),
+  ];
+  for (const rawRoot of [...new Set(configuredRoots)]) {
+    if (typeof rawRoot !== 'string') continue;
+    const normalized = rawRoot.trim().replace(/\\/g, '/').replace(/\/+$/g, '');
+    if (
+      !normalized ||
+      path.isAbsolute(normalized) ||
+      normalized.split('/').some((segment) => !segment || segment === '.' || segment === '..')
+    ) {
+      skip(ctx, rawRoot, 'invalid configured documentation root');
+      continue;
+    }
+    const candidate = path.resolve(projectRoot, ...normalized.split('/'));
+    const relative = path.relative(projectRoot, candidate);
+    if (relative.startsWith('..') || path.isAbsolute(relative)) {
+      skip(ctx, candidate, 'configured documentation root escapes project');
+      continue;
+    }
+    const stat = await fs.lstat(candidate).catch(() => null);
+    if (!stat?.isDirectory() || stat.isSymbolicLink()) {
+      skip(ctx, candidate, 'configured documentation root is unavailable or unsafe');
+      continue;
+    }
+    await walkDir(ctx, candidate, 0);
   }
   ctx.docs.sort((a, b) => a.file.localeCompare(b.file));
   return ctx;
@@ -267,6 +296,8 @@ async function addDoc(ctx, filePath) {
       return;
     }
     const rel = path.relative(ctx.projectRoot, filePath).split(path.sep).join('/');
+    if (ctx.seen.has(rel)) return;
+    ctx.seen.add(rel);
     ctx.docs.push({
       absPath: filePath,
       file: rel,
@@ -1261,7 +1292,7 @@ async function scanProject(entry, activeDays) {
     seenRisks: new Set(),
   };
 
-  const collected = await collectDocs(entry.path);
+  const collected = await collectDocs(entry.path, entry.documentationViews);
   const docs = collected ? collected.docs : null;
   const skipped = collected ? collected.skipped : [];
   if (collected?.truncated) {
@@ -1273,6 +1304,7 @@ async function scanProject(entry, activeDays) {
     for (const doc of docs) {
       try {
         const content = await fs.readFile(doc.absPath, 'utf8');
+        doc.content = content;
         const perDoc = parseDoc(content, doc, acc);
         doc.openTaskCount = perDoc.open;
         doc.completedTaskCount = perDoc.completed;
@@ -1283,6 +1315,12 @@ async function scanProject(entry, activeDays) {
     }
   }
 
+  const roadmapRoots = entry.documentationViews?.roadmap?.roots ?? [];
+  if (roadmapRoots.length > 0) {
+    const inRoadmapRoots = (file) => roadmapRoots.some((root) => file === root || file.startsWith(`${root.replace(/\\/g, '/').replace(/\/+$/, '')}/`));
+    acc.phases = acc.phases.filter((phase) => inRoadmapRoots(phase.file));
+    acc.steps = acc.steps.filter((step) => inRoadmapRoots(step.file));
+  }
   acc.phases = dedupePhases(acc.phases);
   attachSteps(acc.phases, acc.steps);
   flagOrderingContradictions(acc.phases);
@@ -1293,6 +1331,12 @@ async function scanProject(entry, activeDays) {
 
   const { changes: openspecChanges, specFileCount } = collectOpenSpec(docs ?? []);
   acc.specs.push(...openspecChanges);
+  const specWork = buildSpecWork({
+    projectId: entry.id ?? entry.path,
+    docs: docs ?? [],
+    documentationViews: entry.documentationViews,
+    truncated: Boolean(collected?.truncated),
+  });
 
   const lastModified =
     docs && docs.length > 0 ? docs.map((d) => d.modified).sort().at(-1) : null;
@@ -1312,6 +1356,7 @@ async function scanProject(entry, activeDays) {
   const totalTasks = acc.openTasks.length + acc.completedTasks.length;
 
   return {
+    id: entry.id ?? entry.path,
     name: entry.name,
     path: entry.path,
     status,
@@ -1332,6 +1377,7 @@ async function scanProject(entry, activeDays) {
     risks: acc.risks,
     specs: acc.specs,
     specFileCount,
+    specWork,
     audits,
     gaps,
     intel: {
@@ -1344,7 +1390,7 @@ async function scanProject(entry, activeDays) {
       attentionMarkerCount: attention,
       lastDocUpdate: lastModified,
     },
-    docs: (docs ?? []).map(({ absPath: _absPath, archivedFlag: _a, ...rest }) => rest),
+    docs: (docs ?? []).map(({ absPath: _absPath, archivedFlag: _a, content: _content, ...rest }) => rest),
     stats: {
       docsCount: docs ? docs.length : 0,
       totalSizeBytes: (docs ?? []).reduce((sum, d) => sum + d.sizeBytes, 0),

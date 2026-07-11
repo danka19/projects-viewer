@@ -103,12 +103,17 @@ export function normalizeProjectConfig(input = {}, { now = () => new Date() } = 
       existingIds.add(id);
       const createdAt = validIso(project.createdAt) ? project.createdAt : timestamp;
       const updatedAt = validIso(project.updatedAt) ? project.updatedAt : createdAt;
+      const documentationViews = normalizeDocumentationViews(project.documentationViews);
       return {
         id,
         name,
         path: path.resolve(project.path),
         enabled: project.enabled !== false,
         tags: normalizeTags(project.tags),
+        ...(project.defaultView === 'roadmap' || project.defaultView === 'specs'
+          ? { defaultView: project.defaultView }
+          : {}),
+        ...(documentationViews ? { documentationViews } : {}),
         createdAt,
         updatedAt,
       };
@@ -155,18 +160,59 @@ export async function updateProject(id, patch, options = {}) {
   if (index === -1) throwStatus(404, 'Project not found.');
 
   const timestamp = toIso(options.now?.() ?? new Date());
+  const current = config.projects[index];
+  const defaultView =
+    patch?.defaultView === undefined
+      ? current.defaultView
+      : patch.defaultView === null || patch.defaultView === ''
+        ? undefined
+        : normalizeDefaultView(patch.defaultView);
+  const documentationViews =
+    patch?.documentationViews === undefined
+      ? current.documentationViews
+      : await validateDocumentationViews(current.path, patch.documentationViews);
   const projects = config.projects.map((project, projectIndex) => {
     if (projectIndex !== index) return project;
-    return {
+    const nextProject = {
       ...project,
       name: patch?.name === undefined ? project.name : cleanName(patch.name, project.name),
       enabled: typeof patch?.enabled === 'boolean' ? patch.enabled : project.enabled,
       tags: patch?.tags === undefined ? project.tags : normalizeTags(patch.tags),
       updatedAt: timestamp,
     };
+    delete nextProject.defaultView;
+    delete nextProject.documentationViews;
+    if (defaultView) nextProject.defaultView = defaultView;
+    if (documentationViews) nextProject.documentationViews = documentationViews;
+    return nextProject;
   });
   const saved = await writeProjectConfig({ ...config, projects }, options);
   return { project: saved.projects[index], config: saved };
+}
+
+export async function validateDocumentationViews(projectRoot, input) {
+  if (input === null) return undefined;
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throwStatus(400, 'Documentation views must be an object.');
+  }
+  const normalized = normalizeDocumentationViews(input, { strict: true });
+  if (!normalized) return undefined;
+  const rootReal = await fs.realpath(projectRoot).catch(() => null);
+  if (!rootReal) throwStatus(400, 'Saved project root must exist and be a directory.');
+  for (const view of ['roadmap', 'specs']) {
+    for (const relativeRoot of normalized[view]?.roots ?? []) {
+      const candidate = path.resolve(projectRoot, ...relativeRoot.split('/'));
+      const stat = await fs.stat(candidate).catch(() => null);
+      if (!stat || !stat.isDirectory()) {
+        throwStatus(400, `Documentation root "${relativeRoot}" must exist and be a directory.`);
+      }
+      const real = await fs.realpath(candidate).catch(() => null);
+      if (!real || !isInsideRoot(real, rootReal)) {
+        throwStatus(400, `Documentation root "${relativeRoot}" must remain inside the saved project root.`);
+      }
+    }
+  }
+  return normalized;
 }
 
 export async function removeProject(id, options = {}) {
@@ -253,6 +299,50 @@ function normalizeTags(tags) {
   return Array.isArray(tags)
     ? [...new Set(tags.filter((tag) => typeof tag === 'string').map((tag) => tag.trim()).filter(Boolean))]
     : [];
+}
+
+function normalizeDefaultView(value) {
+  if (value !== 'roadmap' && value !== 'specs') {
+    throwStatus(400, 'Default view must be "roadmap" or "specs".');
+  }
+  return value;
+}
+
+function normalizeDocumentationViews(input, { strict = false } = {}) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return undefined;
+  const result = {};
+  for (const view of ['roadmap', 'specs']) {
+    const candidate = input[view];
+    if (candidate === undefined || candidate === null) continue;
+    if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) {
+      if (strict) throwStatus(400, `Documentation ${view} view must be an object.`);
+      continue;
+    }
+    if (!Array.isArray(candidate.roots)) {
+      if (strict) throwStatus(400, `Documentation ${view} roots must be an array.`);
+      continue;
+    }
+    const roots = [];
+    for (const raw of candidate.roots) {
+      if (typeof raw !== 'string') {
+        if (strict) throwStatus(400, 'Documentation roots must be project-relative strings.');
+        continue;
+      }
+      const normalized = raw.trim().replace(/\\/g, '/').replace(/\/+$/g, '');
+      if (
+        !normalized ||
+        path.isAbsolute(normalized) ||
+        /^[a-z]:/i.test(normalized) ||
+        normalized.split('/').some((segment) => !segment || segment === '.' || segment === '..')
+      ) {
+        if (strict) throwStatus(400, 'Documentation roots must be normalized project-relative paths.');
+        continue;
+      }
+      if (!roots.includes(normalized)) roots.push(normalized);
+    }
+    result[view] = { roots };
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
 }
 
 function cleanName(value, fallback) {

@@ -29,6 +29,9 @@ import StatusOrb from './components/StatusOrb';
 import ManageProjects from './components/ManageProjects';
 import GlobalSearch from './components/GlobalSearch';
 import ProjectTimeline from './timeline/ProjectTimeline';
+import SpecsCanvas, { PrimaryViewSelector } from './specs/SpecsCanvas';
+import { resolvePrimaryView } from './specs/model';
+import type { PrimaryWorkView } from './specs/model';
 
 const MANAGE_PROJECTS_TRIGGER_ID = 'manage-projects-trigger';
 
@@ -259,6 +262,19 @@ function AppShell({
   );
   const selected: ProjectData | null =
     data.projects.find((p) => p.path === selectedPath) ?? data.projects[0] ?? null;
+  const selectedProjectId = selected ? (selected.id ?? selected.path) : null;
+  const selectedConfig = selected
+    ? config?.projects.find((project) => project.id === selected.id || project.path === selected.path)
+    : null;
+  const savedPrimary = selectedProjectId ? uiState.primaryViews?.[selectedProjectId] ?? null : null;
+  const primaryResolution = selected
+    ? resolvePrimaryView({
+        saved: savedPrimary?.view ?? null,
+        configured: selectedConfig?.defaultView ?? null,
+        roadmapCount: selected.phases.length,
+        specsCount: selected.specWork?.specifications.length ?? 0,
+      })
+    : { view: null, reason: null };
   const restoredDrawer = useMemo(
     () => (uiState.drawer ? resolveDrawerDescriptor(uiState.drawer, data.projects) : null),
     [data.projects, uiState.drawer],
@@ -288,7 +304,11 @@ function AppShell({
     const descriptor = persistableDrawer(hit.drawer);
     setTransientDrawer(hit.drawer && !descriptor ? hit.drawer : null);
     commitUiState(
-      (current) => ({
+      (current) => {
+        const projectId = hit.project.id ?? hit.project.path;
+        const existingPrimary = current.primaryViews?.[projectId];
+        const routedView = hit.primaryView ?? existingPrimary?.view;
+        return ({
         ...current,
         selectedPath: hit.project.path,
         activeTab: hit.tab ?? current.activeTab,
@@ -296,9 +316,41 @@ function AppShell({
         timeline:
           hit.project.path === current.selectedPath ? current.timeline : null,
         drawer: descriptor,
-      }),
+        primaryViews: routedView ? {
+          ...(current.primaryViews ?? {}),
+          [projectId]: {
+            view: routedView,
+            selectedSpecKey: hit.specKey ?? existingPrimary?.selectedSpecKey ?? null,
+            expandedSpecKey: hit.taskKey ? hit.specKey ?? null : existingPrimary?.expandedSpecKey ?? null,
+            zoom: existingPrimary?.zoom ?? 100,
+            panX: existingPrimary?.panX ?? 0,
+            panY: existingPrimary?.panY ?? 0,
+          },
+        } : current.primaryViews,
+      });},
       'push',
     );
+  }
+
+  function selectPrimaryView(view: PrimaryWorkView) {
+    if (!selected || !selectedProjectId) return;
+    commitUiState((current) => {
+      const previous = current.primaryViews?.[selectedProjectId];
+      return {
+        ...current,
+        primaryViews: {
+          ...(current.primaryViews ?? {}),
+          [selectedProjectId]: {
+            view,
+            selectedSpecKey: previous?.selectedSpecKey ?? null,
+            expandedSpecKey: previous?.expandedSpecKey ?? null,
+            zoom: previous?.zoom ?? 100,
+            panX: previous?.panX ?? 0,
+            panY: previous?.panY ?? 0,
+          },
+        },
+      };
+    }, 'push');
   }
 
   function selectProject(path: string) {
@@ -447,7 +499,16 @@ function AppShell({
                     }
                     onOpenDrawer={openDrawer}
                   />
-                  <ProjectTimeline
+                  <div className="flex flex-wrap items-center gap-3">
+                    <PrimaryViewSelector
+                      value={primaryResolution.view ?? 'roadmap'}
+                      roadmapCount={selected.phases.length}
+                      specsCount={selected.specWork?.specifications.length ?? 0}
+                      onChange={selectPrimaryView}
+                    />
+                    {primaryResolution.reason && <p role="status" className="text-xs text-warn">{primaryResolution.reason}</p>}
+                  </div>
+                  {primaryResolution.view === 'roadmap' ? <ProjectTimeline
                     key={`timeline:${selected.path}`}
                     project={selected}
                     generatedAt={data.generatedAt}
@@ -470,7 +531,22 @@ function AppShell({
                         'push',
                       )
                     }
-                  />
+                  /> : primaryResolution.view === 'specs' ? <SpecsCanvas
+                    key={`specs:${selectedProjectId}`}
+                    project={selected}
+                    generatedAt={data.generatedAt}
+                    sourceMode={timelineSourceMode}
+                    refreshing={liveMode && scanStatus?.status === 'scanning'}
+                    state={savedPrimary}
+                    onStateChange={(primary, historyMode = 'push') => {
+                      if (!selectedProjectId) return;
+                      commitUiState((current) => ({
+                        ...current,
+                        primaryViews: { ...(current.primaryViews ?? {}), [selectedProjectId]: primary },
+                      }), historyMode);
+                    }}
+                    onOpenDrawer={openDrawer}
+                  /> : <div className="glass rounded-xl p-8 text-center"><h2 className="text-base font-semibold text-ink">No primary work detected</h2><p className="mt-2 text-sm text-mute">Add a supported roadmap or specification source, or configure documentation roots.</p></div>}
                   <ProjectTabs
                     project={selected}
                     activeTab={activeTab}

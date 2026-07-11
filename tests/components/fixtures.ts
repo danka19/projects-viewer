@@ -34,6 +34,7 @@ export function makePhase(overrides: Partial<PhaseItem> = {}): PhaseItem {
 
 export function makeProject(overrides: Partial<ProjectData> = {}): ProjectData {
   return {
+    id: 'fixture-project',
     name: 'fixture-project',
     path: 'C:/tmp/fixture-project',
     status: 'active',
@@ -112,4 +113,43 @@ export function makeProject(overrides: Partial<ProjectData> = {}): ProjectData {
     },
     ...overrides,
   };
+}
+
+export function makeDenseSpecProject(count = 32): ProjectData {
+  const specifications = Array.from({ length: count }, (_, index) => ({
+    key: `dense:spec-${index}`,
+    id: `spec-${index}`,
+    name: `Specification ${String(index).padStart(2, '0')}`,
+    kind: (index % 7 === 0 ? 'accepted-capability' : 'openspec-change') as 'accepted-capability' | 'openspec-change',
+    lifecycleStatus: (index >= 26 ? 'archived' : index === 4 ? 'in_progress' : index === 12 ? 'blocked' : 'planned') as 'archived' | 'in_progress' | 'blocked' | 'planned',
+    confidence: 'high' as const,
+    source: { file: `openspec/changes/spec-${index}/proposal.md`, line: 1 },
+    sourceScopeId: index % 2 ? 'analytics/search' : 'openspec/changes',
+    groupId: index % 3 === 0 ? 'search' : index % 3 === 1 ? 'reports' : null,
+    tasks: Array.from({ length: index % 8 }, (_, taskIndex) => ({
+      key: `dense:spec-${index}:task-${taskIndex}`,
+      id: null,
+      name: `Task ${index}.${taskIndex}`,
+      status: (taskIndex < 2 ? 'closed' : taskIndex === 2 && index === 4 ? 'in_progress' : 'planned') as 'closed' | 'in_progress' | 'planned',
+      source: { file: `openspec/changes/spec-${index}/tasks.md`, line: taskIndex + 1 },
+      order: taskIndex,
+    })),
+    dependsOnIds: index > 0 && index < 18 && index % 6 !== 0 ? [`spec-${index - 1}`] : index === 20 ? ['spec-21'] : index === 21 ? ['spec-20'] : [],
+  }));
+  const dependencies = specifications.flatMap((spec) => spec.dependsOnIds.map((prerequisiteId) => ({
+    key: `${prerequisiteId}->${spec.id}`,
+    prerequisiteId,
+    dependentId: spec.id,
+    sourceEvidence: [spec.source],
+    state: 'unknown' as const,
+  })));
+  return makeProject({
+    id: 'dense-project', name: 'dense-project', path: 'C:/projects/dense', phases: [],
+    specWork: {
+      projectId: 'dense-project', specifications, dependencies,
+      unassignedTasks: [{ key: 'unassigned:1', id: null, name: 'Loose task', status: 'planned', source: { file: 'docs/TASKS.md', line: 1 }, order: 0 }],
+      integrityIssues: [{ kind: 'cycle', message: 'Dependency cycle: spec-20, spec-21' }],
+      isPartial: true,
+    },
+  });
 }

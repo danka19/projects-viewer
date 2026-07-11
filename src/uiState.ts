@@ -24,7 +24,7 @@ import type {
   TabId,
 } from './types';
 
-export const UI_STATE_VERSION = 1 as const;
+export const UI_STATE_VERSION = 2 as const;
 export const UI_STATE_STORAGE_KEY = 'projects-viewer.ui-state';
 export const UI_STATE_HISTORY_KEY = 'projectsViewer';
 
@@ -54,6 +54,16 @@ export interface DashboardUiState {
   includeDiagnostics: boolean;
   timeline: TimelineDescriptor | null;
   drawer: DrawerDescriptor | null;
+  primaryViews?: Record<string, PrimaryViewDescriptor>;
+}
+
+export interface PrimaryViewDescriptor {
+  view: 'roadmap' | 'specs';
+  selectedSpecKey: string | null;
+  expandedSpecKey: string | null;
+  zoom: number;
+  panX: number;
+  panY: number;
 }
 
 interface PersistedUiState extends DashboardUiState {
@@ -123,6 +133,7 @@ export function createDefaultUiState(projects: ProjectData[]): DashboardUiState 
     includeDiagnostics: false,
     timeline: null,
     drawer: null,
+    primaryViews: {},
   };
 }
 
@@ -161,12 +172,31 @@ function parseDrawerDescriptor(value: unknown): DrawerDescriptor | null {
 }
 
 function toPersistedUiState(state: DashboardUiState): PersistedUiState {
-  return { version: UI_STATE_VERSION, ...state };
+  return { version: UI_STATE_VERSION, ...state, primaryViews: state.primaryViews ?? {} };
+}
+
+function parsePrimaryViews(value: unknown, projects: ProjectData[]): Record<string, PrimaryViewDescriptor> {
+  if (!isRecord(value)) return {};
+  const projectIds = new Set(projects.map((project) => project.id ?? project.path));
+  const result: Record<string, PrimaryViewDescriptor> = {};
+  for (const [projectId, raw] of Object.entries(value)) {
+    if (!projectIds.has(projectId) || !isRecord(raw) || (raw.view !== 'roadmap' && raw.view !== 'specs')) continue;
+    const zoom = typeof raw.zoom === 'number' && Number.isFinite(raw.zoom) ? Math.max(50, Math.min(150, raw.zoom)) : 100;
+    result[projectId] = {
+      view: raw.view,
+      selectedSpecKey: typeof raw.selectedSpecKey === 'string' ? raw.selectedSpecKey : null,
+      expandedSpecKey: typeof raw.expandedSpecKey === 'string' ? raw.expandedSpecKey : null,
+      zoom,
+      panX: typeof raw.panX === 'number' && Number.isFinite(raw.panX) ? raw.panX : 0,
+      panY: typeof raw.panY === 'number' && Number.isFinite(raw.panY) ? raw.panY : 0,
+    };
+  }
+  return result;
 }
 
 export function restoreUiState(value: unknown, projects: ProjectData[]): DashboardUiState {
   const defaults = createDefaultUiState(projects);
-  if (!isRecord(value) || value.version !== UI_STATE_VERSION) return defaults;
+  if (!isRecord(value) || (value.version !== UI_STATE_VERSION && value.version !== 1)) return defaults;
 
   const selectedPath =
     typeof value.selectedPath === 'string' &&
@@ -205,6 +235,7 @@ export function restoreUiState(value: unknown, projects: ProjectData[]): Dashboa
         : defaults.includeDiagnostics,
     timeline,
     drawer: resolvedDrawer,
+    primaryViews: value.version === 1 ? {} : parsePrimaryViews(value.primaryViews, projects),
   };
 }
 

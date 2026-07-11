@@ -33,6 +33,25 @@ function diagnostic(text: string, file: string, line: number): BlockedGatedCandi
 }
 
 describe('searchProjects pure contract', () => {
+  it('indexes specification identities and owned tasks with Specs routing descriptors', () => {
+    const project = makeProject({
+      specWork: {
+        projectId: 'fixture-project',
+        specifications: [{
+          key: 'spec:ranking', id: 'ranking', name: 'Needle ranking', kind: 'openspec-change', lifecycleStatus: 'in_progress', confidence: 'high',
+          source: { file: 'openspec/changes/ranking/proposal.md', line: 1 }, sourceScopeId: 'openspec/changes', groupId: 'search', dependsOnIds: [],
+          tasks: [{ key: 'task:tune', id: null, name: 'Needle tune weights', status: 'planned', source: { file: 'openspec/changes/ranking/tasks.md', line: 2 }, order: 0 }],
+        }],
+        dependencies: [], unassignedTasks: [], integrityIssues: [], isPartial: false,
+      },
+    });
+    const result = searchProjects([project], 'needle');
+    expect(result.hits).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: 'Specification', primaryView: 'specs', specKey: 'spec:ranking' }),
+      expect.objectContaining({ kind: 'Spec task', primaryView: 'specs', specKey: 'spec:ranking', taskKey: 'task:tune' }),
+    ]));
+  });
+
   it('ranks project and current work ahead of ordinary tasks, docs, and diagnostics', () => {
     const project = makeProject({
       name: 'Needle project',

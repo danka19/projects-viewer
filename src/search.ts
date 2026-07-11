@@ -26,6 +26,9 @@ export interface SearchHit {
   tab?: TabId;
   knowledgeView?: KnowledgeViewId;
   drawer?: DrawerItem;
+  primaryView?: 'roadmap' | 'specs';
+  specKey?: string;
+  taskKey?: string;
 }
 
 export interface SearchResult {
@@ -118,6 +121,7 @@ export function searchProjects(
           project: p,
           tab: 'status',
           drawer: phaseDrawer(ph, p),
+          primaryView: 'roadmap',
         });
       }
     }
@@ -197,6 +201,37 @@ export function searchProjects(
           tab: 'knowledge',
           knowledgeView: 'specs',
           drawer: specDrawer(sp, p),
+        });
+      }
+    }
+    for (const spec of p.specWork?.specifications ?? []) {
+      const haystack = [spec.name, spec.id, spec.groupId, spec.lifecycleStatus, spec.source.file].filter(Boolean).join(' ').toLowerCase();
+      if (haystack.includes(q)) {
+        add({
+          key: stableKey(p, 'spec-work', spec.source.file, spec.source.line, spec.key),
+          kind: 'Specification',
+          label: spec.name,
+          sub: `${p.name} · ${spec.lifecycleStatus.replaceAll('_', ' ')}`,
+          score: spec.lifecycleStatus === 'in_progress' ? 90 : spec.lifecycleStatus === 'archived' ? 46 : 70,
+          project: p,
+          primaryView: 'specs',
+          specKey: spec.key,
+          drawer: {
+            type: 'Specification', title: spec.name, text: `${spec.kind.replaceAll('-', ' ')} · ${spec.lifecycleStatus.replaceAll('_', ' ')}`,
+            file: spec.source.file, line: spec.source.line, projectPath: p.path, status: spec.lifecycleStatus.replaceAll('_', ' '),
+          },
+        });
+      }
+      for (const task of spec.tasks) {
+        if (!task.name.toLowerCase().includes(q)) continue;
+        add({
+          key: stableKey(p, 'spec-task', task.source.file, task.source.line, task.key),
+          kind: 'Spec task', label: task.name, sub: `${p.name} · ${spec.name}`, score: task.status === 'in_progress' ? 88 : 68,
+          project: p, primaryView: 'specs', specKey: spec.key, taskKey: task.key,
+          drawer: {
+            type: 'Specification task', title: task.name, text: `${spec.name} · ${task.status.replaceAll('_', ' ')}`,
+            file: task.source.file, line: task.source.line, projectPath: p.path, status: task.status.replaceAll('_', ' '),
+          },
         });
       }
     }

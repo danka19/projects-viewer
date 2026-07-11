@@ -347,3 +347,20 @@ test('runScan normalizes phase statuses to the phase-status-audit lifecycle', as
   assert.ok(phases.every((phase) => allowed.has(phase.status)));
   assert.equal(phases[0].issue, 'none');
 });
+
+test('runScan scopes Roadmap phases to saved roadmap roots while Specs uses its own roots', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-view-roots-'));
+  const projectRoot = path.join(tmp, 'sample');
+  await fs.mkdir(path.join(projectRoot, 'delivery'), { recursive: true });
+  await fs.mkdir(path.join(projectRoot, 'analytics'), { recursive: true });
+  await fs.mkdir(path.join(projectRoot, 'docs'), { recursive: true });
+  await fs.writeFile(path.join(projectRoot, 'delivery', 'ROADMAP.md'), '# Roadmap\n## Phase 1. Included\nStatus: planned.\n');
+  await fs.writeFile(path.join(projectRoot, 'docs', 'OLD_PHASE.md'), '# Roadmap\n## Phase 9. Excluded\nStatus: planned.\n');
+  await fs.writeFile(path.join(projectRoot, 'analytics', 'ranking.md'), '---\nwork:\n  id: ranking\n---\n# Ranking\n');
+  const configPath = path.join(tmp, 'projects.config.json');
+  const outputPath = path.join(tmp, 'projects.json');
+  await fs.writeFile(configPath, JSON.stringify({ projects: [{ id: 'sample', name: 'Sample', path: projectRoot, documentationViews: { roadmap: { roots: ['delivery'] }, specs: { roots: ['analytics'] } } }] }));
+  const result = await runScan({ configPath, outputPath, quiet: true });
+  assert.deepEqual(result.output.projects[0].phases.map((phase) => phase.id), ['1']);
+  assert.deepEqual(result.output.projects[0].specWork.specifications.map((spec) => spec.id), ['ranking']);
+});

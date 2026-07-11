@@ -165,6 +165,61 @@ export interface SpecItem {
   completedTasks?: number;
 }
 
+export type SpecLifecycleStatus = PhaseStatus | 'archived';
+export type SpecDependencyState = 'clear' | 'blocked' | 'invalid' | 'unknown';
+
+export interface SpecSourceEvidence {
+  file: string;
+  line?: number;
+}
+
+export interface RawSpecTask {
+  key: string;
+  id: string | null;
+  name: string;
+  status: StepStatus;
+  source: SpecSourceEvidence;
+  order: number;
+  ownerId?: string | null;
+}
+
+export interface RawSpecWorkItem {
+  key: string;
+  id: string;
+  name: string;
+  kind: 'openspec-change' | 'accepted-capability' | 'generic-spec';
+  lifecycleStatus: SpecLifecycleStatus;
+  confidence: Confidence;
+  source: SpecSourceEvidence;
+  sourceScopeId: string;
+  groupId: string | null;
+  tasks: RawSpecTask[];
+  dependsOnIds: string[];
+}
+
+export interface RawSpecDependency {
+  key: string;
+  prerequisiteId: string;
+  dependentId: string;
+  sourceEvidence: SpecSourceEvidence[];
+  state: 'unknown' | 'invalid';
+}
+
+export interface SpecIntegrityIssue {
+  kind: 'invalid-frontmatter' | 'duplicate-id' | 'self-dependency' | 'missing-target' | 'cycle' | 'contradictory-metadata';
+  message: string;
+  source?: SpecSourceEvidence;
+}
+
+export interface RawSpecWorkModel {
+  projectId: string;
+  specifications: RawSpecWorkItem[];
+  dependencies: RawSpecDependency[];
+  unassignedTasks: RawSpecTask[];
+  integrityIssues: SpecIntegrityIssue[];
+  isPartial: boolean;
+}
+
 export interface AuditDoc {
   file: string;
   title: string;
@@ -224,6 +279,7 @@ export interface ProjectStats {
 }
 
 export interface ProjectData {
+  id?: string;
   name: string;
   path: string;
   status: ProjectStatus;
@@ -244,6 +300,7 @@ export interface ProjectData {
   risks: RiskItem[];
   specs: SpecItem[];
   specFileCount: number;
+  specWork?: RawSpecWorkModel;
   audits: AuditDoc[];
   gaps: string[];
   intel: DocIntel;
@@ -771,6 +828,11 @@ export interface TrackedProjectConfig {
   path: string;
   enabled: boolean;
   tags: string[];
+  defaultView?: 'roadmap' | 'specs';
+  documentationViews?: {
+    roadmap?: { roots: string[] };
+    specs?: { roots: string[] };
+  };
   createdAt: string;
   updatedAt: string;
 }

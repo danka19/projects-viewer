@@ -276,6 +276,31 @@ kbd {
   scroll-snap-type: x proximity;
   overscroll-behavior-x: contain;
 }
+
+.spec-control {
+  min-height: 2rem;
+  min-width: 2rem;
+  border: 1px solid var(--line);
+  border-radius: 0.375rem;
+  color: var(--mute);
+  font-size: 0.75rem;
+}
+.spec-control:hover { color: var(--ink); border-color: var(--line-strong); }
+.spec-canvas-viewport { max-height: min(68vh, 720px); overscroll-behavior: contain; }
+.spec-canvas-stage {
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.3px);
+  background-size: 20px 20px;
+  transition: transform 180ms ease;
+}
+.spec-card { transition: left 180ms ease, top 180ms ease, min-height 180ms ease, border-color 120ms ease; }
+
+@media (max-width: 767px) {
+  .spec-canvas-viewport { max-height: none; overflow: visible; }
+  .spec-canvas-stage { width: auto !important; height: auto !important; transform: none !important; display: flex; flex-direction: column; gap: 0.75rem; padding: 0.75rem; background: none; }
+  .spec-canvas-stage > svg { display: none; }
+  .spec-card { position: relative !important; inset: auto !important; width: 100% !important; min-height: 0 !important; }
+  .spec-card:not(.spec-independent)::before { content: "↓ Explicit dependency chain"; display: block; margin-bottom: 0.5rem; font: 10px var(--font-mono); color: var(--faint); }
+}
 .tl-phase-track::before,
 .tl-phase-track::after,
 .tl-step-track::before,

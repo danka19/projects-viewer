@@ -143,6 +143,7 @@ function fullState(project: ProjectData, drawer: DrawerDescriptor): DashboardUiS
     knowledgeView: 'audits',
     query: 'remember me',
     includeDiagnostics: true,
+    primaryViews: {},
     timeline: {
       projectId: project.path,
       revision: 'r1',
@@ -153,6 +154,31 @@ function fullState(project: ProjectData, drawer: DrawerDescriptor): DashboardUiS
 }
 
 describe('versioned local UI state', () => {
+  it('migrates v1 and validates path-free per-project primary view state', () => {
+    const project = makeEvidenceProject();
+    const storage = new MemoryStorage();
+    storage.values.set(UI_STATE_STORAGE_KEY, JSON.stringify({
+      version: 1,
+      selectedPath: project.path,
+      statusFilter: 'all', activeTab: 'status', knowledgeView: 'specs', query: '', includeDiagnostics: false,
+      timeline: null, drawer: null,
+    }));
+    expect(readStoredUiState(storage, [project]).primaryViews).toEqual({});
+    storage.values.set(UI_STATE_STORAGE_KEY, JSON.stringify({
+      version: UI_STATE_VERSION,
+      selectedPath: project.path,
+      statusFilter: 'all', activeTab: 'status', knowledgeView: 'specs', query: '', includeDiagnostics: false,
+      timeline: null, drawer: null,
+      primaryViews: {
+        [project.id!]: { view: 'specs', selectedSpecKey: 'spec:a', expandedSpecKey: 'spec:a', zoom: 999, panX: 12, panY: -4 },
+        arbitrary: { view: 'specs', zoom: 100, panX: 0, panY: 0 },
+      },
+    }));
+    expect(readStoredUiState(storage, [project]).primaryViews).toEqual({
+      [project.id!]: { view: 'specs', selectedSpecKey: 'spec:a', expandedSpecKey: 'spec:a', zoom: 150, panX: 12, panY: -4 },
+    });
+  });
+
   it('round-trips all supported fields under one versioned storage contract', () => {
     const project = makeEvidenceProject();
     const drawer = createDrawerDescriptor(

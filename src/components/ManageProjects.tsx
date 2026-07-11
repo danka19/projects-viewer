@@ -45,6 +45,15 @@ export default function ManageProjects({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [viewDrafts, setViewDrafts] = useState<Record<string, { defaultView: '' | 'roadmap' | 'specs'; roadmapRoots: string; specsRoots: string }>>({});
+
+  useEffect(() => {
+    setViewDrafts(Object.fromEntries((config?.projects ?? []).map((project) => [project.id, {
+      defaultView: project.defaultView ?? '',
+      roadmapRoots: project.documentationViews?.roadmap?.roots.join('\n') ?? '',
+      specsRoots: project.documentationViews?.specs?.roots.join('\n') ?? '',
+    }])));
+  }, [config]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -236,6 +245,27 @@ export default function ManageProjects({
       await requestJson(`/api/projects/${id}`, { method: 'DELETE' });
       setMessage('Project removed from tracking.');
       await onConfigChanged();
+    });
+  }
+
+  async function handleSaveDocumentationViews(id: string) {
+    const draft = viewDrafts[id];
+    if (!draft) return;
+    const roots = (value: string) => value.split(/[\n,]/).map((item) => item.trim()).filter(Boolean);
+    await runAction(async () => {
+      await requestJson(`/api/projects/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          defaultView: draft.defaultView || null,
+          documentationViews: {
+            roadmap: { roots: roots(draft.roadmapRoots) },
+            specs: { roots: roots(draft.specsRoots) },
+          },
+        }),
+      });
+      setMessage('Documentation views saved.');
+      await onConfigChanged();
+      await onRescan();
     });
   }
 
@@ -535,6 +565,24 @@ export default function ManageProjects({
                     Remove
                   </button>
                 </div>
+                <details className="lg:col-span-2 rounded-lg border border-line/70 px-3 py-2">
+                  <summary className="cursor-pointer text-xs font-semibold text-mute">Documentation views</summary>
+                  <p className="mt-2 text-xs text-faint">Empty roots use automatic mixed-repository classification. Paths are project-relative and validated before saving.</p>
+                  <div className="mt-3 grid gap-3 md:grid-cols-3">
+                    <label className="text-xs text-mute">Default view
+                      <select value={viewDrafts[project.id]?.defaultView ?? ''} disabled={!liveMode || busy} onChange={(event) => setViewDrafts((current) => ({ ...current, [project.id]: { ...(current[project.id] ?? { roadmapRoots: '', specsRoots: '' }), defaultView: event.target.value as '' | 'roadmap' | 'specs' } }))} className="mt-1 block w-full rounded border border-line bg-void px-2 py-2 text-xs text-ink">
+                        <option value="">Automatic</option><option value="roadmap">Roadmap</option><option value="specs">Specs</option>
+                      </select>
+                    </label>
+                    <label className="text-xs text-mute">Roadmap roots
+                      <textarea value={viewDrafts[project.id]?.roadmapRoots ?? ''} disabled={!liveMode || busy} onChange={(event) => setViewDrafts((current) => ({ ...current, [project.id]: { ...(current[project.id] ?? { defaultView: '', specsRoots: '' }), roadmapRoots: event.target.value } }))} placeholder="docs/roadmap&#10;docs/phases" rows={3} className="mt-1 block w-full rounded border border-line bg-void px-2 py-2 font-mono text-xs text-ink" />
+                    </label>
+                    <label className="text-xs text-mute">Specs roots
+                      <textarea value={viewDrafts[project.id]?.specsRoots ?? ''} disabled={!liveMode || busy} onChange={(event) => setViewDrafts((current) => ({ ...current, [project.id]: { ...(current[project.id] ?? { defaultView: '', roadmapRoots: '' }), specsRoots: event.target.value } }))} placeholder="analytics&#10;openspec" rows={3} className="mt-1 block w-full rounded border border-line bg-void px-2 py-2 font-mono text-xs text-ink" />
+                    </label>
+                  </div>
+                  <div className="mt-3 flex gap-2"><button type="button" disabled={!liveMode || busy} onClick={() => handleSaveDocumentationViews(project.id)} className="rounded border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent-ink disabled:opacity-50">Save views</button><button type="button" disabled={busy} onClick={() => setViewDrafts((current) => ({ ...current, [project.id]: { defaultView: project.defaultView ?? '', roadmapRoots: project.documentationViews?.roadmap?.roots.join('\n') ?? '', specsRoots: project.documentationViews?.specs?.roots.join('\n') ?? '' } }))} className="rounded border border-line px-3 py-1.5 text-xs text-mute">Cancel</button></div>
+                </details>
               </div>
             ))}
           </div>
