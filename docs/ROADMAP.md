@@ -91,12 +91,12 @@ Proposed slices and ordering:
 - This slice should be implemented before relying on Projects Viewer MCP preflight packets for everyday agent startup, because it addresses the observed HTML fallback, legacy config ambiguity, and project-id lookup friction.
 - `docs/audits/UX_UI_AUDIT_2026-07-10.md` is the redesign baseline; `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records implementation and browser evidence.
 - `docs/planning/DASHBOARD_REDESIGN_PLAN.md` records the completed bounded sequence: trusted state derivation, Project Timeline, overview integration, search/navigation state, then responsive/accessibility agent acceptance.
-- `openspec/changes/redesign-dashboard-project-timeline/` now has all agent-verifiable work complete and remains active only for explicit human task 7.6. It must not be archived until the owner confirms the lifecycle hierarchy, current step, expansion, and no-active-phase state are understandable at a glance.
+- `openspec/changes/redesign-dashboard-project-timeline/` has all 41 tasks complete. The owner accepted the lifecycle hierarchy, current step, expansion, and no-active-phase presentation on 2026-07-11; the change remains active and unarchived only because archival was explicitly excluded from this work session.
 - `openspec/changes/improve-dashboard-search-navigation/` records ranked diagnostic-aware search and safe versioned local/history presentation state. It preserves configured-path, read-only, and local-only boundaries.
 
 Decision required before Phase 4 planning:
 
-- Decide the detailed Phase 4 scope independently of this bounded redesign and of the still-separate `harden-mcp-context-api` proposal. The immediate redesign action is the human timeline acceptance gate, not silent Phase 4 activation.
+- Decide the detailed Phase 4 scope independently of this completed bounded redesign and of the still-separate `harden-mcp-context-api` proposal. Any later OpenSpec archival/sync is a separate action and does not silently activate Phase 4.
 
 ## Phase Planning Rule
 

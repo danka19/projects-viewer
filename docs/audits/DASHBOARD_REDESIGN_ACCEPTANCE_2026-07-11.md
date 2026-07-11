@@ -1,6 +1,6 @@
 # Dashboard Redesign Acceptance Evidence
 
-Status: agent verification complete; human timeline acceptance pending.
+Status: agent verification and human timeline acceptance complete; OpenSpec change intentionally unarchived.
 
 Date: 2026-07-11.
 
@@ -10,7 +10,7 @@ The bounded dashboard redesign is implemented on `dashboard-redesign/ui-rebuild`
 
 The redesign preserves the existing local-only and read-only boundaries: projects are selected from saved config, browser requests do not introduce arbitrary filesystem paths, scanned project folders are not modified, and no cloud, auth, remote model, task/calendar, or command-execution behavior was added.
 
-The timeline OpenSpec change remains active. Task 7.6 is intentionally open because an agent cannot claim that the lifecycle hierarchy is understandable to the human owner at a glance.
+The timeline OpenSpec change remains active and unarchived. The human owner accepted the delivered redesign in direct response to this acceptance report on 2026-07-11, closing task 7.6 without requesting any contract deviation.
 
 ## Implemented UX
 
@@ -68,13 +68,13 @@ The page-level overflow regression caused by screen-reader-only absolute element
 - The temporary second development server exposed an expected Vite HMR WebSocket collision because the primary dev server already owned the HMR port. Product state checks were repeated against the production build before completion so this environment-only message was not treated as an application regression.
 - The primary local development server remains running at `http://127.0.0.1:5173` as required by the project runbook.
 
-## Residual Risks And Human Gate
+## Human Acceptance And Residual Risks
 
-- OpenSpec timeline task 7.6 requires the human owner to confirm that completed/current/planned hierarchy, current step, exclusive expansion, and no-active-phase presentation are understandable at a glance.
-- `redesign-dashboard-project-timeline` must remain active and unarchived until that confirmation.
+- OpenSpec timeline task 7.6 is complete: the owner accepted the delivered completed/current/planned hierarchy, current step, exclusive expansion, and no-active-phase presentation on 2026-07-11.
+- `redesign-dashboard-project-timeline` is ready for later OpenSpec archival/sync review but remains active and unarchived because archival was explicitly excluded from this work session.
 - Manage Projects still has the older visually-modal implementation; the redesign fixed drawer semantics but did not claim a separate Manage Projects dialog/focus contract.
 - Browser layout evidence is representative rather than a replacement for future automated end-to-end visual regression infrastructure.
 
 ## Next Step
 
-The human owner should review the running dashboard, especially one no-active-phase project and the timeline hierarchy, then either accept task 7.6 or provide concrete clarity feedback. If accepted, the next bounded action is OpenSpec review/archival; it is not automatic in this work session.
+No dashboard-redesign implementation or acceptance task remains. The next bounded action, only when explicitly requested, is OpenSpec archival/sync review followed by integration into `main`; it is not performed in this work session.

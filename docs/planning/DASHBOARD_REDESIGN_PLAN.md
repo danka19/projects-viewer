@@ -1,6 +1,6 @@
 # Dashboard Redesign Plan
 
-Status: implemented on `dashboard-redesign/ui-rebuild`; agent verification complete, human timeline acceptance pending.
+Status: implemented and human-accepted on `dashboard-redesign/ui-rebuild`; OpenSpec task 7.6 closed on 2026-07-11, change intentionally unarchived.
 
 Date: 2026-07-10. Implementation evidence updated 2026-07-11.
 
@@ -88,7 +88,7 @@ Always-visible phase axis:
 - Nested horizontal steps beneath the axis.
 - Source/confidence/integrity access through the read-only details flow.
 
-The timeline appears after the state header and before secondary details. It was promoted after the state-trust and agent browser gates passed. Human visual acceptance remains the explicit OpenSpec task 7.6 gate and is not inferred from agent evidence.
+The timeline appears after the state header and before secondary details. It was promoted after the state-trust and agent browser gates passed. The owner accepted the delivered hierarchy and interaction in direct response to the acceptance report on 2026-07-11, closing OpenSpec task 7.6.
 
 ### 5. Secondary detail navigation
 
@@ -125,7 +125,7 @@ This change must precede authoritative overview promotion of the timeline.
 
 ### Change B — Project Timeline / Roadmap
 
-Implemented, pending-human-acceptance proposal: `openspec/changes/redesign-dashboard-project-timeline/`.
+Implemented and human-accepted proposal, intentionally unarchived: `openspec/changes/redesign-dashboard-project-timeline/`.
 
 Scope:
 
@@ -139,7 +139,7 @@ Scope:
 Gate:
 
 - All OpenSpec requirements and scenarios have corresponding evidence.
-- Timeline passed automated and browser acceptance before overview promotion; human at-a-glance acceptance remains open.
+- Timeline passed automated and browser acceptance before overview promotion; human at-a-glance acceptance followed on 2026-07-11.
 - Dark/light and desktop/tablet/mobile browser checks pass.
 
 ### Change C — Redesign dashboard overview
@@ -159,7 +159,7 @@ Gate:
 
 - At 1280x720, selected-project state and phase axis are visible on first load.
 - Every global count opens the exact matching global set.
-- Human owner can identify current phase/step, next action/decision, and real blocker in under ten seconds for representative fixtures. This is the remaining human gate, not an agent-completed claim.
+- Human owner can identify current phase/step, next action/decision, and real blocker in under ten seconds for representative fixtures. The owner accepted the delivered first-glance hierarchy on 2026-07-11; this outcome is recorded as human evidence rather than an agent-completed claim.
 
 ### Change D — Search and durable navigation state
 
@@ -263,6 +263,8 @@ For representative projects, the human owner must be able to identify without op
 6. real blocker versus diagnostic warning;
 7. source/confidence when state is uncertain.
 
+Outcome 2026-07-11: the owner accepted the delivered redesign after receiving the automated/browser acceptance report, closing this gate without requesting a deviation from the implemented contract.
+
 ## Redesign Acceptance Matrix
 
 | Audit finding | Required closure evidence |
@@ -286,6 +288,6 @@ For representative projects, the human owner must be able to identify without op
 - No cloud, auth, collaboration, remote models, notifications, external task systems, or scanned-project writes.
 - No silent roadmap Phase 4 activation; detailed phase planning still requires a human decision and the phase template.
 
-## Remaining Human Gate
+## Human Acceptance Outcome
 
-OpenSpec task 7.6 remains intentionally open. The owner must confirm that completed/current/planned hierarchy, current step, exclusive phase expansion, and the no-active-phase state are understandable at a glance. Until that confirmation, `redesign-dashboard-project-timeline` remains active and must not be archived. No additional implementation sequencing decision is required for the completed agent-verifiable slice.
+OpenSpec task 7.6 was accepted by the owner on 2026-07-11 in direct response to the final acceptance report. The completed/current/planned hierarchy, current step, exclusive phase expansion, and no-active-phase state therefore have automated, browser, and human acceptance evidence. `redesign-dashboard-project-timeline` remains active and unarchived only because archival was explicitly excluded from this work session; no redesign implementation gate remains.

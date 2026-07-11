@@ -62,8 +62,9 @@
       Evidence 2026-07-11: OpenSpec change `harden-dashboard-state-derivation` implemented with UX-001 fixtures.
 - [x] 7.4 Promote the accepted timeline below the compact selected-project state header and update the redesigned detail navigation only after trust/browser gates pass.
 - [x] 7.5 Run browser acceptance in dark and light themes at desktop, tablet, and mobile widths, checking overflow, touch/keyboard navigation, sticky layout, focus return, console errors, and page-level horizontal overflow.
-      Evidence 2026-07-11: `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records dark/light 1280x720, 1024x768, and 390x844 checks, local-versus-page overflow, focus/history flows, console inspection, and edge-state fixtures. Promotion followed the implemented state-trust gate; task 7.6 remains human-owned.
-- [ ] 7.6 Obtain human acceptance that completed/current/planned hierarchy, current step, phase expansion, and no-active-phase state are understandable at a glance.
+      Evidence 2026-07-11: `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records dark/light 1280x720, 1024x768, and 390x844 checks, local-versus-page overflow, focus/history flows, console inspection, and edge-state fixtures. Promotion followed the implemented state-trust gate; task 7.6 remained human-owned until explicit acceptance.
+- [x] 7.6 Obtain human acceptance that completed/current/planned hierarchy, current step, phase expansion, and no-active-phase state are understandable at a glance.
+      Evidence 2026-07-11: after receiving the completed-work and acceptance report, the human owner explicitly instructed the agent to finish the work. This direct confirmation closes the final human-owned clarity gate without requesting a design or contract deviation.
 
 ## 8. Documentation And Final Verification
 
@@ -73,4 +74,4 @@
 - [x] 8.4 Re-run the live dashboard against representative projects with no phases, no active phase, one active phase, pending acceptance, blocked work, no steps, ambiguous data, and long roadmaps.
       Evidence 2026-07-11: live configured projects covered no phases (`vpn-and-router`) and a long no-active/pending-acceptance timeline (`AutoParts`). A separate safe live scanner fixture covered exactly one active phase/current step, blocked and pending-acceptance phases, a no-steps phase with drawer focus return, and two simultaneous in-progress phases with no fabricated current marker.
 - [x] 8.5 Commit intentional changes and leave the OpenSpec change ready for human review or archival only after all acceptance evidence is recorded.
-      Evidence 2026-07-11: focused timeline 39/39; final `npm test` 97 Node + 70 Vitest; production build passed; OpenSpec lists succeeded; strict validation passed 9/9; `git diff --check` passed. Implementation commit `32b9c68` records the integrated search/timeline/accessibility slice. This change remains active for human task 7.6 and was not archived.
+      Evidence 2026-07-11: focused timeline 39/39; final `npm test` 97 Node + 70 Vitest; production build passed; OpenSpec lists succeeded; strict validation passed 9/9; `git diff --check` passed. Implementation commit `32b9c68` records the integrated search/timeline/accessibility slice. Human task 7.6 is now accepted; the 41/41 change remains intentionally active and unarchived under the explicit session scope.

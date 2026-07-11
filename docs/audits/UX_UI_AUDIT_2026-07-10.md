@@ -42,10 +42,10 @@ The redesign must therefore start with state trust and information hierarchy. A 
 | Finding | Follow-up |
 |---|---|
 | UX-001 | Closed: trusted source/current-state derivation was implemented and regression-tested before overview promotion. |
-| UX-002 | Implemented: compact freshness and the four-group attention brief are in the first viewport; human at-a-glance acceptance remains open. |
+| UX-002 | Closed: compact freshness and the four-group attention brief are in the first viewport; the delivered redesign received human at-a-glance acceptance on 2026-07-11. |
 | UX-003 | Closed: the old mixed metric bar was replaced by labelled attention actions that open matching cross-project sets. |
 | UX-004 | Closed: one selected-project state header, primary timeline, and progressive detail surfaces replace repeated primary tiles. |
-| UX-005 | Implemented: horizontal parent/child timelines are primary and browser-verified; OpenSpec human task 7.6 remains open. |
+| UX-005 | Closed: horizontal parent/child timelines are primary, browser-verified, and human-accepted through OpenSpec task 7.6. |
 | UX-006 | Closed: deterministic ranking, stable identity, visible totals/truncation, keyboard control, and diagnostic opt-in are implemented and tested. |
 | UX-007 | Closed: measured mobile order is project switcher, selected header, timeline, then detail tabs, without page-level overflow. |
 | UX-008 | Closed: the compact responsive shell removes the measured header/sidebar collision at desktop and tablet breakpoints. |
@@ -104,7 +104,7 @@ Required direction:
 
 Severity: P0.
 
-Status: implemented; human at-a-glance acceptance pending.
+Status: closed 2026-07-11 after implementation, browser evidence, and human at-a-glance acceptance.
 
 The most prominent header content is scanner telemetry: live/static mode, rescan, interval, status, files, skipped items, duration, trigger, and scan message. The main metrics emphasize totals and documentation presence but omit a ranked human brief: required decisions, real blockers, active work, pending acceptance, and between-phase projects.
 
@@ -138,7 +138,7 @@ Required direction: one primary project-state surface, one prioritized cross-pro
 
 Severity: P1.
 
-Status: implemented and agent-verified; human OpenSpec task 7.6 remains open.
+Status: closed 2026-07-11 after implementation, agent verification, browser evidence, and human OpenSpec task 7.6 acceptance.
 
 The existing Roadmap tab contains the best lifecycle data but renders it as another vertical list and is not visible on the first screen. `No active phase detected` hides the more useful state: closed prior phase, no active implementation phase, next planned phase, and required decision/gate.
 
@@ -232,4 +232,4 @@ Required direction: introduce the smallest compatible component test harness and
 
 ## Recommended Next Decision
 
-Keep `harden-mcp-context-api` as a separate operational hardening change. For the dashboard redesign, the remaining decision is human OpenSpec task 7.6: confirm that lifecycle hierarchy, current step, exclusive expansion, and the no-active-phase state are understandable at a glance. Do not archive the timeline change before that confirmation.
+Keep `harden-mcp-context-api` as a separate operational hardening change. The dashboard redesign has no remaining implementation or human-acceptance gate: task 7.6 was accepted on 2026-07-11. The timeline change is ready for a separately authorized OpenSpec archival/sync review and remains unarchived in this work session.

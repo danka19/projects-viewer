@@ -10,7 +10,7 @@ Dashboard redesign update on 2026-07-11:
 
 - The 2026-07-10 UX/UI audit remains the baseline. State-derivation trust, overview hierarchy, the horizontal phase/step timeline, ranked search, safe UI-state persistence, responsive ordering, focus handling, and contrast were implemented on `dashboard-redesign/ui-rebuild`.
 - `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records automated and browser evidence across dark/light desktop, tablet, mobile, history/focus flows, overflow measurements, and representative lifecycle states.
-- Active OpenSpec changes `redesign-dashboard-project-timeline` and `improve-dashboard-search-navigation` remain unarchived. All agent-verifiable redesign tasks are complete; timeline task 7.6 still requires explicit human at-a-glance acceptance.
+- Active OpenSpec changes `redesign-dashboard-project-timeline` and `improve-dashboard-search-navigation` remain unarchived. The dashboard redesign is implementation-complete and human-accepted; timeline task 7.6 was accepted on 2026-07-11, and archival remains a separate explicitly authorized action.
 - This bounded UX work did not activate or close roadmap Phase 4 and did not expand the local-only, configured-path, read-only, no-cloud security boundary.
 
 v7 implemented on 2026-07-09:
@@ -68,7 +68,7 @@ v3 implemented on 2026-07-07:
 | `AGENTS_USAGE.md` | Codex and agent runbook for local startup, context packet API usage, MCP tools, and safety boundaries |
 | `CONTEXT.md` | Canonical terms and boundary rules for live/static scanning |
 | `audits/UX_UI_AUDIT_2026-07-10.md` | Evidence-backed audit of first-glance state clarity, data trust, information density, interaction, responsive layout, and accessibility |
-| `audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` | Implementation, automated verification, browser matrix, representative lifecycle states, residual risks, and open human timeline gate |
+| `audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` | Implementation, automated verification, browser matrix, representative lifecycle states, human acceptance, and residual risks |
 | `planning/DASHBOARD_REDESIGN_PLAN.md` | Implemented redesign sequence and integration record for state trust, overview hierarchy, Project Timeline, search/navigation, and acceptance gates |
 | `planning/MCP_CONTEXT_API_HARDENING_PLAN.md` | Planned cleanup for canonical config, compact project-id listing, agent preflight API routing, MCP non-JSON errors, and local HTTP diagnostics |
 | `phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 plan for users, workflows, data sources, AI use cases, and acceptance criteria |
@@ -85,7 +85,7 @@ v3 implemented on 2026-07-07:
 - `openspec/changes/agent-preflight-packet/`: implemented proposed local AI-agent preflight packet workflow, ready for human acceptance review and intentionally separate from the human brief/report contract.
 - `openspec/changes/harden-mcp-context-api/`: proposed hardening change for canonical project config, compact saved project-id listing, JSON-only API boundaries, MCP response validation, and local API diagnostics.
 - `openspec/changes/harden-dashboard-state-derivation/`: implemented dashboard trust gate that filters rule/policy/template noise and preserves explicit current-state semantics.
-- `openspec/changes/redesign-dashboard-project-timeline/`: implemented horizontal project phase/step timeline; agent verification is complete and human task 7.6 remains open.
+- `openspec/changes/redesign-dashboard-project-timeline/`: implemented and human-accepted horizontal project phase/step timeline; all 41 tasks are complete, and the change remains intentionally unarchived.
 - `openspec/changes/improve-dashboard-search-navigation/`: implemented ranked accessible search plus safe versioned local/history UI-state restoration.
 
 ## Operations Summary
