@@ -1,0 +1,21 @@
+## 1. Scanner Evidence Trust
+
+- [ ] 1.1 RED: extend `tests/scan-trust.test.mjs` with the exact 2026-07-12 false-positive shapes—checked `[x]` `checkbox blocker` and `hard-block pattern` tasks, a cross-line OpenSpec `WHEN` followed by `**THEN** its dependent remains blocked`, and explanatory `Next-action signals ...` prose containing an embedded `NEXT:` example—and prove they currently enter live blocker or next-action state.
+- [ ] 1.2 Add positive scanner controls for an unchecked explicitly blocked task and a standalone actionable next-action directive from a trusted planning source so the exclusions cannot erase legitimate live evidence.
+- [ ] 1.3 GREEN: preserve checkbox completion and bounded OpenSpec scenario context through classification, reject completed/normative blocker candidates, and require structural active-work semantics for next-action candidates until all focused scanner fixtures pass.
+
+## 2. Explainable Deduplicated Search
+
+- [ ] 2.1 RED: extend `tests/components/search-pure.test.tsx` with early/middle/late/long query matches using the audited late `preflight packet` shape, and prove the model does not yet expose match-aware presentation while stable keys, ranking, and navigation identity remain unchanged.
+- [ ] 2.2 RED: extend `tests/components/search-integration.test.tsx` to require the visible query-matching fragment or equivalent explanation in the rendered result and to cover keyboard/pointer activation of that retained result.
+- [ ] 2.3 GREEN: implement readable match-aware fragments in the pure search model and focused component, including accessible truncation boundaries, without changing the ranking, source-evidence identity, navigation, or result-limit contracts owned by `improve-dashboard-search-navigation`.
+- [ ] 2.4 Add a regression fixture where identical file/line/text evidence has Next action and Decision/task representations; verify one retained result visibly explains the match and query-dependent fragments never create duplicate results or unstable keys.
+
+## 3. Verification And Durable Evidence
+
+- [ ] 3.1 Run focused scanner and search verification: `node --test tests/scan-trust.test.mjs` and `npm run test:components -- tests/components/search-pure.test.tsx tests/components/search-integration.test.tsx`; record RED/GREEN evidence and final counts.
+- [ ] 3.2 Run the full automated gates: `npm test`, `npm run build`, and `git diff --check`; record exact pass/fail counts and any residual risk.
+- [ ] 3.3 Run a real configured-project rescan and inspect `projects-viewer` generated evidence to prove the three audited false positives no longer appear in `signalGroups.realBlockers`, `summary.mainBlocker`, or `summary.nextAction`, while legitimate blocker/action controls remain available; do not modify scanned project files.
+- [ ] 3.4 Verify in the browser that querying `preflight packet` visibly explains every displayed match, retains a single representation for identical evidence, and preserves existing keyboard navigation; inspect desktop and the existing 390 px mobile acceptance viewport plus console output.
+- [ ] 3.5 Update `docs/audits/API_UX_TRUST_AUDIT_2026-07-12.md` with implementation and verification status and update `docs/CURRENT_PROJECT_AUDIT.md` (plus roadmap/current-state documentation only where sequencing or state actually changes), keeping the API fallback remediation linked solely to `harden-mcp-context-api`.
+- [ ] 3.6 Run `openspec status --change "improve-dashboard-evidence-trust"`, `openspec list`, `openspec list --specs`, and `openspec validate --all --strict`; keep the change open with checked tasks only for work actually completed during apply.
