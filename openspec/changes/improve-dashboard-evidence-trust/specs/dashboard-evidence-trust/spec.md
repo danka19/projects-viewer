@@ -50,7 +50,7 @@ Projects Viewer SHALL require a next-action candidate to express active work thr
 #### Scenario: Trusted source contains a standalone active directive
 
 - **WHEN** a trusted planning source contains an unchecked active task or a standalone recognized next-action directive with actionable text
-- **THEN** the scanner may include it as a next action under the source-trust contract owned by `dashboard-state-derivation`
+- **THEN** the scanner SHALL include it as a next action under the source-trust contract owned by `dashboard-state-derivation`
 - **AND** embedded or quoted marker examples do not satisfy this scenario
 
 ### Requirement: Search results visibly explain their match
