@@ -1,6 +1,6 @@
 # Selectable Roadmap And Specs Canvas Design
 
-Status: draft for human review before OpenSpec proposal and implementation planning.
+Status: approved by the human owner on 2026-07-11 for OpenSpec proposal and implementation.
 
 Date: 2026-07-11.
 
