@@ -87,6 +87,7 @@ v3 implemented on 2026-07-07:
 - `openspec/changes/add-project-brief-report/`: proposed local daily/weekly human project brief/report workflow.
 - `openspec/changes/agent-preflight-packet/`: implemented proposed local AI-agent preflight packet workflow, ready for human acceptance review and intentionally separate from the human brief/report contract.
 - `openspec/changes/harden-mcp-context-api/`: proposed hardening change for canonical project config, compact saved project-id listing, JSON-only API boundaries, MCP response validation, and local API diagnostics.
+- `openspec/changes/improve-dashboard-evidence-trust/`: planned scanner and search evidence-trust remediation linked to the 2026-07-12 API and UX trust audit.
 - `openspec/changes/harden-dashboard-state-derivation/`: implemented dashboard trust gate that filters rule/policy/template noise and preserves explicit current-state semantics.
 - `openspec/changes/redesign-dashboard-project-timeline/`: technically implemented horizontal project phase/step timeline; 42/43 tasks are complete, explicit human acceptance task 7.6 remains open, and the change remains intentionally unarchived.
 - `openspec/changes/improve-dashboard-search-navigation/`: implemented ranked accessible search plus safe versioned local/history UI-state restoration.

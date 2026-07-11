@@ -2,9 +2,9 @@
 
 Status: in_progress.
 
-Last updated: 2026-07-11.
+Last updated: 2026-07-12.
 
-## Phase And OpenSpec Status Reconciliation (2026-07-11)
+## Phase And OpenSpec Status Reconciliation (2026-07-12)
 
 | Item | Status | Evidence / blocker |
 |---|---|---|
@@ -18,9 +18,10 @@ Last updated: 2026-07-11.
 | `redesign-dashboard-project-timeline` | `pending_acceptance` | `openspec list` reports 42/43 tasks. Commit `9cfb550` and fresh six-viewport/theme geometry evidence close tasks 5.6-5.7; explicit human task 7.6 remains open. |
 | `add-selectable-specs-canvas` | `pending_acceptance` | OpenSpec artifacts validate strictly; scanner/config/model/layout/routing/state/search/UI implementation is complete with 107 Node + 91 component tests, production build, and dark/light 1280×720, 1024×768, 390×844 browser evidence. Archive/push/merge were not performed. |
 | `harden-mcp-context-api` | `planned` | 0/19 tasks; implementation has not started. |
+| `improve-dashboard-evidence-trust` | `planned` | 0/13 tasks; the change follows `harden-mcp-context-api` in the draft Phase 4 ordering and implementation has not started. |
 | Accepted specs `ai-context`, `ai-findings` | `accepted` | Present under `openspec/specs/` and validated by OpenSpec. |
 
-Sequential work: timeline archival/integration is blocked only by explicit human acceptance task 7.6. MCP/API hardening is parallel-independent because its config/API/MCP boundaries do not depend on timeline geometry, but it remains only `planned` until intentionally started.
+Sequential work: timeline archival/integration is blocked only by explicit human acceptance task 7.6. MCP/API hardening is parallel-independent because its config/API/MCP boundaries do not depend on timeline geometry, but it remains only `planned` until intentionally started. Dashboard evidence-trust remediation is also `planned` and follows MCP/API hardening in the draft Phase 4 ordering.
 
 ## Repository Baseline
 
@@ -149,6 +150,7 @@ Sequential work: timeline archival/integration is blocked only by explicit human
 | AUDIT-014 | Previous task 7.6 acceptance was inferred too broadly. Corrected geometry is now verified in `9cfb550`, but explicit owner acceptance is still required before archival/integration. | Human owner | pending_acceptance |
 | AUDIT-015 | Manage Projects now has `role="dialog"`, `aria-modal`, an accessible name, initial focus, bidirectional focus containment, Escape dismissal, inert background, and exact focus return. Four component scenarios and all six dark/light browser matrix points pass. | Dashboard redesign | closed 2026-07-11 |
 | AUDIT-016 | Drawer focus return now resolves a stable source-derived opener ID instead of retaining a DOM element. A real-App polling integration test replaces the phase-details opener during live refresh and proves Escape focuses its replacement; all six browser matrix points also pass. | Dashboard redesign | closed 2026-07-11 |
+| AUDIT-017 | [`API_UX_TRUST_AUDIT_2026-07-12.md`](audits/API_UX_TRUST_AUDIT_2026-07-12.md) records four confirmed trust findings. `harden-mcp-context-api` owns API fallback remediation; `improve-dashboard-evidence-trust` owns scanner and search evidence remediation. Neither change has started implementation. | Phase 4 hardening changes | open 2026-07-12 |
 
 ## Audit Rules
 
