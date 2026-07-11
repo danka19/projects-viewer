@@ -42,6 +42,8 @@
 - [x] 5.4 Implement proximity scroll snapping, manual-scroll preservation, current/focus centering triggers, compact metadata above twelve phases, and bounded rendering through scanner limits.
 - [x] 5.5 Verify the selected-project header and phase axis fit the first 1280x720 viewport and the mobile timeline precedes the full project list/detail navigation. (Gated on the overview redesign slice.)
       Evidence 2026-07-11: component geometry contracts pass; live browser at 1280x720 measured the header at y=183-382, timeline at y=398-712, and detail tabs at y=728. At 390x844 the project switcher, selected header, timeline, and tabs appeared in that order; document width remained 380/380 while the phase row scrolled only inside its 314 px viewport.
+- [ ] 5.6 Add a failing regression test and stretch every phase card to the tallest card in its row without fixed heights or clipping.
+- [ ] 5.7 Verify in dark/light at 1280x720, 1024x768, and 390x844 that mixed-content phase cards share one axis baseline with no more than 1 px node deviation.
 
 ## 6. Accessibility And Motion
 
@@ -63,8 +65,8 @@
 - [x] 7.4 Promote the accepted timeline below the compact selected-project state header and update the redesigned detail navigation only after trust/browser gates pass.
 - [x] 7.5 Run browser acceptance in dark and light themes at desktop, tablet, and mobile widths, checking overflow, touch/keyboard navigation, sticky layout, focus return, console errors, and page-level horizontal overflow.
       Evidence 2026-07-11: `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records dark/light 1280x720, 1024x768, and 390x844 checks, local-versus-page overflow, focus/history flows, console inspection, and edge-state fixtures. Promotion followed the implemented state-trust gate; task 7.6 remained human-owned until explicit acceptance.
-- [x] 7.6 Obtain human acceptance that completed/current/planned hierarchy, current step, phase expansion, and no-active-phase state are understandable at a glance.
-      Evidence 2026-07-11: after receiving the completed-work and acceptance report, the human owner explicitly instructed the agent to finish the work. This direct confirmation closes the final human-owned clarity gate without requesting a design or contract deviation.
+- [ ] 7.6 Obtain human acceptance that completed/current/planned hierarchy, current step, phase expansion, no-active-phase state, and the corrected straight-axis geometry are understandable at a glance.
+      Reopened 2026-07-11: the previous evidence inferred acceptance from an instruction to continue. The owner then reported a visible broken-axis defect, so final human acceptance must follow the corrected implementation and fresh evidence.
 
 ## 8. Documentation And Final Verification
 

@@ -269,6 +269,28 @@ An adapter such as `buildProjectTimelineModel(project)` may initially map existi
 - No hover-only content is required to understand status or use actions.
 - Expanded steps stay horizontal; they do not become a long vertical list before the user can reach lower dashboard content.
 
+### Shared phase-axis baseline
+
+- All phase cards in one rendered row stretch to the tallest card in that row; variable title, status, progress, or integrity content must not move individual axis nodes vertically.
+- Axis-node top coordinates may differ by at most 1 px after layout at desktop, tablet, and mobile widths.
+- The layout must preserve intrinsic card content and existing clamps. A fixed pixel height and content clipping are not acceptable solutions.
+- The phase implementation follows the existing nested-step pattern: equal-height flex list items and cards that consume the available row height.
+
+Change intake 2026-07-11:
+
+```text
+Idea: Keep the phase axis straight when phase cards contain different amounts of content.
+Source: Human owner browser review after the first redesign acceptance report.
+Type: bug_fix, scope_refinement, verification_change, documentation_change
+Decision: adopt_now
+Reason: The defect breaks the primary lifecycle visualization and invalidates the previous visual-acceptance claim.
+Affected specs: dashboard-project-timeline large-timeline and responsive requirements.
+Affected architecture: No boundary change; reuse the existing flex layout contract.
+Data contract impact: None.
+Verification impact: Add a failing component contract test and <=1 px live-browser geometry checks at three supported viewports.
+Status: in_progress
+```
+
 ## Accessibility
 
 - The phase viewport uses a labelled ordered list; every phase card is a real button.

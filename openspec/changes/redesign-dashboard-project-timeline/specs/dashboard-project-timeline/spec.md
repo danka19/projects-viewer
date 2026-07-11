@@ -181,6 +181,12 @@ Phase and step axes SHALL remain single-row horizontal sequences and SHALL suppo
 - **THEN** ordinary data refresh does not repeatedly recenter the viewport
 - **AND** `Jump to current` restores the explicit current phase when requested
 
+#### Scenario: Phase cards contain different amounts of content
+- **WHEN** one phase row contains cards with different title, status, progress, or integrity content heights
+- **THEN** every phase card stretches to the height of the tallest card in that row
+- **AND** all phase-axis node top coordinates differ by no more than 1 pixel
+- **AND** the implementation does not use a fixed card height or clip card content
+
 ### Requirement: Timeline is responsive and touch usable
 
 The timeline SHALL preserve hierarchy and interaction across desktop, tablet, and mobile viewports using horizontal overflow rather than stacking phase order vertically.
