@@ -4,7 +4,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Current Roadmap Validation
 
-- Current phase: no active implementation phase. Phase 3 is accepted and closed; Phase 4 is not planned in detail yet. Proposed operational hardening slice: `openspec/changes/harden-mcp-context-api/`. Proposed UX work is documented separately in `docs/planning/DASHBOARD_REDESIGN_PLAN.md` and `openspec/changes/redesign-dashboard-project-timeline/`; this planning work does not activate Phase 4.
+- Current phase: no active roadmap implementation phase. Phase 3 is accepted and closed; Phase 4 remains draft. The bounded dashboard redesign was implemented on `dashboard-redesign/ui-rebuild` through `harden-dashboard-state-derivation`, `redesign-dashboard-project-timeline`, and `improve-dashboard-search-navigation`; this did not activate or close Phase 4. Agent verification is complete, while the timeline human clarity gate remains open.
 - Planning from this roadmap alone is forbidden. Detailed phase plans must reconcile roadmap intent, current docs, current implementation, environment evidence, audit findings, and human decisions.
 - Product behavior, requirements, proposed changes, and acceptance criteria belong in OpenSpec artifacts under `openspec/` when SDD applies.
 - New ideas during active phase work must go through change intake before they alter scope or plans.
@@ -81,7 +81,7 @@ Decision required:
 
 ## Phase 4. Hardening And Pilot Readiness
 
-Status: not planned in detail yet.
+Status: draft; not planned in detail yet.
 
 Goal: improve reliability, safety, UX, operations, and acceptance evidence.
 
@@ -89,13 +89,14 @@ Proposed slices and ordering:
 
 - `openspec/changes/harden-mcp-context-api/` defines canonical config cleanup, compact saved project-id listing, JSON-only API boundaries, MCP response validation, agent preflight packet retrieval hardening, and local HTTP diagnostics.
 - This slice should be implemented before relying on Projects Viewer MCP preflight packets for everyday agent startup, because it addresses the observed HTML fallback, legacy config ambiguity, and project-id lookup friction.
-- `docs/audits/UX_UI_AUDIT_2026-07-10.md` records P0 data-trust/first-glance findings plus information-density, search, responsive, sticky-layout, accessibility, and frontend-test gaps.
-- `docs/planning/DASHBOARD_REDESIGN_PLAN.md` proposes the dashboard sequence: trusted state derivation, Project Timeline, overview integration, search/navigation state, then responsive/accessibility pilot acceptance.
-- `openspec/changes/redesign-dashboard-project-timeline/` is apply-ready planning for a horizontal phase timeline with one expanded phase and a nested horizontal step timeline. Component work may be verified behind the Roadmap surface, but overview promotion is gated on trustworthy explicit current phase/step inputs.
+- `docs/audits/UX_UI_AUDIT_2026-07-10.md` is the redesign baseline; `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records implementation and browser evidence.
+- `docs/planning/DASHBOARD_REDESIGN_PLAN.md` records the completed bounded sequence: trusted state derivation, Project Timeline, overview integration, search/navigation state, then responsive/accessibility agent acceptance.
+- `openspec/changes/redesign-dashboard-project-timeline/` now has all agent-verifiable work complete and remains active only for explicit human task 7.6. It must not be archived until the owner confirms the lifecycle hierarchy, current step, expansion, and no-active-phase state are understandable at a glance.
+- `openspec/changes/improve-dashboard-search-navigation/` records ranked diagnostic-aware search and safe versioned local/history presentation state. It preserves configured-path, read-only, and local-only boundaries.
 
 Decision required before Phase 4 planning:
 
-- Confirm whether operational MCP/API hardening remains the first Phase 4 slice or whether isolated timeline work may proceed in parallel while dashboard state-derivation trust is designed. State trust must precede authoritative overview promotion in either sequence.
+- Decide the detailed Phase 4 scope independently of this bounded redesign and of the still-separate `harden-mcp-context-api` proposal. The immediate redesign action is the human timeline acceptance gate, not silent Phase 4 activation.
 
 ## Phase Planning Rule
 

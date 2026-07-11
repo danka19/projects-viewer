@@ -1,8 +1,8 @@
 # Dashboard Redesign Plan
 
-Status: proposed; documentation and OpenSpec planning only. No implementation phase is active.
+Status: implemented on `dashboard-redesign/ui-rebuild`; agent verification complete, human timeline acceptance pending.
 
-Date: 2026-07-10.
+Date: 2026-07-10. Implementation evidence updated 2026-07-11.
 
 ## Goal
 
@@ -15,8 +15,10 @@ The Project Timeline / Roadmap is the central visual component of the selected-p
 - UX evidence and findings: `docs/audits/UX_UI_AUDIT_2026-07-10.md`.
 - Timeline proposal/design/tasks: `openspec/changes/redesign-dashboard-project-timeline/`.
 - Normative timeline requirements: `openspec/changes/redesign-dashboard-project-timeline/specs/dashboard-project-timeline/spec.md`.
+- Search/navigation proposal and requirements: `openspec/changes/improve-dashboard-search-navigation/`.
+- Implementation/browser evidence: `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md`.
 - Existing lifecycle vocabulary: `docs/03-status-rules.md`, `src/types.ts`, and `src/statusMeta.ts`.
-- Existing roadmap implementation: `src/components/RoadmapTimeline.tsx` and `src/phaseProgress.ts`.
+- Implemented timeline: `src/timeline/`, `src/phaseProgress.ts`, and `src/components/ProjectTabs.tsx`.
 - Existing product boundaries: `AGENTS.md`, `docs/CONTEXT.md`, and accepted OpenSpec specs.
 - Visual reference: horizontal parent phases, exclusive expansion, and nested horizontal steps only. Reference palette, people, dates, application shell, zoom controls, and sample data are excluded.
 
@@ -86,7 +88,7 @@ Always-visible phase axis:
 - Nested horizontal steps beneath the axis.
 - Source/confidence/integrity access through the read-only details flow.
 
-The timeline appears after the state header and before secondary details. It is initially verified behind the existing Roadmap surface, then promoted only after the state-trust gate and human visual acceptance.
+The timeline appears after the state header and before secondary details. It was promoted after the state-trust and agent browser gates passed. Human visual acceptance remains the explicit OpenSpec task 7.6 gate and is not inferred from agent evidence.
 
 ### 5. Secondary detail navigation
 
@@ -103,7 +105,7 @@ Exact labels may be localized later; conceptual separation is the requirement. P
 
 ### Change A — Harden dashboard state derivation
 
-Recommended future OpenSpec name: `harden-dashboard-state-derivation`.
+Implemented OpenSpec change: `harden-dashboard-state-derivation`.
 
 Scope:
 
@@ -123,7 +125,7 @@ This change must precede authoritative overview promotion of the timeline.
 
 ### Change B — Project Timeline / Roadmap
 
-Active proposal: `openspec/changes/redesign-dashboard-project-timeline/`.
+Implemented, pending-human-acceptance proposal: `openspec/changes/redesign-dashboard-project-timeline/`.
 
 Scope:
 
@@ -137,12 +139,12 @@ Scope:
 Gate:
 
 - All OpenSpec requirements and scenarios have corresponding evidence.
-- Timeline is accepted in the Roadmap surface before overview promotion.
+- Timeline passed automated and browser acceptance before overview promotion; human at-a-glance acceptance remains open.
 - Dark/light and desktop/tablet/mobile browser checks pass.
 
 ### Change C — Redesign dashboard overview
 
-Recommended future OpenSpec name: `redesign-dashboard-overview`.
+Implemented overview slice on the redesign branch.
 
 Scope:
 
@@ -157,11 +159,11 @@ Gate:
 
 - At 1280x720, selected-project state and phase axis are visible on first load.
 - Every global count opens the exact matching global set.
-- Human owner can identify current phase/step, next action/decision, and real blocker in under ten seconds for representative fixtures.
+- Human owner can identify current phase/step, next action/decision, and real blocker in under ten seconds for representative fixtures. This is the remaining human gate, not an agent-completed claim.
 
 ### Change D — Search and durable navigation state
 
-Recommended future OpenSpec name: `improve-dashboard-search-navigation`.
+Implemented proposal: `openspec/changes/improve-dashboard-search-navigation/`.
 
 Scope:
 
@@ -179,7 +181,7 @@ Gate:
 
 ### Change E — Responsive and accessibility acceptance
 
-This may be implemented within B-D but remains a separate gate.
+Implemented across B-D; agent verification passed and the human clarity gate remains separate.
 
 Scope:
 
@@ -208,23 +210,25 @@ Gate:
 
 If the human owner prioritizes visible UX before MCP hardening, Change A remains non-negotiable before Change C; Change B may run in parallel only as an isolated Roadmap-surface implementation using explicit fixture/current IDs.
 
+Implementation result on 2026-07-11: the owner requested the UX-first sequence. Change A landed before overview promotion; B and C established the trusted primary timeline/overview; D added ranked search and safe presentation-state persistence; E passed automated and live-browser checks. MCP/API hardening remains an independent change and was not silently folded into the redesign.
+
 ## Affected Files And Boundaries
 
-Expected existing files to modify during later implementation:
+Primary implemented files:
 
 - `src/App.tsx`: shell, aggregate attention brief, selected-project/mobile ordering, durable view state.
-- `src/components/OverviewStats.tsx`: replace or narrow global metrics.
+- `src/components/AttentionBrief.tsx`: prioritized cross-project attention groups.
 - `src/components/ProjectSidebar.tsx`: compact/mobile project switcher and sticky behavior.
 - `src/components/SelectedProjectHeader.tsx`: compact trusted lifecycle summary.
 - `src/components/ProjectTabs.tsx`: detail-navigation consolidation and timeline placement.
-- `src/components/RoadmapTimeline.tsx`: replace/decompose current vertical implementation.
+- `src/timeline/`: trusted presentation model, interaction state, phase/step components, legend, and fallback states.
+- `src/components/GlobalSearch.tsx`, `src/search.ts`: ranked accessible search and diagnostic opt-in.
+- `src/uiState.ts`: versioned local/history presentation state and safe descriptor restoration.
 - `src/phaseProgress.ts`: deterministic progress semantics.
 - `src/statusMeta.ts` and `src/index.css`: existing semantic tokens, contrast, typography, responsive/sticky variables.
 - `src/types.ts`: explicit presentation/current/integrity contract when upstream support is added.
 - `scan-projects.mjs`: source authority, lifecycle reconciliation, trusted current/next/blocker derivation.
 - `tests/`: scanner contract, timeline model/state/component, accessibility, responsive, and browser acceptance coverage.
-
-Recommended new focused frontend modules/components are named in the OpenSpec design but are not created by this planning session.
 
 Safety boundaries remain unchanged: saved project IDs/paths only, scanned projects read-only, no arbitrary browser paths, no task/calendar writes, no commands/commits from dashboard behavior, no remote model/auth/cloud additions.
 
@@ -277,17 +281,11 @@ For representative projects, the human owner must be able to identify without op
 
 ## Out Of Scope
 
-- No implementation in this planning session.
 - No Figma asset, image generation, new brand system, or palette replacement.
 - No calendar/Gantt scheduling, dependencies, owners, avatars, date editing, zoom controls, or draggable phases copied from the reference.
 - No cloud, auth, collaboration, remote models, notifications, external task systems, or scanned-project writes.
 - No silent roadmap Phase 4 activation; detailed phase planning still requires a human decision and the phase template.
 
-## Required Human Decision Before Implementation
+## Remaining Human Gate
 
-Choose sequencing after documentation review:
-
-- Recommended: finish/reprioritize the existing MCP hardening explicitly, then execute state trust -> timeline -> overview.
-- UX-first alternative: begin the timeline behind the current Roadmap tab while state-trust work proceeds, but do not promote it to the overview until trust acceptance passes.
-
-Leaving this unresolved risks parallel work with contradictory priorities, but it does not block review of the timeline specification itself.
+OpenSpec task 7.6 remains intentionally open. The owner must confirm that completed/current/planned hierarchy, current step, exclusive phase expansion, and the no-active-phase state are understandable at a glance. Until that confirmation, `redesign-dashboard-project-timeline` remains active and must not be archived. No additional implementation sequencing decision is required for the completed agent-verifiable slice.

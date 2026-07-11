@@ -1,6 +1,6 @@
 # UX/UI Audit — Dashboard State Clarity
 
-Status: recorded; findings remain open until implementation and acceptance evidence closes them.
+Status: recorded baseline; agent-verifiable remediation completed 2026-07-11, with UX-002/UX-005 human clarity acceptance still open.
 
 Date: 2026-07-10.
 
@@ -18,7 +18,9 @@ This audit does not approve implementation scope. Canonical proposed behavior fo
 - `GET /api/scan-status`, `GET /api/projects`, and `GET /api/agent-preflight-packet?projectId=projects-viewer&agentRole=reviewer`.
 - Generated project summaries in `app-data/projects.generated.json`.
 - `src/App.tsx`, `src/components/OverviewStats.tsx`, `ProjectSidebar.tsx`, `SelectedProjectHeader.tsx`, `ProjectTabs.tsx`, `FocusCards.tsx`, `RoadmapTimeline.tsx`, `TasksPanel.tsx`, `DetailDrawer.tsx`, `src/index.css`, `src/phaseProgress.ts`, `src/statusMeta.ts`, and `scan-projects.mjs`.
-- Current tests under `tests/`; no component-level frontend/browser automation suite currently exists.
+- Current tests under `tests/`; no component-level frontend/browser automation suite existed at the time of this baseline audit.
+
+Follow-up implementation, automated evidence, measured breakpoint results, search/history/focus flows, and representative lifecycle states are recorded in `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md`.
 
 ## Executive Verdict
 
@@ -34,6 +36,22 @@ The human owner cannot reliably answer the following on the first screen:
 - Which values are accepted facts versus low-confidence dashboard interpretations?
 
 The redesign must therefore start with state trust and information hierarchy. A visual-only reskin would amplify incorrect status conclusions.
+
+## 2026-07-11 Follow-up Status
+
+| Finding | Follow-up |
+|---|---|
+| UX-001 | Closed: trusted source/current-state derivation was implemented and regression-tested before overview promotion. |
+| UX-002 | Implemented: compact freshness and the four-group attention brief are in the first viewport; human at-a-glance acceptance remains open. |
+| UX-003 | Closed: the old mixed metric bar was replaced by labelled attention actions that open matching cross-project sets. |
+| UX-004 | Closed: one selected-project state header, primary timeline, and progressive detail surfaces replace repeated primary tiles. |
+| UX-005 | Implemented: horizontal parent/child timelines are primary and browser-verified; OpenSpec human task 7.6 remains open. |
+| UX-006 | Closed: deterministic ranking, stable identity, visible totals/truncation, keyboard control, and diagnostic opt-in are implemented and tested. |
+| UX-007 | Closed: measured mobile order is project switcher, selected header, timeline, then detail tabs, without page-level overflow. |
+| UX-008 | Closed: the compact responsive shell removes the measured header/sidebar collision at desktop and tablet breakpoints. |
+| UX-009 | Closed: body prose uses system sans; semantic tokens and composited interaction tints pass automated AA checks in both themes. |
+| UX-010 | Partially remediated: safe versioned state, semantic tabs, search/history, and drawer isolation/trap/return are implemented; Manage Projects modal semantics remain a separate follow-up. |
+| UX-011 | Closed: Node plus component/accessibility/search/theme coverage and live-browser acceptance now exist. |
 
 ## Quantitative Observations
 
@@ -55,7 +73,7 @@ The redesign must therefore start with state trust and information hierarchy. A 
 
 Severity: P0.
 
-Status: open.
+Status: closed 2026-07-11; trust fixtures and overview evidence recorded in the follow-up acceptance audit.
 
 Observed on `projects-viewer`:
 
@@ -86,7 +104,7 @@ Required direction:
 
 Severity: P0.
 
-Status: open.
+Status: implemented; human at-a-glance acceptance pending.
 
 The most prominent header content is scanner telemetry: live/static mode, rescan, interval, status, files, skipped items, duration, trigger, and scan message. The main metrics emphasize totals and documentation presence but omit a ranked human brief: required decisions, real blockers, active work, pending acceptance, and between-phase projects.
 
@@ -100,7 +118,7 @@ Required direction:
 
 Severity: P1.
 
-Status: open.
+Status: closed 2026-07-11.
 
 `Next actions 108` and `Docs coverage 97%` are calculated across all projects, but their click behavior opens a tab for only the selected project. Status cards act as filters, while the Projects card resets filtering. Identical card styling therefore represents different interaction contracts.
 
@@ -110,7 +128,7 @@ Required direction: every global metric must open an aggregate view whose item c
 
 Severity: P1.
 
-Status: open.
+Status: closed 2026-07-11.
 
 Status, attention, next actions, blockers, coverage, and decisions repeat across the metric bar, filter chips, sidebar card, selected-project header, focus cards, and tabs. Most surfaces use the same border, radius, density, and typography, so primary and diagnostic information appear equally important.
 
@@ -120,7 +138,7 @@ Required direction: one primary project-state surface, one prioritized cross-pro
 
 Severity: P1.
 
-Status: accepted design direction; implementation open.
+Status: implemented and agent-verified; human OpenSpec task 7.6 remains open.
 
 The existing Roadmap tab contains the best lifecycle data but renders it as another vertical list and is not visible on the first screen. `No active phase detected` hides the more useful state: closed prior phase, no active implementation phase, next planned phase, and required decision/gate.
 
@@ -137,7 +155,7 @@ Canonical behavior and acceptance criteria: `openspec/changes/redesign-dashboard
 
 Severity: P1.
 
-Status: open.
+Status: closed 2026-07-11.
 
 Search mixes roadmap entries, diagnostics, decisions, blockers, filtered process-policy candidates, and historical text in source iteration order. It silently stops at 40 results, has no relevance/current-state ranking, grouping, visible total, or full keyboard result-navigation contract.
 
@@ -147,7 +165,7 @@ Required direction: rank accepted/current sources first, group by project/type, 
 
 Severity: P1.
 
-Status: open.
+Status: closed 2026-07-11.
 
 At 390x844 the header occupies 340 px, the selected-project header begins around y=1514, and detail tabs begin around y=2227. This technically avoids page-wide horizontal overflow but fails task priority.
 
@@ -157,7 +175,7 @@ Required direction: compact system header; selected-project status and timeline 
 
 Severity: P1 bug.
 
-Status: open.
+Status: closed 2026-07-11.
 
 `ProjectSidebar` uses a fixed `lg:top-[70px]` while the measured sticky header is 157 px at the audited desktop viewport. Scrolled sidebar content can appear beneath the header.
 
@@ -167,7 +185,7 @@ Required direction: one shared responsive sticky offset or remove nested sticky 
 
 Severity: P2.
 
-Status: open.
+Status: closed 2026-07-11.
 
 Fira Code is applied to all body prose. Long tasks, blockers, decisions, and explanations therefore read like terminal output. Ten-pixel faint metadata falls below WCAG AA normal-text contrast.
 
@@ -177,7 +195,7 @@ Required direction: use a readable sans-serif for prose and keep monospace for p
 
 Severity: P2.
 
-Status: open.
+Status: partially remediated; Manage Projects modal semantics remain a separate follow-up.
 
 Selected project, tab, filter, drawer item, and timeline context are not represented in a durable URL/state model. Current tabs lack the full arrow-key/ARIA relationship pattern. The detail drawer lacks a complete focus trap/return contract, and Manage Projects is visually modal without a fully specified dialog behavior.
 
@@ -187,7 +205,7 @@ Required direction: URL/local state for selected context where safe; semantic co
 
 Severity: P2.
 
-Status: open.
+Status: closed 2026-07-11.
 
 Current automated tests focus on scanner/server contracts and a pure phase-progress helper. There is no component-capable suite covering overview semantics, interaction, accessibility, sticky layout, search behavior, or responsive overflow.
 
@@ -214,4 +232,4 @@ Required direction: introduce the smallest compatible component test harness and
 
 ## Recommended Next Decision
 
-Keep `harden-mcp-context-api` as a separate operational hardening change. For the dashboard redesign, approve the following product sequence: state-derivation trust change, selected-project overview/timeline change, search/state persistence, then responsive/accessibility acceptance. Timeline component work may start behind the current Roadmap tab, but overview promotion must wait for the trust gate.
+Keep `harden-mcp-context-api` as a separate operational hardening change. For the dashboard redesign, the remaining decision is human OpenSpec task 7.6: confirm that lifecycle hierarchy, current step, exclusive expansion, and the no-active-phase state are understandable at a glance. Do not archive the timeline change before that confirmation.

@@ -4,17 +4,18 @@ A local, read-only **project radar** that scans the documentation of your projec
 
 ## How the interface works
 
-The main screen is deliberately calm — details are one click away (progressive disclosure):
+The main screen uses progressive disclosure: trusted state and lifecycle come first, while full evidence remains one action away.
 
-- **Top metric bar** — total / active / needs-attention / stalled / done projects, open next actions, docs coverage. Every card is clickable: status cards filter the project list, "Next actions" opens the Tasks tab, "Docs coverage" opens the Documentation tab.
-- **Left sidebar** — compact project cards with status orb, health score (0–100), one-line status reason, and last update. Filter chips by status; click a card to select the project.
-- **Project radar panel** — the selected project's summary: health ring, current phase, next action, main blocker, recent decision, recent change, and a 5-slot doc-coverage strip. Every tile is clickable and jumps to the right tab or opens the detail drawer.
-- **Focus cards (Overview tab)** — max 3 items each for Next up, Work constraints (Real blockers / Approval gates / Needs review / Paused), Needs attention, and Recent decisions, with "View all →" buttons.
-- **Tabs** — Overview · Roadmap · SDD/Specs (grouped by status) · Tasks · Decisions · Audits (grouped: attention/latest/recorded/archived) · Documentation (coverage map with per-category file lists and filename search) · Activity (change timeline). Only the selected tab renders its lists.
-- **Roadmap tab** — a segmented progress bar that separates closed / accepted / pending-acceptance / in-progress / blocked-deferred / planned-like phases using the `phase-status-audit` lifecycle. Collapsed: number, title, status badge, step-based progress %, confidence dot, source file. Expanded: a "Why this status?" panel (raw `Status:` text, matched parser rule, confidence, source `file:line`, suspected stale-doc warnings), detected steps with colored status dots and counts, and related decisions/audits. `npm run scan` also prints a **Roadmap Status Diagnostics** table per project with the same transparency data.
-- **Detail drawer** — click any phase, task, decision, blocker, audit, spec, or doc file to open a right-side drawer with its type, status, extracted text, `file:line` source, a copy-path button, and related items. Esc closes it.
-- **Global search** (`/` to focus) — searches projects, roadmap phases, tasks, blocked work, decisions, specs, and doc filenames across all projects; clicking a result selects the project, opens the right tab, and opens the drawer.
-- **Theme toggle** — switches between the default dark terminal palette and a light parchment palette. The choice is saved in `localStorage`.
+- **Compact system bar** - global search, live/static freshness, project management, and the saved dark/light theme.
+- **Cross-project attention brief** - owner decisions, real blockers, active work, and between-phase projects. Each enabled card opens the matching cross-project evidence list.
+- **Project navigation** - a filtered sidebar on wider screens and a compact project switcher on mobile. Selecting a project is independent from the current sidebar filter.
+- **Selected-project state header** - concise lifecycle position, status, freshness, next action, and real blocker without repeating the full document inventory.
+- **Project Timeline** - a horizontal, no-wrap phase axis immediately below the state header. Exactly one phase may expand to an independent horizontal step axis. Current phase/step, lifecycle state, progress basis, confidence, ambiguity, no-phase, no-active-phase, no-steps, stale, loading, and error states remain explicit and read-only.
+- **Four detail surfaces** - Status, Work, Decisions, and Knowledge use semantic tab/tabpanel relationships and arrow-key navigation. The timeline stays visible above these secondary surfaces.
+- **Detail drawer** - phase, step, task, decision, blocker, audit, spec, or document evidence opens in a modal read-only drawer. Focus moves inside, is contained, and returns to the exact originating control on Escape or close.
+- **Ranked global search** (`/` to focus) - searches projects, roadmap phases, steps, tasks, blockers, decisions, specs, and docs with deterministic relevance, stable result identity, visible totals/truncation, keyboard navigation, and diagnostics excluded unless explicitly enabled. Result activation preserves query/filter context and participates in browser Back/Forward state.
+- **Responsive priority** - at narrow widths the project switcher and selected-project state precede the timeline and detail navigation; long phase/step rows scroll only inside their labelled local viewports.
+- **Durable presentation state** - theme, selection, filters, query, active tabs, compatible timeline expansion, and safe drawer descriptors are versioned and restored without putting local filesystem paths into the URL.
 
 The health score is derived from documentation coverage, blocker/rejection counts, attention markers, staleness, and next-action clarity — it is a documentation-health signal, not a judgment of the code.
 
@@ -54,7 +55,7 @@ Common commands:
 | `npm run server` | Serve the built frontend through the same local Express API. Run `npm run build` first. |
 | `npm run preview` | Alias for serving the built dashboard through `server.mjs`. |
 | `npm run start` | Alias for serving the built dashboard through `server.mjs`. |
-| `npm test` | Run the Node test suite for scanner/server behavior. |
+| `npm test` | Run Node scanner/server/model tests, then the Vitest component/accessibility/search suite. |
 
 Local URLs and ports:
 
@@ -327,7 +328,11 @@ app-data/ai.context.snapshot.json  # saved compact AI context snapshot for chang
 app-data/ai.findings.generated.json # generated AI findings and review state (ignored)
 scan-projects.mjs        # read-only Node scanner (npm run scan)
 src/data/projects.json   # static fallback scan output
-src/App.tsx              # app shell: header, global search, layout, drawer state
+src/App.tsx              # app shell: attention brief, responsive layout, persisted UI state
+src/search.ts            # pure ranked cross-project search contracts
+src/uiState.ts           # validated versioned local/history UI-state contracts
+src/timeline/            # phase/step presentation model, state, and components
+src/components/GlobalSearch.tsx    # accessible controlled combobox/listbox search
 src/components/ManageProjects.tsx  # tracked project/workspace management UI
 server/project-config.mjs          # config migration, validation, CRUD helpers
 server/project-discovery.mjs       # safe workspace candidate discovery
@@ -336,9 +341,8 @@ server/ai-findings.mjs             # deterministic findings and local review-sta
 server/agent-preflight-packet.mjs  # pure agent preflight packet composition
 server/project-brief-report.mjs    # pure advisory project brief/report composition
 src/drawer.ts            # builders that turn extracted items into drawer payloads
-src/components/          # OverviewStats, ProjectSidebar, SelectedProjectHeader,
-                         # FocusCards, ProjectTabs, RoadmapTimeline, SpecsPanel,
-                         # AuditsPanel, DecisionsPanel, TasksPanel,
+src/components/          # AttentionBrief, ProjectSidebar, SelectedProjectHeader,
+                         # ProjectTabs, GlobalSearch, focused evidence panels,
                          # DocumentationCoverage, ActivityPanel, DetailDrawer
 docs/                    # design notes: conventions analysis, data model, status rules
 ```

@@ -38,17 +38,19 @@
 
 - [x] 5.1 Add tests for loading without data, background refresh with retained data, empty, live retryable error, static non-retryable error, stale retained model, partial model, and integrity warning states.
 - [x] 5.2 Implement bounded skeleton, empty, error, stale, partial, and integrity-warning presentations without fabricated status or progress.
-- [ ] 5.3 Add responsive tests for phase/step no-wrap behavior, overflow detection, visible neighbor/edge affordances, and card sizing at desktop, tablet, and mobile widths.
+- [x] 5.3 Add responsive tests for phase/step no-wrap behavior, overflow detection, visible neighbor/edge affordances, and card sizing at desktop, tablet, and mobile widths.
 - [x] 5.4 Implement proximity scroll snapping, manual-scroll preservation, current/focus centering triggers, compact metadata above twelve phases, and bounded rendering through scanner limits.
-- [ ] 5.5 Verify the selected-project header and phase axis fit the first 1280x720 viewport and the mobile timeline precedes the full project list/detail navigation. (Gated on the overview redesign slice.)
+- [x] 5.5 Verify the selected-project header and phase axis fit the first 1280x720 viewport and the mobile timeline precedes the full project list/detail navigation. (Gated on the overview redesign slice.)
+      Evidence 2026-07-11: component geometry contracts pass; live browser at 1280x720 measured the header at y=183-382, timeline at y=398-712, and detail tabs at y=728. At 390x844 the project switcher, selected header, timeline, and tabs appeared in that order; document width remained 380/380 while the phase row scrolled only inside its 314 px viewport.
 
 ## 6. Accessibility And Motion
 
 - [x] 6.1 Add accessibility assertions for labelled ordered lists, semantic buttons, `aria-current`, `aria-expanded`, `aria-controls`, progress descriptions, live-region announcements, and scroll-container labels.
 - [x] 6.2 Implement visible focus, complete keyboard parity, expansion announcements, drawer focus transfer/return, and non-hover access to all essential information.
-- [ ] 6.3 Verify WCAG 2.1 AA contrast for dark/light text, lifecycle tokens, axis states, and focus indicators.
+- [x] 6.3 Verify WCAG 2.1 AA contrast for dark/light text, lifecycle tokens, axis states, and focus indicators.
 - [x] 6.4 Add reduced-motion coverage and implement immediate/minimal centering and expansion when `prefers-reduced-motion` is active.
-- [ ] 6.5 Run the focused accessibility suite and record any automated-tool limitations for manual follow-up.
+- [x] 6.5 Run the focused accessibility suite and record any automated-tool limitations for manual follow-up.
+      Evidence 2026-07-11: timeline tests pass 39/39; navigation/drawer tests pass 6/6; theme contrast tests pass 4/4. Browser keyboard checks covered timeline/tab/search movement, modal focus containment, exact-origin return, and Back/Forward restoration. Automated contrast math does not replace the still-open human clarity gate.
 
 ## 7. Dashboard Integration And Acceptance
 
@@ -58,14 +60,17 @@
       Evidence 2026-07-11: full `npm test` (93 node + 18 component) and live browser interaction checks pass.
 - [x] 7.3 Complete the scanner-state trust gate for current phase/step inputs before promoting the timeline into the primary selected-project overview.
       Evidence 2026-07-11: OpenSpec change `harden-dashboard-state-derivation` implemented with UX-001 fixtures.
-- [ ] 7.4 Promote the accepted timeline below the compact selected-project state header and update the redesigned detail navigation only after trust/browser gates pass.
-- [ ] 7.5 Run browser acceptance in dark and light themes at desktop, tablet, and mobile widths, checking overflow, touch/keyboard navigation, sticky layout, focus return, console errors, and page-level horizontal overflow.
+- [x] 7.4 Promote the accepted timeline below the compact selected-project state header and update the redesigned detail navigation only after trust/browser gates pass.
+- [x] 7.5 Run browser acceptance in dark and light themes at desktop, tablet, and mobile widths, checking overflow, touch/keyboard navigation, sticky layout, focus return, console errors, and page-level horizontal overflow.
+      Evidence 2026-07-11: `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records dark/light 1280x720, 1024x768, and 390x844 checks, local-versus-page overflow, focus/history flows, console inspection, and edge-state fixtures. Promotion followed the implemented state-trust gate; task 7.6 remains human-owned.
 - [ ] 7.6 Obtain human acceptance that completed/current/planned hierarchy, current step, phase expansion, and no-active-phase state are understandable at a glance.
 
 ## 8. Documentation And Final Verification
 
-- [ ] 8.1 Update user-facing/project documentation with implemented component behavior, verification evidence, and any accepted deviations from this proposal.
-- [ ] 8.2 Update `docs/CURRENT_PROJECT_AUDIT.md`, `docs/ROADMAP.md`, and the dashboard redesign plan with trust-gate and human-acceptance outcomes.
-- [ ] 8.3 Run focused timeline tests, `npm test`, `npm run build`, `openspec list`, `openspec list --specs`, `openspec validate --all --strict`, and `git diff --check`.
-- [ ] 8.4 Re-run the live dashboard against representative projects with no phases, no active phase, one active phase, pending acceptance, blocked work, no steps, ambiguous data, and long roadmaps.
-- [ ] 8.5 Commit intentional changes and leave the OpenSpec change ready for human review or archival only after all acceptance evidence is recorded.
+- [x] 8.1 Update user-facing/project documentation with implemented component behavior, verification evidence, and any accepted deviations from this proposal.
+- [x] 8.2 Update `docs/CURRENT_PROJECT_AUDIT.md`, `docs/ROADMAP.md`, and the dashboard redesign plan with trust-gate and human-acceptance outcomes.
+- [x] 8.3 Run focused timeline tests, `npm test`, `npm run build`, `openspec list`, `openspec list --specs`, `openspec validate --all --strict`, and `git diff --check`.
+- [x] 8.4 Re-run the live dashboard against representative projects with no phases, no active phase, one active phase, pending acceptance, blocked work, no steps, ambiguous data, and long roadmaps.
+      Evidence 2026-07-11: live configured projects covered no phases (`vpn-and-router`) and a long no-active/pending-acceptance timeline (`AutoParts`). A separate safe live scanner fixture covered exactly one active phase/current step, blocked and pending-acceptance phases, a no-steps phase with drawer focus return, and two simultaneous in-progress phases with no fabricated current marker.
+- [x] 8.5 Commit intentional changes and leave the OpenSpec change ready for human review or archival only after all acceptance evidence is recorded.
+      Evidence 2026-07-11: focused timeline 39/39; final `npm test` 97 Node + 70 Vitest; production build passed; OpenSpec lists succeeded; strict validation passed 9/9; `git diff --check` passed. Implementation commit `32b9c68` records the integrated search/timeline/accessibility slice. This change remains active for human task 7.6 and was not archived.

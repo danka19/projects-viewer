@@ -20,16 +20,20 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/` | Product, architecture, operations, roadmap, audit, glossary, and phase documentation |
 | `server/` | Server-side helper modules |
 | `src/` | React frontend, components, generated data fallback, and TypeScript types |
-| `tests/` | Node test suite for scanner and server behavior |
+| `tests/` | Node scanner/server/model tests plus Vitest component, interaction, accessibility, search, and theme tests |
 
 ## Application Code
 
 | Path | Purpose |
 |---|---|
-| `src/App.tsx` | App shell, live/static data loading, scan controls, search, layout, and drawer state |
+| `src/App.tsx` | App shell, live/static loading, attention brief, responsive ordering, versioned presentation state, and drawer integration |
 | `src/data/projects.json` | Static fallback data for browser-only mode |
-| `src/types.ts` | Scanner output, AI context/findings, project brief/report, and UI data contracts |
+| `src/types.ts` | Scanner output, AI context/findings, project brief/report, drawer descriptor, and UI data contracts |
+| `src/search.ts` | Pure cross-project search indexing, ranking, deduplication, diagnostic opt-in, totals, and stable hit identity |
+| `src/uiState.ts` | Versioned validated local/history UI-state restoration and safe timeline/drawer descriptor contracts |
+| `src/timeline/` | Trusted timeline presentation model/state, phase/step cards, horizontal axes, lifecycle visuals, legend, and fallback states |
 | `src/components/` | Dashboard panels, tabs, status badges, drawer, skeletons, and project views |
+| `src/components/GlobalSearch.tsx` | Accessible controlled search combobox/listbox with keyboard navigation and diagnostic disclosure |
 | `src/components/ManageProjects.tsx` | Live-mode tracked project/workspace management UI |
 | `server/scan-controller.mjs` | Single-flight scan controller with queue, delay, status, trigger, and throttle logic |
 | `server/project-config.mjs` | Canonical config path helpers, legacy migration, validation, project/workspace CRUD, enabled-project filtering |
@@ -42,6 +46,8 @@ This document is the repository map for agents and humans. Keep it current whene
 | `tests/agent-preflight-packet-types.ts` | Type-level contract sample for shared agent preflight packet TypeScript types |
 | `tests/project-brief-report.test.mjs` | Pure composition and local API tests for project brief/report behavior and read-only side effects |
 | `tests/project-brief-report-types.ts` | Type-level contract sample for shared project brief/report TypeScript types |
+| `tests/components/` | Timeline, search, UI state, tab, drawer focus, responsive contract, and dashboard component tests |
+| `tests/theme-contrast.test.mjs` | Dark/light semantic-token, composite tint, axis, focus, and interaction contrast checks |
 
 ## Local Runtime Data
 
@@ -63,10 +69,11 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/AI_STEP_VERIFICATION_CHECKLIST.md` | Mandatory self-check for AI agents |
 | `docs/CONTEXT.md` | Active glossary and domain boundaries |
 | `docs/planning/` | Cross-phase planning notes and decision drafts |
-| `docs/planning/DASHBOARD_REDESIGN_PLAN.md` | Proposed UX redesign sequence, target information architecture, Project Timeline integration, trust prerequisites, and acceptance matrix |
+| `docs/planning/DASHBOARD_REDESIGN_PLAN.md` | Implemented UX redesign sequence, target information architecture, Project Timeline integration, trust prerequisites, and acceptance matrix |
 | `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md` | Planned cleanup for config source of truth, compact project-id listing, agent preflight API routing, MCP response validation, and HTTP diagnostics |
 | `docs/audits/` | Focused audit reports |
 | `docs/audits/UX_UI_AUDIT_2026-07-10.md` | Live-browser UX/UI audit of data trust, first-glance status clarity, density, search, responsive layout, accessibility, and test gaps |
+| `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` | Redesign implementation record, verification commands, browser matrix, edge-state evidence, residual risks, and open human gate |
 | `docs/phases/` | Detailed phase plans and templates |
 | `docs/phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 discovery and requirements plan |
 | `docs/phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Accepted and closed Phase 2 architecture and data model plan for the project brief/report workflow |
@@ -78,7 +85,9 @@ This document is the repository map for agents and humans. Keep it current whene
 | `openspec/changes/add-project-brief-report/` | Active proposed OpenSpec change for the local daily/weekly project brief/report workflow |
 | `openspec/changes/agent-preflight-packet/` | Implemented proposed OpenSpec change for a separate local AI-agent preflight packet workflow, ready for human acceptance review |
 | `openspec/changes/harden-mcp-context-api/` | Proposed OpenSpec change for canonical config cleanup, compact project-id listing, API JSON boundary hardening, MCP response validation, and diagnostics |
-| `openspec/changes/redesign-dashboard-project-timeline/` | Proposed OpenSpec change for the horizontal phase timeline, exclusive expansion, nested step timeline, responsive overflow, accessibility, and acceptance evidence |
+| `openspec/changes/harden-dashboard-state-derivation/` | Implemented dashboard source-trust/current-state filtering change |
+| `openspec/changes/redesign-dashboard-project-timeline/` | Implemented horizontal phase/step timeline change; agent evidence complete, human task 7.6 open |
+| `openspec/changes/improve-dashboard-search-navigation/` | Implemented ranked search and safe versioned presentation-state persistence change |
 | `openspec/changes/archive/2026-07-08-add-ai-context-findings-layer/` | Archived OpenSpec change for AI-readable project context and review-required findings |
 | `openspec/specs/ai-context/spec.md` | Accepted AI context requirements |
 | `openspec/specs/ai-findings/spec.md` | Accepted AI findings requirements |
@@ -91,7 +100,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `npm run scan` | Run one-time read-only scan into `app-data/projects.generated.json` |
 | `npm run build` | Type-check and build static frontend |
 | `npm run server` | Serve built frontend with local API |
-| `npm test` | Run Node tests |
+| `npm test` | Run Node tests, then the Vitest component/accessibility/search suite |
 
 ## Skills
 
