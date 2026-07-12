@@ -23,6 +23,56 @@ async function scanFixture(name, files) {
   return result.output.projects[0];
 }
 
+test('unchecked explicitly blocked tasks remain live blockers', async () => {
+  const project = await scanFixture('positive-unchecked-blocker', {
+    'README.md': '# Sample\n',
+    'docs/ROADMAP.md': [
+      '# Roadmap',
+      '',
+      '## Current work',
+      '',
+      '- [ ] Release is blocked by the missing signing key.',
+      '',
+    ].join('\n'),
+  });
+
+  assert.equal(project.signalGroups.realBlockers.length, 1);
+  assert.match(project.signalGroups.realBlockers[0].text, /missing signing key/);
+  assert.equal(project.signalGroups.realBlockers[0].file, 'docs/ROADMAP.md');
+  assert.match(project.summary.mainBlocker, /missing signing key/);
+});
+
+test('ordinary unchecked active tasks remain next actions', async () => {
+  const project = await scanFixture('positive-unchecked-next-action', {
+    'README.md': '# Sample\n',
+    'docs/ROADMAP.md': [
+      '# Roadmap',
+      '',
+      '## Next actions',
+      '',
+      '- [ ] Implement the import pipeline.',
+      '',
+    ].join('\n'),
+  });
+
+  assert.equal(project.nextTasks.length, 1);
+  assert.match(project.nextTasks[0].text, /Implement the import pipeline/);
+  assert.equal(project.nextTasks[0].file, 'docs/ROADMAP.md');
+  assert.match(project.summary.nextAction, /Implement the import pipeline/);
+});
+
+test('standalone actionable directives from trusted planning sources remain next actions', async () => {
+  const project = await scanFixture('positive-standalone-next-action', {
+    'README.md': '# Sample\n',
+    'docs/ROADMAP.md': '# Roadmap\n\nNEXT: Implement scanner exclusions.\n',
+  });
+
+  assert.equal(project.nextTasks.length, 1);
+  assert.equal(project.nextTasks[0].text, 'Implement scanner exclusions.');
+  assert.equal(project.nextTasks[0].file, 'docs/ROADMAP.md');
+  assert.equal(project.summary.nextAction, 'Implement scanner exclusions.');
+});
+
 test('agent rules and verification checklists do not become next actions', async () => {
   const project = await scanFixture('agent-rules', {
     'AGENTS.md': [
