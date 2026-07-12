@@ -270,6 +270,84 @@ describe('searchProjects pure contract', () => {
     expect(stableContract(dashboardMatches)).toEqual(stableContract(preflightMatches));
   });
 
+  it('deduplicates identical spec-work and open-task evidence before selecting query fragments', () => {
+    const evidence = task(
+      'Verify in the browser that querying preflight packet keeps the trusted dashboard evidence visible.',
+      'openspec/changes/improve-dashboard-evidence-trust/tasks.md',
+      19,
+    );
+    const project = makeProject({
+      openTasks: [{ ...evidence }],
+      specWork: {
+        projectId: 'fixture-project',
+        specifications: [{
+          key: 'spec:evidence-trust', id: 'evidence-trust', name: 'Dashboard evidence trust', kind: 'openspec-change', lifecycleStatus: 'in_progress', confidence: 'high',
+          source: { file: 'openspec/changes/improve-dashboard-evidence-trust/proposal.md', line: 1 }, sourceScopeId: 'openspec/changes', groupId: 'dashboard', dependsOnIds: [],
+          tasks: [{ key: 'task:3.4', id: '3.4', name: evidence.text, status: 'planned', source: { file: evidence.file, line: evidence.line }, order: 0 }],
+        }],
+        dependencies: [], unassignedTasks: [], integrityIssues: [], isPartial: false,
+      },
+    });
+
+    const browserMatches = searchProjects([project], 'in the browser');
+    const preflightMatches = searchProjects([project], 'preflight packet');
+    const stableContract = (result: typeof browserMatches) =>
+      result.hits.map((hit) => ({
+        key: hit.key,
+        kind: hit.kind,
+        score: hit.score,
+        primaryView: hit.primaryView,
+        specKey: hit.specKey,
+        taskKey: hit.taskKey,
+        file: hit.drawer?.file,
+        line: hit.drawer?.line,
+        projectPath: hit.drawer?.projectPath,
+      }));
+
+    for (const result of [browserMatches, preflightMatches]) {
+      expect(result.total).toBe(1);
+      expect(result.hits).toHaveLength(1);
+      expect(result.hits[0]).toMatchObject({
+        kind: 'Spec task',
+        score: 68,
+        primaryView: 'specs',
+        specKey: 'spec:evidence-trust',
+        taskKey: 'task:3.4',
+      });
+    }
+    expect(browserMatches.hits[0].matchFragment.toLowerCase()).toContain('in the browser');
+    expect(preflightMatches.hits[0].matchFragment.toLowerCase()).toContain('preflight packet');
+    expect(browserMatches.hits[0].matchFragment).not.toBe(
+      preflightMatches.hits[0].matchFragment,
+    );
+    expect(stableContract(browserMatches)).toEqual(stableContract(preflightMatches));
+  });
+
+  it('does not collapse spec-task evidence with different text or source lines', () => {
+    const file = 'openspec/changes/improve-dashboard-evidence-trust/tasks.md';
+    const project = makeProject({
+      specWork: {
+        projectId: 'fixture-project',
+        specifications: [{
+          key: 'spec:evidence-trust', id: 'evidence-trust', name: 'Dashboard evidence trust', kind: 'openspec-change', lifecycleStatus: 'in_progress', confidence: 'high',
+          source: { file: 'openspec/changes/improve-dashboard-evidence-trust/proposal.md', line: 1 }, sourceScopeId: 'openspec/changes', groupId: 'dashboard', dependsOnIds: [],
+          tasks: [
+            { key: 'task:a', id: null, name: 'Needle exact evidence', status: 'planned', source: { file, line: 19 }, order: 0 },
+            { key: 'task:b', id: null, name: 'Needle exact evidence', status: 'planned', source: { file, line: 20 }, order: 1 },
+            { key: 'task:c', id: null, name: 'Needle different evidence', status: 'planned', source: { file, line: 19 }, order: 2 },
+          ],
+        }],
+        dependencies: [], unassignedTasks: [], integrityIssues: [], isPartial: false,
+      },
+    });
+
+    const result = searchProjects([project], 'needle');
+
+    expect(result.total).toBe(3);
+    expect(result.hits).toHaveLength(3);
+    expect(new Set(result.hits.map((hit) => hit.key)).size).toBe(3);
+  });
+
   it('does not leak filtered diagnostic evidence through open tasks', () => {
     const leakedEvidence = task('Needle policy example', 'docs/AGENTS.md', 9);
     const project = makeProject({

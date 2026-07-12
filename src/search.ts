@@ -303,7 +303,9 @@ export function searchProjects(
             type: 'Specification task', title: task.name, text: `${spec.name} · ${task.status.replaceAll('_', ' ')}`,
             file: task.source.file, line: task.source.line, projectPath: p.path, status: task.status.replaceAll('_', ' '),
           },
-        }, task.name);
+        }, task.name, task.source.line === undefined
+          ? undefined
+          : evidenceKey(p, { file: task.source.file, line: task.source.line, text: task.name }));
       }
     }
     for (const doc of p.docs) {
