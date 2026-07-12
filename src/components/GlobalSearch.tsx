@@ -27,6 +27,14 @@ function isTextEntry(element: Element | null): boolean {
   );
 }
 
+function matchExplanationLabel(hit: SearchHit): string {
+  const boundaries = [
+    hit.matchFragmentLeadingOmitted ? 'Earlier text omitted.' : '',
+    hit.matchFragmentTrailingOmitted ? 'Later text omitted.' : '',
+  ].filter(Boolean).join(' ');
+  return `${hit.kind}: ${hit.label} — ${hit.project.name}. Match: ${hit.matchFragment} ${boundaries}`.trim();
+}
+
 export default function GlobalSearch({
   projects,
   query,
@@ -187,7 +195,7 @@ export default function GlobalSearch({
                   role="option"
                   tabIndex={-1}
                   aria-selected={activeIndex === index}
-                  aria-label={`${hit.kind}: ${hit.label} — ${hit.project.name}`}
+                  aria-label={matchExplanationLabel(hit)}
                   onMouseEnter={() => setActiveIndex(index)}
                   onClick={() => activate(hit)}
                   className={`flex w-full items-baseline gap-3 rounded-lg px-3 py-2 text-left transition-colors ${
@@ -202,6 +210,9 @@ export default function GlobalSearch({
                     <span className="block truncate font-mono text-[10px] text-faint">
                       {hit.project.name}
                       {hit.sub && hit.sub !== hit.project.name ? ` · ${hit.sub}` : ''}
+                    </span>
+                    <span className="mt-1 block text-xs leading-relaxed text-mute">
+                      {hit.matchFragment}
                     </span>
                   </span>
                 </button>

@@ -21,6 +21,9 @@ export interface SearchHit {
   kind: string;
   label: string;
   sub: string;
+  matchFragment: string;
+  matchFragmentLeadingOmitted: boolean;
+  matchFragmentTrailingOmitted: boolean;
   score: number;
   project: ProjectData;
   tab?: TabId;
@@ -30,6 +33,11 @@ export interface SearchHit {
   specKey?: string;
   taskKey?: string;
 }
+
+type RankedSearchHit = Omit<
+  SearchHit,
+  'matchFragment' | 'matchFragmentLeadingOmitted' | 'matchFragmentTrailingOmitted'
+>;
 
 export interface SearchResult {
   hits: SearchHit[];
@@ -75,6 +83,64 @@ function compareText(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
+function matchSource(hit: RankedSearchHit, query: string): string {
+  const specification = hit.specKey
+    ? hit.project.specWork?.specifications.find((item) => item.key === hit.specKey)
+    : undefined;
+  const candidates = [
+    hit.label,
+    hit.sub,
+    hit.drawer?.title,
+    hit.drawer?.text,
+    hit.drawer?.file,
+    hit.specKey,
+    hit.taskKey,
+    specification?.id,
+    specification?.groupId,
+  ];
+  return candidates.find((candidate) => candidate?.toLowerCase().includes(query)) ?? hit.label;
+}
+
+function matchPresentation(
+  source: string,
+  query: string,
+): Pick<
+  SearchHit,
+  'matchFragment' | 'matchFragmentLeadingOmitted' | 'matchFragmentTrailingOmitted'
+> {
+  const matchStart = source.toLowerCase().indexOf(query);
+  if (matchStart < 0) {
+    return {
+      matchFragment: source,
+      matchFragmentLeadingOmitted: false,
+      matchFragmentTrailingOmitted: false,
+    };
+  }
+
+  const contextLength = 48;
+  const matchEnd = matchStart + query.length;
+  let start = Math.max(0, matchStart - contextLength);
+  let end = Math.min(source.length, matchEnd + contextLength);
+
+  if (start > 0) {
+    const nextBoundary = source.slice(start, matchStart).search(/\s/);
+    if (nextBoundary >= 0) start += nextBoundary + 1;
+  }
+  if (end < source.length) {
+    const previousBoundary = source.slice(matchEnd, end).search(/\s\S*$/);
+    if (previousBoundary >= 0) end = matchEnd + previousBoundary;
+  }
+
+  const leadingOmitted = start > 0;
+  const trailingOmitted = end < source.length;
+  const fragment = source.slice(start, end).trim();
+  return {
+    matchFragment: `${leadingOmitted ? '…' : ''}${fragment}${trailingOmitted ? '…' : ''}`,
+    matchFragmentLeadingOmitted: leadingOmitted,
+    matchFragmentTrailingOmitted: trailingOmitted,
+  };
+}
+
 export function searchProjects(
   projects: ProjectData[],
   rawQuery: string,
@@ -83,10 +149,10 @@ export function searchProjects(
   const q = rawQuery.trim().toLowerCase();
   if (q.length < 2) return { hits: [], total: 0, truncated: false, diagnosticsAvailable: 0 };
 
-  const byKey = new Map<string, SearchHit>();
+  const byKey = new Map<string, RankedSearchHit>();
   let diagnosticsAvailable = 0;
 
-  const add = (hit: SearchHit) => {
+  const add = (hit: RankedSearchHit) => {
     const existing = byKey.get(hit.key);
     if (!existing || hit.score > existing.score) byKey.set(hit.key, hit);
   };
@@ -286,8 +352,15 @@ export function searchProjects(
       compareText(a.key, b.key),
   );
 
+  // Match fragments are presentation-only metadata. Compute them only after
+  // evidence identity, deduplication, scoring, and stable ordering are final.
+  const presented = all.map((hit): SearchHit => ({
+    ...hit,
+    ...matchPresentation(matchSource(hit, q), q),
+  }));
+
   return {
-    hits: all.slice(0, SEARCH_LIMIT),
+    hits: presented.slice(0, SEARCH_LIMIT),
     total: all.length,
     truncated: all.length > SEARCH_LIMIT,
     diagnosticsAvailable,
