@@ -9,7 +9,7 @@
 - [x] 2.1 RED: extend `tests/components/search-pure.test.tsx` with early/middle/late/long query matches using the audited late `preflight packet` shape, and prove the model does not yet expose match-aware presentation while stable keys, ranking, and navigation identity remain unchanged.
 - [x] 2.2 RED: extend `tests/components/search-integration.test.tsx` to require the visible query-matching fragment or equivalent explanation in the rendered result and to cover keyboard/pointer activation of that retained result.
 - [x] 2.3 GREEN: implement readable match-aware fragments in the pure search model and focused component, including accessible truncation boundaries, without changing the ranking, source-evidence identity, navigation, or result-limit contracts owned by `improve-dashboard-search-navigation`.
-- [ ] 2.4 Add a regression fixture where identical file/line/text evidence has Next action and Decision/task representations; verify one retained result visibly explains the match and query-dependent fragments never create duplicate results or unstable keys.
+- [x] 2.4 Add a regression fixture where identical file/line/text evidence has Next action and Decision/task representations; verify one retained result visibly explains the match and query-dependent fragments never create duplicate results or unstable keys.
 
 ## 3. Verification And Durable Evidence
 
