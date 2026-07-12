@@ -78,7 +78,8 @@ function evidenceKey(
   project: ProjectData,
   evidence: { file: string; line: number; text: string },
 ): string {
-  return JSON.stringify([project.path, evidence.file, evidence.line, evidence.text]);
+  const sourceText = evidence.text.replace(/^\[[ xX]\]\s+/, '');
+  return JSON.stringify([project.path, evidence.file, evidence.line, sourceText]);
 }
 
 function compareText(a: string, b: string): number {
@@ -235,7 +236,7 @@ export function searchProjects(
           project: p,
           tab: 'work',
           drawer: blockerDrawer(b, p),
-        }, b.text);
+        }, b.text, evidenceKey(p, b));
     }
     for (const t of p.openTasks) {
       const key = evidenceKey(p, t);

@@ -232,6 +232,43 @@ describe('searchProjects pure contract', () => {
     expect(result.hits[0]).toMatchObject({ kind: 'Next action', score: 84 });
   });
 
+  it('deduplicates scanner-derived blocker and task representations without collapsing distinct source evidence', () => {
+    const taskText = 'Needle release is blocked by the missing signing key.';
+    const scannerBlockerText = `[ ] ${taskText}`;
+    const project = makeProject({
+      openTasks: [task(taskText, 'docs/ROADMAP.md', 22)],
+    });
+    project.signalGroups.realBlockers = [
+      blocker(scannerBlockerText, 'docs/ROADMAP.md', 22),
+      blocker(scannerBlockerText, 'docs/OTHER.md', 22),
+      blocker(scannerBlockerText, 'docs/ROADMAP.md', 23),
+      blocker('[ ] Needle deployment is blocked by the missing signing key.', 'docs/ROADMAP.md', 22),
+    ];
+
+    const result = searchProjects([project], 'needle');
+
+    expect(result.total).toBe(4);
+    expect(result.hits).toHaveLength(4);
+    expect(result.hits.filter((hit) => hit.drawer?.file === 'docs/ROADMAP.md' && hit.drawer.line === 22))
+      .toHaveLength(2);
+    expect(result.hits).toContainEqual(expect.objectContaining({
+      kind: 'Blocker',
+      label: scannerBlockerText,
+      score: 82,
+      key: JSON.stringify([
+        project.path,
+        'blocker',
+        'docs/ROADMAP.md',
+        22,
+        scannerBlockerText,
+      ]),
+    }));
+    expect(result.hits).not.toContainEqual(expect.objectContaining({
+      kind: 'Task',
+      label: taskText,
+    }));
+  });
+
   it('deduplicates next-action, decision, and task representations before selecting query fragments', () => {
     const evidence = task(
       'Dashboard UI remains the selected delivery surface while the retained evidence also explains the preflight packet follow-up.',
