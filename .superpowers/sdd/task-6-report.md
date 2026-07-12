@@ -34,3 +34,19 @@ No dependency, public API, OpenSpec task checkbox, ranking, source identity, or 
 Task 2.3 remains unchecked for parent review/coordination. The change is not ready to archive because the wider OpenSpec change has additional tasks. Next: parent reviewer should inspect this commit and decide whether to mark task 2.3 complete in the coordinating session.
 
 Subagents were not used because this was an explicitly delegated bounded GREEN implementation with one shared code path. Skills used: `projects-viewer-codex-context`, `test-driven-development`, `verification-before-completion`, and `session-report`.
+
+## Blocking Review Fixes
+
+Two blocking findings were reproduced and fixed in a follow-up TDD cycle:
+
+- P1 root cause: search inclusion and fragment-source reconstruction maintained separate field lists. Exact searchable tokens such as specification lifecycle `in_progress` and composites such as `phase 7 Trust evidence` could match while the reconstructed display fields contained `in progress` or an em-dash separator instead. Search candidates now retain the exact source that caused inclusion through one `addMatching` path. That internal source is removed when presentation metadata is mapped after deduplication and sorting, so it cannot affect stable keys, score, ordering, navigation, totals, or the result limit.
+- P2 root cause: the fixed 48-character context window cut whitespace-free paths, URLs, and identifiers at arbitrary character positions. A whitespace-free token up to the deterministic 192-character bound is now shown whole with both omission flags false. Larger sources remain bounded to the query plus contextual windows and prefer path/URL punctuation boundaries when whitespace is unavailable; omission flags continue to reflect the actual slice.
+
+Follow-up evidence:
+
+- RED: the focused combined command exited 1 with 3 expected failures and 19 passes. The failing cases proved loss of `in_progress`, loss of `phase 7 trust` across the display separator, and arbitrary truncation of a bounded no-whitespace URL with incorrect omission flags.
+- GREEN: `npm run test:components -- tests/components/search-pure.test.tsx tests/components/search-integration.test.tsx` exited 0 with 2 files and 22/22 tests passing; it was rerun after the final helper cleanup with the same result.
+- Full suite: `npm test` exited 0 with 133/133 Node tests and 101/101 Vitest component tests passing. The known non-failing `WebSocket server error: Port 24678 is already in use` warning was emitted.
+- Build: `npm run build` exited 0; TypeScript and Vite completed successfully with 65 modules transformed.
+- Whitespace verification: `git diff --check` exited 0 with only informational LF-to-CRLF working-copy warnings.
+- No dependency, public API, OpenSpec checkbox, ranking, evidence identity, navigation, or result-limit changes were made.

@@ -112,6 +112,56 @@ describe('searchProjects pure contract', () => {
     }
   });
 
+  it('retains the exact searchable specification lifecycle token for presentation', () => {
+    const project = makeProject({
+      specWork: {
+        projectId: 'fixture-project',
+        specifications: [{
+          key: 'spec:trust', id: 'trust', name: 'Evidence trust', kind: 'openspec-change', lifecycleStatus: 'in_progress', confidence: 'high',
+          source: { file: 'openspec/changes/trust/proposal.md', line: 1 }, sourceScopeId: 'openspec/changes', groupId: 'dashboard', dependsOnIds: [], tasks: [],
+        }],
+        dependencies: [], unassignedTasks: [], integrityIssues: [], isPartial: false,
+      },
+    });
+
+    const result = searchProjects([project], 'in_progress');
+
+    expect(result.hits).toHaveLength(1);
+    expect(result.hits[0].matchFragment.toLowerCase()).toContain('in_progress');
+  });
+
+  it('retains the exact searchable phase composite when display separators differ', () => {
+    const project = makeProject({
+      phases: [makePhase({ id: '7', name: 'Trust evidence' })],
+    });
+
+    const result = searchProjects([project], 'phase 7 trust');
+
+    expect(result.hits).toHaveLength(1);
+    expect(result.hits[0].matchFragment.toLowerCase()).toContain('phase 7 trust');
+  });
+
+  it('keeps a bounded no-whitespace URL token whole instead of splitting it', () => {
+    const url = `https://local.example/evidence/${'a'.repeat(55)}-preflight-packet-${'b'.repeat(55)}.md`;
+    const project = makeProject({
+      docs: [{
+        file: url,
+        category: 'other',
+        sizeBytes: 100,
+        modified: '2026-07-11T00:00:00.000Z',
+      }],
+    });
+
+    const result = searchProjects([project], 'preflight-packet');
+
+    expect(result.hits).toHaveLength(1);
+    expect(result.hits[0]).toMatchObject({
+      matchFragment: url,
+      matchFragmentLeadingOmitted: false,
+      matchFragmentTrailingOmitted: false,
+    });
+  });
+
   it('indexes specification identities and owned tasks with Specs routing descriptors', () => {
     const project = makeProject({
       specWork: {

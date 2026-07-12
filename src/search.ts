@@ -39,6 +39,8 @@ type RankedSearchHit = Omit<
   'matchFragment' | 'matchFragmentLeadingOmitted' | 'matchFragmentTrailingOmitted'
 >;
 
+type SearchCandidate = RankedSearchHit & { searchSource: string };
+
 export interface SearchResult {
   hits: SearchHit[];
   total: number;
@@ -83,22 +85,12 @@ function compareText(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
-function matchSource(hit: RankedSearchHit, query: string): string {
-  const specification = hit.specKey
-    ? hit.project.specWork?.specifications.find((item) => item.key === hit.specKey)
-    : undefined;
-  const candidates = [
-    hit.label,
-    hit.sub,
-    hit.drawer?.title,
-    hit.drawer?.text,
-    hit.drawer?.file,
-    hit.specKey,
-    hit.taskKey,
-    specification?.id,
-    specification?.groupId,
-  ];
-  return candidates.find((candidate) => candidate?.toLowerCase().includes(query)) ?? hit.label;
+function findSearchMatch(
+  sources: string | Array<string | null | undefined>,
+  query: string,
+): string | undefined {
+  const candidates = Array.isArray(sources) ? sources : [sources];
+  return candidates.find((source) => source?.toLowerCase().includes(query)) ?? undefined;
 }
 
 function matchPresentation(
@@ -117,17 +109,33 @@ function matchPresentation(
     };
   }
 
+  const maxWholeTokenLength = 192;
+  if (!/\s/.test(source) && source.length <= maxWholeTokenLength) {
+    return {
+      matchFragment: source,
+      matchFragmentLeadingOmitted: false,
+      matchFragmentTrailingOmitted: false,
+    };
+  }
+
   const contextLength = 48;
   const matchEnd = matchStart + query.length;
   let start = Math.max(0, matchStart - contextLength);
   let end = Math.min(source.length, matchEnd + contextLength);
 
   if (start > 0) {
-    const nextBoundary = source.slice(start, matchStart).search(/\s/);
+    const leadingContext = source.slice(start, matchStart);
+    const nextWhitespace = leadingContext.search(/\s/);
+    const nextDelimiter = leadingContext.search(/[\\/?#&=._:-]/);
+    const nextBoundary = nextWhitespace >= 0 ? nextWhitespace : nextDelimiter;
     if (nextBoundary >= 0) start += nextBoundary + 1;
   }
   if (end < source.length) {
-    const previousBoundary = source.slice(matchEnd, end).search(/\s\S*$/);
+    const trailingContext = source.slice(matchEnd, end);
+    const previousWhitespace = trailingContext.search(/\s\S*$/);
+    const delimiters = [...trailingContext.matchAll(/[\\/?#&=._:-]/g)];
+    const previousDelimiter = delimiters.at(-1)?.index ?? -1;
+    const previousBoundary = previousWhitespace >= 0 ? previousWhitespace : previousDelimiter;
     if (previousBoundary >= 0) end = matchEnd + previousBoundary;
   }
 
@@ -149,12 +157,21 @@ export function searchProjects(
   const q = rawQuery.trim().toLowerCase();
   if (q.length < 2) return { hits: [], total: 0, truncated: false, diagnosticsAvailable: 0 };
 
-  const byKey = new Map<string, RankedSearchHit>();
+  const byKey = new Map<string, SearchCandidate>();
   let diagnosticsAvailable = 0;
 
-  const add = (hit: RankedSearchHit) => {
+  const add = (hit: RankedSearchHit, searchSource: string) => {
     const existing = byKey.get(hit.key);
-    if (!existing || hit.score > existing.score) byKey.set(hit.key, hit);
+    if (!existing || hit.score > existing.score) byKey.set(hit.key, { ...hit, searchSource });
+  };
+
+  const addMatching = (
+    hit: RankedSearchHit,
+    sources: string | Array<string | null | undefined>,
+  ): void => {
+    const searchSource = findSearchMatch(sources, q);
+    if (!searchSource) return;
+    add(hit, searchSource);
   };
 
   for (const p of projects) {
@@ -166,19 +183,16 @@ export function searchProjects(
     const diagnosticEvidenceKeys = new Set(diagnostics.map((item) => evidenceKey(p, item)));
     const nextTaskEvidenceKeys = new Set(p.nextTasks.map((item) => evidenceKey(p, item)));
 
-    if (p.name.toLowerCase().includes(q) || p.path.toLowerCase().includes(q)) {
-      add({
+    addMatching({
         key: stableKey(p, 'project', '', undefined, p.path),
         kind: 'Project',
         label: p.name,
         sub: p.path,
         score: 100,
         project: p,
-      });
-    }
+      }, [p.name, p.path]);
     for (const ph of p.phases) {
-      if (`phase ${ph.id} ${ph.name}`.toLowerCase().includes(q)) {
-        add({
+      addMatching({
           key: stableKey(p, 'phase', ph.file, ph.line, ph.id),
           kind: 'Roadmap',
           label: `Phase ${ph.id} — ${ph.name}`,
@@ -188,12 +202,10 @@ export function searchProjects(
           tab: 'status',
           drawer: phaseDrawer(ph, p),
           primaryView: 'roadmap',
-        });
-      }
+        }, `phase ${ph.id} ${ph.name}`);
     }
     for (const t of p.nextTasks) {
-      if (t.text.toLowerCase().includes(q)) {
-        add({
+      addMatching({
           key: stableKey(p, 'next-action', t.file, t.line, t.text),
           kind: 'Next action',
           label: t.text.slice(0, 90),
@@ -202,8 +214,7 @@ export function searchProjects(
           project: p,
           tab: 'work',
           drawer: taskDrawer(t, p, 'Next action', 'next-action'),
-        });
-      }
+        }, t.text);
     }
     for (const b of [
       ...p.signalGroups.realBlockers,
@@ -211,9 +222,8 @@ export function searchProjects(
       ...p.signalGroups.needsReview,
       ...p.signalGroups.pausedDeferred,
     ]) {
-      if (b.text.toLowerCase().includes(q)) {
-        const kind = b.kind === 'blocked' || b.kind === 'rejection' ? 'Blocker' : 'Signal';
-        add({
+      const kind = b.kind === 'blocked' || b.kind === 'rejection' ? 'Blocker' : 'Signal';
+      addMatching({
           key: stableKey(p, kind === 'Blocker' ? 'blocker' : 'signal', b.file, b.line, b.text),
           kind,
           label: b.text.slice(0, 90),
@@ -222,14 +232,12 @@ export function searchProjects(
           project: p,
           tab: 'work',
           drawer: blockerDrawer(b, p),
-        });
-      }
+        }, b.text);
     }
     for (const t of p.openTasks) {
       const key = evidenceKey(p, t);
       if (diagnosticEvidenceKeys.has(key) || nextTaskEvidenceKeys.has(key)) continue;
-      if (t.text.toLowerCase().includes(q)) {
-        add({
+      addMatching({
           key: stableKey(p, 'task', t.file, t.line, t.text),
           kind: 'Task',
           label: t.text.slice(0, 90),
@@ -238,12 +246,10 @@ export function searchProjects(
           project: p,
           tab: 'work',
           drawer: taskDrawer(t, p),
-        });
-      }
+        }, t.text);
     }
     for (const d of p.decisions) {
-      if (d.text.toLowerCase().includes(q)) {
-        add({
+      addMatching({
           key: stableKey(p, 'decision', d.file, d.line, d.text),
           kind: 'Decision',
           label: d.text.slice(0, 90),
@@ -252,12 +258,10 @@ export function searchProjects(
           project: p,
           tab: 'decisions',
           drawer: decisionDrawer(d, p),
-        });
-      }
+        }, d.text);
     }
     for (const sp of p.specs) {
-      if (sp.name.toLowerCase().includes(q)) {
-        add({
+      addMatching({
           key: stableKey(p, 'spec', sp.file, undefined, sp.name),
           kind: 'Spec',
           label: sp.name,
@@ -267,13 +271,13 @@ export function searchProjects(
           tab: 'knowledge',
           knowledgeView: 'specs',
           drawer: specDrawer(sp, p),
-        });
-      }
+        }, sp.name);
     }
     for (const spec of p.specWork?.specifications ?? []) {
-      const haystack = [spec.name, spec.id, spec.groupId, spec.lifecycleStatus, spec.source.file].filter(Boolean).join(' ').toLowerCase();
-      if (haystack.includes(q)) {
-        add({
+      const haystack = [spec.name, spec.id, spec.groupId, spec.lifecycleStatus, spec.source.file]
+        .filter(Boolean)
+        .join(' ');
+      addMatching({
           key: stableKey(p, 'spec-work', spec.source.file, spec.source.line, spec.key),
           kind: 'Specification',
           label: spec.name,
@@ -286,11 +290,9 @@ export function searchProjects(
             type: 'Specification', title: spec.name, text: `${spec.kind.replaceAll('-', ' ')} · ${spec.lifecycleStatus.replaceAll('_', ' ')}`,
             file: spec.source.file, line: spec.source.line, projectPath: p.path, status: spec.lifecycleStatus.replaceAll('_', ' '),
           },
-        });
-      }
+        }, haystack);
       for (const task of spec.tasks) {
-        if (!task.name.toLowerCase().includes(q)) continue;
-        add({
+        addMatching({
           key: stableKey(p, 'spec-task', task.source.file, task.source.line, task.key),
           kind: 'Spec task', label: task.name, sub: `${p.name} · ${spec.name}`, score: task.status === 'in_progress' ? 88 : 68,
           project: p, primaryView: 'specs', specKey: spec.key, taskKey: task.key,
@@ -298,12 +300,11 @@ export function searchProjects(
             type: 'Specification task', title: task.name, text: `${spec.name} · ${task.status.replaceAll('_', ' ')}`,
             file: task.source.file, line: task.source.line, projectPath: p.path, status: task.status.replaceAll('_', ' '),
           },
-        });
+        }, task.name);
       }
     }
     for (const doc of p.docs) {
-      if (doc.file.toLowerCase().includes(q)) {
-        add({
+      addMatching({
           key: stableKey(p, 'doc', doc.file, undefined, doc.file),
           kind: 'Doc',
           label: doc.file,
@@ -313,21 +314,18 @@ export function searchProjects(
           tab: 'knowledge',
           knowledgeView: 'docs',
           drawer: docDrawer(doc, p),
-        });
-      }
+        }, doc.file);
     }
     const matchingDiagnosticEvidence = new Set<string>();
     for (const candidate of diagnostics) {
-      if (
-        candidate.text.toLowerCase().includes(q) ||
-        candidate.reason.toLowerCase().includes(q)
-      ) {
-        const candidateEvidenceKey = evidenceKey(p, candidate);
-        if (matchingDiagnosticEvidence.has(candidateEvidenceKey)) continue;
-        matchingDiagnosticEvidence.add(candidateEvidenceKey);
-        diagnosticsAvailable += 1;
-        if (options.includeDiagnostics) {
-          add({
+      const searchSource = findSearchMatch([candidate.text, candidate.reason], q);
+      if (!searchSource) continue;
+      const candidateEvidenceKey = evidenceKey(p, candidate);
+      if (matchingDiagnosticEvidence.has(candidateEvidenceKey)) continue;
+      matchingDiagnosticEvidence.add(candidateEvidenceKey);
+      diagnosticsAvailable += 1;
+      if (options.includeDiagnostics) {
+        add({
             key: stableKey(p, 'diagnostic', candidate.file, candidate.line, candidate.text),
             kind: 'Diagnostic',
             label: candidate.text.slice(0, 90),
@@ -336,8 +334,7 @@ export function searchProjects(
             project: p,
             tab: 'work',
             drawer: blockedGatedCandidateDrawer(candidate, p),
-          });
-        }
+          }, searchSource);
       }
     }
   }
@@ -354,10 +351,13 @@ export function searchProjects(
 
   // Match fragments are presentation-only metadata. Compute them only after
   // evidence identity, deduplication, scoring, and stable ordering are final.
-  const presented = all.map((hit): SearchHit => ({
-    ...hit,
-    ...matchPresentation(matchSource(hit, q), q),
-  }));
+  const presented = all.map((candidate): SearchHit => {
+    const { searchSource, ...hit } = candidate;
+    return {
+      ...hit,
+      ...matchPresentation(searchSource, q),
+    };
+  });
 
   return {
     hits: presented.slice(0, SEARCH_LIMIT),
