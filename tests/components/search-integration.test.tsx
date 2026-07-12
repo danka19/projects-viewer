@@ -133,7 +133,22 @@ describe('accessible global search integration', () => {
     const options = within(screen.getByRole('listbox')).getAllByRole('option');
     expect(options).toHaveLength(1);
     expect(options[0]).toHaveAccessibleName(/Next action.*Audited project/i);
-    expect(options[0]).toHaveTextContent(/preflight packet/i);
+    const contextualMatch = /(?:\S+\s+){2,}preflight packet\s+\S+/i;
+    const matchExplanations = within(options[0]).queryAllByText(
+      (_content, element) =>
+        element !== options[0] &&
+        contextualMatch.test(element?.textContent ?? '') &&
+        ![...(element?.children ?? [])].some((child) =>
+          contextualMatch.test(child.textContent ?? ''),
+        ),
+    );
+    expect(matchExplanations).toHaveLength(1);
+    const matchExplanation = matchExplanations[0];
+    expect(matchExplanation).not.toBe(options[0]);
+    expect(matchExplanation).toBeVisible();
+    expect(matchExplanation.className).not.toMatch(
+      /\b(?:truncate|overflow-hidden|line-clamp(?:-\d+)?)\b/,
+    );
   });
 
   it('activates the retained late-match result by keyboard and pointer', async () => {
