@@ -12,8 +12,8 @@ Last updated: 2026-07-12.
 | Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer\.worktrees\harden-mcp-context-api` |
 | Current branch | `harden-mcp-context-api` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Latest known commit before this audit update | Task 15 implementation for `harden-mcp-context-api`; Task 16 documentation edits in progress |
-| Local divergence | Feature branch/worktree `harden-mcp-context-api` contains local implementation commits for the MCP/API hardening OpenSpec change |
+| Latest known implementation commit | `b283500` (`fix API parser error boundary`) on `harden-mcp-context-api` |
+| Local divergence | Feature branch/worktree `harden-mcp-context-api` contains the completed MCP/API hardening implementation, accepted-spec sync, and archived change history; PR integration to `main` is the remaining step |
 
 ## Useful Starting Points
 
@@ -65,7 +65,7 @@ Last updated: 2026-07-12.
 | Agent preflight packet implementation | `GET /api/agent-preflight-packet` implemented on branch `codex/agent-preflight-packet` with shared `AgentPreflightPacket` types, pure `server/agent-preflight-packet.mjs` composition, strict saved-project query validation, read-only local API retrieval, unknown-change safe state without fabricated proposed requirements/tasks, and contract-separation regression coverage |
 | Agent preflight packet focused verification | `npm test -- tests/agent-preflight-packet.test.mjs` passed 20/20 after adding explicit local negative side-effect artifact assertions for task/calendar/commit/shell/remote/agent-work records |
 | MCP/API hardening follow-up | 2026-07-09 diagnostic found historical failure modes: `get_agent_preflight_packet` could return the Vite HTML shell with HTTP 200, `list_projects` was too large for convenient project-id selection, root `projects.config.json` could mislead agents with legacy `Example Project` data, and `Invoke-WebRequest` could produce low-value diagnostics. Remediation context is recorded in `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md`. |
-| MCP/API hardening OpenSpec | Proposed change `openspec/changes/harden-mcp-context-api/` now captures the hardening work as formal OpenSpec artifacts: proposal, design, tasks, and delta specs for `local-project-config`, `mcp-context-api`, and `agent-preflight-packet`. The planning doc records why the OpenSpec was not created in the first documentation-only follow-up. |
+| MCP/API hardening OpenSpec | Completed change history is archived at `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`; accepted requirements are synced to main specs for `local-project-config`, `mcp-context-api`, and `agent-preflight-packet`. The planning doc records why the OpenSpec was not created in the first documentation-only follow-up. |
 | MCP/API hardening implementation facts | Runtime tracked-project config source is only `app-data/projects.config.json`; `projects.config.example.json` is a versioned empty schema reference; `GET /api/configured-projects` and MCP `list_configured_projects` provide compact saved project identities for `projectId` lookup; unknown `/api/*` routes return JSON `404`; the MCP adapter rejects non-JSON, malformed JSON, wrong response shapes, and wrong packet kind with explicit status/content-type/path/preview details; diagnostics should prefer `curl.exe -i --max-time 10` when headers or content type matter. |
 
 ## Known Risks And Gaps
@@ -81,7 +81,7 @@ Last updated: 2026-07-12.
 | AUDIT-007 | `agent-preflight-packet` is implemented separately from `project-brief-report`; final acceptance still requires full verification evidence and human review before archiving the OpenSpec change. | Current feature | monitored |
 | AUDIT-008 | Next implementation step remains a human/product decision: archive `add-project-brief-report`, accept/archive `agent-preflight-packet` after final verification, or continue with dashboard/brief UI. | Human owner | open |
 | AUDIT-009 | Unrelated uncommitted UI/worktree changes were present while implementing `agent-preflight-packet`; they were not reverted or included in feature commits, and final verification must distinguish them from this change. | Human owner / current session | monitored |
-| AUDIT-010 | MCP/API hardening implementation and implementation verification are complete on branch `harden-mcp-context-api`: root legacy config fallback is removed, compact saved project ids are exposed, `/api/*` parser and routing failures stay JSON, MCP response validation is hardened, and local HTTP diagnostics guidance is updated. OpenSpec tasks 5.3 and 5.4 record completed verification evidence; reviewer confirmation, human acceptance, and archival remain. | Final review / human owner | closed 2026-07-12 |
+| AUDIT-010 | MCP/API hardening implementation, verification, independent review, accepted-spec sync, and OpenSpec archival are complete on branch `harden-mcp-context-api`: root legacy config fallback is removed, compact saved project ids are exposed, `/api/*` parser and routing failures stay JSON, MCP response validation is hardened, and local HTTP diagnostics guidance is updated. | Human owner / archive and PR workflow | closed 2026-07-12 |
 
 ## Audit Rules
 

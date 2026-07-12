@@ -1,10 +1,10 @@
 # MCP Context API Hardening Plan
 
-Status: implementation and implementation verification complete; final-review fixes are complete pending reviewer confirmation. Human acceptance and OpenSpec archival remain.
+Status: implementation, verification, independent review, accepted-spec sync, and OpenSpec archival complete on 2026-07-12; PR integration to `main` follows.
 
 Decision date: 2026-07-09.
 
-OpenSpec change: `openspec/changes/harden-mcp-context-api/`.
+Archived OpenSpec change: `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`.
 
 ## Purpose
 
@@ -128,5 +128,5 @@ Contributing factors:
 
 Corrective decision:
 
-- `harden-mcp-context-api` is now the OpenSpec source for this follow-up.
+- Accepted requirements are now canonical in `openspec/specs/agent-preflight-packet/`, `openspec/specs/local-project-config/`, and `openspec/specs/mcp-context-api/`; implementation history is archived under `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`.
 - Future work that changes Projects Viewer API behavior, MCP tools, config source-of-truth rules, or agent workflow contracts should create or update OpenSpec artifacts in the same session as the durable planning note.
