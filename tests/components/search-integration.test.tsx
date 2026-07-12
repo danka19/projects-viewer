@@ -146,9 +146,18 @@ describe('accessible global search integration', () => {
     const matchExplanation = matchExplanations[0];
     expect(matchExplanation).not.toBe(options[0]);
     expect(matchExplanation).toBeVisible();
-    expect(matchExplanation.className).not.toMatch(
-      /\b(?:truncate|overflow-hidden|line-clamp(?:-\d+)?)\b/,
-    );
+    const presentationChain: HTMLElement[] = [];
+    let presentationNode: HTMLElement | null = matchExplanation;
+    while (presentationNode && presentationNode !== options[0]) {
+      presentationChain.push(presentationNode);
+      presentationNode = presentationNode.parentElement;
+    }
+    expect(presentationNode).toBe(options[0]);
+    for (const node of presentationChain) {
+      expect(node.className).not.toMatch(
+        /\b(?:truncate|overflow-hidden|line-clamp(?:-\d+)?)\b/,
+      );
+    }
   });
 
   it('activates the retained late-match result by keyboard and pointer', async () => {
