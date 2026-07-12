@@ -1,6 +1,6 @@
 # API And UX Trust Audit
 
-Status: original verification complete; all four findings are implemented and verified through their separately owned remediation changes. `harden-mcp-context-api` is archived, while `improve-dashboard-evidence-trust` remains open for documentation and final OpenSpec follow-through.
+Status: original verification complete; all four findings are implemented and verified through their separately owned remediation changes. `harden-mcp-context-api` is archived. `improve-dashboard-evidence-trust` has completed all 13/13 implementation tasks and its strict OpenSpec CLI gate, but remains active/open, unsynced, and unarchived pending the separate explicit sync/archive workflow.
 
 Date: 2026-07-12 (Asia/Vladivostok).
 
@@ -104,7 +104,7 @@ The paired check, not the later values, proves no changes to those two files in 
 The original findings now have verified remediations, with ownership intentionally split:
 
 - API-001 belongs solely to the archived [`harden-mcp-context-api`](../../openspec/changes/archive/2026-07-12-harden-mcp-context-api/) change. It added the final JSON-only `/api/*` fallback and completed its API/MCP hardening, accepted-spec sync, and archive workflow. The scanner/search change below neither specifies nor implements API fallback behavior.
-- DATA-001, DATA-002, and SEARCH-001 belong to active change [`improve-dashboard-evidence-trust`](../../openspec/changes/improve-dashboard-evidence-trust/). Its scanner/search implementation and acceptance evidence are complete, but the change remains open and unsynced/unarchived until its remaining documentation and OpenSpec CLI follow-through are recorded.
+- DATA-001, DATA-002, and SEARCH-001 belong to active change [`improve-dashboard-evidence-trust`](../../openspec/changes/improve-dashboard-evidence-trust/). Its scanner/search implementation, acceptance evidence, documentation reconciliation, and strict OpenSpec CLI gate are complete at 13/13 tasks, but the change remains active/open, unsynced, and unarchived until the separate explicit sync/archive workflow is authorized and run.
 
 ### Verified implementation
 
@@ -135,7 +135,7 @@ Fresh browser acceptance then exercised query `preflight packet` at exact 1280x7
 - The configured real corpus had no legitimate live blocker or trusted next action, so real-corpus preservation of those positive forms could not be observed without modifying scanned sources. The 11-test focused scanner suite supplies those explicit positive controls.
 - The rescan's 32 skipped entries were counted but not semantically audited, and unrelated marker/gate/health derivation was not part of this remediation.
 - Browser evidence is a structured manual matrix, not cross-browser visual-regression automation. One locator-based mobile close invocation timed out in the browser-control transport, but an independent visible-DOM pointer action completed the same close/focus-return contract without reproducing a product defect.
-- `improve-dashboard-evidence-trust` must remain open until its remaining documentation/task-state and strict OpenSpec CLI follow-through are completed. This update does not close or alter the separate Project Timeline clarity acceptance or selectable Specs Canvas human product-acceptance gates.
+- `improve-dashboard-evidence-trust` has completed all 13/13 implementation tasks, including documentation/task-state reconciliation and the strict OpenSpec CLI gate. It remains active/open, unsynced, and unarchived, ready for the separate explicit sync/archive workflow. This update does not close or alter the separate Project Timeline clarity acceptance or selectable Specs Canvas human product-acceptance gates.
 
 ## Findings And Remediation Status
 
@@ -158,7 +158,7 @@ Fresh browser acceptance then exercised query `preflight packet` at exact 1280x7
 - **Verified root cause:** `TASK_RE` matches both `[ ]` and `[x]`, and the later blocker guard does not inspect the captured completion state. Separately, `CONDITIONAL_BLOCK_RE` evaluates only the current line, so it misses cross-line OpenSpec `WHEN`/`THEN` normative context.
 - **Residual uncertainty:** semantic blocker accuracy was not manually audited across the other five configured projects, so this finding does not establish that all 28 cross-project blocker items are false.
 - **Verified remediation:** completion-aware classification and bounded OpenSpec normative context exclude both shapes; focused tests and the fresh real-project rescan verify that they no longer affect blockers, blocker counts, status reasons, or health.
-- **Recommended next action:** finish the remaining OpenSpec documentation/CLI follow-through, then archive only through the explicit archive workflow.
+- **Recommended next action:** run the separate explicit accepted-spec sync/archive workflow; until then, keep the completed change active/open, unsynced, and unarchived.
 - **Canonical context:** [`harden-dashboard-state-derivation`](../../openspec/changes/harden-dashboard-state-derivation/) owns existing source and unchecked-task trust rules but does not cover checked tasks or cross-line normative conditions.
 
 ### DATA-002 — Implemented proposal prose becomes the primary next action
@@ -169,7 +169,7 @@ Fresh browser acceptance then exercised query `preflight packet` at exact 1280x7
 - **Verified root cause:** `NEXT_ACTION_RE` matches `Next-action signals`; the same explanatory line includes the example marker ``NEXT:``, satisfying the secondary `is|should|must|:` check despite lacking active-work semantics.
 - **Residual uncertainty:** the audit verified this exact false positive, not every heading, embedded marker example, or explanatory use of next-action terminology.
 - **Verified remediation:** active-work gating excludes the audited proposal sentence, headings, labels, and embedded examples while focused positive controls preserve unchecked tasks and standalone directives; the fresh rescan returned `summary.nextAction=null` for the configured project.
-- **Recommended next action:** finish the remaining OpenSpec documentation/CLI follow-through, then archive only through the explicit archive workflow.
+- **Recommended next action:** run the separate explicit accepted-spec sync/archive workflow; until then, keep the completed change active/open, unsynced, and unarchived.
 - **Canonical context:** [`harden-dashboard-state-derivation`](../../openspec/changes/harden-dashboard-state-derivation/) covers excluded source categories but does not own this explanatory-prose shape.
 
 ### SEARCH-001 — Search result hides why it matched
@@ -180,7 +180,7 @@ Fresh browser acceptance then exercised query `preflight packet` at exact 1280x7
 - **Verified root cause:** the result label uses `text.slice(0, 90)`, which truncates before the matching phrase rather than selecting a match-aware fragment.
 - **Residual uncertainty:** this session did not measure every query position, source kind, or long-text truncation case. Keyboard behavior itself passed.
 - **Verified remediation:** query-centered fragments expose the match with accessible omission boundaries; the follow-up source-evidence-key fix collapses identical spec/open-task representations before presentation. Focused tests and the fresh two-viewport browser rerun verify visible context, unique evidence, stable navigation, and clean console output.
-- **Recommended next action:** finish the remaining OpenSpec documentation/CLI follow-through, then archive only through the explicit archive workflow.
+- **Recommended next action:** run the separate explicit accepted-spec sync/archive workflow; until then, keep the completed change active/open, unsynced, and unarchived.
 - **Canonical context:** [`improve-dashboard-search-navigation`](../../openspec/changes/improve-dashboard-search-navigation/) owns deterministic ranking and deduplication, but its current requirements do not require visible match fragments.
 
 ## Positive Results
@@ -210,6 +210,6 @@ The search established these ownership decisions:
 - API-001 was specified and tasked by `harden-mcp-context-api`, especially tasks 3.1–3.3; that owner is now verified, synced, and archived. This audit remains its evidence record rather than a second requirement owner.
 - Existing `harden-dashboard-state-derivation` requirements exclude untrusted source categories and distinguish unchecked plan tasks from blockers, but they do not cover checked `[x]` task text, cross-line OpenSpec normative conditions, or explanatory next-action terminology with embedded marker examples.
 - Existing `improve-dashboard-search-navigation` requirements cover deterministic ranking, source-aware deduplication, visible project/type context, keyboard operation, and scope disclosure, but not a visible matching fragment.
-- Therefore DATA-001, DATA-002, and SEARCH-001 were assigned to one non-overlapping scanner/search trust change. That change is now implemented and verified but remains active for documentation/task-state and strict OpenSpec CLI follow-through.
+- Therefore DATA-001, DATA-002, and SEARCH-001 were assigned to one non-overlapping scanner/search trust change. That change has completed all 13/13 implementation tasks and its strict OpenSpec CLI gate, but remains active/open, unsynced, and unarchived pending the separate explicit sync/archive workflow.
 
 The dated audit owns the observations, evidence, classifications, findings, and residual risks. OpenSpec owns proposed behavior and acceptance scenarios; the roadmap owns sequencing. Those requirements are linked above instead of copied here.
