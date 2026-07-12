@@ -842,11 +842,13 @@ function parseDoc(content, doc, acc) {
       });
       const candidateKey = candidate ? `${candidate.file}:${candidate.line}:${candidate.text}` : null;
       if (candidate && !acc.seenBlockedGatedCandidates.has(candidateKey)) {
-        let signal = candidate.includedInProjectStatus ? classifyWorkSignal(trimmed) : null;
         const isOpenSpecNormativeLine =
           inOpenSpecScenario && /^\s*[-*]\s+\*\*(?:WHEN|THEN|AND)\*\*/i.test(line);
+        let signal =
+          candidate.includedInProjectStatus && !isCheckedTask && !isOpenSpecNormativeLine
+            ? classifyWorkSignal(trimmed)
+            : null;
         if (isCheckedTask || isOpenSpecNormativeLine) {
-          signal = null;
           candidate = {
             ...candidate,
             classification: 'process_policy',
