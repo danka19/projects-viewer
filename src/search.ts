@@ -160,18 +160,21 @@ export function searchProjects(
   const byKey = new Map<string, SearchCandidate>();
   let diagnosticsAvailable = 0;
 
-  const add = (hit: RankedSearchHit, searchSource: string) => {
-    const existing = byKey.get(hit.key);
-    if (!existing || hit.score > existing.score) byKey.set(hit.key, { ...hit, searchSource });
+  const add = (hit: RankedSearchHit, searchSource: string, dedupeKey = hit.key) => {
+    const existing = byKey.get(dedupeKey);
+    if (!existing || hit.score > existing.score) {
+      byKey.set(dedupeKey, { ...hit, searchSource });
+    }
   };
 
   const addMatching = (
     hit: RankedSearchHit,
     sources: string | Array<string | null | undefined>,
+    dedupeKey = hit.key,
   ): void => {
     const searchSource = findSearchMatch(sources, q);
     if (!searchSource) return;
-    add(hit, searchSource);
+    add(hit, searchSource, dedupeKey);
   };
 
   for (const p of projects) {
@@ -214,7 +217,7 @@ export function searchProjects(
           project: p,
           tab: 'work',
           drawer: taskDrawer(t, p, 'Next action', 'next-action'),
-        }, t.text);
+        }, t.text, evidenceKey(p, t));
     }
     for (const b of [
       ...p.signalGroups.realBlockers,
@@ -246,7 +249,7 @@ export function searchProjects(
           project: p,
           tab: 'work',
           drawer: taskDrawer(t, p),
-        }, t.text);
+        }, t.text, key);
     }
     for (const d of p.decisions) {
       addMatching({
@@ -258,7 +261,7 @@ export function searchProjects(
           project: p,
           tab: 'decisions',
           drawer: decisionDrawer(d, p),
-        }, d.text);
+        }, d.text, evidenceKey(p, d));
     }
     for (const sp of p.specs) {
       addMatching({

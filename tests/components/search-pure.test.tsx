@@ -232,6 +232,44 @@ describe('searchProjects pure contract', () => {
     expect(result.hits[0]).toMatchObject({ kind: 'Next action', score: 84 });
   });
 
+  it('deduplicates next-action, decision, and task representations before selecting query fragments', () => {
+    const evidence = task(
+      'Dashboard UI remains the selected delivery surface while the retained evidence also explains the preflight packet follow-up.',
+      'docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md',
+      356,
+    );
+    const project = makeProject({
+      nextTasks: [evidence],
+      openTasks: [{ ...evidence }],
+      decisions: [{ ...evidence, date: '2026-07-12' }],
+    });
+
+    const dashboardMatches = searchProjects([project], 'dashboard ui');
+    const preflightMatches = searchProjects([project], 'preflight packet');
+    const stableContract = (result: typeof dashboardMatches) =>
+      result.hits.map((hit) => ({
+        key: hit.key,
+        kind: hit.kind,
+        score: hit.score,
+        tab: hit.tab,
+        file: hit.drawer?.file,
+        line: hit.drawer?.line,
+        projectPath: hit.drawer?.projectPath,
+      }));
+
+    for (const result of [dashboardMatches, preflightMatches]) {
+      expect(result.total).toBe(1);
+      expect(result.hits).toHaveLength(1);
+      expect(result.hits[0]).toMatchObject({ kind: 'Next action', score: 84 });
+    }
+    expect(dashboardMatches.hits[0].matchFragment.toLowerCase()).toContain('dashboard ui');
+    expect(preflightMatches.hits[0].matchFragment.toLowerCase()).toContain('preflight packet');
+    expect(dashboardMatches.hits[0].matchFragment).not.toBe(
+      preflightMatches.hits[0].matchFragment,
+    );
+    expect(stableContract(dashboardMatches)).toEqual(stableContract(preflightMatches));
+  });
+
   it('does not leak filtered diagnostic evidence through open tasks', () => {
     const leakedEvidence = task('Needle policy example', 'docs/AGENTS.md', 9);
     const project = makeProject({
