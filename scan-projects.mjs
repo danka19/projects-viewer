@@ -135,6 +135,7 @@ const HEADING_TEXT_RE = /(roadmap|task|spec|phase|plan|milestone|next|backlog|st
 const HARD_MARKER_RE = /\b(TODO|FIXME|BUG)\b/g;
 const SOFT_MARKER_RE = /\b(NEXT|DONE)\s*:/g;
 const NEXT_SECTION_RE = /next/i;
+const STANDALONE_NEXT_MARKER_RE = /^\s*(?:[-*]\s+)?NEXT\s*:\s*(\S.*)$/i;
 
 // Convention intelligence patterns
 const PHASE_HEADING_SECTION_RE = /^#{2,3}\s+Phase\s+([0-9][0-9.]*)\.?\s+(.+)$/i;
@@ -148,7 +149,7 @@ const DECISION_SECTION_RE = /^(human |key |product |accepted )?decisions\b/i;
 const RISK_SECTION_RE = /\brisks?\b|open questions?|blocking questions?/i;
 const OPEN_QUESTION_RE = /\bopen question\b/i;
 const NEXT_ACTION_RE =
-  /\bnext\b[^.]{0,60}\b(step|action|focus|design|work order|work item|priority)\b|\bremaining work\b|\bfollow[- ]up\b/i;
+  /^\s*(?:[-*]\s+)?(?:the\s+)?next\s+(?:implementation\s+)?(?:step|action|focus|design|work order|work item|priority)\s+(?:is|should|must)\s+\S|^\s*(?:[-*]\s+)?(?:remaining work|follow[- ]up)\s*:\s*\S/i;
 // A work rejection needs a human/owner actor near the verb — "rejected" alone
 // is domain vocabulary in review-workflow projects (rejected analogs etc.).
 const REJECTION_RE =
@@ -563,6 +564,7 @@ function parseDoc(content, doc, acc) {
   const isHandoffFile = doc.category === 'handoff';
   const isDecisionFile = doc.category === 'decision';
   const isClaudeFile = fileLower === 'claude.md';
+  const isOpenSpecFile = /(^|\/)\.?openspec\//.test(fileLower);
   // Rule, checklist, and template documents describe how to work, not what
   // the project's next action is: never source next-action signals from them.
   const allowNextSignals = pathBias(doc.file) === null && doc.category !== 'audit';
@@ -573,6 +575,7 @@ function parseDoc(content, doc, acc) {
   let handoffStatus = null;
   let handoffTitle = null;
   let inActiveHandoffSection = false;
+  let inOpenSpecScenario = false;
 
   function finalizeStep() {
     if (!currentStep) return;
@@ -611,6 +614,8 @@ function parseDoc(content, doc, acc) {
     const heading = line.match(HEADING_RE);
     if (heading) {
       section = heading[2];
+      inOpenSpecScenario =
+        isOpenSpecFile && heading[1].length === 4 && /^Scenario\s*:/i.test(section.trim());
       inActiveHandoffSection = isClaudeFile && /^active handoff$/i.test(section.trim());
       if (isHandoffFile && !handoffTitle) {
         handoffTitle = section.replace(/^handoff:\s*/i, '').trim();
@@ -715,6 +720,7 @@ function parseDoc(content, doc, acc) {
     }
 
     const task = line.match(TASK_RE);
+    const isCheckedTask = task !== null && task[1] !== ' ';
     if (task) {
       const item = {
         text: task[2].trim().slice(0, 300),
@@ -767,9 +773,10 @@ function parseDoc(content, doc, acc) {
           line: lineNo,
         });
       }
-      if (type === 'NEXT' && allowNextSignals && acc.nextTasks.length < LIMITS.nextTasks) {
+      const standaloneNext = type === 'NEXT' ? line.match(STANDALONE_NEXT_MARKER_RE) : null;
+      if (standaloneNext && allowNextSignals && acc.nextTasks.length < LIMITS.nextTasks) {
         acc.nextTasks.push({
-          text: line.trim().replace(/^.*?NEXT\s*:\s*/, '').slice(0, 300) || line.trim().slice(0, 300),
+          text: standaloneNext[1].trim().slice(0, 300),
           file: doc.file,
           line: lineNo,
           section,
@@ -836,6 +843,20 @@ function parseDoc(content, doc, acc) {
       const candidateKey = candidate ? `${candidate.file}:${candidate.line}:${candidate.text}` : null;
       if (candidate && !acc.seenBlockedGatedCandidates.has(candidateKey)) {
         let signal = candidate.includedInProjectStatus ? classifyWorkSignal(trimmed) : null;
+        const isOpenSpecNormativeLine =
+          inOpenSpecScenario && /^\s*[-*]\s+\*\*(?:WHEN|THEN|AND)\*\*/i.test(line);
+        if (isCheckedTask || isOpenSpecNormativeLine) {
+          signal = null;
+          candidate = {
+            ...candidate,
+            classification: 'process_policy',
+            includedInProjectStatus: false,
+            confidence: 'high',
+            reason: isCheckedTask
+              ? 'completed checkbox evidence is not active project work'
+              : 'OpenSpec scenario normative context is not active project work',
+          };
+        }
         // An unchecked plan checkbox is a task, not a live blocker: it only
         // counts as a real blocker when it explicitly says blocked/blocker.
         if (
