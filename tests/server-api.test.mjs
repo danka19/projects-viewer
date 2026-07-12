@@ -11,10 +11,14 @@ async function startTestServer(app) {
   const { port } = server.address();
   return {
     url: `http://127.0.0.1:${port}`,
-    close: () =>
-      new Promise((resolve, reject) => {
+    close: async () => {
+      await new Promise((resolve, reject) => {
         server.close((err) => (err ? reject(err) : resolve()));
-      }),
+      });
+      if (typeof app.locals.closeFrontend === 'function') {
+        await app.locals.closeFrontend();
+      }
+    },
   };
 }
 
@@ -25,7 +29,6 @@ test('project management API persists added project and rejects missing path', a
   await fs.mkdir(projectRoot, { recursive: true });
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -68,7 +71,6 @@ test('workspace discovery API returns candidates and track-discovered persists s
   await fs.writeFile(path.join(docsRoot, 'README.md'), '# Docs');
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -117,7 +119,6 @@ test('track-discovered rejects internal folders without adding partial projects'
   await fs.writeFile(path.join(docsRoot, 'README.md'), '# Docs');
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -153,7 +154,6 @@ test('browse folder API returns selected local path', async () => {
   const selectedPath = path.join(tmp, 'selected');
   const app = await createApp({
     appDataDir: path.join(tmp, 'app-data'),
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -174,7 +174,6 @@ test('browse folder API reports cancelled selection without error', async () => 
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-browse-cancel-api-'));
   const app = await createApp({
     appDataDir: path.join(tmp, 'app-data'),
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -184,6 +183,180 @@ test('browse folder API reports cancelled selection without error', async () => 
   try {
     const response = await fetch(`${server.url}/api/browse-folder`, { method: 'POST' });
     assert.equal(response.status, 204);
+  } finally {
+    await server.close();
+  }
+});
+
+test('configured projects API returns enabled and disabled project identities with normalized tags', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-configured-projects-api-'));
+  const appDataDir = path.join(tmp, 'app-data');
+  const alphaRoot = path.join(tmp, 'alpha');
+  const betaRoot = path.join(tmp, 'beta');
+  await fs.mkdir(alphaRoot, { recursive: true });
+  await fs.mkdir(betaRoot, { recursive: true });
+  const app = await createApp({
+    appDataDir,
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    await fetch(`${server.url}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: alphaRoot, name: 'Alpha', tags: ['docs', ' docs ', '', 'docs'] }),
+    });
+    await fetch(`${server.url}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: betaRoot, name: 'Beta', tags: ['api', 'ops'] }),
+    });
+    const disableBeta = await fetch(`${server.url}/api/projects/beta`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: false, tags: ['ops', 'ops', ' api '] }),
+    });
+    assert.equal(disableBeta.status, 200);
+
+    const response = await fetch(`${server.url}/api/configured-projects`);
+    assert.equal(response.status, 200);
+    const body = await response.json();
+
+    assert.deepEqual(body, {
+      projects: [
+        {
+          id: 'alpha',
+          name: 'Alpha',
+          path: path.resolve(alphaRoot),
+          enabled: true,
+          tags: ['docs'],
+        },
+        {
+          id: 'beta',
+          name: 'Beta',
+          path: path.resolve(betaRoot),
+          enabled: false,
+          tags: ['ops', 'api'],
+        },
+      ],
+    });
+    assert.equal(body.projects.every((project) => !Object.hasOwn(project, 'status')), true);
+  } finally {
+    await server.close();
+  }
+});
+
+test('configured projects API returns empty list when config has no saved projects', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-configured-projects-empty-api-'));
+  const app = await createApp({
+    appDataDir: path.join(tmp, 'app-data'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const response = await fetch(`${server.url}/api/configured-projects`);
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.deepEqual(body, { projects: [] });
+  } finally {
+    await server.close();
+  }
+});
+
+test('configured projects API rejects unsupported query parameters including path-like input', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-configured-projects-query-api-'));
+  const app = await createApp({
+    appDataDir: path.join(tmp, 'app-data'),
+    skipStartupScan: true,
+    skipWatcher: true,
+    skipFrontend: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const response = await fetch(
+      `${server.url}/api/configured-projects?path=${encodeURIComponent('C:\\arbitrary\\path')}`,
+    );
+    assert.equal(response.status, 400);
+    const body = await response.json();
+    assert.deepEqual(body, {
+      error: 'Query parameters are not supported.',
+      code: 'invalid-query',
+    });
+  } finally {
+    await server.close();
+  }
+});
+
+test('unknown API routes return JSON 404 instead of the frontend HTML shell when frontend fallback is enabled', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-api-fallback-regression-'));
+  const app = await createApp({
+    appDataDir: path.join(tmp, 'app-data'),
+    skipStartupScan: true,
+    skipWatcher: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const response = await fetch(`${server.url}/api/does-not-exist`);
+    assert.equal(response.status, 404);
+    assert.match(response.headers.get('content-type') ?? '', /^application\/json\b/i);
+    assert.deepEqual(await response.json(), {
+      error: 'API route not found.',
+      code: 'api-route-not-found',
+    });
+  } finally {
+    await server.close();
+  }
+});
+
+test('API routes return JSON 400 for malformed JSON request bodies when frontend fallback is enabled', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-api-malformed-json-'));
+  const app = await createApp({
+    appDataDir: path.join(tmp, 'app-data'),
+    skipStartupScan: true,
+    skipWatcher: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const response = await fetch(`${server.url}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{"path":',
+    });
+    assert.equal(response.status, 400);
+    assert.match(response.headers.get('content-type') ?? '', /^application\/json\b/i);
+    assert.deepEqual(await response.json(), {
+      error: 'Malformed JSON request body.',
+      code: 'malformed-json',
+    });
+  } finally {
+    await server.close();
+  }
+});
+
+test('API routes return JSON 413 for oversized JSON request bodies when frontend fallback is enabled', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-api-oversized-json-'));
+  const app = await createApp({
+    appDataDir: path.join(tmp, 'app-data'),
+    skipStartupScan: true,
+    skipWatcher: true,
+  });
+  const server = await startTestServer(app);
+  try {
+    const response = await fetch(`${server.url}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: 'x'.repeat(17 * 1024) }),
+    });
+    assert.equal(response.status, 413);
+    assert.match(response.headers.get('content-type') ?? '', /^application\/json\b/i);
+    assert.deepEqual(await response.json(), {
+      error: 'JSON request body exceeds the 16 KB limit.',
+      code: 'request-body-too-large',
+    });
   } finally {
     await server.close();
   }

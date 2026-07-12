@@ -649,7 +649,9 @@ function EmptyConfig() {
           No projects scanned yet
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-mute">
-          Use Manage Projects to add local project paths, then rescan docs or generate the data file:
+          Add projects in Manage Projects or edit <code className="text-mute">app-data/projects.config.json</code>
+          {' '}using <code className="text-mute">projects.config.example.json</code> as a schema reference,
+          then rescan docs or generate the data file:
         </p>
         <pre className="mt-4 rounded-lg border border-line bg-void/60 px-4 py-2.5 text-left font-mono text-xs text-ok">
           npm run scan

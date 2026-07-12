@@ -215,7 +215,6 @@ test('AI context API uses saved generated scan data and rejects arbitrary path i
   await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), JSON.stringify(sampleScan(tmp)));
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -244,7 +243,6 @@ test('AI context API returns a clear empty state when generated scan data is mis
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-ai-context-missing-'));
   const app = await createApp({
     appDataDir: path.join(tmp, 'app-data'),
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -326,7 +324,6 @@ test('AI changes endpoint persists and compares local compact context snapshots'
   await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), JSON.stringify(initialScan));
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -393,7 +390,6 @@ test('AI findings API filters by review state and updates review state locally',
   await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), JSON.stringify(sampleScan(tmp)));
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,

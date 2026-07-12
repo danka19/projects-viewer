@@ -8,7 +8,7 @@ This is the active glossary and domain-boundary file for Projects Viewer.
 |---|---|---|
 | Scanned project | A configured local repository or folder whose documentation is read by Projects Viewer. | Paths come only from `app-data/projects.config.json`; browser requests must never provide arbitrary scan paths. |
 | Dashboard project | This repository: `projects-viewer`. | Runtime writes stay inside the dashboard project, primarily under `app-data/`. |
-| Canonical project config | `app-data/projects.config.json`, the local source of truth for tracked projects, workspaces, and settings. | The root `projects.config.json` is a legacy seed/example after migration. |
+| Canonical project config | `app-data/projects.config.json`, the local source of truth for tracked projects, workspaces, and settings. | Fresh setup starts empty; `projects.config.example.json` is a schema reference only. |
 | Workspace | A saved discovery input that points at a workspace root. | Workspaces are discovery inputs only, not scanned projects. |
 | Workspace root | A saved local parent folder where discovery looks for project folders. | Example: `C:\Users\me\Documents\projects`; the workspace root itself is not a discovered project. |
 | Discovered project candidate | A real project-root candidate found under a workspace root. | By default only immediate child folders are inspected; candidates are not tracked until selected and confirmed. |

@@ -13,9 +13,9 @@ This document is the repository map for agents and humans. Keep it current whene
 | `README.md` | User-facing app overview, setup, commands, live/static mode, and troubleshooting |
 | `package.json` / `package-lock.json` | Node scripts and dependency lockfile |
 | `app-data/` | Ignored local runtime data folder for canonical config and generated live scan data |
-| `projects.config.json` | Legacy runtime fallback scheduled for removal; future clean setup should use only `app-data/projects.config.json` and, if needed, an empty `.example` config |
+| `projects.config.example.json` | Versioned empty schema reference for manual edits to `app-data/projects.config.json` |
 | `scan-projects.mjs` | Read-only scanner CLI and exported `runScan()` API |
-| `server.mjs` | Local Express dashboard server, API endpoints, Vite middleware, built frontend serving, and watcher setup |
+| `server.mjs` | Local Express dashboard server, JSON-first `/api/*` endpoints/errors, Vite middleware, built frontend serving, and watcher setup |
 | `vite.config.ts` / `tsconfig.json` | Frontend build and TypeScript configuration |
 | `docs/` | Product, architecture, operations, roadmap, audit, glossary, and phase documentation |
 | `server/` | Server-side helper modules |
@@ -32,12 +32,13 @@ This document is the repository map for agents and humans. Keep it current whene
 | `src/components/` | Dashboard panels, tabs, status badges, drawer, skeletons, and project views |
 | `src/components/ManageProjects.tsx` | Live-mode tracked project/workspace management UI |
 | `server/scan-controller.mjs` | Single-flight scan controller with queue, delay, status, trigger, and throttle logic |
-| `server/project-config.mjs` | Canonical config path helpers, legacy migration, validation, project/workspace CRUD, enabled-project filtering |
+| `server/project-config.mjs` | Canonical `app-data/projects.config.json` path helpers, validation, project/workspace CRUD, enabled-project filtering, and compact saved-project identity mapping |
 | `server/project-discovery.mjs` | Safe workspace candidate discovery with marker reasons, depth caps, and excluded folders |
 | `server/ai-context.mjs` | Compact AI context mapping, source-evidence normalization, and changes-since category comparison |
 | `server/ai-findings.mjs` | Deterministic review-required findings generation and local review-state persistence |
 | `server/agent-preflight-packet.mjs` | Pure agent preflight packet composition, required reading, acceptance mapping, attention signals, verification plan, safe states, and work-boundary guards |
 | `server/project-brief-report.mjs` | Pure advisory project brief/report composition, ranking, safe states, evidence aggregation, and recommendation guards |
+| `server/projects-viewer-mcp.mjs` | Read-only MCP adapter for local API context tools, configured-project lookup, response content/type validation, and explicit API error reporting |
 | `tests/agent-preflight-packet.test.mjs` | Pure composition and local API tests for agent preflight packet behavior, query validation, contract separation, and read-only side effects |
 | `tests/agent-preflight-packet-types.ts` | Type-level contract sample for shared agent preflight packet TypeScript types |
 | `tests/project-brief-report.test.mjs` | Pure composition and local API tests for project brief/report behavior and read-only side effects |
@@ -47,7 +48,7 @@ This document is the repository map for agents and humans. Keep it current whene
 
 | Path | Purpose |
 |---|---|
-| `app-data/projects.config.json` | Canonical local tracked project/workspace config; ignored by git |
+| `app-data/projects.config.json` | Only runtime source for local tracked project/workspace config; ignored by git |
 | `app-data/projects.generated.json` | Generated live scan output; ignored by git |
 | `app-data/ai.context.snapshot.json` | Last compact AI context snapshot used by changes-since comparison; ignored by git |
 | `app-data/ai.findings.generated.json` | Generated AI findings plus accepted/dismissed/stale review metadata; ignored by git |
@@ -63,7 +64,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/AI_STEP_VERIFICATION_CHECKLIST.md` | Mandatory self-check for AI agents |
 | `docs/CONTEXT.md` | Active glossary and domain boundaries |
 | `docs/planning/` | Cross-phase planning notes and decision drafts |
-| `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md` | Planned cleanup for config source of truth, compact project-id listing, agent preflight API routing, MCP response validation, and HTTP diagnostics |
+| `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md` | Hardening plan and implementation notes for config source of truth, compact project-id listing, agent preflight API routing, MCP response validation, and HTTP diagnostics |
 | `docs/audits/` | Focused audit reports |
 | `docs/phases/` | Detailed phase plans and templates |
 | `docs/phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 discovery and requirements plan |
@@ -75,10 +76,13 @@ This document is the repository map for agents and humans. Keep it current whene
 | `openspec/changes/add-persistent-project-management/` | Completed OpenSpec change for persistent project/workspace management |
 | `openspec/changes/add-project-brief-report/` | Active proposed OpenSpec change for the local daily/weekly project brief/report workflow |
 | `openspec/changes/agent-preflight-packet/` | Implemented proposed OpenSpec change for a separate local AI-agent preflight packet workflow, ready for human acceptance review |
-| `openspec/changes/harden-mcp-context-api/` | Proposed OpenSpec change for canonical config cleanup, compact project-id listing, API JSON boundary hardening, MCP response validation, and diagnostics |
 | `openspec/changes/archive/2026-07-08-add-ai-context-findings-layer/` | Archived OpenSpec change for AI-readable project context and review-required findings |
+| `openspec/changes/archive/2026-07-12-harden-mcp-context-api/` | Archived implementation history for canonical config cleanup, compact project-id listing, API JSON boundary hardening, MCP response validation, and diagnostics |
+| `openspec/specs/agent-preflight-packet/spec.md` | Accepted agent preflight retrieval and JSON-boundary requirements |
 | `openspec/specs/ai-context/spec.md` | Accepted AI context requirements |
 | `openspec/specs/ai-findings/spec.md` | Accepted AI findings requirements |
+| `openspec/specs/local-project-config/spec.md` | Accepted canonical local project config requirements |
+| `openspec/specs/mcp-context-api/spec.md` | Accepted configured-project listing, API JSON-boundary, MCP validation, and diagnostics requirements |
 
 ## Local Runtime
 
