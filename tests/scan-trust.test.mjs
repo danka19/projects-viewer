@@ -23,6 +23,21 @@ async function scanFixture(name, files) {
   return result.output.projects[0];
 }
 
+function assertSameBlockerDerivedState(actual, control) {
+  assert.equal(actual.status, control.status, 'false evidence must not change project status');
+  assert.equal(
+    actual.statusReason,
+    control.statusReason,
+    'false evidence must not change the blocker-derived status reason',
+  );
+  assert.equal(actual.summary.status, control.summary.status);
+  assert.equal(
+    actual.summary.healthScore,
+    control.summary.healthScore,
+    'false evidence must not change blocker-derived project health',
+  );
+}
+
 test('unchecked explicitly blocked tasks remain live blockers', async () => {
   const project = await scanFixture('positive-unchecked-blocker', {
     'README.md': '# Sample\n',
@@ -188,6 +203,22 @@ test('checked blocker tasks never become live blockers', async () => {
     project.signalGroups.realBlockers.every((signal) => !/checkbox blocker|hard-block pattern/i.test(signal.text)),
     'checked blocker tasks stay completed evidence',
   );
+  assert.doesNotMatch(project.summary.mainBlocker ?? '', /checkbox blocker|hard-block pattern/i);
+
+  const control = await scanFixture('completed-blockers-control', {
+    'README.md': '# Sample\n',
+    'docs/ROADMAP.md': [
+      '# Roadmap',
+      '',
+      '## Current work',
+      '',
+      '- [x] 1.1 Add completed UX-001 fixtures for historical scanner evidence.',
+      '- [x] 1.3 Finish classification coverage for completed plan checkboxes.',
+      '- [ ] Import job is blocked by missing required data from the vendor.',
+      '',
+    ].join('\n'),
+  });
+  assertSameBlockerDerivedState(project, control);
 });
 
 test('cross-line OpenSpec normative scenarios never become live blockers', async () => {
@@ -218,6 +249,28 @@ test('cross-line OpenSpec normative scenarios never become live blockers', async
     project.signalGroups.realBlockers.every((signal) => !/\*\*(THEN|AND)\*\*/.test(signal.text)),
     'normative THEN and AND lines stay specification context',
   );
+  assert.doesNotMatch(project.summary.mainBlocker ?? '', /dependent remains blocked|cannot continue/i);
+
+  const control = await scanFixture('openspec-normative-blockers-control', {
+    'README.md': '# Sample\n',
+    'docs/ROADMAP.md': [
+      '# Roadmap',
+      '',
+      '- Import job is blocked by missing required data from the vendor.',
+      '',
+    ].join('\n'),
+    'openspec/changes/dependency/specs/dependency/spec.md': [
+      '# Dependency Specification',
+      '',
+      '#### Scenario: Dependent follows prerequisite',
+      '',
+      '- **WHEN** a prerequisite is implementation-complete and accepted',
+      '- **THEN** its dependent becomes ready',
+      '- **AND** dependent work may proceed after the prerequisite is final',
+      '',
+    ].join('\n'),
+  });
+  assertSameBlockerDerivedState(project, control);
 });
 
 test('explanatory next-action prose with an embedded marker never becomes current work', async () => {
@@ -239,6 +292,19 @@ test('explanatory next-action prose with an embedded marker never becomes curren
     project.nextTasks.every((task) => !/no longer sourced|Next-action signals/i.test(task.text)),
     'an embedded NEXT example stays explanatory prose',
   );
+  assert.doesNotMatch(project.summary.nextAction ?? '', /no longer sourced|Next-action signals/i);
+
+  const control = await scanFixture('embedded-next-marker-control', {
+    'README.md': '# Sample\n',
+    'docs/ROADMAP.md': '# Roadmap\n\nNEXT: Implement scanner exclusions.\n',
+    'openspec/changes/dependency/proposal.md': [
+      '# Proposal',
+      '',
+      'Scanner evidence rules distinguish explanatory proposal prose from active work.',
+      '',
+    ].join('\n'),
+  });
+  assertSameBlockerDerivedState(project, control);
 });
 
 test('next-action headings and descriptive labels never become current work', async () => {
