@@ -33,6 +33,85 @@ function diagnostic(text: string, file: string, line: number): BlockedGatedCandi
 }
 
 describe('searchProjects pure contract', () => {
+  const matchPresentationCases = [
+    {
+      position: 'early',
+      query: 'preflight packet',
+      text: 'Preflight packet startup guidance remains advisory while the project owner retains every product and execution decision.',
+    },
+    {
+      position: 'middle',
+      query: 'saved-project query validation',
+      text: 'The implementation keeps the existing local boundary and adds strict saved-project query validation before read-only retrieval returns trusted context.',
+    },
+    {
+      position: 'late',
+      query: 'preflight packet',
+      text: 'Decision required for the next phase: choose whether the next product slice is dashboard UI, Markdown/rendered brief, or an agent preflight packet follow-up.',
+    },
+    {
+      position: 'long',
+      query: 'strict saved-project query validation, read-only local API retrieval',
+      text: 'Agent context hardening preserves existing boundaries while adding strict saved-project query validation, read-only local API retrieval, and an unknown-change safe state.',
+    },
+  ] as const;
+
+  it.each(matchPresentationCases)(
+    'exposes match-aware presentation for a $position query match',
+    ({ position, query, text }) => {
+      const project = makeProject({
+        openTasks: [task(text, 'docs/CURRENT_PROJECT_AUDIT.md', 84)],
+      });
+
+      const result = searchProjects([project], query);
+      const hit = result.hits[0] as typeof result.hits[number] & {
+        matchFragment?: string;
+      };
+
+      expect(result.hits).toHaveLength(1);
+      expect(hit.matchFragment, `${position} match should have presentation metadata`).toEqual(
+        expect.any(String),
+      );
+      expect(hit.matchFragment?.toLowerCase()).toContain(query.toLowerCase());
+    },
+  );
+
+  it('keeps identity, ranking, navigation, and result limiting independent of the selected match', () => {
+    const auditedLateMatch =
+      'Decision required for the next phase: choose whether the next product slice is dashboard UI, Markdown/rendered brief, or an agent preflight packet follow-up.';
+    const project = makeProject({
+      openTasks: [
+        task(auditedLateMatch, 'docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md', 356),
+        ...Array.from({ length: SEARCH_LIMIT }, (_, index) =>
+          task(
+            `Dashboard UI option ${String(index).padStart(2, '0')} keeps an agent preflight packet follow-up available.`,
+            'docs/TASKS.md',
+            index + 1,
+          ),
+        ),
+      ],
+    });
+
+    const dashboardMatches = searchProjects([project], 'dashboard ui');
+    const preflightMatches = searchProjects([project], 'preflight packet');
+    const stableContract = (result: typeof dashboardMatches) =>
+      result.hits.map((hit) => ({
+        key: hit.key,
+        score: hit.score,
+        tab: hit.tab,
+        file: hit.drawer?.file,
+        line: hit.drawer?.line,
+        projectPath: hit.drawer?.projectPath,
+      }));
+
+    expect(stableContract(dashboardMatches)).toEqual(stableContract(preflightMatches));
+    for (const result of [dashboardMatches, preflightMatches]) {
+      expect(result.total).toBe(SEARCH_LIMIT + 1);
+      expect(result.hits).toHaveLength(SEARCH_LIMIT);
+      expect(result.truncated).toBe(true);
+    }
+  });
+
   it('indexes specification identities and owned tasks with Specs routing descriptors', () => {
     const project = makeProject({
       specWork: {
