@@ -62,6 +62,20 @@ function searchProjects(): ProjectData[] {
   return [alpha, beta];
 }
 
+function auditedLateMatchProject(): ProjectData {
+  const auditedEvidence = task(
+    'Decision required for the next phase: choose whether the next product slice is dashboard UI, Markdown/rendered brief, or an agent preflight packet follow-up.',
+    'docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md',
+    356,
+  );
+  return makeProject({
+    name: 'Audited project',
+    path: 'C:/projects/audited',
+    nextTasks: [auditedEvidence],
+    openTasks: [{ ...auditedEvidence }],
+  });
+}
+
 function scan(projects = searchProjects()): ScanOutput {
   return {
     generatedAt: '2026-07-11T00:00:00.000Z',
@@ -110,6 +124,42 @@ async function renderApp(data = scan()) {
 }
 
 describe('accessible global search integration', () => {
+  it('visibly explains a late query match on the retained deduplicated result', async () => {
+    const user = userEvent.setup();
+    const search = await renderApp(scan([auditedLateMatchProject()]));
+
+    await user.type(search, 'preflight packet');
+
+    const options = within(screen.getByRole('listbox')).getAllByRole('option');
+    expect(options).toHaveLength(1);
+    expect(options[0]).toHaveAccessibleName(/Next action.*Audited project/i);
+    expect(options[0]).toHaveTextContent(/preflight packet/i);
+  });
+
+  it('activates the retained late-match result by keyboard and pointer', async () => {
+    const user = userEvent.setup();
+    const search = await renderApp(scan([auditedLateMatchProject()]));
+
+    await user.type(search, 'preflight packet');
+    const keyboardOption = within(screen.getByRole('listbox')).getByRole('option');
+    await user.keyboard('{ArrowDown}');
+    expect(search).toHaveAttribute('aria-activedescendant', keyboardOption.id);
+    await user.keyboard('{Enter}');
+
+    expect(search).toHaveValue('preflight packet');
+    expect(screen.getByRole('dialog')).toHaveTextContent(/agent preflight packet follow-up/i);
+    await user.keyboard('{Escape}');
+    expect(search).toHaveFocus();
+
+    await user.click(search);
+    const pointerOption = within(screen.getByRole('listbox')).getByRole('option');
+    expect(pointerOption.id).toBe(keyboardOption.id);
+    await user.click(pointerOption);
+
+    expect(screen.getByRole('dialog')).toHaveTextContent(/agent preflight packet follow-up/i);
+    expect(search).toHaveValue('preflight packet');
+  });
+
   it('uses one ranked semantic listbox with stable option identity and full keyboard dismissal', async () => {
     const user = userEvent.setup();
     const search = await renderApp();
