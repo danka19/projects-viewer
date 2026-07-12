@@ -13,6 +13,15 @@ const tools = [
     },
   },
   {
+    name: 'list_configured_projects',
+    description: 'List compact saved Projects Viewer project ids from the local read-only API.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+      additionalProperties: false,
+    },
+  },
+  {
     name: 'get_agent_preflight_packet',
     description: 'Fetch a read-only agent preflight packet for a saved project id.',
     inputSchema: {
@@ -63,24 +72,51 @@ const tools = [
 ];
 
 const handlers = {
-  list_projects: () => requestJson('/api/projects'),
+  list_projects: () =>
+    requestJson('/api/projects', {
+      contractName: 'dashboard scan payload',
+      validate: validateDashboardScanPayload,
+    }),
+  list_configured_projects: () =>
+    requestJson('/api/configured-projects', {
+      contractName: 'configured projects payload',
+      validate: validateConfiguredProjectsPayload,
+    }),
   get_agent_preflight_packet: (args) => {
     const params = new URLSearchParams({ projectId: requiredString(args, 'projectId') });
     if (args.changeId) params.set('changeId', String(args.changeId));
     if (args.agentRole) params.set('agentRole', String(args.agentRole));
-    return requestJson(`/api/agent-preflight-packet?${params.toString()}`);
+    return requestJson(`/api/agent-preflight-packet?${params.toString()}`, {
+      contractName: 'agent preflight packet payload',
+      validate: validateAgentPreflightPacketPayload,
+    });
   },
   get_project_brief_report: (args) => {
     const params = new URLSearchParams();
     if (args.mode) params.set('mode', String(args.mode));
     if (args.since) params.set('since', String(args.since));
-    return requestJson(`/api/project-brief-report${params.size ? `?${params.toString()}` : ''}`);
+    return requestJson(`/api/project-brief-report${params.size ? `?${params.toString()}` : ''}`, {
+      contractName: 'project brief report payload',
+      validate: validateProjectBriefReportPayload,
+    });
   },
-  get_ai_context: (args) => requestJson(args.projectId ? `/api/ai-context/projects/${encodeURIComponent(String(args.projectId))}` : '/api/ai-context'),
+  get_ai_context: (args) =>
+    args.projectId
+      ? requestJson(`/api/ai-context/projects/${encodeURIComponent(String(args.projectId))}`, {
+          contractName: 'project AI context payload',
+          validate: validateProjectAiContextPayload,
+        })
+      : requestJson('/api/ai-context', {
+          contractName: 'AI context payload',
+          validate: validateAllAiContextPayload,
+        }),
   get_ai_findings: (args) => {
     const params = new URLSearchParams();
     if (args.state) params.set('state', String(args.state));
-    return requestJson(`/api/ai-findings${params.size ? `?${params.toString()}` : ''}`);
+    return requestJson(`/api/ai-findings${params.size ? `?${params.toString()}` : ''}`, {
+      contractName: 'AI findings payload',
+      validate: validateAiFindingsPayload,
+    });
   },
 };
 
@@ -142,25 +178,132 @@ function respond(id, result, error) {
   process.stdout.write(`${JSON.stringify(payload)}\n`);
 }
 
-async function requestJson(pathname) {
+async function requestJson(pathname, { contractName = null, validate = null } = {}) {
   const response = await fetch(new URL(pathname, API_BASE_URL));
   const text = await response.text();
+  const contentType = response.headers.get('content-type') ?? 'unknown';
+  const isJson = /^\s*application\/json\b/i.test(contentType);
+  const errorContext = formatApiErrorContext({
+    pathname,
+    status: response.status,
+    contentType,
+    bodyPreview: createBodyPreview(text),
+  });
+
+  if (!isJson) {
+    throw new Error(
+      `Expected JSON response from Projects Viewer API. ${errorContext}. Start the local dashboard with "npm run dev" and retry.`,
+    );
+  }
+
   let body;
   try {
     body = text ? JSON.parse(text) : null;
-  } catch {
-    body = { raw: text };
+  } catch (err) {
+    throw new Error(`Projects Viewer API returned malformed JSON. ${errorContext}. Parse error: ${err.message}`);
   }
   if (!response.ok) {
     throw new Error(
-      `Projects Viewer API returned ${response.status}. Start the local dashboard with "npm run dev" and retry. Response: ${JSON.stringify(body)}`,
+      `Projects Viewer API returned ${response.status}. ${errorContext}. Start the local dashboard with "npm run dev" and retry.`,
     );
   }
+  if (typeof validate === 'function') {
+    const validationError = validate(body);
+    if (validationError) {
+      throw new Error(
+        `Projects Viewer API returned wrong shape for ${contractName}. Expected ${validationError}. ${errorContext}.`,
+      );
+    }
+  }
   return body;
+}
+
+function formatApiErrorContext({ pathname, status, contentType, bodyPreview }) {
+  return `API path ${pathname}, status ${status}, content-type ${contentType}, preview "${bodyPreview}"`;
+}
+
+function createBodyPreview(body) {
+  if (!body) return '(empty)';
+  return body.replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
 }
 
 function requiredString(args, key) {
   const value = args?.[key];
   if (typeof value !== 'string' || value.trim() === '') throw new Error(`${key} is required.`);
   return value;
+}
+
+function validateDashboardScanPayload(body) {
+  if (!isObject(body) || !isString(body.generatedAt) || !Array.isArray(body.projects)) {
+    return 'generatedAt string and projects array';
+  }
+  return null;
+}
+
+function validateConfiguredProjectsPayload(body) {
+  if (!isObject(body) || !Array.isArray(body.projects)) {
+    return 'projects array of compact project identities';
+  }
+  if (
+    !body.projects.every(
+      (project) =>
+        isObject(project) &&
+        isString(project.id) &&
+        isString(project.name) &&
+        isString(project.path) &&
+        typeof project.enabled === 'boolean' &&
+        Array.isArray(project.tags),
+    )
+  ) {
+    return 'projects array of compact project identities';
+  }
+  return null;
+}
+
+function validateAllAiContextPayload(body) {
+  if (!isObject(body) || !isString(body.kind)) {
+    return 'all-project AI context contract';
+  }
+  if (body.kind === 'all-project-ai-context') {
+    return !isString(body.generatedAt) || !Array.isArray(body.projects) ? 'kind "all-project-ai-context" with generatedAt string and projects array' : null;
+  }
+  return 'kind "all-project-ai-context"';
+}
+
+function validateProjectAiContextPayload(body) {
+  if (!isObject(body) || !isObject(body.project) || body.project.kind !== 'project-ai-context') {
+    return 'project object with kind "project-ai-context"';
+  }
+  return !isObject(body.project.identity) || !isString(body.project.identity.name) || !isString(body.project.identity.path)
+    ? 'project object with kind "project-ai-context" and identity.name and identity.path strings'
+    : null;
+}
+
+function validateAiFindingsPayload(body) {
+  if (!isObject(body) || !isString(body.generatedAt) || !Array.isArray(body.findings)) {
+    return 'generatedAt string and findings array';
+  }
+  return null;
+}
+
+function validateProjectBriefReportPayload(body) {
+  if (!isObject(body) || body.kind !== 'project-brief-report' || !isString(body.generatedAt) || !Array.isArray(body.items)) {
+    return 'kind "project-brief-report" with generatedAt string and items array';
+  }
+  return null;
+}
+
+function validateAgentPreflightPacketPayload(body) {
+  if (!isObject(body) || body.kind !== 'agent-preflight-packet') {
+    return 'kind "agent-preflight-packet"';
+  }
+  return null;
+}
+
+function isObject(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isString(value) {
+  return typeof value === 'string';
 }

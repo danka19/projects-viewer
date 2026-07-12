@@ -12,6 +12,7 @@ import {
   addWorkspace,
   ensureProjectConfig,
   getConfigPaths,
+  getConfiguredProjectIdentities,
   getEnabledProjects,
   readProjectConfig,
   removeProject,
@@ -494,7 +495,6 @@ async function readAgentPreflightChecklistSignals() {
 
 export async function createApp({
   appDataDir,
-  legacyConfigPath = path.join(__dirname, 'projects.config.json'),
   skipStartupScan = false,
   skipWatcher = false,
   skipFrontend = false,
@@ -502,12 +502,41 @@ export async function createApp({
   logger = console,
 } = {}) {
   const app = express();
-  const configOptions = { appDataDir, legacyConfigPath };
+  app.locals.closeFrontend = null;
+  const configOptions = { appDataDir };
   await ensureProjectConfig(configOptions);
   const controller = createScanController({ runScan: createDashboardRunScan(configOptions), logger });
   let watcher = null;
 
   app.use(express.json({ limit: '16kb' }));
+  app.use((err, req, res, next) => {
+    if (!req.path.startsWith('/api')) {
+      next(err);
+      return;
+    }
+
+    if (err.type === 'entity.parse.failed') {
+      res.status(400).json({
+        error: 'Malformed JSON request body.',
+        code: 'malformed-json',
+      });
+      return;
+    }
+
+    if (err.type === 'entity.too.large') {
+      res.status(413).json({
+        error: 'JSON request body exceeds the 16 KB limit.',
+        code: 'request-body-too-large',
+      });
+      return;
+    }
+
+    const status = Number.isInteger(err.status) && err.status >= 400 && err.status < 500 ? err.status : 400;
+    res.status(status).json({
+      error: 'Invalid JSON request body.',
+      code: 'invalid-json-body',
+    });
+  });
 
   async function restartWatcher() {
     if (skipWatcher) return;
@@ -655,10 +684,34 @@ export async function createApp({
     return { projectId, changeId, agentRole };
   }
 
+  function parseConfiguredProjectsQuery(req) {
+    const url = new URL(req.originalUrl, 'http://127.0.0.1');
+    if ([...url.searchParams.keys()].length > 0) {
+      const err = new Error('Query parameters are not supported.');
+      err.code = 'invalid-query';
+      err.statusCode = 400;
+      throw err;
+    }
+  }
+
   app.get('/api/config', async (_req, res) => {
     try {
       res.json(await readProjectConfig(configOptions));
     } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.get('/api/configured-projects', async (req, res) => {
+    try {
+      parseConfiguredProjectsQuery(req);
+      const config = await readProjectConfig(configOptions);
+      res.json({ projects: getConfiguredProjectIdentities(config) });
+    } catch (err) {
+      if (isDomainError(err)) {
+        res.status(err.statusCode).json(serializeDomainError(err));
+        return;
+      }
       sendError(res, err);
     }
   });
@@ -928,6 +981,13 @@ export async function createApp({
     res.status(status.status === 'error' ? 500 : 200).json(status);
   });
 
+  app.use('/api', (_req, res) => {
+    res.status(404).json({
+      error: 'API route not found.',
+      code: 'api-route-not-found',
+    });
+  });
+
   if (!skipStartupScan) await controller.requestScan('startup');
   if (!skipWatcher) watcher = await createWatcher(controller, configOptions);
 
@@ -940,6 +1000,7 @@ export async function createApp({
       server: { middlewareMode: true },
       appType: 'spa',
     });
+    app.locals.closeFrontend = () => vite.close();
     app.use(vite.middlewares);
   } else {
     app.use(express.static(DIST_DIR));

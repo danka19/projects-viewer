@@ -1421,7 +1421,6 @@ export async function runScan(options = {}) {
   if (configPath === DEFAULT_CONFIG_PATH) {
     await ensureProjectConfig({
       appDataDir: path.dirname(DEFAULT_CONFIG_PATH),
-      legacyConfigPath: path.join(__dirname, 'projects.config.json'),
     });
   }
   let config;
@@ -1432,9 +1431,6 @@ export async function runScan(options = {}) {
   }
   const configuredProjects = Array.isArray(config.projects) ? config.projects : [];
   const projectsToScan = configuredProjects.filter((project) => project?.enabled !== false);
-  if (projectsToScan.length === 0) {
-    throw new Error('projects.config.json must contain a non-empty "projects" array.');
-  }
   const activeDays = Number.isFinite(config.settings?.activeDays)
     ? config.settings.activeDays
     : Number.isFinite(config.activeDays)
@@ -1518,7 +1514,6 @@ async function main() {
   const startedAt = Date.now();
   await ensureProjectConfig({
     appDataDir: path.dirname(CONFIG_PATH),
-    legacyConfigPath: path.join(__dirname, 'projects.config.json'),
   });
   let config;
   try {
@@ -1529,10 +1524,6 @@ async function main() {
   }
   const configuredProjects = Array.isArray(config.projects) ? config.projects : [];
   const projectsToScan = configuredProjects.filter((project) => project?.enabled !== false);
-  if (projectsToScan.length === 0) {
-    console.error('projects.config.json must contain a non-empty "projects" array.');
-    process.exit(1);
-  }
   const activeDays = Number.isFinite(config.settings?.activeDays)
     ? config.settings.activeDays
     : Number.isFinite(config.activeDays)

@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "test": "node --test",
+    "test": "node --test --test-concurrency=1",
     "scan": "node scan-projects.mjs",
     "dev": "node server.mjs",
     "server": "node server.mjs --production",

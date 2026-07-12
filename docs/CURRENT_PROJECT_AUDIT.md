@@ -17,22 +17,22 @@ Last updated: 2026-07-12.
 | `improve-dashboard-search-navigation` | `accepted` | Implementation and verification are included in the accepted redesign evidence; archival remains separate. |
 | `redesign-dashboard-project-timeline` | `pending_acceptance` | `openspec list` reports 42/43 tasks. Commit `9cfb550` and fresh six-viewport/theme geometry evidence close tasks 5.6-5.7; explicit human task 7.6 remains open. |
 | `add-selectable-specs-canvas` | `pending_acceptance` | OpenSpec artifacts validate strictly; scanner/config/model/layout/routing/state/search/UI implementation is complete with 107 Node + 91 component tests, production build, and dark/light 1280×720, 1024×768, 390×844 browser evidence. Archive/push/merge were not performed. |
-| `harden-mcp-context-api` | `planned` | 0/19 tasks; implementation has not started. |
+| `harden-mcp-context-api` | `archived` | Implementation, verification, accepted-spec sync, and archival are complete at `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`. |
 | [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) | `planned` | 0/13 tasks; the change follows `harden-mcp-context-api` in the draft Phase 4 ordering and implementation has not started. |
-| Accepted specs `ai-context`, `ai-findings` | `accepted` | Present under `openspec/specs/` and validated by OpenSpec. |
+| Accepted specs `ai-context`, `ai-findings`, `agent-preflight-packet`, `local-project-config`, `mcp-context-api` | `accepted` | Present under `openspec/specs/` and validated by OpenSpec. |
 
-Sequential work: timeline archival/integration is blocked only by explicit human acceptance task 7.6. MCP/API hardening is parallel-independent because its config/API/MCP boundaries do not depend on timeline geometry, but it remains only `planned` until intentionally started. Dashboard evidence-trust remediation is also `planned` and follows MCP/API hardening in the draft Phase 4 ordering.
+Sequential work: timeline archival/integration is blocked only by explicit human acceptance task 7.6. MCP/API hardening is complete and archived independently of timeline geometry. Dashboard evidence-trust remediation remains `planned` as the follow-on hardening slice.
 
 ## Repository Baseline
 
 | Item | Current State |
 |---|---|
 | Repository root | `C:\Users\danoc\Documents\projects\projects-viewer` |
-| Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer` |
-| Current branch | `dashboard-redesign/ui-rebuild` |
+| Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer\.worktrees\improve-dashboard-evidence-trust` |
+| Current branch | `codex/improve-dashboard-evidence-trust` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Latest implementation commit before this audit update | `9cfb550 fix: keep timeline phase axis level` |
-| Local divergence | Redesign branch contains intentional local commits over `main`; no push was performed. The mixed-height axis implementation and evidence are committed. |
+| Latest feature commit before the `origin/main` merge | `d3fa93d` (`docs: close evidence audit rollout plan`) |
+| Local divergence | The feature branch contains the planned dashboard evidence-trust change over the redesign workstream and integrates the completed MCP/API hardening implementation, accepted specs, and archived change history from `origin/main`; no push was performed during this merge. |
 
 ## Useful Starting Points
 
@@ -54,9 +54,9 @@ Sequential work: timeline archival/integration is blocked only by explicit human
 | Local app/server available | `npm run dev` started `http://127.0.0.1:5173`; `/api/scan-status` returned `success`, trigger `startup`, docs `53` |
 | Production-like local server | `npm run server` started after `npm run build`; `/api/projects` returned 1 project and 53 docs; `/` returned HTTP 200 |
 | Watcher behavior | Temporary markdown add produced watcher scan with 54 docs; delayed unlink scan returned 53 docs |
-| Persistent config module | `npm test -- tests/project-config.test.mjs` passed: migration, project CRUD, duplicate handling, enabled filtering, workspace normalization |
+| Persistent config module | `npm test -- tests/project-config.test.mjs` passed: clean canonical `app-data/projects.config.json` creation, root `projects.config.json` ignored with no fallback/migration, compact configured-project identities, project CRUD, duplicate handling, enabled filtering, and workspace normalization |
 | Workspace discovery module | `npm test -- tests/project-discovery.test.mjs` passed: default depth 1, explicit nested discovery, ignored internal folders, marker reasons, disabled workspace, and selected-path validation |
-| Scanner config contract | `npm test -- tests/run-scan.test.mjs` passed: legacy config, enabled-project filtering, app-data generated output |
+| Scanner config contract | Runtime config now reads only `app-data/projects.config.json`; root `projects.config.json` fallback/migration was removed. Empty config/no projects scan is valid and should not crash. |
 | Project management API | `npm test -- tests/server-api.test.mjs` passed: add project validation/persistence, workspace discovery, track-discovered, and invalid selection rejection without partial adds |
 | Frontend build | `npm run build` passed after adding `Manage Projects`; prebuild wrote `app-data/projects.generated.json` |
 | Real workspace discovery check | `C:\Users\danoc\Documents\projects` returned top-level candidates AutoParts, autoparts-db, finance-sheets, projects-viewer, ScanLabMultiplatform, ScanLabTesting, teamSsdCli, and vpn-and-router; forbidden internal names were absent from candidates; `AnnaPh` was not present on disk during verification |
@@ -83,8 +83,9 @@ Sequential work: timeline archival/integration is blocked only by explicit human
 | Agent preflight packet intake | Human owner requested a separate `agent-preflight-packet` OpenSpec proposal on 2026-07-09 so agent preflight behavior does not mix into the daily/weekly human brief; routing decision was `create_openspec_change` |
 | Agent preflight packet implementation | `GET /api/agent-preflight-packet` implemented on branch `codex/agent-preflight-packet` with shared `AgentPreflightPacket` types, pure `server/agent-preflight-packet.mjs` composition, strict saved-project query validation, read-only local API retrieval, unknown-change safe state without fabricated proposed requirements/tasks, and contract-separation regression coverage |
 | Agent preflight packet focused verification | `npm test -- tests/agent-preflight-packet.test.mjs` passed 20/20 after adding explicit local negative side-effect artifact assertions for task/calendar/commit/shell/remote/agent-work records |
-| MCP/API hardening follow-up | 2026-07-09 diagnostic found that `get_agent_preflight_packet` can return the Vite HTML shell with HTTP 200, `list_projects` is too large for convenient project-id selection, root `projects.config.json` can mislead agents with legacy `Example Project` data, and `Invoke-WebRequest` can produce low-value diagnostics. Planned remediation is recorded in `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md`. |
-| MCP/API hardening OpenSpec | Proposed change `openspec/changes/harden-mcp-context-api/` now captures the hardening work as formal OpenSpec artifacts: proposal, design, tasks, and delta specs for `local-project-config`, `mcp-context-api`, and `agent-preflight-packet`. The planning doc records why the OpenSpec was not created in the first documentation-only follow-up. |
+| MCP/API hardening follow-up | 2026-07-09 diagnostic found historical failure modes: `get_agent_preflight_packet` could return the Vite HTML shell with HTTP 200, `list_projects` was too large for convenient project-id selection, root `projects.config.json` could mislead agents with legacy `Example Project` data, and `Invoke-WebRequest` could produce low-value diagnostics. Remediation context is recorded in `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md`. |
+| MCP/API hardening OpenSpec | Completed change history is archived at `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`; accepted requirements are synced to main specs for `local-project-config`, `mcp-context-api`, and `agent-preflight-packet`. The planning doc records why the OpenSpec was not created in the first documentation-only follow-up. |
+| MCP/API hardening implementation facts | Runtime tracked-project config source is only `app-data/projects.config.json`; `projects.config.example.json` is a versioned empty schema reference; `GET /api/configured-projects` and MCP `list_configured_projects` provide compact saved project identities for `projectId` lookup; unknown `/api/*` routes return JSON `404`; the MCP adapter rejects non-JSON, malformed JSON, wrong response shapes, and wrong packet kind with explicit status/content-type/path/preview details; diagnostics should prefer `curl.exe -i --max-time 10` when headers or content type matter. |
 | UX/UI live-browser audit | On 2026-07-10 the dashboard was inspected at 1280x720 and 390x844. Evidence recorded false current next-action/blocker/task promotion, repeated dense text, global-to-local metric actions, noisy 40-result search saturation, a 340 px mobile header, selected-project content below y=1500 on mobile, and a desktop sticky sidebar/header overlap. Full evidence is in `docs/audits/UX_UI_AUDIT_2026-07-10.md`. |
 | Dashboard state-trust gate | `harden-dashboard-state-derivation` implemented trusted constraint filtering/current-state derivation before overview promotion; representative trust fixtures and the full suite pass. |
 | Project Timeline implementation | `src/timeline/` provides the trusted model/state, horizontal phase/step axes, current/expanded separation, edge states, keyboard/reduced-motion behavior, responsive overflow, integrity disclosure, and read-only drawer integration. Commit `9cfb550` adds the equal-height card contract; current status is 42/43 tasks with human acceptance open. |
@@ -143,14 +144,14 @@ Sequential work: timeline archival/integration is blocked only by explicit human
 | AUDIT-007 | `agent-preflight-packet` is implemented separately from `project-brief-report`; final acceptance still requires full verification evidence and human review before archiving the OpenSpec change. | Current feature | monitored |
 | AUDIT-008 | The owner selected the bounded UX-first sequence; state trust preceded overview promotion and MCP/API hardening remained separate. Detailed Phase 4 scope is still a future decision. | Human owner | closed for redesign sequencing 2026-07-11 |
 | AUDIT-009 | Unrelated uncommitted UI/worktree changes were present during the earlier agent-preflight feature session; by 2026-07-10 `main` matched `origin/main` and the worktree was clean before new intentional documentation changes. | Human owner | closed 2026-07-10 |
-| AUDIT-010 | MCP/API hardening is needed before agents can rely on preflight packet retrieval in everyday workflow: remove root legacy config fallback, expose compact saved project ids, prevent `/api/*` HTML fallback from masquerading as success, and improve local HTTP diagnostics. OpenSpec proposal now exists as `harden-mcp-context-api`; implementation remains open. | Next bounded change | open |
+| AUDIT-010 | MCP/API hardening implementation, verification, independent review, accepted-spec sync, and OpenSpec archival are complete: root legacy config fallback is removed, compact saved project ids are exposed, `/api/*` parser and routing failures stay JSON, MCP response validation is hardened, and local HTTP diagnostics guidance is updated. | Completed hardening slice | closed 2026-07-12 |
 | AUDIT-011 | Dashboard trust filtering/current-state derivation is implemented and regression-tested before overview promotion. | Dashboard redesign | closed 2026-07-11 |
 | AUDIT-012 | First-glance hierarchy, mobile ordering, and corrected straight-axis geometry are implemented and freshly browser-verified; explicit human clarity acceptance remains open. | Dashboard redesign | pending_acceptance |
 | AUDIT-013 | Component, accessibility, search/state, responsive-contract, theme-contrast, and live-browser coverage now exists and passes. | Dashboard redesign | closed 2026-07-11 |
 | AUDIT-014 | Previous task 7.6 acceptance was inferred too broadly. Corrected geometry is now verified in `9cfb550`, but explicit owner acceptance is still required before archival/integration. | Human owner | pending_acceptance |
 | AUDIT-015 | Manage Projects now has `role="dialog"`, `aria-modal`, an accessible name, initial focus, bidirectional focus containment, Escape dismissal, inert background, and exact focus return. Four component scenarios and all six dark/light browser matrix points pass. | Dashboard redesign | closed 2026-07-11 |
 | AUDIT-016 | Drawer focus return now resolves a stable source-derived opener ID instead of retaining a DOM element. A real-App polling integration test replaces the phase-details opener during live refresh and proves Escape focuses its replacement; all six browser matrix points also pass. | Dashboard redesign | closed 2026-07-11 |
-| AUDIT-017 | [`API_UX_TRUST_AUDIT_2026-07-12.md`](audits/API_UX_TRUST_AUDIT_2026-07-12.md) records four confirmed trust findings. [`harden-mcp-context-api`](../openspec/changes/harden-mcp-context-api/) owns API fallback remediation; [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) owns scanner and search evidence remediation. Neither change has started implementation. | Phase 4 hardening changes | open 2026-07-12 |
+| AUDIT-017 | [`API_UX_TRUST_AUDIT_2026-07-12.md`](audits/API_UX_TRUST_AUDIT_2026-07-12.md) records four confirmed trust findings. Archived `harden-mcp-context-api` owns the completed API fallback remediation; [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) owns the still-planned scanner and search evidence remediation. | Phase 4 hardening changes | open 2026-07-12 |
 
 ## Audit Rules
 

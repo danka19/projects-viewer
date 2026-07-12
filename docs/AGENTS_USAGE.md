@@ -7,7 +7,7 @@ Keep it current whenever agent workflow, local API usage, MCP configuration, ver
 
 Projects Viewer is a local-only, read-only dashboard over configured project documentation. Agents should use this project as a source of structured local context, not as an action runner.
 
-The preferred context source is the agent preflight packet API:
+The preferred context source is the agent preflight packet API, after discovering a saved project id from the compact configured-project list:
 
 ```text
 GET /api/agent-preflight-packet?projectId=<id>&changeId=<change-id>&agentRole=<role>
@@ -44,7 +44,13 @@ npm run scan
 
 ## Get Project Context
 
-Project ids come from saved Projects Viewer config, not from inferred project names or legacy config files. The planned hardening work in `docs/planning/MCP_CONTEXT_API_HARDENING_PLAN.md` and `openspec/changes/harden-mcp-context-api/` will add a compact project-id listing endpoint/tool. Until then, use the saved ids in `app-data/projects.config.json` when a preflight packet requires `projectId`.
+Project ids come from saved Projects Viewer config, not from inferred project names or legacy config files. The only runtime tracked-project config source is `app-data/projects.config.json`; root `projects.config.json` is ignored. Prefer the compact configured-project list before requesting an agent preflight packet.
+
+List compact configured project ids from the local API:
+
+```powershell
+Invoke-RestMethod "http://127.0.0.1:5173/api/configured-projects"
+```
 
 List currently scanned dashboard projects:
 
@@ -93,10 +99,17 @@ server/projects-viewer-mcp.mjs
 It exposes only read-only context tools:
 
 - `list_projects`
+- `list_configured_projects`
 - `get_agent_preflight_packet`
 - `get_project_brief_report`
 - `get_ai_context`
 - `get_ai_findings`
+
+Preferred MCP preflight flow:
+
+1. Call `list_configured_projects` to get saved `projectId` values from the compact config-focused payload.
+2. Call `get_agent_preflight_packet` with one of those ids.
+3. Use `list_projects` only when you need the fuller dashboard scan payload from `/api/projects`.
 
 The adapter calls the local Projects Viewer HTTP API. By default it uses:
 
@@ -112,7 +125,7 @@ $env:PROJECTS_VIEWER_API_BASE_URL = "http://127.0.0.1:<port>"
 
 The MCP adapter does not start the dashboard server. If a tool returns an API unavailable error, start `npm run dev` and retry.
 
-If an MCP tool returns a raw Vite HTML shell such as `<!doctype html>` for an API call, treat that as an API routing or stale-server failure, not as valid context. The planned hardening work must make this an explicit MCP error by checking JSON content type and expected response shape.
+MCP tools reject non-JSON responses, malformed JSON, wrong response shapes, and `get_agent_preflight_packet` responses whose `kind` is not `agent-preflight-packet`. Errors include response evidence such as status, content type, API path, and a short body preview so stale-server or routing failures do not masquerade as valid context.
 
 ## Safety Boundaries
 
@@ -128,9 +141,9 @@ Agents must not use Projects Viewer APIs or MCP tools to:
 - start agent work automatically;
 - modify scanned project folders.
 
-Scanned projects are read-only inputs. `app-data/projects.config.json` is the source of tracked project paths.
+Scanned projects are read-only inputs. `app-data/projects.config.json` is the only source of tracked project paths.
 
-The root `projects.config.json` is not an accepted future runtime source. It should be removed from runtime fallback behavior; a fresh setup should contain no default tracked projects. If an example is needed, use an empty `.example` file only.
+The root `projects.config.json` is not a runtime source, fallback, or migration input. A fresh setup contains no default tracked projects; empty config/no projects scan is valid and should not crash. The versioned `projects.config.example.json` file is an empty schema reference only.
 
 ## Diagnostics
 

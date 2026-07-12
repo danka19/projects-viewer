@@ -208,6 +208,29 @@ test('runScan scans only enabled projects from new config shape', async () => {
   );
 });
 
+test('runScan allows empty canonical config and writes empty projects output', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-scan-empty-'));
+  const configPath = path.join(tmp, 'projects.config.json');
+  const outputPath = path.join(tmp, 'projects.generated.json');
+  await fs.writeFile(
+    configPath,
+    JSON.stringify({
+      workspaces: [],
+      projects: [],
+      settings: { watchDocs: true, autoRescanIntervalSec: 0, activeDays: 3 },
+    }),
+  );
+
+  const result = await runScan({ configPath, outputPath, quiet: true });
+  const written = JSON.parse(await fs.readFile(outputPath, 'utf8'));
+
+  assert.equal(result.output.activeDays, 3);
+  assert.deepEqual(result.output.projects, []);
+  assert.deepEqual(written.projects, []);
+  assert.equal(result.status.scannedFilesCount, 0);
+  assert.equal(result.status.skippedFilesCount, 0);
+});
+
 test('runScan can write generated data to app-data path', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-generated-'));
   const projectRoot = path.join(tmp, 'sample');

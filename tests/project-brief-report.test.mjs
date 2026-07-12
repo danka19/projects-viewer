@@ -349,7 +349,6 @@ test('project brief report API returns default and weekly reports without unauth
 
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -391,7 +390,6 @@ test('project brief report API rejects unsafe or invalid query parameters', asyn
 
   const app = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(tmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -428,7 +426,6 @@ test('project brief report API returns a stable missing scan error and no-attent
   const missingTmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-project-brief-missing-'));
   const missingApp = await createApp({
     appDataDir: path.join(missingTmp, 'app-data'),
-    legacyConfigPath: path.join(missingTmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -450,7 +447,6 @@ test('project brief report API returns a stable missing scan error and no-attent
   await fs.writeFile(path.join(corruptAppDataDir, 'projects.generated.json'), '{not-json');
   const corruptApp = await createApp({
     appDataDir: corruptAppDataDir,
-    legacyConfigPath: path.join(corruptTmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,
@@ -473,7 +469,6 @@ test('project brief report API returns a stable missing scan error and no-attent
   await fs.writeFile(path.join(appDataDir, 'projects.generated.json'), JSON.stringify(scanWith([quiet])));
   const quietApp = await createApp({
     appDataDir,
-    legacyConfigPath: path.join(quietTmp, 'missing.json'),
     skipStartupScan: true,
     skipWatcher: true,
     skipFrontend: true,

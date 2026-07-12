@@ -1,0 +1,8 @@
+{
+  "workspaces": [],
+  "projects": [],
+  "settings": {
+    "watchDocs": true,
+    "autoRescanIntervalSec": 0
+  }
+}

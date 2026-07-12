@@ -4,7 +4,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Current Roadmap Validation
 
-- Current phase: no active roadmap implementation phase. Phase 3 is closed; Phase 4 remains draft. The bounded dashboard redesign workstream is technically complete on `dashboard-redesign/ui-rebuild` at 42/43 timeline tasks; only explicit human clarity acceptance task 7.6 remains open. The separate `add-selectable-specs-canvas` OpenSpec change is implemented and technically verified but remains active for human product acceptance. Neither workstream activates or closes Phase 4.
+- Current phase: no active roadmap implementation phase. Phase 3 is accepted and closed; Phase 4 remains draft and is not planned in detail. Its first MCP/API hardening slice is implemented, accepted into main specs, and archived at `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`. The bounded dashboard redesign workstream is technically complete at 42/43 timeline tasks with explicit human clarity acceptance task 7.6 still open. The separate `add-selectable-specs-canvas` change is implemented and technically verified but remains active for human product acceptance. These bounded workstreams do not by themselves activate or close Phase 4.
 - Planning from this roadmap alone is forbidden. Detailed phase plans must reconcile roadmap intent, current docs, current implementation, environment evidence, audit findings, and human decisions.
 - Product behavior, requirements, proposed changes, and acceptance criteria belong in OpenSpec artifacts under `openspec/` when SDD applies.
 - New ideas during active phase work must go through change intake before they alter scope or plans.
@@ -87,11 +87,15 @@ Planning state: detailed planning has not started.
 
 Goal: improve reliability, safety, UX, operations, and acceptance evidence.
 
-Proposed slices and ordering:
+Completed first slice:
 
-- `openspec/changes/harden-mcp-context-api/` defines canonical config cleanup, compact saved project-id listing, JSON-only API boundaries, MCP response validation, agent preflight packet retrieval hardening, and local HTTP diagnostics.
-- This slice should be implemented before relying on Projects Viewer MCP preflight packets for everyday agent startup, because it addresses the observed HTML fallback, legacy config ambiguity, and project-id lookup friction.
-- [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) is the planned follow-on that restores scanner and search evidence trust after `harden-mcp-context-api`; [`API_UX_TRUST_AUDIT_2026-07-12.md`](audits/API_UX_TRUST_AUDIT_2026-07-12.md) is the canonical evidence source.
+- `openspec/changes/archive/2026-07-12-harden-mcp-context-api/` records canonical config cleanup, compact saved project-id listing, JSON-only API boundaries, MCP response validation, agent preflight packet retrieval hardening, and local HTTP diagnostics.
+- Accepted requirements now live in `openspec/specs/agent-preflight-packet/`, `openspec/specs/local-project-config/`, and `openspec/specs/mcp-context-api/`.
+- The slice removes the observed HTML fallback, legacy config ambiguity, and project-id lookup friction before Projects Viewer MCP preflight packets are used for everyday agent startup.
+
+Planned follow-on and parallel bounded workstreams:
+
+- [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) is the planned follow-on that restores scanner and search evidence trust after the completed MCP/API hardening slice; [`API_UX_TRUST_AUDIT_2026-07-12.md`](audits/API_UX_TRUST_AUDIT_2026-07-12.md) is the canonical evidence source.
 - `docs/audits/UX_UI_AUDIT_2026-07-10.md` is the redesign baseline; `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records implementation and browser evidence.
 - `docs/planning/DASHBOARD_REDESIGN_PLAN.md` records the bounded sequence: trusted state derivation, Project Timeline, overview integration, search/navigation state, then responsive/accessibility acceptance.
 - `openspec/changes/redesign-dashboard-project-timeline/` is `pending_acceptance` with 42/43 tasks complete. Commit `9cfb550` fixed the mixed-height axis and fresh dark/light desktop, tablet, and mobile checks measured 0 px axis deviation with no clipping or page overflow. Human acceptance task 7.6 remains open.
@@ -100,7 +104,7 @@ Proposed slices and ordering:
 Decision required before Phase 4 planning:
 
 - Obtain explicit human acceptance or rejection for timeline task 7.6 after reviewing the corrected straight-axis presentation.
-- Decide the detailed Phase 4 scope independently of the timeline workstream and of the still-separate `harden-mcp-context-api` proposal. Any later OpenSpec archival/sync is a separate action and does not silently activate Phase 4.
+- Decide the detailed Phase 4 scope independently of the timeline and other bounded workstreams. Completing or archiving an individual OpenSpec change does not silently activate Phase 4.
 
 ## Phase Planning Rule
 
