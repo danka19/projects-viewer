@@ -6,6 +6,7 @@ Explicit `ready` and `planned` phase statuses are overwritten by explanatory acc
 
 - Make an exact leading supported phase status authoritative.
 - Expose conflicting explanatory lifecycle prose as documentation integrity evidence.
+- Attach numbered phase steps only from a roadmap with phase headings or an explicit phase-plan document.
 - Keep genuine accepted-phase progress semantics unchanged.
 - Make accepted living-spec progress unknown without eligible tasks or explicit implementation-final evidence.
 

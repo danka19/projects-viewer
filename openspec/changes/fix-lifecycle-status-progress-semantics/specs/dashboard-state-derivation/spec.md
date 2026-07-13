@@ -17,3 +17,11 @@ The system SHALL preserve an exact supported lifecycle value at the start of a p
 - **WHEN** a phase status value starts with `accepted` and its explanation describes human acceptance of the result
 - **THEN** lifecycle status remains `accepted`
 - **AND** existing accepted-phase implementation-progress semantics are preserved
+
+### Requirement: Phase steps require explicit source ownership
+The system SHALL attach numbered step headings to roadmap phases only when the source document contains recognized phase structure or explicitly identifies itself as a phase plan.
+
+#### Scenario: Generic planning sections resemble phase steps
+- **WHEN** a generic planning document contains numbered headings such as `3.1` or `4.1` but contains no recognized phase heading or phase-plan title
+- **THEN** those headings are not attached as roadmap phase steps
+- **AND** they do not affect roadmap implementation progress

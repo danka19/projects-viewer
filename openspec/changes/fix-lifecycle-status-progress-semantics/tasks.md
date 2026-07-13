@@ -3,6 +3,9 @@
 - [x] 1.1 Add RED regression coverage for exact leading ready/planned/accepted forms and integrity evidence.
 - [x] 1.2 Implement authoritative leading-token normalization while preserving legacy prose heuristics.
 - [x] 1.3 Run focused scanner tests and inspect structured phase output.
+- [x] 1.4 Add RED coverage proving generic numbered planning sections do not become phase steps.
+- [x] 1.5 Require roadmap or explicit phase-plan structure before extracting numbered steps.
+- [x] 1.6 Re-run focused scanner tests and configured roadmap progress evidence.
 
 ## 2. Specification progress
 

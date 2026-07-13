@@ -595,6 +595,9 @@ function parseDoc(content, doc, acc) {
   const fileLower = doc.file.toLowerCase();
   const listHeadings = HEADING_FILE_RE.test(doc.file);
   const isRoadmapLike = doc.category === 'roadmap';
+  const hasOwnedPhaseStructure =
+    isRoadmapLike &&
+    lines.some((candidate) => PHASE_HEADING_SECTION_RE.test(candidate) || PHASE_HEADING_TITLE_RE.test(candidate));
   const isHandoffFile = doc.category === 'handoff';
   const isDecisionFile = doc.category === 'decision';
   const isClaudeFile = fileLower === 'claude.md';
@@ -696,7 +699,7 @@ function parseDoc(content, doc, acc) {
       if (pendingPhase && heading[1].length <= 3) pendingPhase = null;
 
       // Step/work-item headings like "### 4.7.1 Add Import Session Registry".
-      const stepMatch = isRoadmapLike ? line.match(STEP_HEADING_RE) : null;
+      const stepMatch = hasOwnedPhaseStructure ? line.match(STEP_HEADING_RE) : null;
       if (stepMatch) {
         const segments = stepMatch[1].split('.');
         currentStep = {

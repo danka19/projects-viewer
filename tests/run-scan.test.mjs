@@ -417,6 +417,51 @@ test('runScan keeps the leading phase status authoritative and exposes conflicti
   assert.equal(phases[2].confidence, 'high');
 });
 
+test('runScan does not attach generic numbered planning sections as phase steps', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-phase-step-ownership-'));
+  const projectRoot = path.join(tmp, 'sample');
+  await fs.mkdir(path.join(projectRoot, 'docs', 'planning'), { recursive: true });
+  await fs.writeFile(path.join(projectRoot, 'README.md'), '# Sample\n');
+  await fs.writeFile(
+    path.join(projectRoot, 'docs', 'ROADMAP.md'),
+    [
+      '# Roadmap',
+      '## Phase 0. Foundation',
+      'Status: closed.',
+      '## Phase 1. Discovery',
+      'Status: closed.',
+      '## Phase 2. Transfer',
+      'Status: ready.',
+      '## Phase 3. Pilot',
+      'Status: planned.',
+      '## Phase 4. Hardening',
+      'Status: planned.',
+    ].join('\n'),
+  );
+  await fs.writeFile(
+    path.join(projectRoot, 'docs', 'planning', 'CORPORATE_PROCESS_ADOPTION_PLAN.md'),
+    [
+      '# Corporate Process Adoption Plan',
+      '### 3.1 System-of-record mapping',
+      'Status: pending acceptance.',
+      '### 3.2 Controlled subset',
+      'Status: draft.',
+      '### 4.1 Minor',
+      'Status: deferred.',
+    ].join('\n'),
+  );
+
+  const configPath = path.join(tmp, 'projects.config.json');
+  const outputPath = path.join(tmp, 'projects.json');
+  await fs.writeFile(configPath, JSON.stringify({ activeDays: 7, projects: [{ name: 'Sample', path: projectRoot }] }));
+
+  const result = await runScan({ configPath, outputPath, quiet: true });
+  const phases = result.output.projects[0].phases;
+
+  assert.deepEqual(phases.find((phase) => phase.id === '3')?.steps, []);
+  assert.deepEqual(phases.find((phase) => phase.id === '4')?.steps, []);
+});
+
 test('runScan scopes Roadmap phases to saved roadmap roots while Specs uses its own roots', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-view-roots-'));
   const projectRoot = path.join(tmp, 'sample');

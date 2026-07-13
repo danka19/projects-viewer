@@ -30,6 +30,12 @@ The remaining explanation will be evaluated only for integrity evidence. If it i
 
 Alternative rejected: expanding negation patterns. That would remain grammar-dependent and would not prevent positive decision-acceptance prose from overriding a phase lifecycle.
 
+### Numbered phase steps require phase-owned source structure
+
+The scanner will accept `N.N` step headings only when the same document contains a recognized phase heading or its title explicitly identifies a phase plan. A generic planning document may use numbered sections that resemble phase steps but does not establish ownership merely through matching numbers.
+
+Alternative rejected: filtering the reproduced NIS filename or section titles. That would patch one source instead of fixing the ownership boundary shared by all scanned projects.
+
 ### Accepted living specifications need implementation evidence
 
 The specification model will return null progress for `accepted-capability` items with no eligible tasks. The Canvas will explain this state as `No tasks documented` while retaining the existing accessible `progress unknown` wording. Lifecycle remains `accepted`; only the unsupported implementation percentage is removed.
@@ -42,6 +48,7 @@ Alternative rejected: making every final lifecycle with zero tasks unknown. That
 
 - Conflicting explanatory prose may produce more documentation warnings than before. This is intentional; the authoritative lifecycle remains stable and the warning identifies source cleanup work.
 - Legacy statuses without an exact leading token remain heuristic and may retain existing ambiguity. Focused compatibility tests protect current behavior while future cases can be addressed separately.
+- Generic planning documents that previously contributed accidental phase steps will stop affecting roadmap progress. Explicit roadmap and phase-plan structures retain their existing step extraction.
 - Some repositories may treat an accepted living specification as proof of implementation. Without explicit task or implementation-final evidence, Projects Viewer cannot safely make that inference.
 
 ## Migration Plan
