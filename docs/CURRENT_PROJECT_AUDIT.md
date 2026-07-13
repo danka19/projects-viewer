@@ -14,6 +14,8 @@ Last updated: 2026-07-13.
 
 No parser, UI, OpenSpec, or scanned-project source was changed during the audit. Remediation requires an explicit product/change decision. The source-backed expected roadmap matrix is `closed`, `closed`, `ready`, `planned`, `planned`, which produces 40% under the current mean-of-known-phases formula.
 
+The owner approved the recommended Projects Viewer-only direction on 2026-07-13. The written design is [`2026-07-13-lifecycle-status-progress-semantics-design.md`](superpowers/specs/2026-07-13-lifecycle-status-progress-semantics-design.md): exact leading phase status is authoritative, contradictory explanatory lifecycle prose becomes an integrity warning, genuine accepted-phase progress remains unchanged, and accepted living specs without task evidence report unknown progress. Implementation planning remains gated on final review of that written design. `teamSsdCli` remains read-only and will receive only a textual follow-up task.
+
 ## Phase And OpenSpec Status Reconciliation (2026-07-12)
 
 | Item | Status | Evidence / blocker |
