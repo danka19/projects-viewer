@@ -1,0 +1,17 @@
+## 1. Phase status ingestion
+
+- [ ] 1.1 Add RED regression coverage for exact leading ready/planned/accepted forms and integrity evidence.
+- [ ] 1.2 Implement authoritative leading-token normalization while preserving legacy prose heuristics.
+- [ ] 1.3 Run focused scanner tests and inspect structured phase output.
+
+## 2. Specification progress
+
+- [ ] 2.1 Add RED model and Canvas coverage for accepted-capability without task evidence.
+- [ ] 2.2 Implement unknown progress and `No tasks documented` presentation.
+- [ ] 2.3 Run focused Specs model/Canvas tests.
+
+## 3. Reconciliation and verification
+
+- [ ] 3.1 Update status rules, audit state, and documentation index.
+- [ ] 3.2 Run full tests, build, configured rescan, browser checks, OpenSpec strict validation, and `git diff --check`.
+- [ ] 3.3 Record the separate text-only source-document task for `teamSsdCli` without modifying it.
