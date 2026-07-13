@@ -42,6 +42,30 @@ describe('spec canvas model', () => {
     expect(model.explicitCurrentSpecKey).toBe(feature.key);
   });
 
+  it('keeps no-task accepted capability progress unknown while retaining final change progress', () => {
+    const input = raw({
+      specifications: [
+        {
+          key: 'fixture:accepted-capability', id: 'accepted-capability', name: 'Accepted capability', kind: 'accepted-capability',
+          lifecycleStatus: 'accepted', confidence: 'high', source: { file: 'openspec/specs/accepted-capability/spec.md', line: 1 },
+          sourceScopeId: 'openspec/specs', groupId: null, tasks: [], dependsOnIds: [],
+        },
+        {
+          key: 'fixture:closed-change', id: 'closed-change', name: 'Closed change', kind: 'openspec-change',
+          lifecycleStatus: 'closed', confidence: 'high', source: { file: 'openspec/changes/closed-change/proposal.md', line: 1 },
+          sourceScopeId: 'openspec/changes', groupId: null, tasks: [], dependsOnIds: [],
+        },
+      ],
+      dependencies: [],
+    });
+
+    const model = buildSpecCanvasModel(makeProject({ specWork: input }), { generatedAt: 'x', sourceMode: 'live' });
+
+    expect(model.specifications.find((item) => item.id === 'accepted-capability')?.progress).toBeNull();
+    expect(model.specifications.find((item) => item.id === 'closed-change')?.progress).toMatchObject({ percent: 100, completed: 0, total: 0 });
+    expect(model.progress.unknown).toBe(1);
+  });
+
   it('blocks an otherwise planned dependent and invalidates cycles without inventing current work', () => {
     const input = raw();
     input.specifications[0].lifecycleStatus = 'pending_acceptance';

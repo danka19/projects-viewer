@@ -72,6 +72,29 @@ describe('Specs Canvas', () => {
     expect(onOpenDrawer).toHaveBeenCalledWith(expect.objectContaining({ title: 'Tune ranking', file: 'openspec/changes/rank/tasks.md' }));
   });
 
+  it('shows no task evidence instead of fabricated progress for an accepted capability', () => {
+    const noTaskCapability = makeProject({
+      id: 'no-task-capability',
+      phases: [],
+      specWork: {
+        projectId: 'no-task-capability',
+        specifications: [{
+          key: 'spec:accepted-capability', id: 'accepted-capability', name: 'Accepted capability', kind: 'accepted-capability', lifecycleStatus: 'accepted', confidence: 'high',
+          source: { file: 'openspec/specs/accepted-capability/spec.md', line: 1 }, sourceScopeId: 'openspec/specs', groupId: null, dependsOnIds: [], tasks: [],
+        }],
+        dependencies: [], unassignedTasks: [], integrityIssues: [], isPartial: false,
+      },
+    });
+
+    render(<SpecsCanvas project={noTaskCapability} generatedAt="2026-07-13" sourceMode="live" state={null} onStateChange={vi.fn()} onOpenDrawer={vi.fn()} />);
+
+    const card = screen.getByTestId('spec-card-spec:accepted-capability');
+    expect(within(card).getByText('No tasks documented')).toBeInTheDocument();
+    expect(within(card).queryByText('0/0 tasks')).not.toBeInTheDocument();
+    expect(within(card).queryByText('100%')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Accepted capability, accepted, progress unknown, 0 tasks/i })).toBeInTheDocument();
+  });
+
   it('discloses dense, partial, cyclic, archived, and unassigned work without dropping counts', () => {
     const { container } = render(<SpecsCanvas project={makeDenseSpecProject()} generatedAt="2026-07-11" sourceMode="stale" state={null} onStateChange={vi.fn()} onOpenDrawer={vi.fn()} />);
     expect(screen.getByRole('region', { name: /32 specifications/ })).toBeInTheDocument();

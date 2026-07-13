@@ -60,6 +60,7 @@ function stableHash(value: unknown) {
 function progressOf(item: RawSpecWorkItem): SpecProgress | null {
   const eligible = item.tasks.filter((task) => !EXCLUDED_TASK.has(task.status));
   if (eligible.length === 0) {
+    if (item.kind === 'accepted-capability') return null;
     return FINAL.has(item.lifecycleStatus) ? { percent: 100, completed: 0, total: 0 } : null;
   }
   const completed = eligible.filter((task) => RESOLVED_TASK.has(task.status)).length;

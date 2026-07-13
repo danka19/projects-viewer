@@ -6,9 +6,9 @@
 
 ## 2. Specification progress
 
-- [ ] 2.1 Add RED model and Canvas coverage for accepted-capability without task evidence.
-- [ ] 2.2 Implement unknown progress and `No tasks documented` presentation.
-- [ ] 2.3 Run focused Specs model/Canvas tests.
+- [x] 2.1 Add RED model and Canvas coverage for accepted-capability without task evidence.
+- [x] 2.2 Implement unknown progress and `No tasks documented` presentation.
+- [x] 2.3 Run focused Specs model/Canvas tests.
 
 ## 3. Reconciliation and verification
 
