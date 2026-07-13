@@ -8,6 +8,7 @@ Repo: https://github.com/danka19/projects-viewer
 
 Dashboard redesign update on 2026-07-11:
 
+- Active change `fix-lifecycle-status-progress-semantics` implements authoritative exact leading phase statuses with documentation conflict evidence, limits phase steps to phase-owned source structure, and keeps accepted living-spec progress unknown when no task evidence exists. RED/GREEN coverage, the full suite/build, a fresh configured rescan, and browser acceptance are complete; sync/archive remain separate gates.
 - Selectable Roadmap/Specs primary work and the responsive Specs Canvas are implemented under active change `add-selectable-specs-canvas`. Scanner/config/model/geometry/state/component tests, the full suite/build, and the six-point dark/light browser matrix pass. The owner authorized integration on 2026-07-13; the change remains active and unarchived pending a separate lifecycle action.
 - The 2026-07-10 UX/UI audit remains the baseline. State-derivation trust, overview hierarchy, the horizontal phase/step timeline, ranked search, safe UI-state persistence, responsive ordering, focus handling, and contrast were implemented on `dashboard-redesign/ui-rebuild`.
 - `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records automated and browser evidence across dark/light desktop, tablet, mobile, history/focus flows, overflow measurements, and representative lifecycle states.
@@ -86,6 +87,7 @@ v3 implemented on 2026-07-07:
 
 ## Active OpenSpec Changes
 
+- `openspec/changes/fix-lifecycle-status-progress-semantics/`: authoritative leading phase lifecycle, phase-owned step extraction, and evidence-based no-task accepted-capability progress; all implementation and verification tasks are complete, while the change remains unsynced/unarchived.
 - `openspec/changes/add-selectable-specs-canvas/`: approved selectable Roadmap/Specs primary-work change with safe documentation-view roots, evidence-backed specification work, persistent view state, and responsive accessible Canvas Focus presentation.
 - `openspec/changes/add-project-brief-report/`: proposed local daily/weekly human project brief/report workflow.
 - `openspec/changes/agent-preflight-packet/`: implemented proposed local AI-agent preflight packet workflow, ready for human acceptance review and intentionally separate from the human brief/report contract.

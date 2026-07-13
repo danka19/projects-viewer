@@ -1,7 +1,7 @@
 # Status Rules
 
 Status: implemented.
-Last updated: 2026-07-10.
+Last updated: 2026-07-13.
 
 Two levels are intentionally separate:
 
@@ -30,7 +30,16 @@ Parser mapping:
 | `cancelled` | "cancelled", "canceled" |
 | `superseded` | "superseded", "replaced by" |
 
+Machine-readable precedence:
+
+- When a `Status:` value starts with one exact allowed lifecycle value, that leading value is authoritative.
+- Explanatory decision, dependency, or acceptance prose must not replace the leading lifecycle.
+- Conflicting later lifecycle vocabulary creates a documentation integrity warning and reduces confidence.
+- Numbered step headings affect a phase only when their source contains recognized roadmap phase structure or explicitly identifies itself as a phase plan; matching numbers in a generic planning document do not establish ownership.
+
 Phase progress display treats `closed`, `accepted`, and `pending_acceptance` phases as 100% implementation progress even when historical detailed phase-plan steps are stale, incomplete, or only describe objectives. The segmented roadmap summary counts only `closed` as fully reconciled.
+
+Specification progress is evidence-based: `accepted-capability` identifies an accepted living specification, not implementation completion. Without eligible owned tasks or explicit implementation-final evidence, progress is unknown and Specs Canvas reports `No tasks documented` instead of `0/0 tasks` or 100%. The active OpenSpec change [`fix-lifecycle-status-progress-semantics`](../openspec/changes/fix-lifecycle-status-progress-semantics/) is the canonical proposed contract until sync and archival.
 
 ## Project Status
 

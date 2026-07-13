@@ -6,17 +6,27 @@ Last updated: 2026-07-13.
 
 ## Lifecycle Status And Progress Semantics (2026-07-13)
 
-[`LIFECYCLE_STATUS_PROGRESS_AUDIT_2026-07-13.md`](audits/LIFECYCLE_STATUS_PROGRESS_AUDIT_2026-07-13.md) confirms three status-trust defects against configured project `teamSsdCli`:
+[`LIFECYCLE_STATUS_PROGRESS_AUDIT_2026-07-13.md`](audits/LIFECYCLE_STATUS_PROGRESS_AUDIT_2026-07-13.md) originally confirmed that configured project `teamSsdCli` was misreported as `closed`, `closed`, `accepted`, `accepted`, `accepted` with 100% roadmap implementation and that accepted living specs without tasks displayed `0/0 tasks` at 100%.
 
-- source phases 2-4 are `ready`, `planned`, and `planned`, but conflicting acceptance vocabulary on their `Status:` lines combines with permissive parser precedence to emit `accepted`, `accepted`, and `accepted` at high confidence;
-- the deliberate final-state progress rule amplifies that parser error into a false 100% project implementation value and a false `Phase 4 accepted` summary;
-- accepted living specs with no owned task evidence render as `0/0 tasks` and 100%, despite the approved design also requiring no-task specification progress to remain unknown.
+The owner approved and selected inline execution of [`fix-lifecycle-status-progress-semantics`](../openspec/changes/fix-lifecycle-status-progress-semantics/) on 2026-07-13. Implementation on `codex/fix-lifecycle-status-progress-semantics` now:
 
-No parser, UI, OpenSpec, or scanned-project source was changed during the audit. Remediation requires an explicit product/change decision. The source-backed expected roadmap matrix is `closed`, `closed`, `ready`, `planned`, `planned`, which produces 40% under the current mean-of-known-phases formula.
+- treats an exact supported lifecycle at the start of `Status:` as authoritative and reports contradictory later prose through existing documentation integrity fields;
+- preserves genuine accepted-phase and pending-acceptance progress semantics;
+- keeps accepted living-spec progress unknown without eligible task evidence and renders `No tasks documented`;
+- requires roadmap or explicit phase-plan structure before numbered headings can become phase steps. This last guard was added after the fresh rescan proved that generic NIS adoption-plan sections `3.1-4.4` otherwise inflated roadmap progress from the expected 40% to 47%.
 
-The owner approved the recommended Projects Viewer-only direction on 2026-07-13. The written design is [`2026-07-13-lifecycle-status-progress-semantics-design.md`](superpowers/specs/2026-07-13-lifecycle-status-progress-semantics-design.md): exact leading phase status is authoritative, contradictory explanatory lifecycle prose becomes an integrity warning, genuine accepted-phase progress remains unchanged, and accepted living specs without task evidence report unknown progress. Implementation planning remains gated on final review of that written design. `teamSsdCli` remains read-only and will receive only a textual follow-up task.
+Fresh verification evidence:
 
-The owner completed the written-design review on 2026-07-13. The implementation plan is [`2026-07-13-lifecycle-status-progress-semantics.md`](superpowers/plans/2026-07-13-lifecycle-status-progress-semantics.md); execution remains pending selection of inline or explicitly authorized subagent-driven execution. The plan requires an isolated `codex/fix-lifecycle-status-progress-semantics` branch, OpenSpec change `fix-lifecycle-status-progress-semantics`, RED/GREEN evidence, a fresh configured-project rescan, and browser acceptance without modifying `teamSsdCli`.
+- TDD RED reproduced `ready/planned` becoming `accepted`, accepted capability progress becoming `{ percent: 100, completed: 0, total: 0 }`, and generic planning sections becoming phase steps; each focused GREEN then passed.
+- `node --test tests/run-scan.test.mjs tests/phase-progress.test.mjs`: 18/18 passed.
+- focused Specs model/Canvas/geometry coverage: 13/13 passed; `tests/spec-work-scan.test.mjs`: 7/7 passed.
+- `npm test`: 135/135 Node tests and 107/107 Vitest tests passed. The known Vite test-harness warning about occupied HMR port `24678` remains environmental output; it did not fail tests.
+- `npm run build`: TypeScript and Vite production build passed (65 modules transformed).
+- isolated configured rescan at `2026-07-13T08:14:34.938Z`: success in 437 ms, 337 files scanned, 151 entries skipped, no queued scan.
+- API/browser matrix is `closed`, `closed`, `ready`, `planned`, `planned`; Phases 2-4 show documentation warnings; phase step counts are `2, 0, 8, 0, 0`; Roadmap shows `2 closed · 1 ready · 2 planned` and 40% implemented.
+- Specs Canvas shows all eight taskless accepted living specs as `No tasks documented`; the accessible card name says `progress unknown`; their cards show neither `0/0 tasks` nor an implementation percentage. Browser console logs were empty.
+
+`teamSsdCli` was read-only throughout. Its ambiguous source lines remain a separate text-only follow-up task; they are no longer allowed to falsify Projects Viewer lifecycle or progress.
 
 ## Phase And OpenSpec Status Reconciliation (2026-07-12)
 
@@ -42,11 +52,11 @@ Sequential work: the owner authorized integration of the complete dashboard bran
 | Item | Current State |
 |---|---|
 | Repository root | `C:\Users\danoc\Documents\projects\projects-viewer` |
-| Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer` |
-| Current branch | `main` |
+| Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer\.worktrees\fix-lifecycle-status-progress-semantics` |
+| Current branch | `codex/fix-lifecycle-status-progress-semantics` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Current commit | `295185e` (`docs: record dashboard integration acceptance`) |
-| Local divergence | `main` matched `origin/main` at audit start; the working tree was clean before this documentation-only audit. |
+| Current implementation commit | `c0c818e` (`fix: scope phase steps to owned documents`); final documentation reconciliation follows in the same branch. |
+| Local divergence | The feature branch starts from local `main` at `d3899b4` and contains four implementation-session commits through `c0c818e`; no remote push or integration was performed. |
 
 ## Useful Starting Points
 

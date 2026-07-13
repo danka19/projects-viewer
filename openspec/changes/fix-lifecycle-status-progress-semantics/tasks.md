@@ -15,6 +15,6 @@
 
 ## 3. Reconciliation and verification
 
-- [ ] 3.1 Update status rules, audit state, and documentation index.
-- [ ] 3.2 Run full tests, build, configured rescan, browser checks, OpenSpec strict validation, and `git diff --check`.
-- [ ] 3.3 Record the separate text-only source-document task for `teamSsdCli` without modifying it.
+- [x] 3.1 Update status rules, audit state, and documentation index.
+- [x] 3.2 Run full tests, build, configured rescan, browser checks, OpenSpec strict validation, and `git diff --check`.
+- [x] 3.3 Record the separate text-only source-document task for `teamSsdCli` without modifying it.
