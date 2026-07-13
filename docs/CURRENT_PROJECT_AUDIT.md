@@ -16,6 +16,8 @@ No parser, UI, OpenSpec, or scanned-project source was changed during the audit.
 
 The owner approved the recommended Projects Viewer-only direction on 2026-07-13. The written design is [`2026-07-13-lifecycle-status-progress-semantics-design.md`](superpowers/specs/2026-07-13-lifecycle-status-progress-semantics-design.md): exact leading phase status is authoritative, contradictory explanatory lifecycle prose becomes an integrity warning, genuine accepted-phase progress remains unchanged, and accepted living specs without task evidence report unknown progress. Implementation planning remains gated on final review of that written design. `teamSsdCli` remains read-only and will receive only a textual follow-up task.
 
+The owner completed the written-design review on 2026-07-13. The implementation plan is [`2026-07-13-lifecycle-status-progress-semantics.md`](superpowers/plans/2026-07-13-lifecycle-status-progress-semantics.md); execution remains pending selection of inline or explicitly authorized subagent-driven execution. The plan requires an isolated `codex/fix-lifecycle-status-progress-semantics` branch, OpenSpec change `fix-lifecycle-status-progress-semantics`, RED/GREEN evidence, a fresh configured-project rescan, and browser acceptance without modifying `teamSsdCli`.
+
 ## Phase And OpenSpec Status Reconciliation (2026-07-12)
 
 | Item | Status | Evidence / blocker |
