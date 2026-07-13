@@ -36,3 +36,4 @@
 - [x] 5.2 Run targeted scanner/config/model/state/component/geometry suites, `npm test`, `npm run build`, `openspec list`, `openspec list --specs`, `openspec validate --all --strict`, and `git diff --check`.
 - [x] 5.3 Run and record the dark/light browser matrix at 1280×720, 1024×768, and 390×844, including dense fixture, keyboard/focus, drawer return, connector geometry, overflow, and console checks.
 - [x] 5.4 Perform a spec-compliance and code-quality self-review, resolve findings through failing regression tests, and leave the complete unarchived change ready for human acceptance.
+      Accepted 2026-07-13: after the complete branch and recorded verification evidence were presented, the owner explicitly instructed Codex to merge to `main` and push. This authorizes product integration; OpenSpec sync/archive remains a separate lifecycle action.

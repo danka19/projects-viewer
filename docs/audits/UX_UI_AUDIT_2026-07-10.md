@@ -1,6 +1,6 @@
 # UX/UI Audit — Dashboard State Clarity
 
-Status: pending_acceptance. Agent-verifiable remediation, including mixed-height axis geometry and UX-010 modal/focus behavior, is complete; UX-005 still requires explicit human clarity acceptance through timeline task 7.6.
+Status: accepted. Agent-verifiable remediation, including mixed-height axis geometry and UX-010 modal/focus behavior, is complete; the owner explicitly authorized integration on 2026-07-13, closing timeline task 7.6 and UX-005.
 
 Date: 2026-07-10.
 
@@ -42,10 +42,10 @@ The redesign must therefore start with state trust and information hierarchy. A 
 | Finding | Follow-up |
 |---|---|
 | UX-001 | Closed: trusted source/current-state derivation was implemented and regression-tested before overview promotion. |
-| UX-002 | Technically closed: compact freshness and the four-group attention brief are in the first viewport; renewed human at-a-glance acceptance remains coupled to task 7.6. |
+| UX-002 | Closed: compact freshness and the four-group attention brief are in the first viewport; the owner explicitly accepted integration on 2026-07-13. |
 | UX-003 | Closed: the old mixed metric bar was replaced by labelled attention actions that open matching cross-project sets. |
 | UX-004 | Closed: one selected-project state header, primary timeline, and progressive detail surfaces replace repeated primary tiles. |
-| UX-005 | Pending acceptance: mixed-height axis tasks 5.6-5.7 pass fresh regression/browser evidence; explicit human task 7.6 remains open. |
+| UX-005 | Closed: mixed-height axis tasks 5.6-5.7 pass fresh regression/browser evidence, and explicit owner integration acceptance closed task 7.6 on 2026-07-13. |
 | UX-006 | Closed: deterministic ranking, stable identity, visible totals/truncation, keyboard control, and diagnostic opt-in are implemented and tested. |
 | UX-007 | Closed: measured mobile order is project switcher, selected header, timeline, then detail tabs, without page-level overflow. |
 | UX-008 | Closed: the compact responsive shell removes the measured header/sidebar collision at desktop and tablet breakpoints. |
@@ -138,7 +138,7 @@ Required direction: one primary project-state surface, one prioritized cross-pro
 
 Severity: P1.
 
-Status: pending_acceptance. The straight-axis correction and fresh browser evidence pass; explicit task 7.6 acceptance remains open.
+Status: closed. The straight-axis correction and fresh browser evidence pass; explicit owner integration acceptance closed task 7.6 on 2026-07-13.
 
 The existing Roadmap tab contains the best lifecycle data but renders it as another vertical list and is not visible on the first screen. `No active phase detected` hides the more useful state: closed prior phase, no active implementation phase, next planned phase, and required decision/gate.
 
@@ -234,4 +234,4 @@ Required direction: introduce the smallest compatible component test harness and
 
 ## Recommended Next Decision
 
-Keep `harden-mcp-context-api` as a separate operational hardening change. The dashboard redesign has 42/43 timeline tasks complete; only human-acceptance task 7.6 blocks OpenSpec archival/sync review.
+Keep `harden-mcp-context-api` as a separate operational hardening change. The dashboard redesign has 43/43 timeline tasks complete after owner integration acceptance on 2026-07-13. OpenSpec archival/sync remains a separate lifecycle action.

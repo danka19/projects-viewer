@@ -4,7 +4,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Current Roadmap Validation
 
-- Current phase: no active roadmap implementation phase. Phase 3 is accepted and closed; Phase 4 remains draft and is not planned in detail. Its first MCP/API hardening slice is implemented, accepted into main specs, and archived at `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`. The follow-on `improve-dashboard-evidence-trust` scanner/search slice has completed all 13/13 implementation tasks and its strict OpenSpec CLI gate, but remains active/open, unsynced, and unarchived pending a separate explicit sync/archive workflow. The bounded dashboard redesign workstream is technically complete at 42/43 timeline tasks with explicit human clarity acceptance task 7.6 still open. The separate `add-selectable-specs-canvas` change is implemented and technically verified but remains active for human product acceptance. These bounded workstreams do not by themselves activate or close Phase 4.
+- Current phase: no active roadmap implementation phase. Phase 3 is accepted and closed; Phase 4 remains draft and is not planned in detail. Its first MCP/API hardening slice is implemented, accepted into main specs, and archived at `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`. The follow-on `improve-dashboard-evidence-trust` scanner/search slice has completed all 13/13 implementation tasks and its strict OpenSpec CLI gate. The owner authorized integration of the complete dashboard branch on 2026-07-13, accepting the 43/43 timeline and finished Specs Canvas; their active changes remain unsynced/unarchived pending separate lifecycle actions. These bounded workstreams do not by themselves activate or close Phase 4.
 - Planning from this roadmap alone is forbidden. Detailed phase plans must reconcile roadmap intent, current docs, current implementation, environment evidence, audit findings, and human decisions.
 - Product behavior, requirements, proposed changes, and acceptance criteria belong in OpenSpec artifacts under `openspec/` when SDD applies.
 - New ideas during active phase work must go through change intake before they alter scope or plans.
@@ -98,12 +98,12 @@ Implemented follow-on and parallel bounded workstreams:
 - [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) restores scanner and search evidence trust after the completed MCP/API hardening slice. Implementation, focused/full gates, real configured-project rescan, corrected desktop/mobile browser acceptance, documentation/task-state reconciliation, and the strict OpenSpec CLI gate are complete at 13/13 tasks. The change remains active/open, unsynced, and unarchived, ready for a separate explicit sync/archive workflow. [`API_UX_TRUST_AUDIT_2026-07-12.md`](audits/API_UX_TRUST_AUDIT_2026-07-12.md) is the canonical evidence source.
 - `docs/audits/UX_UI_AUDIT_2026-07-10.md` is the redesign baseline; `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records implementation and browser evidence.
 - `docs/planning/DASHBOARD_REDESIGN_PLAN.md` records the bounded sequence: trusted state derivation, Project Timeline, overview integration, search/navigation state, then responsive/accessibility acceptance.
-- `openspec/changes/redesign-dashboard-project-timeline/` is `pending_acceptance` with 42/43 tasks complete. Commit `9cfb550` fixed the mixed-height axis and fresh dark/light desktop, tablet, and mobile checks measured 0 px axis deviation with no clipping or page overflow. Human acceptance task 7.6 remains open.
+- `openspec/changes/redesign-dashboard-project-timeline/` is `accepted` with 43/43 tasks complete. Commit `9cfb550` fixed the mixed-height axis and fresh dark/light desktop, tablet, and mobile checks measured 0 px axis deviation with no clipping or page overflow. The owner explicitly authorized integration on 2026-07-13, closing task 7.6.
 - `openspec/changes/improve-dashboard-search-navigation/` records ranked diagnostic-aware search and safe versioned local/history presentation state. It preserves configured-path, read-only, and local-only boundaries.
 
 Decision required before Phase 4 planning:
 
-- Obtain explicit human acceptance or rejection for timeline task 7.6 after reviewing the corrected straight-axis presentation.
+- Perform OpenSpec sync/archive for the accepted dashboard changes only when separately authorized; integration acceptance does not silently archive active changes.
 - Decide the detailed Phase 4 scope independently of the timeline and other bounded workstreams. Completing or archiving an individual OpenSpec change does not silently activate Phase 4.
 
 ## Phase Planning Rule

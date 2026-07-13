@@ -90,7 +90,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `openspec/changes/add-project-brief-report/` | Active proposed OpenSpec change for the local daily/weekly project brief/report workflow |
 | `openspec/changes/agent-preflight-packet/` | Implemented proposed OpenSpec change for a separate local AI-agent preflight packet workflow, ready for human acceptance review |
 | `openspec/changes/harden-dashboard-state-derivation/` | Implemented dashboard source-trust/current-state filtering change |
-| `openspec/changes/redesign-dashboard-project-timeline/` | Technically implemented horizontal phase/step timeline change; 42/43 tasks complete, explicit human acceptance open, and intentionally unarchived |
+| `openspec/changes/redesign-dashboard-project-timeline/` | Accepted horizontal phase/step timeline change; 43/43 tasks complete after explicit owner integration acceptance on 2026-07-13, and intentionally unarchived |
 | `openspec/changes/improve-dashboard-search-navigation/` | Implemented ranked search and safe versioned presentation-state persistence change |
 | `openspec/changes/archive/2026-07-08-add-ai-context-findings-layer/` | Archived OpenSpec change for AI-readable project context and review-required findings |
 | `openspec/changes/archive/2026-07-12-harden-mcp-context-api/` | Archived implementation history for canonical config cleanup, compact project-id listing, API JSON boundary hardening, MCP response validation, and diagnostics |

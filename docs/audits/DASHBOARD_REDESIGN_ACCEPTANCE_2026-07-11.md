@@ -1,6 +1,6 @@
 # Dashboard Redesign Acceptance Evidence
 
-Status: technical acceptance passed after the mixed-height axis correction; explicit human clarity acceptance remains open as OpenSpec task 7.6.
+Status: accepted for integration. Technical acceptance passed after the mixed-height axis correction, and the owner's explicit merge-to-`main` and push instruction on 2026-07-13 closes OpenSpec task 7.6 and accepts the finished Specs Canvas for integration.
 
 Date: 2026-07-11.
 
@@ -10,7 +10,7 @@ The bounded dashboard redesign is implemented on `dashboard-redesign/ui-rebuild`
 
 The redesign preserves the existing local-only and read-only boundaries: projects are selected from saved config, browser requests do not introduce arbitrary filesystem paths, scanned project folders are not modified, and no cloud, auth, remote model, task/calendar, or command-execution behavior was added.
 
-The timeline OpenSpec change remains active and unarchived. Tasks 5.6 and 5.7 now have fresh regression and browser evidence; task 7.6 remains human-owned and is not inferred from an instruction to continue work.
+The timeline OpenSpec change remains active and unarchived. Tasks 5.6 and 5.7 have fresh regression and browser evidence; task 7.6 was closed only after the owner's explicit integration instruction on 2026-07-13, not inferred from an instruction to continue work.
 
 ## Implemented UX
 
@@ -82,7 +82,7 @@ At every dark/light matrix point, Manage Projects and the detail drawer transfer
 | Requirement / redesign intent | Status | Evidence / remaining gap |
 |---|---|---|
 | Trusted lifecycle state before visual promotion | Passed | Explicit current IDs, integrity handling, state-trust fixtures, and no prose inference pass automated coverage. |
-| First-screen information hierarchy | Passed technically | Compact system bar, four-group attention brief, selected-project header, timeline, then secondary tabs; renewed human clarity judgment remains task 7.6. |
+| First-screen information hierarchy | Passed and accepted | Compact system bar, four-group attention brief, selected-project header, timeline, then secondary tabs; owner integration acceptance closed task 7.6 on 2026-07-13. |
 | Completed/current/planned and exceptional lifecycle vocabulary | Passed | All phase and step statuses have visible text/icon cues and semantic connectors; ambiguous current state fabricates no marker. |
 | Exclusive phase expansion and nested steps | Passed | Click/re-click/switch, no-steps, current-step, independent child viewport, and focus preservation have component/browser evidence. |
 | Deterministic implementation progress | Passed | Lifecycle and step-derived calculations, unknown evidence, exclusions, and project averaging pass pure tests. |
@@ -93,13 +93,13 @@ At every dark/light matrix point, Manage Projects and the detail drawer transfer
 | Durable safe UI state and history | Passed | Versioned state, stable descriptors, Back/Forward, invalid-state rejection, and no local paths in the URL pass tests/browser checks. |
 | Existing visual identity, dark/light contrast, and readable prose | Passed | Existing theme/status tokens retained; semantic/composite contrast tests pass both themes. |
 | Manage Projects dialog accessibility | Passed | Named modal semantics, initial focus, bidirectional focus trap, Escape, inert background, exact return focus, four component scenarios, and all six live-browser matrix points pass. |
-| Human at-a-glance clarity | Pending acceptance | OpenSpec task 7.6 can be closed only by explicit owner acceptance after reviewing the corrected axis. |
-| OpenSpec sync/archive and integration to `main` | Not performed | Intentionally requires separate authorization and remains blocked by task 7.6. |
+| Human at-a-glance clarity | Accepted | The owner's explicit merge-to-`main` and push instruction on 2026-07-13 closes OpenSpec task 7.6 after the corrected-axis evidence. |
+| OpenSpec sync/archive and integration to `main` | Integration authorized | The owner explicitly authorized merge and push on 2026-07-13. OpenSpec sync/archive remains a separate lifecycle action. |
 
 ## Human Acceptance And Residual Risks
 
-- OpenSpec timeline task 7.6 remains `pending_acceptance`; the agent can accept the technical implementation but cannot substitute for explicit human clarity acceptance.
-- `redesign-dashboard-project-timeline` has 42/43 tasks complete and is not ready for archival/sync review until task 7.6 is explicitly accepted.
+- OpenSpec timeline task 7.6 is accepted through the owner's explicit integration instruction on 2026-07-13.
+- `redesign-dashboard-project-timeline` has 43/43 tasks complete and is ready for a separately authorized archival/sync workflow.
 - The previously observed Manage Projects modal gap is closed by component and six-point live-browser evidence.
 - The previously observed live-refresh drawer race is closed by a real-App polling regression that proves return focus is resolved by stable source identity after opener replacement.
 - Browser layout evidence is representative rather than a replacement for future automated end-to-end visual regression infrastructure.
@@ -124,8 +124,8 @@ Browser matrix evidence:
 | 1024×768 | Passed | Passed | Spatial canvas retained, zero card overlaps, zero page overflow. |
 | 390×844 | Passed | Passed | Cards switched to relative vertical flow, SVG hidden, dependency text retained, zero page overflow. |
 
-The final live browser run produced no warnings/errors. A real expanded 24-task card initially exposed two card collisions because its actual six-task preview exceeded the reserved height; the reservation was corrected and final remeasurement reported zero overlaps at all six matrix points. Closing a task drawer returned focus to the exact stable task control. Manage Projects exposed six Documentation views editors in the current six-project config. The final canvas disclosed 11 full specifications, kept one archived card behind an explicit counted control, and rendered 10 active/reference cards by default. The OpenSpec change remains active and unarchived for explicit human product acceptance.
+The final live browser run produced no warnings/errors. A real expanded 24-task card initially exposed two card collisions because its actual six-task preview exceeded the reserved height; the reservation was corrected and final remeasurement reported zero overlaps at all six matrix points. Closing a task drawer returned focus to the exact stable task control. Manage Projects exposed six Documentation views editors in the current six-project config. The final canvas disclosed 11 full specifications, kept one archived card behind an explicit counted control, and rendered 10 active/reference cards by default. The owner accepted integration on 2026-07-13; the OpenSpec change remains active and unarchived pending a separate lifecycle action.
 
 ## Next Step
 
-The next required actions are explicit human acceptance/rejection of timeline task 7.6 and product acceptance of the finished Specs Canvas. OpenSpec archival/sync and integration remain separate authorized actions; `add-selectable-specs-canvas` must not be archived, pushed, or merged without the requested approval.
+The owner explicitly accepted integration of the timeline and finished Specs Canvas on 2026-07-13 by instructing Codex to merge the complete branch to `main` and push it. The remaining optional lifecycle action is separately authorized OpenSpec sync/archive for the active changes.
