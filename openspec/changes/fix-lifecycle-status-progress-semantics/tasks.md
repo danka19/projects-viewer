@@ -1,8 +1,8 @@
 ## 1. Phase status ingestion
 
-- [ ] 1.1 Add RED regression coverage for exact leading ready/planned/accepted forms and integrity evidence.
-- [ ] 1.2 Implement authoritative leading-token normalization while preserving legacy prose heuristics.
-- [ ] 1.3 Run focused scanner tests and inspect structured phase output.
+- [x] 1.1 Add RED regression coverage for exact leading ready/planned/accepted forms and integrity evidence.
+- [x] 1.2 Implement authoritative leading-token normalization while preserving legacy prose heuristics.
+- [x] 1.3 Run focused scanner tests and inspect structured phase output.
 
 ## 2. Specification progress
 

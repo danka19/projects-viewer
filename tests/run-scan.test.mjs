@@ -371,6 +371,52 @@ test('runScan normalizes phase statuses to the phase-status-audit lifecycle', as
   assert.equal(phases[0].issue, 'none');
 });
 
+test('runScan keeps the leading phase status authoritative and exposes conflicting prose', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-leading-phase-status-'));
+  const projectRoot = path.join(tmp, 'sample');
+  await fs.mkdir(path.join(projectRoot, 'docs'), { recursive: true });
+  await fs.writeFile(path.join(projectRoot, 'README.md'), '# Sample\n');
+  await fs.writeFile(
+    path.join(projectRoot, 'docs', 'ROADMAP.md'),
+    [
+      '# Roadmap',
+      '',
+      '## Phase 2. Transfer Ready',
+      'Status: ready. The transfer boundary is accepted, the detailed phase plan exists, and work item 2.1 is unblocked.',
+      '',
+      '## Phase 3. Pilot',
+      'Status: planned. A detailed phase plan has not been accepted yet.',
+      '',
+      '## Phase 4. Accepted Result',
+      'Status: accepted. Human accepted the implemented result.',
+    ].join('\n'),
+  );
+
+  const configPath = path.join(tmp, 'projects.config.json');
+  const outputPath = path.join(tmp, 'projects.json');
+  await fs.writeFile(
+    configPath,
+    JSON.stringify({
+      activeDays: 7,
+      projects: [{ name: 'Sample', path: projectRoot }],
+    }),
+  );
+
+  const result = await runScan({ configPath, outputPath, quiet: true });
+  const phases = result.output.projects[0].phases;
+
+  assert.deepEqual(
+    phases.map(({ id, status }) => [id, status]),
+    [['2', 'ready'], ['3', 'planned'], ['4', 'accepted']],
+  );
+  assert.equal(phases[0].issue, 'documentation');
+  assert.match(phases[0].issueNote, /leading status "ready"/i);
+  assert.equal(phases[1].issue, 'documentation');
+  assert.match(phases[1].issueNote, /leading status "planned"/i);
+  assert.equal(phases[2].issue, 'none');
+  assert.equal(phases[2].confidence, 'high');
+});
+
 test('runScan scopes Roadmap phases to saved roadmap roots while Specs uses its own roots', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'projects-viewer-view-roots-'));
   const projectRoot = path.join(tmp, 'sample');

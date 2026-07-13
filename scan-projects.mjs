@@ -324,7 +324,7 @@ function skip(ctx, filePath, reason) {
  * Conflicting primary signals pick the safest non-final status at low
  * confidence; approval/review wording is a modifier, not a conflict.
  */
-function normalizePhase(text) {
+function normalizePhaseProse(text) {
   const t = (text ?? '').toLowerCase();
   if (!t) {
     return { status: 'draft', rule: 'no Status: line found; defaulted to draft', confidence: 'low' };
@@ -400,6 +400,40 @@ function normalizePhase(text) {
     return { status: 'draft', rule: '"draft / not ready" wording', confidence: 'high' };
   }
   return { status: 'draft', rule: 'no known status vocabulary matched; defaulted to draft', confidence: 'low' };
+}
+
+const LEADING_PHASE_STATUS_RE = /^(draft|planned|ready|in[_ ]progress|blocked|pending[_ ]acceptance|accepted|closed|deferred|cancelled|canceled|superseded)\b/i;
+
+function canonicalLeadingPhaseStatus(value) {
+  return value.toLowerCase().replace(' ', '_').replace('canceled', 'cancelled');
+}
+
+function normalizePhase(text) {
+  const raw = String(text ?? '').trim();
+  if (/^accepted and closed\b|^closed and accepted\b/i.test(raw)) {
+    return normalizePhaseProse(raw);
+  }
+
+  const leading = raw.match(LEADING_PHASE_STATUS_RE);
+  if (!leading) return normalizePhaseProse(raw);
+
+  const status = canonicalLeadingPhaseStatus(leading[1]);
+  const remainder = raw.slice(leading[0].length).replace(/^[\s.:;-]+/, '');
+  const explanation = remainder ? normalizePhaseProse(remainder) : null;
+  const conflicts =
+    explanation &&
+    !explanation.rule.startsWith('no known status vocabulary') &&
+    explanation.status !== status;
+
+  return {
+    status,
+    rule: `explicit leading lifecycle status "${status}"`,
+    confidence: conflicts ? 'low' : 'high',
+    issue: conflicts ? 'documentation' : 'none',
+    issueNote: conflicts
+      ? `The leading status "${status}" is authoritative, but explanatory prose also suggests "${explanation.status}".`
+      : null,
+  };
 }
 
 // Steps/work items inside a phase: "### 4.7.1 Name" style headings.
@@ -700,6 +734,8 @@ function parseDoc(content, doc, acc) {
         pendingPhase.status = norm.status;
         pendingPhase.rule = norm.rule;
         pendingPhase.confidence = norm.confidence;
+        pendingPhase.issue = norm.issue ?? pendingPhase.issue;
+        pendingPhase.issueNote = norm.issueNote ?? pendingPhase.issueNote;
         pendingPhase.branch = pendingPhase.statusText.match(BRANCH_RE)?.[1] ?? null;
       }
       if (isHandoffFile && handoffStatus === null) {
@@ -1024,7 +1060,8 @@ function flagOrderingContradictions(phases) {
     ) {
       p.confidence = 'low';
       p.issue = 'documentation';
-      p.issueNote = `Phase ${phases[lastCompleted].id} (later in the roadmap) is already accepted/closed, but this Status: line still says "${p.status.replace('_', ' ')}" — likely stale documentation.`;
+      const orderingNote = `Phase ${phases[lastCompleted].id} (later in the roadmap) is already accepted/closed, but this Status: line still says "${p.status.replace('_', ' ')}" — likely stale documentation.`;
+      p.issueNote = [p.issueNote, orderingNote].filter(Boolean).join(' ');
     }
     if (p.status === 'draft' && p.confidence === 'low' && p.issue === 'none') {
       p.issue = 'parser';
