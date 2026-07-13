@@ -73,6 +73,7 @@ v3 implemented on 2026-07-07:
 | `audits/UX_UI_AUDIT_2026-07-10.md` | Evidence-backed audit of first-glance state clarity, data trust, information density, interaction, responsive layout, and accessibility |
 | `audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` | Implementation, automated verification, browser matrix, representative lifecycle states, pending human acceptance, and residual risks |
 | `audits/API_UX_TRUST_AUDIT_2026-07-12.md` | Original API/UX trust findings plus implementation, automated, real-rescan, browser, ownership, and residual-risk evidence for their remediations |
+| `audits/LIFECYCLE_STATUS_PROGRESS_AUDIT_2026-07-13.md` | Evidence-backed audit of phase-status parsing, implementation-progress semantics, and accepted living-spec progress |
 | `planning/DASHBOARD_REDESIGN_PLAN.md` | Implemented redesign sequence and integration record for state trust, overview hierarchy, Project Timeline, search/navigation, and acceptance gates |
 | `planning/MCP_CONTEXT_API_HARDENING_PLAN.md` | Hardening plan and implementation notes for canonical config, compact project-id listing, agent preflight API routing, MCP non-JSON errors, and local HTTP diagnostics |
 | `phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 plan for users, workflows, data sources, AI use cases, and acceptance criteria |

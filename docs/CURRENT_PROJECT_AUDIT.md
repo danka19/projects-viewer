@@ -4,6 +4,16 @@ Status: in_progress.
 
 Last updated: 2026-07-13.
 
+## Lifecycle Status And Progress Semantics (2026-07-13)
+
+[`LIFECYCLE_STATUS_PROGRESS_AUDIT_2026-07-13.md`](audits/LIFECYCLE_STATUS_PROGRESS_AUDIT_2026-07-13.md) confirms three status-trust defects against configured project `teamSsdCli`:
+
+- source phases 2-4 are `ready`, `planned`, and `planned`, but conflicting acceptance vocabulary on their `Status:` lines combines with permissive parser precedence to emit `accepted`, `accepted`, and `accepted` at high confidence;
+- the deliberate final-state progress rule amplifies that parser error into a false 100% project implementation value and a false `Phase 4 accepted` summary;
+- accepted living specs with no owned task evidence render as `0/0 tasks` and 100%, despite the approved design also requiring no-task specification progress to remain unknown.
+
+No parser, UI, OpenSpec, or scanned-project source was changed during the audit. Remediation requires an explicit product/change decision. The source-backed expected roadmap matrix is `closed`, `closed`, `ready`, `planned`, `planned`, which produces 40% under the current mean-of-known-phases formula.
+
 ## Phase And OpenSpec Status Reconciliation (2026-07-12)
 
 | Item | Status | Evidence / blocker |
@@ -18,7 +28,7 @@ Last updated: 2026-07-13.
 | `redesign-dashboard-project-timeline` | `accepted` | All 43/43 tasks are complete. Commit `9cfb550` and fresh six-viewport/theme geometry evidence close tasks 5.6-5.7; the owner explicitly authorized integration on 2026-07-13, closing task 7.6. Archival remains separate. |
 | `add-selectable-specs-canvas` | `accepted` | OpenSpec artifacts validate strictly; scanner/config/model/layout/routing/state/search/UI implementation is complete with 107 Node + 91 component tests, production build, and dark/light 1280×720, 1024×768, 390×844 browser evidence. The owner authorized integration on 2026-07-13; archival remains separate. |
 | `harden-mcp-context-api` | `archived` | Implementation, verification, accepted-spec sync, and archival are complete at `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`. |
-| [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) | `implemented_verified` | All 13/13 implementation tasks are checked. Scanner/search behavior, focused and full automated gates, a fresh configured-project rescan, the corrected desktop/mobile browser matrix, and the strict OpenSpec CLI gate pass. The change is intentionally active/open, unsynced, and unarchived, ready for the separate explicit sync/archive workflow. |
+| [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) | `accepted` | All 13/13 implementation tasks are checked, verification passes, and the owner authorized integration on 2026-07-13. The change is intentionally unsynced and unarchived pending the separate explicit lifecycle workflow. |
 | Accepted specs `ai-context`, `ai-findings`, `agent-preflight-packet`, `local-project-config`, `mcp-context-api` | `accepted` | Present under `openspec/specs/` and validated by OpenSpec. |
 
 Sequential work: the owner authorized integration of the complete dashboard branch on 2026-07-13, closing timeline task 7.6 and accepting the selectable Specs Canvas. MCP/API hardening is complete and archived independently of timeline geometry. Dashboard evidence-trust implementation, acceptance evidence, documentation/task-state reconciliation, and strict OpenSpec CLI gate are complete as the follow-on hardening slice. Active dashboard changes remain unsynced and unarchived until separate explicit lifecycle workflows.
@@ -28,11 +38,11 @@ Sequential work: the owner authorized integration of the complete dashboard bran
 | Item | Current State |
 |---|---|
 | Repository root | `C:\Users\danoc\Documents\projects\projects-viewer` |
-| Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer\.worktrees\improve-dashboard-evidence-trust` |
-| Current branch | `codex/improve-dashboard-evidence-trust` |
+| Current implementation worktree | `C:\Users\danoc\Documents\projects\projects-viewer` |
+| Current branch | `main` |
 | Remote | `origin https://github.com/danka19/projects-viewer.git` |
-| Latest feature commit before the `origin/main` merge | `d3fa93d` (`docs: close evidence audit rollout plan`) |
-| Local divergence | The feature branch contains the planned dashboard evidence-trust change over the redesign workstream and integrates the completed MCP/API hardening implementation, accepted specs, and archived change history from `origin/main`; no push was performed during this merge. |
+| Current commit | `295185e` (`docs: record dashboard integration acceptance`) |
+| Local divergence | `main` matched `origin/main` at audit start; the working tree was clean before this documentation-only audit. |
 
 ## Useful Starting Points
 

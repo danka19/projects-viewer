@@ -79,6 +79,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/audits/` | Focused audit reports |
 | `docs/audits/UX_UI_AUDIT_2026-07-10.md` | Live-browser UX/UI audit of data trust, first-glance status clarity, density, search, responsive layout, accessibility, and test gaps |
 | `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` | Redesign implementation record, verification commands, browser matrix, edge-state evidence, residual risks, and open human gate |
+| `docs/audits/LIFECYCLE_STATUS_PROGRESS_AUDIT_2026-07-13.md` | Source-to-parser-to-API-to-UI audit of lifecycle status and progress semantics for Roadmap and Specs |
 | `docs/phases/` | Detailed phase plans and templates |
 | `docs/phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md` | Closed Phase 1 discovery and requirements plan |
 | `docs/phases/PHASE_2_ARCHITECTURE_AND_DATA_MODEL.md` | Accepted and closed Phase 2 architecture and data model plan for the project brief/report workflow |
