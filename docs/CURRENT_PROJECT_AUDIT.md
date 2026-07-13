@@ -156,6 +156,24 @@ Sequential work: the owner authorized integration of the complete dashboard bran
 - Human dismissal decision: use one confirmation contract for every dismissal path. When the modal is clean, backdrop click, Escape, and Close dismiss immediately. When it is dirty, each path opens an accessible confirmation with explicit **Discard changes** and **Continue editing** actions; no path may discard silently. Clicking inside the panel never requests dismissal.
 - Status: dismissal behavior accepted; exact dirty-state inputs and busy-state handling remain to be specified before implementation.
 
+## Change Intake: Specification Delivery Planning State (2026-07-13)
+
+- Idea: distinguish accepted specification lifecycle from delivery-planning readiness and implementation progress in Specs Canvas, especially when an approved change or accepted living specification has no documented tasks.
+- Source: human owner feedback after reviewing taskless accepted specification cards that displayed `0/0 tasks` and 100%.
+- Type: `scope_refinement`, `new_feature`, `documentation_change`, `verification_change`.
+- Decision: `create_openspec_change` after `fix-lifecycle-status-progress-semantics` is synced, archived, and integrated. Do not broaden the already implemented and verified bug fix with a new derived-state contract.
+- Reason: the current fix correctly removes false `0/0` and 100% progress, but a separate delivery-planning state is needed to explain what should happen next. Lifecycle acceptance, planning readiness, and implementation completion are independent facts and must not be collapsed into one label.
+- Affected specs: `spec-work-model` and selectable Specs Canvas presentation. The follow-up OpenSpec change must define evidence rules, labels, next-action behavior, empty states, accessibility wording, and compatibility with accepted living specifications and archived changes.
+- Affected architecture: spec-work normalization, derived presentation model, Specs Canvas card metadata, aggregate progress, and source-evidence disclosure. Scanned projects remain read-only.
+- Data contract impact: likely add a derived delivery-planning field rather than another canonical lifecycle value. Exact source evidence and serialized/API exposure must be decided in the follow-up design; task count alone is insufficient evidence.
+- Verification impact: add fixtures and UI coverage for accepted living specs without owned tasks, approved changes awaiting a task breakdown, changes with eligible tasks, explicitly implementation-free changes, and closed or archived changes with final evidence.
+- Accepted semantic boundary: `accepted` on an `accepted-capability` means the requirements or decision are accepted; it does not mean implementation is planned or complete.
+- Accepted progress boundary: zero eligible tasks never establishes 100%. Without explicit final evidence, implementation progress is unknown and no progress bar or percentage is shown.
+- Intended presentation: an approved change with evidence that planning is still missing should show `Planning required`, unknown implementation progress, and a next action such as `Create task breakdown`. An accepted living specification with no owned tasks should identify itself as an accepted specification and report that no implementation tasks are linked, without assuming that planning is missing.
+- Explicit exceptions: a change with explicit implementation-final lifecycle evidence may retain 100%; work explicitly documented as requiring no implementation should show `Not applicable`, not 100%.
+- Prohibited inference: absence of tasks by itself must not select `Planning required`, `Not applicable`, or `Complete`; the derived state must preserve and cite source evidence or remain unknown.
+- Status: queued for a separate OpenSpec proposal; no implementation is authorized by this intake record. The existing `fix-lifecycle-status-progress-semantics` change remains the prerequisite integration step.
+
 ## Known Risks And Gaps
 
 | ID | Risk | Owner | Status |

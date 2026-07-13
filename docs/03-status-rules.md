@@ -41,6 +41,16 @@ Phase progress display treats `closed`, `accepted`, and `pending_acceptance` pha
 
 Specification progress is evidence-based: `accepted-capability` identifies an accepted living specification, not implementation completion. Without eligible owned tasks or explicit implementation-final evidence, progress is unknown and Specs Canvas reports `No tasks documented` instead of `0/0 tasks` or 100%. The active OpenSpec change [`fix-lifecycle-status-progress-semantics`](../openspec/changes/fix-lifecycle-status-progress-semantics/) is the canonical proposed contract until sync and archival.
 
+Specification lifecycle, delivery planning, and implementation progress are separate concepts:
+
+- specification lifecycle answers whether the requirements or decision are accepted;
+- delivery planning answers whether implementation work has an evidenced task breakdown and is ready to enter delivery;
+- implementation progress is calculated only from eligible task evidence or explicit implementation-final evidence.
+
+An accepted living specification under `openspec/specs/` may legitimately have no owned tasks because OpenSpec tasks normally belong to a concrete change package. Task absence alone therefore does not prove either incomplete planning or completed implementation. For display purposes, zero eligible tasks means unknown progress unless explicit source evidence establishes a final change lifecycle. If implementation is explicitly unnecessary, the eventual presentation should use `not applicable`, not 100%.
+
+A follow-up product change is queued to add an evidence-backed delivery-planning presentation without overloading lifecycle status. The intended derived states are `planning required`, `planned`, and `not applicable`; they are not part of the implemented status contract yet and must not be inferred from task count alone. The intake and acceptance boundary are recorded in [`CURRENT_PROJECT_AUDIT.md`](CURRENT_PROJECT_AUDIT.md#change-intake-specification-delivery-planning-state-2026-07-13).
+
 ## Project Status
 
 Evaluate rules top-down; first match wins.
