@@ -4,7 +4,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Current Roadmap Validation
 
-- Current phase: no active roadmap implementation phase. Phase 3 is accepted and closed; Phase 4 remains draft and is not planned in detail. Accepted P0 project management and P3 project brief/report behavior are canonical under `openspec/specs/` and their implementation changes are archived. P4 MCP/API hardening, the full agent preflight packet contract, and Roadmap specification cards are also accepted and archived. Remaining accepted dashboard workstreams are undergoing explicit spec sync/archive cleanup; these bounded workstreams do not by themselves activate or close Phase 4.
+- Current phase: no active roadmap implementation phase and no active OpenSpec changes. Phase 3 is accepted and closed; Phase 4 remains draft and is not planned in detail. All accepted P0-P4 capability behavior is canonical under `openspec/specs/`, and all completed implementation changes are archived. These bounded P4 workstreams did not by themselves activate or close Phase 4.
 - Planning from this roadmap alone is forbidden. Detailed phase plans must reconcile roadmap intent, current docs, current implementation, environment evidence, audit findings, and human decisions.
 - Product behavior, requirements, proposed changes, and acceptance criteria belong in OpenSpec artifacts under `openspec/` when SDD applies.
 - New ideas during active phase work must go through change intake before they alter scope or plans.
@@ -102,7 +102,7 @@ Implemented follow-on and parallel bounded workstreams:
 
 - Accepted state-derivation, lifecycle/progress, and evidence-trust requirements are canonical in `openspec/specs/dashboard-state-derivation/`, `openspec/specs/spec-work-model/`, and `openspec/specs/dashboard-evidence-trust/`. The completed `fix-lifecycle-status-progress-semantics` and `improve-dashboard-evidence-trust` changes are archived under `openspec/changes/archive/`.
 - `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/` records the accepted exact phase/step ownership contract, nested Roadmap specification cards, explicit unassigned/integrity handling, and navigation to the matching Specs Canvas identity. The accepted behavior lives in `openspec/specs/roadmap-spec-cards/`.
-- [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) restores scanner and search evidence trust after the completed MCP/API hardening slice. Implementation, focused/full gates, real configured-project rescan, corrected desktop/mobile browser acceptance, documentation/task-state reconciliation, and the strict OpenSpec CLI gate are complete at 13/13 tasks. The change remains active/open, unsynced, and unarchived, ready for a separate explicit sync/archive workflow. [`API_UX_TRUST_AUDIT_2026-07-12.md`](audits/API_UX_TRUST_AUDIT_2026-07-12.md) is the canonical evidence source.
+- `openspec/changes/archive/2026-07-15-improve-dashboard-evidence-trust/` records the accepted scanner/search evidence-trust remediation. [`API_UX_TRUST_AUDIT_2026-07-12.md`](audits/API_UX_TRUST_AUDIT_2026-07-12.md) remains the canonical verification evidence source.
 - `docs/audits/UX_UI_AUDIT_2026-07-10.md` is the redesign baseline; `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records implementation and browser evidence.
 - `docs/planning/DASHBOARD_REDESIGN_PLAN.md` records the bounded sequence: trusted state derivation, Project Timeline, overview integration, search/navigation state, then responsive/accessibility acceptance.
 - `openspec/changes/archive/2026-07-15-redesign-dashboard-project-timeline/` records the accepted 43/43-task horizontal timeline implementation and its browser/geometry evidence.
@@ -111,7 +111,6 @@ Implemented follow-on and parallel bounded workstreams:
 
 Decision required before Phase 4 planning:
 
-- Perform OpenSpec sync/archive for the accepted dashboard changes only when separately authorized; integration acceptance does not silently archive active changes.
 - Decide the detailed Phase 4 scope independently of the timeline and other bounded workstreams. Completing or archiving an individual OpenSpec change does not silently activate Phase 4.
 
 ## Phase Planning Rule
@@ -143,7 +142,6 @@ When a phase is too large for one iteration, create or update a detailed plan un
 
 | Active change | Execution phase | Related phases | Lifecycle status |
 |---|---|---|---|
-| `harden-dashboard-state-derivation` | P4 | none | accepted |
 
 ## Capability Spec Step Ownership
 
@@ -169,4 +167,3 @@ When a phase is too large for one iteration, create or update a detailed plan un
 
 | Active change | Execution phase | Execution step |
 |---|---|---|
-| `harden-dashboard-state-derivation` | P4 | none |

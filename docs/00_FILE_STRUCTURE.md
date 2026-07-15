@@ -90,7 +90,7 @@ This document is the repository map for agents and humans. Keep it current whene
 | `openspec/changes/archive/2026-07-15-add-persistent-project-management/` | Accepted implementation history for persistent project/workspace management |
 | `openspec/changes/archive/2026-07-15-add-project-brief-report/` | Accepted implementation history for the local daily/weekly project brief/report workflow |
 | `openspec/changes/archive/2026-07-15-agent-preflight-packet/` | Accepted and archived implementation history for the local AI-agent preflight packet workflow |
-| `openspec/changes/harden-dashboard-state-derivation/` | Implemented dashboard source-trust/current-state filtering change |
+| `openspec/changes/archive/2026-07-15-harden-dashboard-state-derivation/` | Accepted dashboard source-trust/current-state filtering implementation history; archived without a retrospective design artifact by owner approval |
 | `openspec/changes/archive/2026-07-15-fix-lifecycle-status-progress-semantics/` | Accepted lifecycle, phase-step ownership, and living-spec progress implementation history |
 | `openspec/changes/archive/2026-07-15-improve-dashboard-evidence-trust/` | Accepted scanner/search evidence-trust remediation history |
 | `openspec/changes/archive/2026-07-15-redesign-dashboard-project-timeline/` | Accepted horizontal phase/step timeline implementation history |

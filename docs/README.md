@@ -90,12 +90,11 @@ v3 implemented on 2026-07-07:
 
 ## Active OpenSpec Changes
 
-- `openspec/changes/archive/2026-07-15-add-project-brief-report/`: accepted local daily/weekly human project brief/report workflow history.
-- `openspec/changes/archive/2026-07-15-agent-preflight-packet/`: accepted local AI-agent preflight packet workflow, intentionally separate from the human brief/report contract.
-- `openspec/changes/harden-dashboard-state-derivation/`: implemented dashboard trust gate that filters rule/policy/template noise and preserves explicit current-state semantics.
+No active OpenSpec changes remain.
 
 ## Archived OpenSpec Changes
 
+- `openspec/changes/archive/2026-07-15-harden-dashboard-state-derivation/`: accepted dashboard trust-gate implementation history; archived by owner approval without a retrospective design artifact.
 - `openspec/changes/archive/2026-07-15-add-selectable-specs-canvas/`: accepted selectable Roadmap/Specs and responsive Specs Canvas implementation history.
 - `openspec/changes/archive/2026-07-15-redesign-dashboard-project-timeline/`: accepted horizontal lifecycle timeline implementation history.
 - `openspec/changes/archive/2026-07-15-improve-dashboard-search-navigation/`: accepted ranked search/navigation and safe UI-state persistence history.
@@ -103,6 +102,8 @@ v3 implemented on 2026-07-07:
 - `openspec/changes/archive/2026-07-15-improve-dashboard-evidence-trust/`: accepted scanner/search evidence-trust remediation history.
 - `openspec/changes/archive/2026-07-15-add-persistent-project-management/`: accepted persistent project/workspace management implementation history.
 - `openspec/changes/archive/2026-07-15-add-project-brief-report/`: accepted local advisory project brief/report implementation history.
+- `openspec/changes/archive/2026-07-15-agent-preflight-packet/`: accepted local AI-agent preflight packet implementation history.
+- `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/`: accepted Roadmap specification-card implementation history.
 - `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`: completed hardening change for canonical project config, compact saved project-id listing, JSON-only API boundaries, MCP response validation, and local API diagnostics. Accepted behavior is synced to `openspec/specs/agent-preflight-packet/`, `openspec/specs/local-project-config/`, and `openspec/specs/mcp-context-api/`.
 
 ## Operations Summary

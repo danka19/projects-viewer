@@ -10,7 +10,7 @@ The accepted `add-selectable-specs-canvas`, `redesign-dashboard-project-timeline
 
 ## Dashboard Model And Evidence Spec Archival (2026-07-15)
 
-The accepted `fix-lifecycle-status-progress-semantics` and `improve-dashboard-evidence-trust` changes were synchronized into canonical `dashboard-state-derivation`, `spec-work-model`, and `dashboard-evidence-trust` capability specs and archived. The accepted `harden-dashboard-state-derivation` delta is also represented in the canonical state-derivation spec, but its change remains active until the owner confirms archival despite its missing optional design artifact.
+The accepted `harden-dashboard-state-derivation`, `fix-lifecycle-status-progress-semantics`, and `improve-dashboard-evidence-trust` changes were synchronized into canonical `dashboard-state-derivation`, `spec-work-model`, and `dashboard-evidence-trust` capability specs and archived. The owner explicitly approved archiving `harden-dashboard-state-derivation` without inventing a retrospective design artifact; its proposal, delta spec, and 7/7 completed tasks remain preserved in archive history.
 
 ## Foundational OpenSpec Archival (2026-07-15)
 
@@ -35,13 +35,13 @@ The roadmap/OpenSpec governance drift was repaired. Every accepted capability sp
 Fresh governance evidence:
 
 - Roadmap/OpenSpec validator: `ok: true`, 0 errors, 0 warnings.
-- The validator now reports 6 accepted specs, 8 active changes, and 5 roadmap phases with explicit statuses.
+- The validator now reports 16 accepted specs, 0 active changes, and 5 roadmap phases with explicit statuses.
 
 ## Lifecycle Status And Progress Semantics (2026-07-13)
 
 [`LIFECYCLE_STATUS_PROGRESS_AUDIT_2026-07-13.md`](audits/LIFECYCLE_STATUS_PROGRESS_AUDIT_2026-07-13.md) originally confirmed that configured project `teamSsdCli` was misreported as `closed`, `closed`, `accepted`, `accepted`, `accepted` with 100% roadmap implementation and that accepted living specs without tasks displayed `0/0 tasks` at 100%.
 
-The owner approved and selected inline execution of [`fix-lifecycle-status-progress-semantics`](../openspec/changes/fix-lifecycle-status-progress-semantics/) on 2026-07-13. Implementation on `codex/fix-lifecycle-status-progress-semantics` now:
+The owner approved and selected inline execution of [`fix-lifecycle-status-progress-semantics`](../openspec/changes/archive/2026-07-15-fix-lifecycle-status-progress-semantics/) on 2026-07-13. The accepted implementation now:
 
 - treats an exact supported lifecycle at the start of `Status:` as authoritative and reports contradictory later prose through existing documentation integrity fields;
 - preserves genuine accepted-phase and pending-acceptance progress semantics;
@@ -70,7 +70,7 @@ Fresh verification evidence:
 | `add-persistent-project-management` | `archived` | Accepted requirements are canonical in `openspec/specs/project-management/`; implementation history is archived at `openspec/changes/archive/2026-07-15-add-persistent-project-management/`. |
 | `add-project-brief-report` | `archived` | Accepted requirements are canonical in `openspec/specs/project-brief-report/`; implementation history is archived at `openspec/changes/archive/2026-07-15-add-project-brief-report/`. |
 | `agent-preflight-packet` | `archived` | The owner accepted the full packet contract on 2026-07-15. Requirements were synced into the accepted spec, and implementation history was archived at `openspec/changes/archive/2026-07-15-agent-preflight-packet/`. |
-| `harden-dashboard-state-derivation` | `accepted` | The trust gate was implemented and included in the accepted redesign evidence; archival remains separate. |
+| `harden-dashboard-state-derivation` | `archived` | Requirements are canonical in `dashboard-state-derivation`; the owner approved archival without a retrospective design artifact on 2026-07-15. |
 | `improve-dashboard-search-navigation` | `archived` | Accepted requirements are canonical in `dashboard-search-navigation`; implementation history is archived under `openspec/changes/archive/2026-07-15-improve-dashboard-search-navigation/`. |
 | `redesign-dashboard-project-timeline` | `archived` | Accepted requirements are canonical in `dashboard-project-timeline`; implementation history is archived under `openspec/changes/archive/2026-07-15-redesign-dashboard-project-timeline/`. |
 | `add-selectable-specs-canvas` | `archived` | Accepted requirements are canonical across documentation-view, primary-view, spec-work-model, and Specs Canvas specs; implementation history is archived under `openspec/changes/archive/2026-07-15-add-selectable-specs-canvas/`. |
@@ -78,9 +78,9 @@ Fresh verification evidence:
 | `harden-mcp-context-api` | `archived` | Implementation, verification, accepted-spec sync, and archival are complete at `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`. |
 | `fix-lifecycle-status-progress-semantics` | `archived` | Accepted requirements are canonical in `dashboard-state-derivation` and `spec-work-model`; implementation history is archived under `openspec/changes/archive/2026-07-15-fix-lifecycle-status-progress-semantics/`. |
 | `improve-dashboard-evidence-trust` | `archived` | Accepted requirements are canonical in `dashboard-evidence-trust`; implementation history is archived under `openspec/changes/archive/2026-07-15-improve-dashboard-evidence-trust/`. |
-| Accepted capability specs | `accepted` | Eight specs are present under `openspec/specs/`, including canonical `project-management` and `project-brief-report` behavior. |
+| Accepted capability specs | `accepted` | Sixteen specs are present under `openspec/specs/`; all completed implementation changes are archived. |
 
-Sequential work: the owner authorized integration of the complete dashboard branch on 2026-07-13, closing timeline task 7.6 and accepting the selectable Specs Canvas. MCP/API hardening is complete and archived independently of timeline geometry. Dashboard evidence-trust implementation, acceptance evidence, documentation/task-state reconciliation, and strict OpenSpec CLI gate are complete as the follow-on hardening slice. Active dashboard changes remain unsynced and unarchived until separate explicit lifecycle workflows.
+Sequential work: the owner authorized integration of the complete dashboard branch on 2026-07-13, closing timeline task 7.6 and accepting the selectable Specs Canvas. MCP/API hardening, dashboard state/evidence trust, timeline, search/navigation, Specs Canvas, project management, project brief, agent preflight, lifecycle semantics, and Roadmap spec cards are synchronized into accepted specs and archived. No active OpenSpec changes remain; Phase 4 remains `draft` pending separate detailed scope planning.
 
 ## Repository Baseline
 
@@ -229,7 +229,7 @@ Sequential work: the owner authorized integration of the complete dashboard bran
 | AUDIT-014 | Previous task 7.6 acceptance was inferred too broadly. Corrected geometry was verified in `9cfb550`; the owner then explicitly authorized merge to `main` and push on 2026-07-13. | Human owner | closed 2026-07-13 |
 | AUDIT-015 | Manage Projects now has `role="dialog"`, `aria-modal`, an accessible name, initial focus, bidirectional focus containment, Escape dismissal, inert background, and exact focus return. Four component scenarios and all six dark/light browser matrix points pass. | Dashboard redesign | closed 2026-07-11 |
 | AUDIT-016 | Drawer focus return now resolves a stable source-derived opener ID instead of retaining a DOM element. A real-App polling integration test replaces the phase-details opener during live refresh and proves Escape focuses its replacement; all six browser matrix points also pass. | Dashboard redesign | closed 2026-07-11 |
-| AUDIT-017 | [`API_UX_TRUST_AUDIT_2026-07-12.md`](audits/API_UX_TRUST_AUDIT_2026-07-12.md) records four remediated and verified trust findings. Archived `harden-mcp-context-api` solely owns the completed API fallback remediation. Active [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) owns the implemented and verified scanner/search remediation; all 13/13 tasks and the strict OpenSpec CLI gate are complete, while accepted-spec sync and archival remain a separate explicit workflow. Timeline clarity and selectable Specs Canvas integration were accepted by the owner on 2026-07-13. | Phase 4 hardening changes | remediation_verified; integration_accepted 2026-07-13 |
+| AUDIT-017 | [`API_UX_TRUST_AUDIT_2026-07-12.md`](audits/API_UX_TRUST_AUDIT_2026-07-12.md) records four remediated and verified trust findings. Archived `harden-mcp-context-api` owns the API fallback remediation; archived `improve-dashboard-evidence-trust` owns the scanner/search remediation. Timeline clarity and selectable Specs Canvas integration were accepted and their changes are archived. | Phase 4 hardening changes | closed 2026-07-15 |
 
 ## Audit Rules
 
