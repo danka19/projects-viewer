@@ -195,10 +195,10 @@ export interface RawSpecWorkItem {
   groupId: string | null;
   tasks: RawSpecTask[];
   dependsOnIds: string[];
-  roadmapPhaseId: string | null;
-  roadmapStepId: string | null;
-  relatedPhaseIds: string[];
-  ownershipEvidence: Array<SpecSourceEvidence & { field: string }>;
+  roadmapPhaseId?: string | null;
+  roadmapStepId?: string | null;
+  relatedPhaseIds?: string[];
+  ownershipEvidence?: Array<SpecSourceEvidence & { field: string }>;
 }
 
 export interface RawSpecDependency {

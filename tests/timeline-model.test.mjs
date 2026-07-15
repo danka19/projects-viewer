@@ -92,6 +92,36 @@ test('model maps ordered phases and steps with stable non-index keys', async () 
   assert.deepEqual(steps.map((s) => s.sequence), [0, 1, 2]);
 });
 
+test('model attaches phase-level and step-owned specs without changing lifecycle identity', async () => {
+  const model = await modelPromise;
+  const p = project({
+    phases: [phase({
+      id: '4',
+      steps: [step({ phaseId: '4', id: '4.1' })],
+    })],
+    specWork: {
+      projectId: 'fixture-project',
+      specifications: [
+        {
+          key: 'fixture:openspec/changes/step/proposal.md', id: 'step-spec', name: 'Step spec', kind: 'openspec-change', lifecycleStatus: 'planned', confidence: 'high',
+          source: { file: 'openspec/changes/step/proposal.md', line: 1 }, sourceScopeId: 'openspec/changes', groupId: null, tasks: [], dependsOnIds: [],
+          roadmapPhaseId: 'P4', roadmapStepId: '4.1', relatedPhaseIds: [], ownershipEvidence: [],
+        },
+        {
+          key: 'fixture:openspec/specs/phase/spec.md', id: 'phase-spec', name: 'Phase spec', kind: 'accepted-capability', lifecycleStatus: 'accepted', confidence: 'high',
+          source: { file: 'openspec/specs/phase/spec.md', line: 1 }, sourceScopeId: 'openspec/specs', groupId: null, tasks: [], dependsOnIds: [],
+          roadmapPhaseId: 'P4', roadmapStepId: null, relatedPhaseIds: [], ownershipEvidence: [],
+        },
+      ],
+      dependencies: [], unassignedTasks: [], integrityIssues: [], isPartial: false,
+    },
+  });
+  const m = build(model, p);
+
+  assert.deepEqual(m.phases[0].phaseSpecs.map((item) => item.id), ['phase-spec']);
+  assert.deepEqual(m.phases[0].steps[0].specs.map((item) => item.id), ['step-spec']);
+});
+
 test('model reports explicit current phase and step from single in_progress lifecycle', async () => {
   const model = await modelPromise;
   const p = project({

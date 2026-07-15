@@ -1,6 +1,8 @@
 import type { Confidence, PhaseItem, PhaseStatus, PhaseStep, ProjectData, StepStatus } from '../types';
 import { phaseProgressInfo, projectRoadmapProgress } from '../phaseProgress';
 import type { PhaseProgressInfo, RoadmapProgress } from '../phaseProgress';
+import { buildTimelineSpecOwnership } from './specOwnership';
+import type { RawSpecWorkItem } from '../types';
 
 /**
  * Timeline presentation model.
@@ -24,6 +26,7 @@ export type TimelineIntegrityKind =
   | 'duplicate-phase-key'
   | 'duplicate-step-key'
   | 'phase-status-issue'
+  | 'spec-ownership'
   | 'partial-data';
 
 export interface TimelineIntegrityIssue {
@@ -42,6 +45,7 @@ export interface TimelineStepModel {
   evidence: string;
   source: TimelineSourceRef;
   raw: PhaseStep;
+  specs: RawSpecWorkItem[];
 }
 
 export interface TimelinePhaseModel {
@@ -58,6 +62,8 @@ export interface TimelinePhaseModel {
   progress: Pick<PhaseProgressInfo, 'percent' | 'basis'>;
   currentStepId: string | null;
   steps: TimelineStepModel[];
+  phaseSpecs: RawSpecWorkItem[];
+  unassignedSpecs: RawSpecWorkItem[];
   source: TimelineSourceRef;
   raw: PhaseItem;
 }
@@ -85,7 +91,7 @@ interface BuildOptions {
 }
 
 export function buildProjectTimelineModel(
-  project: Pick<ProjectData, 'path' | 'phases' | 'error'>,
+  project: Pick<ProjectData, 'path' | 'phases' | 'error' | 'specWork'>,
   options: BuildOptions,
 ): ProjectTimelineModel {
   const issues: TimelineIntegrityIssue[] = [];
@@ -129,6 +135,7 @@ export function buildProjectTimelineModel(
         evidence: s.evidence,
         source: { file: s.file, line: s.line },
         raw: s,
+        specs: [],
       };
     });
 
@@ -155,6 +162,18 @@ export function buildProjectTimelineModel(
     }
 
     const info = phaseProgressInfo(ph);
+    const ownership = buildTimelineSpecOwnership(
+      { id: ph.id, sequence: index, steps: steps.map((step) => ({ id: step.id })) },
+      project.specWork,
+    );
+    for (const issue of ownership.issues) {
+      issues.push({
+        kind: 'spec-ownership',
+        message: issue.message,
+        phaseKey: key,
+        source: issue.source?.line == null ? undefined : { file: issue.source.file, line: issue.source.line },
+      });
+    }
     return {
       key,
       id: ph.id,
@@ -168,7 +187,12 @@ export function buildProjectTimelineModel(
       issueNote: ph.issueNote,
       progress: { percent: info.percent, basis: info.basis },
       currentStepId,
-      steps,
+      steps: steps.map((step) => ({
+        ...step,
+        specs: step.id ? ownership.stepSpecs[step.id] ?? [] : [],
+      })),
+      phaseSpecs: ownership.phaseSpecs,
+      unassignedSpecs: ownership.unassignedSpecs,
       source: { file: ph.file, line: ph.line },
       raw: ph,
     };
@@ -220,7 +244,10 @@ function hashRevision(phases: TimelinePhaseModel[], currentPhaseId: string | nul
   const parts: string[] = [currentPhaseId ?? ''];
   for (const ph of phases) {
     parts.push(ph.key, ph.status, ph.currentStepId ?? '');
-    for (const s of ph.steps) parts.push(s.key, s.status);
+    for (const s of ph.steps) {
+      parts.push(s.key, s.status, ...s.specs.map((spec) => spec.key));
+    }
+    parts.push(...ph.phaseSpecs.map((spec) => spec.key), ...ph.unassignedSpecs.map((spec) => spec.key));
   }
   const text = parts.join('|');
   let hash = 5381;
