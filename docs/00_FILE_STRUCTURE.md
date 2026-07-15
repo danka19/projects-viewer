@@ -87,8 +87,8 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/handoffs/` | Bounded task handoffs to Claude |
 | `docs/superpowers/specs/` | Approved design specs produced by the brainstorming workflow |
 | `docs/superpowers/plans/` | Implementation plans produced by the writing-plans workflow |
-| `openspec/changes/add-persistent-project-management/` | Completed OpenSpec change for persistent project/workspace management |
-| `openspec/changes/add-project-brief-report/` | Active proposed OpenSpec change for the local daily/weekly project brief/report workflow |
+| `openspec/changes/archive/2026-07-15-add-persistent-project-management/` | Accepted implementation history for persistent project/workspace management |
+| `openspec/changes/archive/2026-07-15-add-project-brief-report/` | Accepted implementation history for the local daily/weekly project brief/report workflow |
 | `openspec/changes/archive/2026-07-15-agent-preflight-packet/` | Accepted and archived implementation history for the local AI-agent preflight packet workflow |
 | `openspec/changes/harden-dashboard-state-derivation/` | Implemented dashboard source-trust/current-state filtering change |
 | `openspec/changes/redesign-dashboard-project-timeline/` | Accepted horizontal phase/step timeline change; 43/43 tasks complete after explicit owner integration acceptance on 2026-07-13, and intentionally unarchived |
@@ -100,6 +100,8 @@ This document is the repository map for agents and humans. Keep it current whene
 | `openspec/specs/ai-findings/spec.md` | Accepted AI findings requirements |
 | `openspec/specs/local-project-config/spec.md` | Accepted canonical local project config requirements |
 | `openspec/specs/mcp-context-api/spec.md` | Accepted configured-project listing, API JSON-boundary, MCP validation, and diagnostics requirements |
+| `openspec/specs/project-management/spec.md` | Accepted persistent project/workspace management and read-only scan-boundary requirements |
+| `openspec/specs/project-brief-report/spec.md` | Accepted local advisory project brief/report requirements |
 
 ## Local Runtime
 

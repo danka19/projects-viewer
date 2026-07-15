@@ -4,7 +4,7 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Current Roadmap Validation
 
-- Current phase: no active roadmap implementation phase. Phase 3 is accepted and closed; Phase 4 remains draft and is not planned in detail. Its first MCP/API hardening slice is implemented, accepted into main specs, and archived at `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`. The full agent preflight packet contract was accepted and archived at `openspec/changes/archive/2026-07-15-agent-preflight-packet/`. Roadmap specification cards were accepted on 2026-07-15, synced into `openspec/specs/roadmap-spec-cards/`, and archived at `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/`. The follow-on `improve-dashboard-evidence-trust` scanner/search slice has completed all 13/13 implementation tasks and its strict OpenSpec CLI gate. The owner authorized integration of the complete dashboard branch on 2026-07-13, accepting the 43/43 timeline and finished Specs Canvas; their active changes remain unsynced/unarchived pending separate lifecycle actions. These bounded workstreams do not by themselves activate or close Phase 4.
+- Current phase: no active roadmap implementation phase. Phase 3 is accepted and closed; Phase 4 remains draft and is not planned in detail. Accepted P0 project management and P3 project brief/report behavior are canonical under `openspec/specs/` and their implementation changes are archived. P4 MCP/API hardening, the full agent preflight packet contract, and Roadmap specification cards are also accepted and archived. Remaining accepted dashboard workstreams are undergoing explicit spec sync/archive cleanup; these bounded workstreams do not by themselves activate or close Phase 4.
 - Planning from this roadmap alone is forbidden. Detailed phase plans must reconcile roadmap intent, current docs, current implementation, environment evidence, audit findings, and human decisions.
 - Product behavior, requirements, proposed changes, and acceptance criteria belong in OpenSpec artifacts under `openspec/` when SDD applies.
 - New ideas during active phase work must go through change intake before they alter scope or plans.
@@ -40,7 +40,7 @@ Goal: identify users, workflows, data sources, constraints, and first acceptance
 
 Detailed plan: `docs/phases/PHASE_1_DISCOVERY_AND_REQUIREMENTS.md`.
 
-Selected first workflow: local daily/weekly project brief as API/report JSON first, dashboard UI later. Proposed OpenSpec change: `openspec/changes/add-project-brief-report/`.
+Selected first workflow: local daily/weekly project brief as API/report JSON first, dashboard UI later. Accepted behavior: `openspec/specs/project-brief-report/`; implementation history: `openspec/changes/archive/2026-07-15-add-project-brief-report/`.
 
 Evidence:
 
@@ -67,7 +67,7 @@ Evidence:
 Status: closed.
 Human acceptance was recorded on 2026-07-09.
 
-Goal: implement the first end-to-end local project brief/report workflow from `openspec/changes/add-project-brief-report/`, starting with verified API/report output before dashboard UI.
+Goal: implement the first end-to-end local project brief/report workflow, starting with verified API/report output before dashboard UI.
 
 Detailed plan: `docs/phases/PHASE_3_FIRST_USABLE_WORKFLOW.md`.
 
@@ -81,7 +81,7 @@ Evidence:
 
 Decision required:
 
-- `add-project-brief-report` is ready for OpenSpec archival after the phase branch is reviewed/merged. A future product slice should decide whether to add dashboard UI or Markdown/rendered brief output.
+- A future product slice should decide whether to add dashboard UI or Markdown/rendered brief output.
 
 ## Phase 4. Hardening And Pilot Readiness
 
@@ -125,14 +125,14 @@ When a phase is too large for one iteration, create or update a detailed plan un
 | `ai-findings` | P1 | none |
 | `local-project-config` | P0 | P4 |
 | `mcp-context-api` | P4 | P0 |
+| `project-brief-report` | P3 | P1,P2 |
+| `project-management` | P0 | none |
 | `roadmap-spec-cards` | P4 | none |
 
 ## Active Change Execution
 
 | Active change | Execution phase | Related phases | Lifecycle status |
 |---|---|---|---|
-| `add-persistent-project-management` | P0 | none | accepted |
-| `add-project-brief-report` | P3 | P1,P2 | accepted |
 | `add-selectable-specs-canvas` | P4 | none | accepted |
 | `fix-lifecycle-status-progress-semantics` | P4 | none | accepted |
 | `harden-dashboard-state-derivation` | P4 | none | accepted |
@@ -148,16 +148,15 @@ When a phase is too large for one iteration, create or update a detailed plan un
 | `ai-findings` | P1 | none |
 | `local-project-config` | P0 | none |
 | `mcp-context-api` | P4 | none |
+| `project-brief-report` | P3 | none |
+| `project-management` | P0 | none |
 | `roadmap-spec-cards` | P4 | none |
 
 ## Active Change Step Execution
 
 | Active change | Execution phase | Execution step |
 |---|---|---|
-| `add-persistent-project-management` | P0 | none |
-| `add-project-brief-report` | P3 | none |
 | `add-selectable-specs-canvas` | P4 | none |
-| `agent-preflight-packet` | P4 | none |
 | `fix-lifecycle-status-progress-semantics` | P4 | none |
 | `harden-dashboard-state-derivation` | P4 | none |
 | `improve-dashboard-evidence-trust` | P4 | none |

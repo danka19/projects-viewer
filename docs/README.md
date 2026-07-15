@@ -8,6 +8,7 @@ Repo: https://github.com/danka19/projects-viewer
 
 Dashboard redesign update on 2026-07-11:
 
+- Persistent project management and the local project brief/report were synchronized into accepted capability specs and archived on 2026-07-15. Canonical behavior lives in `openspec/specs/project-management/` and `openspec/specs/project-brief-report/`.
 - The agent preflight packet was accepted on 2026-07-15. Its full local-data, role, evidence, safe-state, verification, and no-automatic-action contract is canonical in `openspec/specs/agent-preflight-packet/`; implementation history is archived under `openspec/changes/archive/2026-07-15-agent-preflight-packet/`.
 - Roadmap specification cards were accepted on 2026-07-15. Exact phase/step ownership, nested cards, unassigned/integrity evidence, and navigation to the matching Specs Canvas identity are canonical in `openspec/specs/roadmap-spec-cards/`; the completed change is archived under `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/`.
 - Active change `fix-lifecycle-status-progress-semantics` implements authoritative exact leading phase statuses with documentation conflict evidence, limits phase steps to phase-owned source structure, and keeps accepted living-spec progress unknown when no task evidence exists. RED/GREEN coverage, the full suite/build, a fresh configured rescan, and browser acceptance are complete; sync/archive remain separate gates.
@@ -91,7 +92,7 @@ v3 implemented on 2026-07-07:
 
 - `openspec/changes/fix-lifecycle-status-progress-semantics/`: authoritative leading phase lifecycle, phase-owned step extraction, and evidence-based no-task accepted-capability progress; all implementation and verification tasks are complete, while the change remains unsynced/unarchived.
 - `openspec/changes/add-selectable-specs-canvas/`: approved selectable Roadmap/Specs primary-work change with safe documentation-view roots, evidence-backed specification work, persistent view state, and responsive accessible Canvas Focus presentation.
-- `openspec/changes/add-project-brief-report/`: proposed local daily/weekly human project brief/report workflow.
+- `openspec/changes/archive/2026-07-15-add-project-brief-report/`: accepted local daily/weekly human project brief/report workflow history.
 - `openspec/changes/archive/2026-07-15-agent-preflight-packet/`: accepted local AI-agent preflight packet workflow, intentionally separate from the human brief/report contract.
 - [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/): scanner and search evidence-trust remediation is implemented and verified with all 13/13 tasks and the strict OpenSpec CLI gate complete. The change remains active/open, unsynced, and unarchived, ready for a separate explicit sync/archive workflow. Evidence is recorded in the [`2026-07-12 API and UX trust audit`](audits/API_UX_TRUST_AUDIT_2026-07-12.md).
 - `openspec/changes/harden-dashboard-state-derivation/`: implemented dashboard trust gate that filters rule/policy/template noise and preserves explicit current-state semantics.
@@ -100,6 +101,8 @@ v3 implemented on 2026-07-07:
 
 ## Archived OpenSpec Changes
 
+- `openspec/changes/archive/2026-07-15-add-persistent-project-management/`: accepted persistent project/workspace management implementation history.
+- `openspec/changes/archive/2026-07-15-add-project-brief-report/`: accepted local advisory project brief/report implementation history.
 - `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`: completed hardening change for canonical project config, compact saved project-id listing, JSON-only API boundaries, MCP response validation, and local API diagnostics. Accepted behavior is synced to `openspec/specs/agent-preflight-packet/`, `openspec/specs/local-project-config/`, and `openspec/specs/mcp-context-api/`.
 
 ## Operations Summary

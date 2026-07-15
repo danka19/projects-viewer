@@ -4,6 +4,10 @@ Status: in_progress.
 
 Last updated: 2026-07-15.
 
+## Foundational OpenSpec Archival (2026-07-15)
+
+The accepted `add-persistent-project-management` and `add-project-brief-report` changes were synchronized into `openspec/specs/project-management/` and `openspec/specs/project-brief-report/`, then archived under `openspec/changes/archive/`. The newer accepted `local-project-config` rule supersedes the original project-management migration scenario: root `projects.config.json` remains ignored and is not migrated into the canonical runtime config.
+
 ## Agent Preflight Packet Acceptance (2026-07-15)
 
 The owner accepted `agent-preflight-packet` on 2026-07-15. Its six change requirements were merged with the two existing MCP/API hardening requirements in `openspec/specs/agent-preflight-packet/spec.md`, preserving the P4 primary owner and P3 relationship. The completed change is archived at `openspec/changes/archive/2026-07-15-agent-preflight-packet/`.
@@ -55,8 +59,8 @@ Fresh verification evidence:
 |---|---|---|
 | Roadmap Phases 0-3 | `closed` | Human acceptance and phase-gate evidence are recorded in their phase plans. |
 | Roadmap Phase 4 | `draft` | Detailed scope has not been accepted; the timeline and MCP workstreams do not silently activate the phase. |
-| `add-persistent-project-management` | `accepted` | Implemented and included in the accepted Phase 0 foundation, but the OpenSpec change remains unarchived. |
-| `add-project-brief-report` | `accepted` | Phase 3 was explicitly accepted and closed; archival remains a separate action. |
+| `add-persistent-project-management` | `archived` | Accepted requirements are canonical in `openspec/specs/project-management/`; implementation history is archived at `openspec/changes/archive/2026-07-15-add-persistent-project-management/`. |
+| `add-project-brief-report` | `archived` | Accepted requirements are canonical in `openspec/specs/project-brief-report/`; implementation history is archived at `openspec/changes/archive/2026-07-15-add-project-brief-report/`. |
 | `agent-preflight-packet` | `archived` | The owner accepted the full packet contract on 2026-07-15. Requirements were synced into the accepted spec, and implementation history was archived at `openspec/changes/archive/2026-07-15-agent-preflight-packet/`. |
 | `harden-dashboard-state-derivation` | `accepted` | The trust gate was implemented and included in the accepted redesign evidence; archival remains separate. |
 | `improve-dashboard-search-navigation` | `accepted` | Implementation and verification are included in the accepted redesign evidence; archival remains separate. |
@@ -65,7 +69,7 @@ Fresh verification evidence:
 | `add-roadmap-spec-cards` | `archived` | The owner accepted the exact ownership and nested-card workflow on 2026-07-15. Requirements were synced to `openspec/specs/roadmap-spec-cards/`, and the completed change was archived at `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/`. |
 | `harden-mcp-context-api` | `archived` | Implementation, verification, accepted-spec sync, and archival are complete at `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`. |
 | [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) | `accepted` | All 13/13 implementation tasks are checked, verification passes, and the owner authorized integration on 2026-07-13. The change is intentionally unsynced and unarchived pending the separate explicit lifecycle workflow. |
-| Accepted specs `ai-context`, `ai-findings`, `agent-preflight-packet`, `local-project-config`, `mcp-context-api`, `roadmap-spec-cards` | `accepted` | Present under `openspec/specs/` and validated by OpenSpec. |
+| Accepted capability specs | `accepted` | Eight specs are present under `openspec/specs/`, including canonical `project-management` and `project-brief-report` behavior. |
 
 Sequential work: the owner authorized integration of the complete dashboard branch on 2026-07-13, closing timeline task 7.6 and accepting the selectable Specs Canvas. MCP/API hardening is complete and archived independently of timeline geometry. Dashboard evidence-trust implementation, acceptance evidence, documentation/task-state reconciliation, and strict OpenSpec CLI gate are complete as the follow-on hardening slice. Active dashboard changes remain unsynced and unarchived until separate explicit lifecycle workflows.
 
@@ -205,7 +209,7 @@ Sequential work: the owner authorized integration of the complete dashboard bran
 | AUDIT-003 | Architecture decisions are partially documented in README/docs, but no ADR/OpenSpec exists for server/API/watcher contracts. | Phase 1/2 | open |
 | AUDIT-004 | Local branch had commits ahead of GitHub remote during early foundation work; `main` later matched `origin/main` before Phase 1 planning. | Human owner | closed 2026-07-08 |
 | AUDIT-005 | Manual browser verification for add project, restart persistence, workspace discovery, track selected, disable, and rescan. | Current feature | closed 2026-07-08 |
-| AUDIT-006 | Phase 3 project brief/report API is implemented, verified, reviewed, pushed, and accepted as closed; `add-project-brief-report` remains ready for OpenSpec archival after branch review/merge. | Human owner / next OpenSpec archival step | closed 2026-07-09 |
+| AUDIT-006 | Phase 3 project brief/report API is implemented, verified, reviewed, accepted, synchronized into the main spec, and archived. | Current feature | closed 2026-07-15 |
 | AUDIT-007 | `agent-preflight-packet` is implemented separately from `project-brief-report`; the owner accepted it on 2026-07-15, its full contract is synced to the accepted spec, and the change is archived. | Current feature | closed 2026-07-15 |
 | AUDIT-008 | The owner selected the bounded UX-first sequence; state trust preceded overview promotion and MCP/API hardening remained separate. Detailed Phase 4 scope is still a future decision. | Human owner | closed for redesign sequencing 2026-07-11 |
 | AUDIT-009 | Unrelated uncommitted UI/worktree changes were present during the earlier agent-preflight feature session; by 2026-07-10 `main` matched `origin/main` and the worktree was clean before new intentional documentation changes. | Human owner | closed 2026-07-10 |
