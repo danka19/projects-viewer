@@ -39,6 +39,7 @@ Whenever the human owner explains how the product should work, rejects behavior,
 - If the human also explicitly asks to "record", "write", "update", "fix", "continue", or otherwise change project artifacts, make the requested documentation/code change after answering or while clearly separating the action from the advice.
 - When there is ambiguity between "answer" and "do", prefer answering and ask for confirmation before implementation unless project safety, durable documentation, or an explicit "record this" request makes the action clear.
 - When multiple open questions remain, ask them in one concise batch with recommended defaults and tradeoffs. Ask one-by-one only when one blocking answer is required before any useful next step can happen.
+- Whenever a question requires a human choice, identify the recommended answer and briefly explain why it is recommended and what the main alternatives trade off.
 
 ## Domain And Architecture Check
 

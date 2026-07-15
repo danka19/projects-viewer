@@ -40,6 +40,7 @@ Scaling rule: for small bounded tasks (typo fixes, single-file edits, doc correc
 13. When the human asks for advice, asks "how is it better", asks a conceptual question, or asks for an opinion/recommendation, answer with a detailed explanation first and do not silently convert the question into implementation. Make changes only when the human explicitly asks to record, implement, update, or continue work, or when the question is inseparable from a requested documentation update.
 14. When several open questions or decisions remain, ask them in one clear batch with recommended defaults and tradeoffs. Ask one-by-one only when a single answer is required to safely proceed.
 15. Keep `docs/AGENTS_USAGE.md` current whenever agent workflow, local API usage, MCP configuration, verification commands, or safety boundaries change.
+16. Whenever asking the human a question that requires a choice or decision, include a clearly identified recommended answer, the main reason for it, and the practical tradeoff of the alternatives.
 
 ## Project-Specific Context
 
