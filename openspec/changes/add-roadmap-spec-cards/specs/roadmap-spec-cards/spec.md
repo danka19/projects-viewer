@@ -50,3 +50,9 @@ Specification cards SHALL expose source details and a safe route to the matching
 - **WHEN** the user activates a specification card
 - **THEN** the existing read-only drawer opens with the specification source evidence
 - **AND** the user can open the same stable specification identity in Specs Canvas
+
+#### Scenario: Unknown progress stays explicit
+
+- **WHEN** a specification has no documented tasks
+- **THEN** its card shows that progress is unknown
+- **AND** the card does not display a fabricated percentage

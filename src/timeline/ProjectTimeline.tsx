@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { RefObject } from 'react';
-import type { DrawerItem, PhaseStatus, ProjectData, StepStatus } from '../types';
-import { drawerFocusOriginId, phaseDrawer, stepDrawer } from '../drawer';
+import type { DrawerItem, PhaseStatus, ProjectData, RawSpecWorkItem, StepStatus } from '../types';
+import { drawerFocusOriginId, phaseDrawer, specWorkDrawer, stepDrawer } from '../drawer';
 import { buildProjectTimelineModel } from './model';
 import type { ProjectTimelineModel, TimelinePhaseModel, TimelineSourceMode } from './model';
 import {
@@ -17,6 +17,7 @@ import { restoreTimelineViewState } from '../uiState';
 import type { TimelineDescriptor } from '../uiState';
 import PhaseCard from './PhaseCard';
 import StepCard from './StepCard';
+import SpecCard from './SpecCard';
 import TimelineLegend from './TimelineLegend';
 import {
   TimelineEmpty,
@@ -37,6 +38,7 @@ interface Props {
   error?: string | null;
   onRetry?: () => void;
   onOpenDrawer: (item: DrawerItem) => void;
+  onOpenSpec?: (item: RawSpecWorkItem) => void;
   onOpenDocs?: () => void;
   restoredDescriptor?: TimelineDescriptor | null;
   onDescriptorChange?: (
@@ -124,6 +126,7 @@ export default function ProjectTimeline({
   error = null,
   onRetry,
   onOpenDrawer,
+  onOpenSpec,
   onOpenDocs,
   restoredDescriptor = null,
   onDescriptorChange,
@@ -744,6 +747,18 @@ export default function ProjectTimeline({
                         }`}
                       />
                     </div>
+                    {s.specs.length > 0 && (
+                      <div className="mt-2 space-y-2 border-l border-accent/30 pl-2" aria-label={`Specifications for step ${s.id ?? s.name}`}>
+                        {s.specs.map((spec) => (
+                          <SpecCard
+                            key={spec.key}
+                            spec={spec}
+                            onOpenDetails={() => onOpenDrawer(specWorkDrawer(spec, project))}
+                            onOpenSpecs={onOpenSpec ? () => onOpenSpec(spec) : undefined}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </li>
                   );
                 })}
@@ -755,6 +770,44 @@ export default function ProjectTimeline({
                   data-testid="step-overflow-end"
                   className="tl-overflow-edge tl-overflow-end"
                 />
+              )}
+            </div>
+          )}
+          {(expandedPhase.phaseSpecs.length > 0 || expandedPhase.unassignedSpecs.length > 0) && (
+            <div className="mt-3 space-y-3 border-t border-line pt-3">
+              {expandedPhase.phaseSpecs.length > 0 && (
+                <div>
+                  <p className="mb-2 font-mono text-[10px] tracking-[0.18em] text-accent-ink uppercase">
+                    Phase specifications
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {expandedPhase.phaseSpecs.map((spec) => (
+                      <SpecCard
+                        key={spec.key}
+                        spec={spec}
+                        onOpenDetails={() => onOpenDrawer(specWorkDrawer(spec, project))}
+                        onOpenSpecs={onOpenSpec ? () => onOpenSpec(spec) : undefined}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+              {expandedPhase.unassignedSpecs.length > 0 && (
+                <div>
+                  <p className="mb-2 font-mono text-[10px] tracking-[0.18em] text-warn uppercase">
+                    Unassigned specifications
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {expandedPhase.unassignedSpecs.map((spec) => (
+                      <SpecCard
+                        key={spec.key}
+                        spec={spec}
+                        onOpenDetails={() => onOpenDrawer(specWorkDrawer(spec, project))}
+                        onOpenSpecs={onOpenSpec ? () => onOpenSpec(spec) : undefined}
+                      />
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           )}

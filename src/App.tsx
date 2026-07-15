@@ -3,6 +3,7 @@ import type {
   DrawerItem,
   ProjectConfig,
   ProjectData,
+  RawSpecWorkItem,
   ScanOutput,
 } from './types';
 import { formatDate, formatTime } from './statusMeta';
@@ -353,6 +354,27 @@ function AppShell({
     }, 'push');
   }
 
+  function openSpecInSpecs(spec: RawSpecWorkItem) {
+    if (!selected || !selectedProjectId) return;
+    commitUiState((current) => {
+      const previous = current.primaryViews?.[selectedProjectId];
+      return {
+        ...current,
+        primaryViews: {
+          ...(current.primaryViews ?? {}),
+          [selectedProjectId]: {
+            view: 'specs',
+            selectedSpecKey: spec.key,
+            expandedSpecKey: null,
+            zoom: previous?.zoom ?? 100,
+            panX: previous?.panX ?? 0,
+            panY: previous?.panY ?? 0,
+          },
+        },
+      };
+    }, 'push');
+  }
+
   function selectProject(path: string) {
     setTransientDrawer(null);
     commitUiState(
@@ -521,6 +543,7 @@ function AppShell({
                       commitUiState((current) => ({ ...current, timeline }), historyMode)
                     }
                     onOpenDrawer={openDrawer}
+                    onOpenSpec={openSpecInSpecs}
                     onOpenDocs={() =>
                       commitUiState(
                         (current) => ({

@@ -8,6 +8,7 @@ import {
   phaseDrawer,
   riskDrawer,
   specDrawer,
+  specWorkDrawer,
   stepDrawer,
   taskDrawer,
 } from './drawer';
@@ -103,6 +104,7 @@ const DRAWER_KINDS = new Set<DrawerDescriptorKind>([
   'signal',
   'decision',
   'spec',
+  'spec-work',
   'doc',
   'audit',
   'risk',
@@ -406,6 +408,8 @@ function drawerCandidates(project: ProjectData, kind: DrawerDescriptorKind): Dra
       return project.decisions.map((item) => decisionDrawer(item, project));
     case 'spec':
       return project.specs.map((item) => specDrawer(item, project));
+    case 'spec-work':
+      return project.specWork?.specifications.map((item) => specWorkDrawer(item, project)) ?? [];
     case 'doc':
       return project.docs.map((item) => docDrawer(item, project));
     case 'audit':

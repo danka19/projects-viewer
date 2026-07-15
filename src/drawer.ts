@@ -9,6 +9,7 @@ import type {
   PhaseItem,
   PhaseStep,
   ProjectData,
+  RawSpecWorkItem,
   RiskItem,
   SpecItem,
   TaskItem,
@@ -192,6 +193,31 @@ export function specDrawer(sp: SpecItem, p: ProjectData): DrawerItem {
     statusChip: SPEC_STATUS_CHIP[sp.status] ?? SPEC_STATUS_CHIP.unknown,
     text: parts.join('\n') || undefined,
     file: sp.file,
+    projectPath: p.path,
+  };
+}
+
+export function specWorkDrawer(sp: RawSpecWorkItem, p: ProjectData): DrawerItem {
+  const completed = sp.tasks.filter((task) => task.status === 'closed').length;
+  const parts = [
+    `Source kind: ${sp.kind}`,
+    `Lifecycle: ${sp.lifecycleStatus}`,
+    `Roadmap phase: ${sp.roadmapPhaseId ?? 'unassigned'}`,
+    `Roadmap step: ${sp.roadmapStepId ?? 'phase-level or unassigned'}`,
+    sp.tasks.length > 0
+      ? `Tasks: ${completed}/${sp.tasks.length} closed`
+      : 'Tasks: no tasks documented; progress is unknown',
+  ];
+  if (sp.relatedPhaseIds?.length) parts.push(`Related phases: ${sp.relatedPhaseIds.join(', ')}`);
+  return {
+    descriptorKind: 'spec-work',
+    type: sp.kind === 'accepted-capability' ? 'Accepted capability' : 'Specification work',
+    title: sp.name,
+    status: sp.lifecycleStatus,
+    statusChip: SPEC_STATUS_CHIP[sp.lifecycleStatus] ?? SPEC_STATUS_CHIP.unknown,
+    text: parts.join('\n'),
+    file: sp.source.file,
+    line: sp.source.line,
     projectPath: p.path,
   };
 }

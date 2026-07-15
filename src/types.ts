@@ -892,6 +892,7 @@ export type DrawerDescriptorKind =
   | 'signal'
   | 'decision'
   | 'spec'
+  | 'spec-work'
   | 'doc'
   | 'audit'
   | 'risk'
