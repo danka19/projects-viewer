@@ -130,6 +130,7 @@ When a phase is too large for one iteration, create or update a detailed plan un
 |---|---|---|---|
 | `add-persistent-project-management` | P0 | none | accepted |
 | `add-project-brief-report` | P3 | P1,P2 | accepted |
+| `add-roadmap-spec-cards` | P4 | none | in_progress |
 | `add-selectable-specs-canvas` | P4 | none | accepted |
 | `agent-preflight-packet` | P4 | P3 | pending_acceptance |
 | `fix-lifecycle-status-progress-semantics` | P4 | none | accepted |
@@ -137,3 +138,28 @@ When a phase is too large for one iteration, create or update a detailed plan un
 | `improve-dashboard-evidence-trust` | P4 | none | accepted |
 | `improve-dashboard-search-navigation` | P4 | none | accepted |
 | `redesign-dashboard-project-timeline` | P4 | none | accepted |
+
+## Capability Spec Step Ownership
+
+| Capability spec | Roadmap phase | Roadmap step |
+|---|---|---|
+| `agent-preflight-packet` | P4 | none |
+| `ai-context` | P1 | none |
+| `ai-findings` | P1 | none |
+| `local-project-config` | P0 | none |
+| `mcp-context-api` | P4 | none |
+
+## Active Change Step Execution
+
+| Active change | Execution phase | Execution step |
+|---|---|---|
+| `add-persistent-project-management` | P0 | none |
+| `add-project-brief-report` | P3 | none |
+| `add-roadmap-spec-cards` | P4 | none |
+| `add-selectable-specs-canvas` | P4 | none |
+| `agent-preflight-packet` | P4 | none |
+| `fix-lifecycle-status-progress-semantics` | P4 | none |
+| `harden-dashboard-state-derivation` | P4 | none |
+| `improve-dashboard-evidence-trust` | P4 | none |
+| `improve-dashboard-search-navigation` | P4 | none |
+| `redesign-dashboard-project-timeline` | P4 | none |
