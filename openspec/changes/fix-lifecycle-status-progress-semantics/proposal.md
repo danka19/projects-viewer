@@ -1,5 +1,11 @@
 ## Why
 
+## Roadmap
+
+- Execution phase: P4
+- Related phases: none
+- Lifecycle status: accepted
+
 Explicit `ready` and `planned` phase statuses are overwritten by explanatory acceptance prose, and accepted living specifications without task evidence display false 100% implementation progress.
 
 ## What Changes

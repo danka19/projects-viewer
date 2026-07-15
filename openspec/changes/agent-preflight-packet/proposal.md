@@ -1,5 +1,11 @@
 ## Why
 
+## Roadmap
+
+- Execution phase: P4
+- Related phases: P3
+- Lifecycle status: pending_acceptance
+
 Projects Viewer already exposes compact AI context and is planning a daily/weekly human brief, but AI implementation and reviewer agents need a different pre-work artifact: a concise, evidence-linked packet that helps them orient before changing code or docs. Defining this separately prevents the human brief/report contract from accumulating agent-specific fields, checklists, or execution guidance.
 
 ## What Changes

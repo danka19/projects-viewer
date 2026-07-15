@@ -12,7 +12,8 @@ This roadmap is the working development plan for Projects Viewer. It is phase-le
 
 ## Phase 0. Project Foundation
 
-Status: closed. Human acceptance was recorded on 2026-07-08.
+Status: closed.
+Human acceptance was recorded on 2026-07-08.
 
 Goal: prepare repository rules, documentation, environment notes, baseline product decisions, and verification habits.
 
@@ -32,7 +33,8 @@ Evidence:
 
 ## Phase 1. Discovery And Requirements
 
-Status: closed. Human acceptance was recorded on 2026-07-09.
+Status: closed.
+Human acceptance was recorded on 2026-07-09.
 
 Goal: identify users, workflows, data sources, constraints, and first acceptance criteria.
 
@@ -47,7 +49,8 @@ Evidence:
 
 ## Phase 2. Architecture And Data Model
 
-Status: closed. Human acceptance was recorded on 2026-07-09.
+Status: closed.
+Human acceptance was recorded on 2026-07-09.
 
 Goal: define the first stable architecture, data contract, report composition module boundary, local API surface, ranking rules, storage boundaries, and integration contracts for the selected project brief/report workflow.
 
@@ -61,7 +64,8 @@ Evidence:
 
 ## Phase 3. First Usable Workflow
 
-Status: closed. Human acceptance was recorded on 2026-07-09.
+Status: closed.
+Human acceptance was recorded on 2026-07-09.
 
 Goal: implement the first end-to-end local project brief/report workflow from `openspec/changes/add-project-brief-report/`, starting with verified API/report output before dashboard UI.
 
@@ -109,3 +113,27 @@ Decision required before Phase 4 planning:
 ## Phase Planning Rule
 
 When a phase is too large for one iteration, create or update a detailed plan under `docs/phases/` before implementation starts. Follow `docs/phases/PHASE_PLAN_TEMPLATE.md`.
+
+## Capability Spec Ownership
+
+| Capability spec | Roadmap phase | Related phases |
+|---|---|---|
+| `agent-preflight-packet` | P4 | P3 |
+| `ai-context` | P1 | none |
+| `ai-findings` | P1 | none |
+| `local-project-config` | P0 | P4 |
+| `mcp-context-api` | P4 | P0 |
+
+## Active Change Execution
+
+| Active change | Execution phase | Related phases | Lifecycle status |
+|---|---|---|---|
+| `add-persistent-project-management` | P0 | none | accepted |
+| `add-project-brief-report` | P3 | P1,P2 | accepted |
+| `add-selectable-specs-canvas` | P4 | none | accepted |
+| `agent-preflight-packet` | P4 | P3 | pending_acceptance |
+| `fix-lifecycle-status-progress-semantics` | P4 | none | accepted |
+| `harden-dashboard-state-derivation` | P4 | none | accepted |
+| `improve-dashboard-evidence-trust` | P4 | none | accepted |
+| `improve-dashboard-search-navigation` | P4 | none | accepted |
+| `redesign-dashboard-project-timeline` | P4 | none | accepted |

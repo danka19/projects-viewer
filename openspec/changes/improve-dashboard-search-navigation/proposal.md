@@ -1,5 +1,11 @@
 ## Why
 
+## Roadmap
+
+- Execution phase: P4
+- Related phases: none
+- Lifecycle status: accepted
+
 Global search currently returns source-order results, silently stops at forty items, mixes parser diagnostics into ordinary work, and clears the user's query when a result opens. The redesigned dashboard also loses selected project, detail surface, and filter context on reload, so the next requested redesign slice must make search trustworthy and safe UI context durable.
 
 ## What Changes

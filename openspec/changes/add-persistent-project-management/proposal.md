@@ -1,5 +1,11 @@
 # Add Persistent Project Management
 
+## Roadmap
+
+- Execution phase: P0
+- Related phases: none
+- Lifecycle status: accepted
+
 ## Why
 
 Users need to add single projects and workspace folders from the local dashboard without losing tracked project settings after app restart or computer reboot.

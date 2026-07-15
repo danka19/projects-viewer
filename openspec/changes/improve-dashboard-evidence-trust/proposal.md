@@ -1,5 +1,11 @@
 ## Why
 
+## Roadmap
+
+- Execution phase: P4
+- Related phases: none
+- Lifecycle status: accepted
+
 The 2026-07-12 API and UX trust audit confirmed that completed task text, cross-line OpenSpec normative scenarios, and explanatory next-action prose can be promoted as current project state, while search results can hide the fragment that caused a match. These gaps make scanner-derived evidence and otherwise-correct search results look authoritative without being explainable.
 
 ## What Changes

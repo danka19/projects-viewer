@@ -1,5 +1,11 @@
 ## Why
 
+## Roadmap
+
+- Execution phase: P4
+- Related phases: none
+- Lifecycle status: accepted
+
 Projects Viewer promotes roadmap phases as the only primary work visualization, so spec-first projects appear empty or secondary even when OpenSpec changes, accepted specifications, and their tasks are the actual work source of truth. The dashboard needs a selectable, persistent Specs view that preserves the accepted Roadmap while representing only evidenced specification ownership and dependencies inside the existing local-only, read-only boundary.
 
 ## What Changes

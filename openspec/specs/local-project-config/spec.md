@@ -1,6 +1,10 @@
 ## Purpose
-
 Define the canonical local runtime configuration and its user-driven safety boundaries.
+
+## Roadmap
+
+- Roadmap phase: P0
+- Related phases: P4
 
 ## Requirements
 

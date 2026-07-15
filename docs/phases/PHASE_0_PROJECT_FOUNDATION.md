@@ -1,6 +1,7 @@
 # Phase 0. Project Foundation
 
-Status: closed. Human acceptance was recorded on 2026-07-08.
+Status: closed.
+Human acceptance was recorded on 2026-07-08.
 
 ## Goal
 

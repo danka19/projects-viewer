@@ -1,6 +1,7 @@
 # Phase 1. Discovery And Requirements
 
-Status: closed. Human acceptance was recorded on 2026-07-09.
+Status: closed.
+Human acceptance was recorded on 2026-07-09.
 
 ## Goal
 

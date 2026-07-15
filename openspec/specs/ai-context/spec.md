@@ -1,6 +1,10 @@
 ## Purpose
-
 Define local AI-readable context contracts over generated Projects Viewer scan data.
+
+## Roadmap
+
+- Roadmap phase: P1
+- Related phases: none
 
 ## Requirements
 

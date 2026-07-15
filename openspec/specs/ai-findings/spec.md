@@ -1,6 +1,10 @@
 ## Purpose
-
 Define local review-required AI finding records derived from Projects Viewer scan signals.
+
+## Roadmap
+
+- Roadmap phase: P1
+- Related phases: none
 
 ## Requirements
 

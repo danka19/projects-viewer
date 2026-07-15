@@ -1,5 +1,11 @@
 ## Why
 
+## Roadmap
+
+- Execution phase: P3
+- Related phases: P1, P2
+- Lifecycle status: accepted
+
 Projects Viewer already exposes local AI context and review-required findings, but the first end-to-end workflow is still prose-only in Phase 1 notes. A project brief/report capability turns those scan signals into a concrete, reviewable daily or weekly decision aid without granting AI authority to act.
 
 ## What Changes

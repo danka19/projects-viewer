@@ -2,7 +2,17 @@
 
 Status: in_progress.
 
-Last updated: 2026-07-13.
+Last updated: 2026-07-15.
+
+## Roadmap/OpenSpec Ownership Reconciliation (2026-07-15)
+
+The roadmap/OpenSpec governance drift was repaired. Every accepted capability spec and active change now declares exactly one primary roadmap phase, and `docs/ROADMAP.md` contains matching inverse ownership/execution tables. Historical ownership follows the phase records: project management is owned by P0, AI context/findings by P1, the project brief/report by P3, and the later agent/dashboard hardening workstreams by P4. P4 remains `draft`; these links provide traceability and do not constitute phase activation or human acceptance.
+
+Fresh governance evidence:
+
+- Roadmap/OpenSpec validator: `ok: true`, 0 errors, 1 warning.
+- The remaining warning is intentional: `agent-preflight-packet` has checked tasks but remains `pending_acceptance` until human acceptance; completed tasks do not imply acceptance.
+- The validator now reports 5 accepted specs, 9 active changes, and 5 roadmap phases with explicit statuses.
 
 ## Lifecycle Status And Progress Semantics (2026-07-13)
 

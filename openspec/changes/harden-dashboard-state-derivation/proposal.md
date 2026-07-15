@@ -1,5 +1,11 @@
 ## Why
 
+## Roadmap
+
+- Execution phase: P4
+- Related phases: none
+- Lifecycle status: accepted
+
 The 2026-07-10 UX audit (UX-001) recorded that generated dashboard state promotes agent rules, verification-checklist instructions, TDD plan checkboxes, and ambiguous lifecycle text as primary current phase, next action, and blocker values. The dashboard redesign is gated on trusted state: the timeline and overview must not visually amplify these false signals.
 
 ## What Changes

@@ -1,6 +1,10 @@
 ## Purpose
-
 Define compact agent context discovery, JSON-only API behavior, MCP response validation, and read-only diagnostics.
+
+## Roadmap
+
+- Roadmap phase: P4
+- Related phases: P0
 
 ## Requirements
 

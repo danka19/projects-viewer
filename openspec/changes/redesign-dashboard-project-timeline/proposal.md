@@ -1,5 +1,11 @@
 ## Why
 
+## Roadmap
+
+- Execution phase: P4
+- Related phases: none
+- Lifecycle status: accepted
+
 Projects Viewer currently presents roadmap state as a dense vertical list hidden behind a secondary tab, so the user cannot understand completed work, the active phase, the current step, or what comes next at a glance. The dashboard redesign needs a trustworthy, compact project timeline that makes lifecycle position visually obvious while preserving the existing dark theme and read-only evidence model.
 
 ## What Changes

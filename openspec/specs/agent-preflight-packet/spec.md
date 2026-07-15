@@ -1,6 +1,10 @@
 ## Purpose
-
 Define validated JSON retrieval boundaries for local agent preflight packets.
+
+## Roadmap
+
+- Roadmap phase: P4
+- Related phases: P3
 
 ## Requirements
 
