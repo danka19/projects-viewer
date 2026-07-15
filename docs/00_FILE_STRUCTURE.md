@@ -89,13 +89,13 @@ This document is the repository map for agents and humans. Keep it current whene
 | `docs/superpowers/plans/` | Implementation plans produced by the writing-plans workflow |
 | `openspec/changes/add-persistent-project-management/` | Completed OpenSpec change for persistent project/workspace management |
 | `openspec/changes/add-project-brief-report/` | Active proposed OpenSpec change for the local daily/weekly project brief/report workflow |
-| `openspec/changes/agent-preflight-packet/` | Implemented proposed OpenSpec change for a separate local AI-agent preflight packet workflow, ready for human acceptance review |
+| `openspec/changes/archive/2026-07-15-agent-preflight-packet/` | Accepted and archived implementation history for the local AI-agent preflight packet workflow |
 | `openspec/changes/harden-dashboard-state-derivation/` | Implemented dashboard source-trust/current-state filtering change |
 | `openspec/changes/redesign-dashboard-project-timeline/` | Accepted horizontal phase/step timeline change; 43/43 tasks complete after explicit owner integration acceptance on 2026-07-13, and intentionally unarchived |
 | `openspec/changes/improve-dashboard-search-navigation/` | Implemented ranked search and safe versioned presentation-state persistence change |
 | `openspec/changes/archive/2026-07-08-add-ai-context-findings-layer/` | Archived OpenSpec change for AI-readable project context and review-required findings |
 | `openspec/changes/archive/2026-07-12-harden-mcp-context-api/` | Archived implementation history for canonical config cleanup, compact project-id listing, API JSON boundary hardening, MCP response validation, and diagnostics |
-| `openspec/specs/agent-preflight-packet/spec.md` | Accepted agent preflight retrieval and JSON-boundary requirements |
+| `openspec/specs/agent-preflight-packet/spec.md` | Accepted local packet composition, evidence, safe-state, no-action, retrieval, and JSON-boundary requirements |
 | `openspec/specs/ai-context/spec.md` | Accepted AI context requirements |
 | `openspec/specs/ai-findings/spec.md` | Accepted AI findings requirements |
 | `openspec/specs/local-project-config/spec.md` | Accepted canonical local project config requirements |

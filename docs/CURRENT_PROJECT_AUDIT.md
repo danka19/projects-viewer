@@ -4,6 +4,12 @@ Status: in_progress.
 
 Last updated: 2026-07-15.
 
+## Agent Preflight Packet Acceptance (2026-07-15)
+
+The owner accepted `agent-preflight-packet` on 2026-07-15. Its six change requirements were merged with the two existing MCP/API hardening requirements in `openspec/specs/agent-preflight-packet/spec.md`, preserving the P4 primary owner and P3 relationship. The completed change is archived at `openspec/changes/archive/2026-07-15-agent-preflight-packet/`.
+
+The accepted contract covers saved configured-project identity, local-only generation, role-specific agent context, separation from human brief output, required reading and acceptance mapping, evidence and derived-label disclosure, safe degradation for optional inputs, blocking behavior for missing generated scan data, and prohibition of automatic actions or arbitrary path/action parameters.
+
 ## Roadmap Specification Cards Acceptance (2026-07-15)
 
 The owner accepted `add-roadmap-spec-cards` on 2026-07-15 after implementation and acceptance evidence were complete. The accepted contract now lives in `openspec/specs/roadmap-spec-cards/spec.md`, and the completed change is archived at `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/`.
@@ -16,9 +22,8 @@ The roadmap/OpenSpec governance drift was repaired. Every accepted capability sp
 
 Fresh governance evidence:
 
-- Roadmap/OpenSpec validator: `ok: true`, 0 errors, 1 warning.
-- The remaining warning is intentional: `agent-preflight-packet` has checked tasks but remains `pending_acceptance` until human acceptance; completed tasks do not imply acceptance.
-- The validator now reports 6 accepted specs, 9 active changes, and 5 roadmap phases with explicit statuses.
+- Roadmap/OpenSpec validator: `ok: true`, 0 errors, 0 warnings.
+- The validator now reports 6 accepted specs, 8 active changes, and 5 roadmap phases with explicit statuses.
 
 ## Lifecycle Status And Progress Semantics (2026-07-13)
 
@@ -52,7 +57,7 @@ Fresh verification evidence:
 | Roadmap Phase 4 | `draft` | Detailed scope has not been accepted; the timeline and MCP workstreams do not silently activate the phase. |
 | `add-persistent-project-management` | `accepted` | Implemented and included in the accepted Phase 0 foundation, but the OpenSpec change remains unarchived. |
 | `add-project-brief-report` | `accepted` | Phase 3 was explicitly accepted and closed; archival remains a separate action. |
-| `agent-preflight-packet` | `pending_acceptance` | Tasks are complete and verification evidence exists; the audit still records human acceptance as outstanding. |
+| `agent-preflight-packet` | `archived` | The owner accepted the full packet contract on 2026-07-15. Requirements were synced into the accepted spec, and implementation history was archived at `openspec/changes/archive/2026-07-15-agent-preflight-packet/`. |
 | `harden-dashboard-state-derivation` | `accepted` | The trust gate was implemented and included in the accepted redesign evidence; archival remains separate. |
 | `improve-dashboard-search-navigation` | `accepted` | Implementation and verification are included in the accepted redesign evidence; archival remains separate. |
 | `redesign-dashboard-project-timeline` | `accepted` | All 43/43 tasks are complete. Commit `9cfb550` and fresh six-viewport/theme geometry evidence close tasks 5.6-5.7; the owner explicitly authorized integration on 2026-07-13, closing task 7.6. Archival remains separate. |
@@ -201,7 +206,7 @@ Sequential work: the owner authorized integration of the complete dashboard bran
 | AUDIT-004 | Local branch had commits ahead of GitHub remote during early foundation work; `main` later matched `origin/main` before Phase 1 planning. | Human owner | closed 2026-07-08 |
 | AUDIT-005 | Manual browser verification for add project, restart persistence, workspace discovery, track selected, disable, and rescan. | Current feature | closed 2026-07-08 |
 | AUDIT-006 | Phase 3 project brief/report API is implemented, verified, reviewed, pushed, and accepted as closed; `add-project-brief-report` remains ready for OpenSpec archival after branch review/merge. | Human owner / next OpenSpec archival step | closed 2026-07-09 |
-| AUDIT-007 | `agent-preflight-packet` is implemented separately from `project-brief-report`; final acceptance still requires full verification evidence and human review before archiving the OpenSpec change. | Current feature | monitored |
+| AUDIT-007 | `agent-preflight-packet` is implemented separately from `project-brief-report`; the owner accepted it on 2026-07-15, its full contract is synced to the accepted spec, and the change is archived. | Current feature | closed 2026-07-15 |
 | AUDIT-008 | The owner selected the bounded UX-first sequence; state trust preceded overview promotion and MCP/API hardening remained separate. Detailed Phase 4 scope is still a future decision. | Human owner | closed for redesign sequencing 2026-07-11 |
 | AUDIT-009 | Unrelated uncommitted UI/worktree changes were present during the earlier agent-preflight feature session; by 2026-07-10 `main` matched `origin/main` and the worktree was clean before new intentional documentation changes. | Human owner | closed 2026-07-10 |
 | AUDIT-010 | MCP/API hardening implementation, verification, independent review, accepted-spec sync, and OpenSpec archival are complete: root legacy config fallback is removed, compact saved project ids are exposed, `/api/*` parser and routing failures stay JSON, MCP response validation is hardened, and local HTTP diagnostics guidance is updated. | Completed hardening slice | closed 2026-07-12 |
