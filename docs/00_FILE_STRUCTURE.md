@@ -93,20 +93,26 @@ This document is the repository map for agents and humans. Keep it current whene
 | `openspec/changes/harden-dashboard-state-derivation/` | Implemented dashboard source-trust/current-state filtering change |
 | `openspec/changes/archive/2026-07-15-fix-lifecycle-status-progress-semantics/` | Accepted lifecycle, phase-step ownership, and living-spec progress implementation history |
 | `openspec/changes/archive/2026-07-15-improve-dashboard-evidence-trust/` | Accepted scanner/search evidence-trust remediation history |
-| `openspec/changes/redesign-dashboard-project-timeline/` | Accepted horizontal phase/step timeline change; 43/43 tasks complete after explicit owner integration acceptance on 2026-07-13, and intentionally unarchived |
-| `openspec/changes/improve-dashboard-search-navigation/` | Implemented ranked search and safe versioned presentation-state persistence change |
+| `openspec/changes/archive/2026-07-15-redesign-dashboard-project-timeline/` | Accepted horizontal phase/step timeline implementation history |
+| `openspec/changes/archive/2026-07-15-improve-dashboard-search-navigation/` | Accepted ranked search and safe versioned presentation-state persistence history |
+| `openspec/changes/archive/2026-07-15-add-selectable-specs-canvas/` | Accepted selectable Roadmap/Specs and responsive Specs Canvas implementation history |
 | `openspec/changes/archive/2026-07-08-add-ai-context-findings-layer/` | Archived OpenSpec change for AI-readable project context and review-required findings |
 | `openspec/changes/archive/2026-07-12-harden-mcp-context-api/` | Archived implementation history for canonical config cleanup, compact project-id listing, API JSON boundary hardening, MCP response validation, and diagnostics |
 | `openspec/specs/agent-preflight-packet/spec.md` | Accepted local packet composition, evidence, safe-state, no-action, retrieval, and JSON-boundary requirements |
 | `openspec/specs/ai-context/spec.md` | Accepted AI context requirements |
 | `openspec/specs/ai-findings/spec.md` | Accepted AI findings requirements |
 | `openspec/specs/dashboard-evidence-trust/spec.md` | Accepted blocker, next-action, normative-scenario, search-match, and evidence-deduplication requirements |
+| `openspec/specs/dashboard-project-timeline/spec.md` | Accepted responsive and accessible horizontal project lifecycle timeline requirements |
+| `openspec/specs/dashboard-search-navigation/spec.md` | Accepted ranked search, navigation, and safe UI-state persistence requirements |
 | `openspec/specs/dashboard-state-derivation/spec.md` | Accepted scanner state, lifecycle, phase-step, next-action, and blocker derivation requirements |
+| `openspec/specs/documentation-view-sources/spec.md` | Accepted safe view-root and deterministic documentation-source classification requirements |
 | `openspec/specs/local-project-config/spec.md` | Accepted canonical local project config requirements |
 | `openspec/specs/mcp-context-api/spec.md` | Accepted configured-project listing, API JSON-boundary, MCP validation, and diagnostics requirements |
 | `openspec/specs/project-management/spec.md` | Accepted persistent project/workspace management and read-only scan-boundary requirements |
 | `openspec/specs/project-brief-report/spec.md` | Accepted local advisory project brief/report requirements |
+| `openspec/specs/selectable-primary-work-view/spec.md` | Accepted Roadmap/Specs view selection and persistence requirements |
 | `openspec/specs/spec-work-model/spec.md` | Accepted specification-work progress and evidence requirements |
+| `openspec/specs/specs-canvas/spec.md` | Accepted responsive, accessible, read-only Specs Canvas requirements |
 
 ## Local Runtime
 

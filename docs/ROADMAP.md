@@ -105,8 +105,9 @@ Implemented follow-on and parallel bounded workstreams:
 - [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) restores scanner and search evidence trust after the completed MCP/API hardening slice. Implementation, focused/full gates, real configured-project rescan, corrected desktop/mobile browser acceptance, documentation/task-state reconciliation, and the strict OpenSpec CLI gate are complete at 13/13 tasks. The change remains active/open, unsynced, and unarchived, ready for a separate explicit sync/archive workflow. [`API_UX_TRUST_AUDIT_2026-07-12.md`](audits/API_UX_TRUST_AUDIT_2026-07-12.md) is the canonical evidence source.
 - `docs/audits/UX_UI_AUDIT_2026-07-10.md` is the redesign baseline; `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records implementation and browser evidence.
 - `docs/planning/DASHBOARD_REDESIGN_PLAN.md` records the bounded sequence: trusted state derivation, Project Timeline, overview integration, search/navigation state, then responsive/accessibility acceptance.
-- `openspec/changes/redesign-dashboard-project-timeline/` is `accepted` with 43/43 tasks complete. Commit `9cfb550` fixed the mixed-height axis and fresh dark/light desktop, tablet, and mobile checks measured 0 px axis deviation with no clipping or page overflow. The owner explicitly authorized integration on 2026-07-13, closing task 7.6.
-- `openspec/changes/improve-dashboard-search-navigation/` records ranked diagnostic-aware search and safe versioned local/history presentation state. It preserves configured-path, read-only, and local-only boundaries.
+- `openspec/changes/archive/2026-07-15-redesign-dashboard-project-timeline/` records the accepted 43/43-task horizontal timeline implementation and its browser/geometry evidence.
+- `openspec/changes/archive/2026-07-15-improve-dashboard-search-navigation/` records accepted ranked diagnostic-aware search and safe versioned local/history presentation state.
+- `openspec/changes/archive/2026-07-15-add-selectable-specs-canvas/` records accepted selectable Roadmap/Specs primary work, safe documentation roots, evidence-backed specification work, and responsive accessible Canvas Focus behavior.
 
 Decision required before Phase 4 planning:
 
@@ -125,22 +126,24 @@ When a phase is too large for one iteration, create or update a detailed plan un
 | `ai-context` | P1 | none |
 | `ai-findings` | P1 | none |
 | `dashboard-evidence-trust` | P4 | none |
+| `dashboard-project-timeline` | P4 | none |
+| `dashboard-search-navigation` | P4 | none |
 | `dashboard-state-derivation` | P4 | none |
+| `documentation-view-sources` | P4 | none |
 | `local-project-config` | P0 | P4 |
 | `mcp-context-api` | P4 | P0 |
 | `project-brief-report` | P3 | P1,P2 |
 | `project-management` | P0 | none |
 | `roadmap-spec-cards` | P4 | none |
+| `selectable-primary-work-view` | P4 | none |
 | `spec-work-model` | P4 | none |
+| `specs-canvas` | P4 | none |
 
 ## Active Change Execution
 
 | Active change | Execution phase | Related phases | Lifecycle status |
 |---|---|---|---|
-| `add-selectable-specs-canvas` | P4 | none | accepted |
 | `harden-dashboard-state-derivation` | P4 | none | accepted |
-| `improve-dashboard-search-navigation` | P4 | none | accepted |
-| `redesign-dashboard-project-timeline` | P4 | none | accepted |
 
 ## Capability Spec Step Ownership
 
@@ -149,19 +152,21 @@ When a phase is too large for one iteration, create or update a detailed plan un
 | `ai-context` | P1 | none |
 | `ai-findings` | P1 | none |
 | `dashboard-evidence-trust` | P4 | none |
+| `dashboard-project-timeline` | P4 | none |
+| `dashboard-search-navigation` | P4 | none |
 | `dashboard-state-derivation` | P4 | none |
+| `documentation-view-sources` | P4 | none |
 | `local-project-config` | P0 | none |
 | `mcp-context-api` | P4 | none |
 | `project-brief-report` | P3 | none |
 | `project-management` | P0 | none |
 | `roadmap-spec-cards` | P4 | none |
+| `selectable-primary-work-view` | P4 | none |
 | `spec-work-model` | P4 | none |
+| `specs-canvas` | P4 | none |
 
 ## Active Change Step Execution
 
 | Active change | Execution phase | Execution step |
 |---|---|---|
-| `add-selectable-specs-canvas` | P4 | none |
 | `harden-dashboard-state-derivation` | P4 | none |
-| `improve-dashboard-search-navigation` | P4 | none |
-| `redesign-dashboard-project-timeline` | P4 | none |

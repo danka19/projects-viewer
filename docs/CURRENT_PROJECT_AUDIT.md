@@ -4,6 +4,10 @@ Status: in_progress.
 
 Last updated: 2026-07-15.
 
+## Dashboard Interface Spec Archival (2026-07-15)
+
+The accepted `add-selectable-specs-canvas`, `redesign-dashboard-project-timeline`, and `improve-dashboard-search-navigation` changes were synchronized into seven canonical interface/model capability specs and archived. The existing `spec-work-model` spec was merged rather than replaced, preserving the previously accepted living-spec progress requirement.
+
 ## Dashboard Model And Evidence Spec Archival (2026-07-15)
 
 The accepted `fix-lifecycle-status-progress-semantics` and `improve-dashboard-evidence-trust` changes were synchronized into canonical `dashboard-state-derivation`, `spec-work-model`, and `dashboard-evidence-trust` capability specs and archived. The accepted `harden-dashboard-state-derivation` delta is also represented in the canonical state-derivation spec, but its change remains active until the owner confirms archival despite its missing optional design artifact.
@@ -67,9 +71,9 @@ Fresh verification evidence:
 | `add-project-brief-report` | `archived` | Accepted requirements are canonical in `openspec/specs/project-brief-report/`; implementation history is archived at `openspec/changes/archive/2026-07-15-add-project-brief-report/`. |
 | `agent-preflight-packet` | `archived` | The owner accepted the full packet contract on 2026-07-15. Requirements were synced into the accepted spec, and implementation history was archived at `openspec/changes/archive/2026-07-15-agent-preflight-packet/`. |
 | `harden-dashboard-state-derivation` | `accepted` | The trust gate was implemented and included in the accepted redesign evidence; archival remains separate. |
-| `improve-dashboard-search-navigation` | `accepted` | Implementation and verification are included in the accepted redesign evidence; archival remains separate. |
-| `redesign-dashboard-project-timeline` | `accepted` | All 43/43 tasks are complete. Commit `9cfb550` and fresh six-viewport/theme geometry evidence close tasks 5.6-5.7; the owner explicitly authorized integration on 2026-07-13, closing task 7.6. Archival remains separate. |
-| `add-selectable-specs-canvas` | `accepted` | OpenSpec artifacts validate strictly; scanner/config/model/layout/routing/state/search/UI implementation is complete with 107 Node + 91 component tests, production build, and dark/light 1280×720, 1024×768, 390×844 browser evidence. The owner authorized integration on 2026-07-13; archival remains separate. |
+| `improve-dashboard-search-navigation` | `archived` | Accepted requirements are canonical in `dashboard-search-navigation`; implementation history is archived under `openspec/changes/archive/2026-07-15-improve-dashboard-search-navigation/`. |
+| `redesign-dashboard-project-timeline` | `archived` | Accepted requirements are canonical in `dashboard-project-timeline`; implementation history is archived under `openspec/changes/archive/2026-07-15-redesign-dashboard-project-timeline/`. |
+| `add-selectable-specs-canvas` | `archived` | Accepted requirements are canonical across documentation-view, primary-view, spec-work-model, and Specs Canvas specs; implementation history is archived under `openspec/changes/archive/2026-07-15-add-selectable-specs-canvas/`. |
 | `add-roadmap-spec-cards` | `archived` | The owner accepted the exact ownership and nested-card workflow on 2026-07-15. Requirements were synced to `openspec/specs/roadmap-spec-cards/`, and the completed change was archived at `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/`. |
 | `harden-mcp-context-api` | `archived` | Implementation, verification, accepted-spec sync, and archival are complete at `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`. |
 | `fix-lifecycle-status-progress-semantics` | `archived` | Accepted requirements are canonical in `dashboard-state-derivation` and `spec-work-model`; implementation history is archived under `openspec/changes/archive/2026-07-15-fix-lifecycle-status-progress-semantics/`. |

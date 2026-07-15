@@ -12,10 +12,10 @@ Dashboard redesign update on 2026-07-11:
 - The agent preflight packet was accepted on 2026-07-15. Its full local-data, role, evidence, safe-state, verification, and no-automatic-action contract is canonical in `openspec/specs/agent-preflight-packet/`; implementation history is archived under `openspec/changes/archive/2026-07-15-agent-preflight-packet/`.
 - Roadmap specification cards were accepted on 2026-07-15. Exact phase/step ownership, nested cards, unassigned/integrity evidence, and navigation to the matching Specs Canvas identity are canonical in `openspec/specs/roadmap-spec-cards/`; the completed change is archived under `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/`.
 - Accepted lifecycle/progress semantics are canonical in `openspec/specs/dashboard-state-derivation/` and `openspec/specs/spec-work-model/`; implementation history is archived under `openspec/changes/archive/2026-07-15-fix-lifecycle-status-progress-semantics/`.
-- Selectable Roadmap/Specs primary work and the responsive Specs Canvas are implemented under active change `add-selectable-specs-canvas`. Scanner/config/model/geometry/state/component tests, the full suite/build, and the six-point dark/light browser matrix pass. The owner authorized integration on 2026-07-13; the change remains active and unarchived pending a separate lifecycle action.
+- Selectable Roadmap/Specs primary work and the responsive Specs Canvas are accepted and canonical in `openspec/specs/documentation-view-sources/`, `selectable-primary-work-view/`, `spec-work-model/`, and `specs-canvas/`.
 - The 2026-07-10 UX/UI audit remains the baseline. State-derivation trust, overview hierarchy, the horizontal phase/step timeline, ranked search, safe UI-state persistence, responsive ordering, focus handling, and contrast were implemented on `dashboard-redesign/ui-rebuild`.
 - `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records automated and browser evidence across dark/light desktop, tablet, mobile, history/focus flows, overflow measurements, and representative lifecycle states.
-- Active OpenSpec changes `redesign-dashboard-project-timeline` and `improve-dashboard-search-navigation` remain unarchived. The timeline is complete at 43/43 tasks after the straight-axis fix in `9cfb550` and explicit owner integration acceptance on 2026-07-13; archival remains a separate authorized action.
+- Accepted timeline and search/navigation behavior is canonical in `openspec/specs/dashboard-project-timeline/` and `openspec/specs/dashboard-search-navigation/`; implementation history is archived under `openspec/changes/archive/`.
 - Accepted scanner/search evidence-trust behavior is canonical in `openspec/specs/dashboard-evidence-trust/`; implementation history is archived under `openspec/changes/archive/2026-07-15-improve-dashboard-evidence-trust/`.
 - This bounded UX work did not activate or close roadmap Phase 4 and did not expand the local-only, configured-path, read-only, no-cloud security boundary.
 
@@ -90,15 +90,15 @@ v3 implemented on 2026-07-07:
 
 ## Active OpenSpec Changes
 
-- `openspec/changes/add-selectable-specs-canvas/`: approved selectable Roadmap/Specs primary-work change with safe documentation-view roots, evidence-backed specification work, persistent view state, and responsive accessible Canvas Focus presentation.
 - `openspec/changes/archive/2026-07-15-add-project-brief-report/`: accepted local daily/weekly human project brief/report workflow history.
 - `openspec/changes/archive/2026-07-15-agent-preflight-packet/`: accepted local AI-agent preflight packet workflow, intentionally separate from the human brief/report contract.
 - `openspec/changes/harden-dashboard-state-derivation/`: implemented dashboard trust gate that filters rule/policy/template noise and preserves explicit current-state semantics.
-- `openspec/changes/redesign-dashboard-project-timeline/`: accepted horizontal project phase/step timeline; all 43/43 tasks are complete after explicit owner integration acceptance on 2026-07-13, and the change remains intentionally unarchived.
-- `openspec/changes/improve-dashboard-search-navigation/`: implemented ranked accessible search plus safe versioned local/history UI-state restoration.
 
 ## Archived OpenSpec Changes
 
+- `openspec/changes/archive/2026-07-15-add-selectable-specs-canvas/`: accepted selectable Roadmap/Specs and responsive Specs Canvas implementation history.
+- `openspec/changes/archive/2026-07-15-redesign-dashboard-project-timeline/`: accepted horizontal lifecycle timeline implementation history.
+- `openspec/changes/archive/2026-07-15-improve-dashboard-search-navigation/`: accepted ranked search/navigation and safe UI-state persistence history.
 - `openspec/changes/archive/2026-07-15-fix-lifecycle-status-progress-semantics/`: accepted lifecycle, phase-step ownership, and living-spec progress implementation history.
 - `openspec/changes/archive/2026-07-15-improve-dashboard-evidence-trust/`: accepted scanner/search evidence-trust remediation history.
 - `openspec/changes/archive/2026-07-15-add-persistent-project-management/`: accepted persistent project/workspace management implementation history.
