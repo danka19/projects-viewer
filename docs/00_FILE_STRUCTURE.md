@@ -91,6 +91,8 @@ This document is the repository map for agents and humans. Keep it current whene
 | `openspec/changes/archive/2026-07-15-add-project-brief-report/` | Accepted implementation history for the local daily/weekly project brief/report workflow |
 | `openspec/changes/archive/2026-07-15-agent-preflight-packet/` | Accepted and archived implementation history for the local AI-agent preflight packet workflow |
 | `openspec/changes/harden-dashboard-state-derivation/` | Implemented dashboard source-trust/current-state filtering change |
+| `openspec/changes/archive/2026-07-15-fix-lifecycle-status-progress-semantics/` | Accepted lifecycle, phase-step ownership, and living-spec progress implementation history |
+| `openspec/changes/archive/2026-07-15-improve-dashboard-evidence-trust/` | Accepted scanner/search evidence-trust remediation history |
 | `openspec/changes/redesign-dashboard-project-timeline/` | Accepted horizontal phase/step timeline change; 43/43 tasks complete after explicit owner integration acceptance on 2026-07-13, and intentionally unarchived |
 | `openspec/changes/improve-dashboard-search-navigation/` | Implemented ranked search and safe versioned presentation-state persistence change |
 | `openspec/changes/archive/2026-07-08-add-ai-context-findings-layer/` | Archived OpenSpec change for AI-readable project context and review-required findings |
@@ -98,10 +100,13 @@ This document is the repository map for agents and humans. Keep it current whene
 | `openspec/specs/agent-preflight-packet/spec.md` | Accepted local packet composition, evidence, safe-state, no-action, retrieval, and JSON-boundary requirements |
 | `openspec/specs/ai-context/spec.md` | Accepted AI context requirements |
 | `openspec/specs/ai-findings/spec.md` | Accepted AI findings requirements |
+| `openspec/specs/dashboard-evidence-trust/spec.md` | Accepted blocker, next-action, normative-scenario, search-match, and evidence-deduplication requirements |
+| `openspec/specs/dashboard-state-derivation/spec.md` | Accepted scanner state, lifecycle, phase-step, next-action, and blocker derivation requirements |
 | `openspec/specs/local-project-config/spec.md` | Accepted canonical local project config requirements |
 | `openspec/specs/mcp-context-api/spec.md` | Accepted configured-project listing, API JSON-boundary, MCP validation, and diagnostics requirements |
 | `openspec/specs/project-management/spec.md` | Accepted persistent project/workspace management and read-only scan-boundary requirements |
 | `openspec/specs/project-brief-report/spec.md` | Accepted local advisory project brief/report requirements |
+| `openspec/specs/spec-work-model/spec.md` | Accepted specification-work progress and evidence requirements |
 
 ## Local Runtime
 

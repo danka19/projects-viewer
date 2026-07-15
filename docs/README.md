@@ -11,12 +11,12 @@ Dashboard redesign update on 2026-07-11:
 - Persistent project management and the local project brief/report were synchronized into accepted capability specs and archived on 2026-07-15. Canonical behavior lives in `openspec/specs/project-management/` and `openspec/specs/project-brief-report/`.
 - The agent preflight packet was accepted on 2026-07-15. Its full local-data, role, evidence, safe-state, verification, and no-automatic-action contract is canonical in `openspec/specs/agent-preflight-packet/`; implementation history is archived under `openspec/changes/archive/2026-07-15-agent-preflight-packet/`.
 - Roadmap specification cards were accepted on 2026-07-15. Exact phase/step ownership, nested cards, unassigned/integrity evidence, and navigation to the matching Specs Canvas identity are canonical in `openspec/specs/roadmap-spec-cards/`; the completed change is archived under `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/`.
-- Active change `fix-lifecycle-status-progress-semantics` implements authoritative exact leading phase statuses with documentation conflict evidence, limits phase steps to phase-owned source structure, and keeps accepted living-spec progress unknown when no task evidence exists. RED/GREEN coverage, the full suite/build, a fresh configured rescan, and browser acceptance are complete; sync/archive remain separate gates.
+- Accepted lifecycle/progress semantics are canonical in `openspec/specs/dashboard-state-derivation/` and `openspec/specs/spec-work-model/`; implementation history is archived under `openspec/changes/archive/2026-07-15-fix-lifecycle-status-progress-semantics/`.
 - Selectable Roadmap/Specs primary work and the responsive Specs Canvas are implemented under active change `add-selectable-specs-canvas`. Scanner/config/model/geometry/state/component tests, the full suite/build, and the six-point dark/light browser matrix pass. The owner authorized integration on 2026-07-13; the change remains active and unarchived pending a separate lifecycle action.
 - The 2026-07-10 UX/UI audit remains the baseline. State-derivation trust, overview hierarchy, the horizontal phase/step timeline, ranked search, safe UI-state persistence, responsive ordering, focus handling, and contrast were implemented on `dashboard-redesign/ui-rebuild`.
 - `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records automated and browser evidence across dark/light desktop, tablet, mobile, history/focus flows, overflow measurements, and representative lifecycle states.
 - Active OpenSpec changes `redesign-dashboard-project-timeline` and `improve-dashboard-search-navigation` remain unarchived. The timeline is complete at 43/43 tasks after the straight-axis fix in `9cfb550` and explicit owner integration acceptance on 2026-07-13; archival remains a separate authorized action.
-- Active change `improve-dashboard-evidence-trust` has completed all 13/13 implementation tasks for its scanner/search remediation: focused/full tests, a fresh configured-project rescan, corrected 1280x720/390x844 browser acceptance, documentation reconciliation, and the strict OpenSpec CLI gate pass. The owner authorized integration on 2026-07-13. The change remains active/open, unsynced, and unarchived pending a separate explicit sync/archive workflow; it does not own the already archived API fallback fix.
+- Accepted scanner/search evidence-trust behavior is canonical in `openspec/specs/dashboard-evidence-trust/`; implementation history is archived under `openspec/changes/archive/2026-07-15-improve-dashboard-evidence-trust/`.
 - This bounded UX work did not activate or close roadmap Phase 4 and did not expand the local-only, configured-path, read-only, no-cloud security boundary.
 
 v7 implemented on 2026-07-09:
@@ -90,17 +90,17 @@ v3 implemented on 2026-07-07:
 
 ## Active OpenSpec Changes
 
-- `openspec/changes/fix-lifecycle-status-progress-semantics/`: authoritative leading phase lifecycle, phase-owned step extraction, and evidence-based no-task accepted-capability progress; all implementation and verification tasks are complete, while the change remains unsynced/unarchived.
 - `openspec/changes/add-selectable-specs-canvas/`: approved selectable Roadmap/Specs primary-work change with safe documentation-view roots, evidence-backed specification work, persistent view state, and responsive accessible Canvas Focus presentation.
 - `openspec/changes/archive/2026-07-15-add-project-brief-report/`: accepted local daily/weekly human project brief/report workflow history.
 - `openspec/changes/archive/2026-07-15-agent-preflight-packet/`: accepted local AI-agent preflight packet workflow, intentionally separate from the human brief/report contract.
-- [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/): scanner and search evidence-trust remediation is implemented and verified with all 13/13 tasks and the strict OpenSpec CLI gate complete. The change remains active/open, unsynced, and unarchived, ready for a separate explicit sync/archive workflow. Evidence is recorded in the [`2026-07-12 API and UX trust audit`](audits/API_UX_TRUST_AUDIT_2026-07-12.md).
 - `openspec/changes/harden-dashboard-state-derivation/`: implemented dashboard trust gate that filters rule/policy/template noise and preserves explicit current-state semantics.
 - `openspec/changes/redesign-dashboard-project-timeline/`: accepted horizontal project phase/step timeline; all 43/43 tasks are complete after explicit owner integration acceptance on 2026-07-13, and the change remains intentionally unarchived.
 - `openspec/changes/improve-dashboard-search-navigation/`: implemented ranked accessible search plus safe versioned local/history UI-state restoration.
 
 ## Archived OpenSpec Changes
 
+- `openspec/changes/archive/2026-07-15-fix-lifecycle-status-progress-semantics/`: accepted lifecycle, phase-step ownership, and living-spec progress implementation history.
+- `openspec/changes/archive/2026-07-15-improve-dashboard-evidence-trust/`: accepted scanner/search evidence-trust remediation history.
 - `openspec/changes/archive/2026-07-15-add-persistent-project-management/`: accepted persistent project/workspace management implementation history.
 - `openspec/changes/archive/2026-07-15-add-project-brief-report/`: accepted local advisory project brief/report implementation history.
 - `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`: completed hardening change for canonical project config, compact saved project-id listing, JSON-only API boundaries, MCP response validation, and local API diagnostics. Accepted behavior is synced to `openspec/specs/agent-preflight-packet/`, `openspec/specs/local-project-config/`, and `openspec/specs/mcp-context-api/`.

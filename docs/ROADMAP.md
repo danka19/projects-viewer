@@ -100,6 +100,7 @@ Completed first slice:
 
 Implemented follow-on and parallel bounded workstreams:
 
+- Accepted state-derivation, lifecycle/progress, and evidence-trust requirements are canonical in `openspec/specs/dashboard-state-derivation/`, `openspec/specs/spec-work-model/`, and `openspec/specs/dashboard-evidence-trust/`. The completed `fix-lifecycle-status-progress-semantics` and `improve-dashboard-evidence-trust` changes are archived under `openspec/changes/archive/`.
 - `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/` records the accepted exact phase/step ownership contract, nested Roadmap specification cards, explicit unassigned/integrity handling, and navigation to the matching Specs Canvas identity. The accepted behavior lives in `openspec/specs/roadmap-spec-cards/`.
 - [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) restores scanner and search evidence trust after the completed MCP/API hardening slice. Implementation, focused/full gates, real configured-project rescan, corrected desktop/mobile browser acceptance, documentation/task-state reconciliation, and the strict OpenSpec CLI gate are complete at 13/13 tasks. The change remains active/open, unsynced, and unarchived, ready for a separate explicit sync/archive workflow. [`API_UX_TRUST_AUDIT_2026-07-12.md`](audits/API_UX_TRUST_AUDIT_2026-07-12.md) is the canonical evidence source.
 - `docs/audits/UX_UI_AUDIT_2026-07-10.md` is the redesign baseline; `docs/audits/DASHBOARD_REDESIGN_ACCEPTANCE_2026-07-11.md` records implementation and browser evidence.
@@ -123,20 +124,21 @@ When a phase is too large for one iteration, create or update a detailed plan un
 | `agent-preflight-packet` | P4 | P3 |
 | `ai-context` | P1 | none |
 | `ai-findings` | P1 | none |
+| `dashboard-evidence-trust` | P4 | none |
+| `dashboard-state-derivation` | P4 | none |
 | `local-project-config` | P0 | P4 |
 | `mcp-context-api` | P4 | P0 |
 | `project-brief-report` | P3 | P1,P2 |
 | `project-management` | P0 | none |
 | `roadmap-spec-cards` | P4 | none |
+| `spec-work-model` | P4 | none |
 
 ## Active Change Execution
 
 | Active change | Execution phase | Related phases | Lifecycle status |
 |---|---|---|---|
 | `add-selectable-specs-canvas` | P4 | none | accepted |
-| `fix-lifecycle-status-progress-semantics` | P4 | none | accepted |
 | `harden-dashboard-state-derivation` | P4 | none | accepted |
-| `improve-dashboard-evidence-trust` | P4 | none | accepted |
 | `improve-dashboard-search-navigation` | P4 | none | accepted |
 | `redesign-dashboard-project-timeline` | P4 | none | accepted |
 
@@ -146,19 +148,20 @@ When a phase is too large for one iteration, create or update a detailed plan un
 |---|---|---|
 | `ai-context` | P1 | none |
 | `ai-findings` | P1 | none |
+| `dashboard-evidence-trust` | P4 | none |
+| `dashboard-state-derivation` | P4 | none |
 | `local-project-config` | P0 | none |
 | `mcp-context-api` | P4 | none |
 | `project-brief-report` | P3 | none |
 | `project-management` | P0 | none |
 | `roadmap-spec-cards` | P4 | none |
+| `spec-work-model` | P4 | none |
 
 ## Active Change Step Execution
 
 | Active change | Execution phase | Execution step |
 |---|---|---|
 | `add-selectable-specs-canvas` | P4 | none |
-| `fix-lifecycle-status-progress-semantics` | P4 | none |
 | `harden-dashboard-state-derivation` | P4 | none |
-| `improve-dashboard-evidence-trust` | P4 | none |
 | `improve-dashboard-search-navigation` | P4 | none |
 | `redesign-dashboard-project-timeline` | P4 | none |

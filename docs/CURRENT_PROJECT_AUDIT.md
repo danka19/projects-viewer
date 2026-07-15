@@ -4,6 +4,10 @@ Status: in_progress.
 
 Last updated: 2026-07-15.
 
+## Dashboard Model And Evidence Spec Archival (2026-07-15)
+
+The accepted `fix-lifecycle-status-progress-semantics` and `improve-dashboard-evidence-trust` changes were synchronized into canonical `dashboard-state-derivation`, `spec-work-model`, and `dashboard-evidence-trust` capability specs and archived. The accepted `harden-dashboard-state-derivation` delta is also represented in the canonical state-derivation spec, but its change remains active until the owner confirms archival despite its missing optional design artifact.
+
 ## Foundational OpenSpec Archival (2026-07-15)
 
 The accepted `add-persistent-project-management` and `add-project-brief-report` changes were synchronized into `openspec/specs/project-management/` and `openspec/specs/project-brief-report/`, then archived under `openspec/changes/archive/`. The newer accepted `local-project-config` rule supersedes the original project-management migration scenario: root `projects.config.json` remains ignored and is not migrated into the canonical runtime config.
@@ -68,7 +72,8 @@ Fresh verification evidence:
 | `add-selectable-specs-canvas` | `accepted` | OpenSpec artifacts validate strictly; scanner/config/model/layout/routing/state/search/UI implementation is complete with 107 Node + 91 component tests, production build, and dark/light 1280×720, 1024×768, 390×844 browser evidence. The owner authorized integration on 2026-07-13; archival remains separate. |
 | `add-roadmap-spec-cards` | `archived` | The owner accepted the exact ownership and nested-card workflow on 2026-07-15. Requirements were synced to `openspec/specs/roadmap-spec-cards/`, and the completed change was archived at `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/`. |
 | `harden-mcp-context-api` | `archived` | Implementation, verification, accepted-spec sync, and archival are complete at `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`. |
-| [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) | `accepted` | All 13/13 implementation tasks are checked, verification passes, and the owner authorized integration on 2026-07-13. The change is intentionally unsynced and unarchived pending the separate explicit lifecycle workflow. |
+| `fix-lifecycle-status-progress-semantics` | `archived` | Accepted requirements are canonical in `dashboard-state-derivation` and `spec-work-model`; implementation history is archived under `openspec/changes/archive/2026-07-15-fix-lifecycle-status-progress-semantics/`. |
+| `improve-dashboard-evidence-trust` | `archived` | Accepted requirements are canonical in `dashboard-evidence-trust`; implementation history is archived under `openspec/changes/archive/2026-07-15-improve-dashboard-evidence-trust/`. |
 | Accepted capability specs | `accepted` | Eight specs are present under `openspec/specs/`, including canonical `project-management` and `project-brief-report` behavior. |
 
 Sequential work: the owner authorized integration of the complete dashboard branch on 2026-07-13, closing timeline task 7.6 and accepting the selectable Specs Canvas. MCP/API hardening is complete and archived independently of timeline geometry. Dashboard evidence-trust implementation, acceptance evidence, documentation/task-state reconciliation, and strict OpenSpec CLI gate are complete as the follow-on hardening slice. Active dashboard changes remain unsynced and unarchived until separate explicit lifecycle workflows.
