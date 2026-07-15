@@ -90,7 +90,11 @@ function roadmapMetadata(content, file, kind) {
 
 function ownershipIssue(item, phases) {
   if (!Array.isArray(phases) || phases.length === 0 || !item.roadmapPhaseId) return null;
-  const phase = phases.find((candidate) => candidate.id === item.roadmapPhaseId);
+  const normalizePhaseId = (value) => {
+    const match = String(value ?? '').trim().match(/^P?(\d+)$/i);
+    return match ? `P${Number(match[1])}` : String(value ?? '');
+  };
+  const phase = phases.find((candidate) => normalizePhaseId(candidate.id) === normalizePhaseId(item.roadmapPhaseId));
   if (!phase) return `Unknown roadmap phase ${item.roadmapPhaseId}.`;
   if (item.roadmapStepId && !phase.steps.some((step) => step.id === item.roadmapStepId)) {
     return `Unknown roadmap step ${item.roadmapStepId} in phase ${item.roadmapPhaseId}.`;

@@ -167,6 +167,19 @@ test('buildSpecWork extracts exact phase and step ownership for accepted specs a
   ]);
 });
 
+test('buildSpecWork accepts P-prefixed ownership against numeric roadmap phase ids', () => {
+  const model = buildSpecWork({
+    projectId: 'fixture',
+    phases: [{ id: '4', steps: [{ id: '7.1' }] }],
+    docs: [
+      doc('openspec/changes/active/proposal.md', '# Active\n\n## Roadmap\n\n- Execution phase: P4\n- Execution step: 7.1'),
+    ],
+  });
+  assert.equal(model.specifications[0].roadmapPhaseId, 'P4');
+  assert.equal(model.specifications[0].roadmapStepId, '7.1');
+  assert.equal(model.integrityIssues.some((issue) => issue.kind === 'invalid-ownership'), false);
+});
+
 test('buildSpecWork keeps invalid ownership unassigned and preserves duplicate lifecycle sources', () => {
   const model = buildSpecWork({
     projectId: 'fixture',
