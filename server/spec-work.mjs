@@ -57,6 +57,47 @@ function titleOf(content, fallback) {
   return String(content ?? '').match(/^#\s+(.+)$/m)?.[1]?.trim() || fallback;
 }
 
+function roadmapMetadata(content, file, kind) {
+  const lines = String(content ?? '').split(/\r?\n/);
+  const heading = lines.findIndex((line) => /^##\s+Roadmap\s*$/i.test(line));
+  if (heading < 0) return { phaseId: null, stepId: null, relatedPhaseIds: [], evidence: [] };
+  const end = lines.findIndex((line, index) => index > heading && /^##\s+/.test(line));
+  const section = lines.slice(heading + 1, end < 0 ? lines.length : end);
+  const phaseField = kind === 'accepted-capability' ? 'Roadmap phase' : 'Execution phase';
+  const stepField = kind === 'accepted-capability' ? 'Roadmap step' : 'Execution step';
+  const read = (field) => {
+    const index = section.findIndex((line) => new RegExp(`^[-*]?\\s*${field}:\\s*(.+)$`, 'i').test(line));
+    if (index < 0) return { value: null, line: null };
+    const value = section[index].match(/^[-*]?\s*[^:]+:\s*(.+)$/)?.[1]?.trim() ?? null;
+    return { value: value && value.toLowerCase() !== 'none' ? value : null, line: heading + index + 2 };
+  };
+  const phase = read(phaseField);
+  const step = read(stepField);
+  const related = read('Related phases');
+  const normalizePhase = (value) => {
+    const match = String(value ?? '').trim().match(/^P?(\d+)$/i);
+    return match ? `P${Number(match[1])}` : null;
+  };
+  return {
+    phaseId: normalizePhase(phase.value),
+    stepId: step.value,
+    relatedPhaseIds: related.value ? related.value.split(',').map(normalizePhase).filter(Boolean) : [],
+    evidence: [[phaseField, phase], [stepField, step]]
+      .filter(([, item]) => item.line !== null)
+      .map(([field, item]) => ({ file, line: item.line, field })),
+  };
+}
+
+function ownershipIssue(item, phases) {
+  if (!Array.isArray(phases) || phases.length === 0 || !item.roadmapPhaseId) return null;
+  const phase = phases.find((candidate) => candidate.id === item.roadmapPhaseId);
+  if (!phase) return `Unknown roadmap phase ${item.roadmapPhaseId}.`;
+  if (item.roadmapStepId && !phase.steps.some((step) => step.id === item.roadmapStepId)) {
+    return `Unknown roadmap step ${item.roadmapStepId} in phase ${item.roadmapPhaseId}.`;
+  }
+  return null;
+}
+
 function lifecycleOf(content, archived = false) {
   if (archived) return 'archived';
   const status = String(content ?? '').match(/^Status:\s*(.+)$/im)?.[1] ?? '';
@@ -118,7 +159,7 @@ function findCycles(ids, dependencies) {
   return cyclic;
 }
 
-export function buildSpecWork({ projectId, docs = [], documentationViews, truncated = false }) {
+export function buildSpecWork({ projectId, docs = [], documentationViews, phases = [], truncated = false }) {
   const normalizedDocs = docs.map((doc) => ({ ...doc, file: normalizePath(doc.file) }));
   const configuredRoots = documentationViews?.specs?.roots?.map(normalizePath) ?? [];
   const candidates = configuredRoots.length > 0
@@ -126,12 +167,14 @@ export function buildSpecWork({ projectId, docs = [], documentationViews, trunca
     : normalizedDocs.filter((doc) => doc.category === 'spec' || /^(?:\.?)openspec\//i.test(doc.file));
   const integrityIssues = [];
   const byId = new Map();
+  const items = [];
   for (const doc of candidates) {
     const identity = identityFor(doc);
     if (!identity) continue;
     const frontmatter = parseFrontmatter(doc.content);
     if (frontmatter.malformed) integrityIssues.push({ kind: 'invalid-frontmatter', message: `Unclosed frontmatter in ${doc.file}`, source: { file: doc.file } });
     const id = frontmatter.work?.id || identity.sourceId;
+    const ownership = roadmapMetadata(doc.content, doc.file, identity.kind);
     const item = {
       key: `${projectId}:${doc.file}`,
       id,
@@ -145,17 +188,33 @@ export function buildSpecWork({ projectId, docs = [], documentationViews, trunca
       groupId: frontmatter.work?.group ?? null,
       tasks: [],
       dependsOnIds: [...new Set(frontmatter.work?.dependsOn ?? [])],
+      roadmapPhaseId: ownership.phaseId,
+      roadmapStepId: ownership.stepId,
+      relatedPhaseIds: ownership.relatedPhaseIds,
+      ownershipEvidence: ownership.evidence,
     };
-    if (byId.has(id)) {
-      integrityIssues.push({ kind: 'duplicate-id', message: `Duplicate specification id: ${id}`, source: item.source });
-      continue;
+    const ownershipError = ownershipIssue(item, phases);
+    if (ownershipError) {
+      integrityIssues.push({ kind: 'invalid-ownership', message: `${id}: ${ownershipError}`, source: item.source });
+      item.roadmapPhaseId = null;
+      item.roadmapStepId = null;
     }
-    byId.set(id, item);
+    items.push(item);
+    if (byId.has(id)) {
+      const kinds = new Set([byId.get(id).kind, item.kind]);
+      if (kinds.has('accepted-capability') && kinds.has('openspec-change')) {
+        integrityIssues.push({ kind: 'parallel-lifecycle', message: `Accepted capability and active change share logical id: ${id}.`, source: item.source });
+      } else {
+        integrityIssues.push({ kind: 'duplicate-id', message: `Duplicate specification id: ${id}`, source: item.source });
+      }
+    } else {
+      byId.set(id, item);
+    }
   }
   for (const doc of candidates) {
     const match = doc.file.match(/^(?:\.?)openspec\/changes\/(?:archive\/)?([^/]+)\/tasks\.md$/i);
     if (match) {
-      const owner = [...byId.values()].find((item) => item.kind === 'openspec-change' && (item.id === match[1] || item.source.file.includes(`/changes/${match[1]}/`)));
+      const owner = items.find((item) => item.kind === 'openspec-change' && (item.id === match[1] || item.source.file.includes(`/changes/${match[1]}/`)));
       if (owner) {
         const secondary = parseFrontmatter(doc.content).work;
         if (secondary && (
@@ -173,10 +232,10 @@ export function buildSpecWork({ projectId, docs = [], documentationViews, trunca
         owner.tasks.push(...tasksFrom(doc, owner.id));
       }
     }
-    const genericOwner = [...byId.values()].find((item) => item.kind === 'generic-spec' && item.source.file === doc.file);
+    const genericOwner = items.find((item) => item.kind === 'generic-spec' && item.source.file === doc.file);
     if (genericOwner) genericOwner.tasks.push(...tasksFrom(doc, genericOwner.id));
   }
-  for (const item of byId.values()) {
+  for (const item of items) {
     if (item.kind === 'accepted-capability') item.lifecycleStatus = 'accepted';
     else if (item.lifecycleStatus !== 'archived' && !item._hasExplicitLifecycle && item.tasks.length > 0) {
       item.lifecycleStatus = item.tasks.every((task) => task.status === 'closed')
@@ -186,13 +245,13 @@ export function buildSpecWork({ projectId, docs = [], documentationViews, trunca
           : 'planned';
     }
   }
-  const ownedSources = new Set([...byId.values()].flatMap((item) => item.tasks.map((task) => `${task.source.file}:${task.source.line}`)));
+  const ownedSources = new Set(items.flatMap((item) => item.tasks.map((task) => `${task.source.file}:${task.source.line}`)));
   const unassignedTasks = candidates
     .filter((doc) => !/^(?:\.?)openspec\//i.test(doc.file) && /(^|[/_.-])(tasks?|todo)([/_.-]|$)/i.test(doc.file.split('/').pop() ?? ''))
     .flatMap((doc) => tasksFrom(doc))
     .filter((task) => !ownedSources.has(`${task.source.file}:${task.source.line}`));
   const dependencies = [];
-  for (const item of byId.values()) {
+  for (const item of items) {
     for (const prerequisiteId of item.dependsOnIds) {
       const edge = {
         key: `${prerequisiteId}->${item.id}`,
@@ -210,7 +269,7 @@ export function buildSpecWork({ projectId, docs = [], documentationViews, trunca
   if (cyclic.size > 0) integrityIssues.push({ kind: 'cycle', message: `Dependency cycle: ${[...cyclic].sort().join(', ')}` });
   return {
     projectId,
-    specifications: [...byId.values()].map(({ _hasExplicitLifecycle: _ignored, ...item }) => item).sort((a, b) => a.id.localeCompare(b.id)),
+    specifications: items.map(({ _hasExplicitLifecycle: _ignored, ...item }) => item).sort((a, b) => a.key.localeCompare(b.key)),
     dependencies: dependencies.sort((a, b) => a.key.localeCompare(b.key)),
     unassignedTasks,
     integrityIssues,

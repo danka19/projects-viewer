@@ -1397,6 +1397,7 @@ async function scanProject(entry, activeDays) {
   const specWork = buildSpecWork({
     projectId: entry.id ?? entry.path,
     docs: docs ?? [],
+    phases: acc.phases,
     documentationViews: entry.documentationViews,
     truncated: Boolean(collected?.truncated),
   });

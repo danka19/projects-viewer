@@ -120,3 +120,70 @@ test('buildSpecWork keeps archived changes and owns tasks embedded in a generic 
   assert.deepEqual(generic.tasks.map((task) => task.name), ['Owned generic task']);
   assert.equal(model.unassignedTasks.length, 0);
 });
+
+test('buildSpecWork extracts exact phase and step ownership for accepted specs and active changes', () => {
+  const model = buildSpecWork({
+    projectId: 'fixture',
+    phases: [{ id: 'P4', steps: [{ id: '7.1' }] }],
+    docs: [
+      doc('openspec/specs/accepted/spec.md', [
+        '## Purpose',
+        'Accepted capability.',
+        '',
+        '## Roadmap',
+        '',
+        '- Roadmap phase: P4',
+        '- Related phases: P1',
+      ].join('\n')),
+      doc('openspec/changes/active/proposal.md', [
+        '# Active change',
+        '',
+        '## Roadmap',
+        '',
+        '- Execution phase: P4',
+        '- Execution step: 7.1',
+        '- Related phases: none',
+      ].join('\n')),
+    ],
+  });
+
+  const accepted = model.specifications.find((item) => item.id === 'accepted');
+  const active = model.specifications.find((item) => item.id === 'active');
+  assert.deepEqual({
+    roadmapPhaseId: accepted.roadmapPhaseId,
+    roadmapStepId: accepted.roadmapStepId,
+    relatedPhaseIds: accepted.relatedPhaseIds,
+  }, {
+    roadmapPhaseId: 'P4',
+    roadmapStepId: null,
+    relatedPhaseIds: ['P1'],
+  });
+  assert.equal(active.roadmapPhaseId, 'P4');
+  assert.equal(active.roadmapStepId, '7.1');
+  assert.deepEqual(active.relatedPhaseIds, []);
+  assert.deepEqual(active.ownershipEvidence.map(({ file, field }) => [file, field]), [
+    ['openspec/changes/active/proposal.md', 'Execution phase'],
+    ['openspec/changes/active/proposal.md', 'Execution step'],
+  ]);
+});
+
+test('buildSpecWork keeps invalid ownership unassigned and preserves duplicate lifecycle sources', () => {
+  const model = buildSpecWork({
+    projectId: 'fixture',
+    phases: [{ id: 'P4', steps: [{ id: '7.1' }] }],
+    docs: [
+      doc('openspec/specs/same/spec.md', '## Purpose\nSame capability.\n\n## Roadmap\n\n- Roadmap phase: P4'),
+      doc('openspec/changes/same/proposal.md', '# Same change\n\n## Roadmap\n\n- Execution phase: P4\n- Execution step: 9.9'),
+    ],
+  });
+
+  assert.equal(model.specifications.length, 2);
+  assert.deepEqual(model.specifications.map((item) => item.key), [
+    'fixture:openspec/changes/same/proposal.md',
+    'fixture:openspec/specs/same/spec.md',
+  ]);
+  assert.ok(model.integrityIssues.some((issue) => issue.kind === 'invalid-ownership'));
+  assert.ok(model.integrityIssues.some((issue) => issue.kind === 'parallel-lifecycle'));
+  assert.equal(model.specifications.find((item) => item.kind === 'accepted-capability').roadmapStepId, null);
+  assert.equal(model.specifications.find((item) => item.kind === 'openspec-change').roadmapStepId, null);
+});

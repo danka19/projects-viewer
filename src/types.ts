@@ -195,6 +195,10 @@ export interface RawSpecWorkItem {
   groupId: string | null;
   tasks: RawSpecTask[];
   dependsOnIds: string[];
+  roadmapPhaseId: string | null;
+  roadmapStepId: string | null;
+  relatedPhaseIds: string[];
+  ownershipEvidence: Array<SpecSourceEvidence & { field: string }>;
 }
 
 export interface RawSpecDependency {
@@ -206,7 +210,7 @@ export interface RawSpecDependency {
 }
 
 export interface SpecIntegrityIssue {
-  kind: 'invalid-frontmatter' | 'duplicate-id' | 'self-dependency' | 'missing-target' | 'cycle' | 'contradictory-metadata';
+  kind: 'invalid-frontmatter' | 'duplicate-id' | 'parallel-lifecycle' | 'invalid-ownership' | 'self-dependency' | 'missing-target' | 'cycle' | 'contradictory-metadata';
   message: string;
   source?: SpecSourceEvidence;
 }
