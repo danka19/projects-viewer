@@ -4,6 +4,12 @@ Status: in_progress.
 
 Last updated: 2026-07-15.
 
+## Roadmap Specification Cards Acceptance (2026-07-15)
+
+The owner accepted `add-roadmap-spec-cards` on 2026-07-15 after implementation and acceptance evidence were complete. The accepted contract now lives in `openspec/specs/roadmap-spec-cards/spec.md`, and the completed change is archived at `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/`.
+
+The accepted behavior covers exact phase/step ownership without inference, phase-level and step-owned specification cards, explicit unassigned/integrity evidence for invalid references, preservation of large specs as single cards with task summaries, and safe navigation to the matching Specs Canvas identity. This bounded P4-owned capability does not activate Phase 4, which remains `draft` pending separate detailed planning and human approval.
+
 ## Roadmap/OpenSpec Ownership Reconciliation (2026-07-15)
 
 The roadmap/OpenSpec governance drift was repaired. Every accepted capability spec and active change now declares exactly one primary roadmap phase, and `docs/ROADMAP.md` contains matching inverse ownership/execution tables. Historical ownership follows the phase records: project management is owned by P0, AI context/findings by P1, the project brief/report by P3, and the later agent/dashboard hardening workstreams by P4. P4 remains `draft`; these links provide traceability and do not constitute phase activation or human acceptance.
@@ -12,7 +18,7 @@ Fresh governance evidence:
 
 - Roadmap/OpenSpec validator: `ok: true`, 0 errors, 1 warning.
 - The remaining warning is intentional: `agent-preflight-packet` has checked tasks but remains `pending_acceptance` until human acceptance; completed tasks do not imply acceptance.
-- The validator now reports 5 accepted specs, 9 active changes, and 5 roadmap phases with explicit statuses.
+- The validator now reports 6 accepted specs, 9 active changes, and 5 roadmap phases with explicit statuses.
 
 ## Lifecycle Status And Progress Semantics (2026-07-13)
 
@@ -51,9 +57,10 @@ Fresh verification evidence:
 | `improve-dashboard-search-navigation` | `accepted` | Implementation and verification are included in the accepted redesign evidence; archival remains separate. |
 | `redesign-dashboard-project-timeline` | `accepted` | All 43/43 tasks are complete. Commit `9cfb550` and fresh six-viewport/theme geometry evidence close tasks 5.6-5.7; the owner explicitly authorized integration on 2026-07-13, closing task 7.6. Archival remains separate. |
 | `add-selectable-specs-canvas` | `accepted` | OpenSpec artifacts validate strictly; scanner/config/model/layout/routing/state/search/UI implementation is complete with 107 Node + 91 component tests, production build, and dark/light 1280×720, 1024×768, 390×844 browser evidence. The owner authorized integration on 2026-07-13; archival remains separate. |
+| `add-roadmap-spec-cards` | `archived` | The owner accepted the exact ownership and nested-card workflow on 2026-07-15. Requirements were synced to `openspec/specs/roadmap-spec-cards/`, and the completed change was archived at `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/`. |
 | `harden-mcp-context-api` | `archived` | Implementation, verification, accepted-spec sync, and archival are complete at `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`. |
 | [`improve-dashboard-evidence-trust`](../openspec/changes/improve-dashboard-evidence-trust/) | `accepted` | All 13/13 implementation tasks are checked, verification passes, and the owner authorized integration on 2026-07-13. The change is intentionally unsynced and unarchived pending the separate explicit lifecycle workflow. |
-| Accepted specs `ai-context`, `ai-findings`, `agent-preflight-packet`, `local-project-config`, `mcp-context-api` | `accepted` | Present under `openspec/specs/` and validated by OpenSpec. |
+| Accepted specs `ai-context`, `ai-findings`, `agent-preflight-packet`, `local-project-config`, `mcp-context-api`, `roadmap-spec-cards` | `accepted` | Present under `openspec/specs/` and validated by OpenSpec. |
 
 Sequential work: the owner authorized integration of the complete dashboard branch on 2026-07-13, closing timeline task 7.6 and accepting the selectable Specs Canvas. MCP/API hardening is complete and archived independently of timeline geometry. Dashboard evidence-trust implementation, acceptance evidence, documentation/task-state reconciliation, and strict OpenSpec CLI gate are complete as the follow-on hardening slice. Active dashboard changes remain unsynced and unarchived until separate explicit lifecycle workflows.
 

@@ -9,7 +9,7 @@ Projects Viewer now records bidirectional roadmap/OpenSpec phase ownership, but 
 - Execution phase: P4
 - Execution step: none
 - Related phases: none
-- Lifecycle status: in_progress
+- Lifecycle status: accepted
 
 ## What Changes
 

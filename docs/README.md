@@ -8,6 +8,7 @@ Repo: https://github.com/danka19/projects-viewer
 
 Dashboard redesign update on 2026-07-11:
 
+- Roadmap specification cards were accepted on 2026-07-15. Exact phase/step ownership, nested cards, unassigned/integrity evidence, and navigation to the matching Specs Canvas identity are canonical in `openspec/specs/roadmap-spec-cards/`; the completed change is archived under `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/`.
 - Active change `fix-lifecycle-status-progress-semantics` implements authoritative exact leading phase statuses with documentation conflict evidence, limits phase steps to phase-owned source structure, and keeps accepted living-spec progress unknown when no task evidence exists. RED/GREEN coverage, the full suite/build, a fresh configured rescan, and browser acceptance are complete; sync/archive remain separate gates.
 - Selectable Roadmap/Specs primary work and the responsive Specs Canvas are implemented under active change `add-selectable-specs-canvas`. Scanner/config/model/geometry/state/component tests, the full suite/build, and the six-point dark/light browser matrix pass. The owner authorized integration on 2026-07-13; the change remains active and unarchived pending a separate lifecycle action.
 - The 2026-07-10 UX/UI audit remains the baseline. State-derivation trust, overview hierarchy, the horizontal phase/step timeline, ranked search, safe UI-state persistence, responsive ordering, focus handling, and contrast were implemented on `dashboard-redesign/ui-rebuild`.
