@@ -7,7 +7,7 @@ Project View can currently promote historical, audit, plan, or explanatory block
 - Restrict live blocker and constraint evidence to `ROADMAP.md`, non-archived active OpenSpec changes, and `docs/BUGS.md`.
 - Require an explicit current-work blocker statement rather than treating the word `blocked` alone as evidence.
 - Exclude superseded items from progress and constraints; surface missing replacement references as quality-only warnings.
-- Derive the singular current phase only from explicit lifecycle status in `ROADMAP.md`.
+- Derive the current phase from roadmap order and explicit roadmap lifecycle, including a blocked first unfinished phase.
 
 ## Roadmap
 

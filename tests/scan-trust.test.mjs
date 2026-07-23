@@ -331,7 +331,7 @@ test('next-action headings and descriptive labels never become current work', as
   );
 });
 
-test('summary current phase requires exactly one in-progress phase', async () => {
+test('summary current phase follows the first unfinished roadmap phase', async () => {
   const single = await scanFixture('current-single', {
     'README.md': '# Sample\n',
     'docs/ROADMAP.md': [
@@ -364,7 +364,7 @@ test('summary current phase requires exactly one in-progress phase', async () =>
       '',
     ].join('\n'),
   });
-  assert.equal(ambiguous.summary.currentPhase, null, 'ambiguous current phase stays null');
+  assert.equal(ambiguous.summary.currentPhase, '1 First', 'roadmap order breaks ties between unfinished phases');
 
   const betweenPhases = await scanFixture('current-between', {
     'README.md': '# Sample\n',
@@ -387,7 +387,88 @@ test('summary current phase requires exactly one in-progress phase', async () =>
   });
   assert.equal(
     betweenPhases.summary.currentPhase,
-    null,
-    'pending acceptance is a gate, not a fabricated current phase',
+    '1 Waiting',
+    'pending acceptance remains the first unfinished roadmap phase',
   );
+});
+
+test('only canonical current sources can create live blocker-derived state', async () => {
+  const project = await scanFixture('canonical-live-sources', {
+    'README.md': '# Sample\n',
+    'docs/ROADMAP.md': '- Current release is blocked by the signing key.\n',
+    'docs/BUGS.md': '- BUG-42: Export is blocked by a reproducible crash.\n',
+    'openspec/changes/live-import/proposal.md': '- Current import is blocked by the active migration.\n',
+    'docs/archive/old-release.md': '- Current deployment is blocked by historic credentials.\n',
+    'docs/audits/evidence.md': '- Current audit is blocked by an old screenshot.\n',
+    'docs/evidence/trace.md': '- Current evidence collection is blocked by stale logs.\n',
+    'docs/plans/release.md': '- Current implementation is blocked by plan text.\n',
+    'openspec/changes/archive/old-import/proposal.md': '- Current import is blocked by archived migration.\n',
+  });
+
+  assert.deepEqual(
+    project.signalGroups.realBlockers.map((item) => item.file).sort(),
+    ['docs/BUGS.md', 'docs/ROADMAP.md', 'openspec/changes/live-import/proposal.md'],
+  );
+  assert.ok(
+    project.blockedGatedDiagnostics.filteredProcessPolicies.some(
+      (item) => item.file === 'docs/archive/old-release.md' && !item.includedInProjectStatus,
+    ),
+  );
+});
+
+test('bare blocked wording, technical invariants, and historical quotes are not live blockers', async () => {
+  const project = await scanFixture('non-explicit-blockers', {
+    'README.md': '# Sample\n',
+    'docs/ROADMAP.md': [
+      '# Roadmap',
+      '',
+      '- Phase 4 is blocked.',
+      '- Technical invariant: blocked phases retain their status until evidence changes.',
+      '> Previous release was blocked by signing credentials.',
+    ].join('\n'),
+  });
+
+  assert.equal(project.signalGroups.realBlockers.length, 0);
+  assert.equal(project.summary.mainBlocker, null);
+});
+
+test('superseded work is non-live and missing replacement is a quality-only warning', async () => {
+  const project = await scanFixture('superseded-quality', {
+    'README.md': '# Sample\n',
+    'docs/ROADMAP.md': [
+      '# Roadmap',
+      '',
+      '- Previous migration is superseded.',
+      '- Current migration is blocked by active key rotation.',
+    ].join('\n'),
+  });
+
+  assert.equal(project.signalGroups.realBlockers.length, 1);
+  assert.match(project.summary.mainBlocker, /active key rotation/);
+  assert.ok(
+    project.blockedGatedDiagnostics.filteredProcessPolicies.some(
+      (item) => /superseded work lacks a replacement reference/i.test(item.reason),
+    ),
+  );
+});
+
+test('ScanLab-style roadmap selects its first blocked unfinished phase', async () => {
+  const project = await scanFixture('scanlab-current-phase', {
+    'README.md': '# Sample\n',
+    'docs/ROADMAP.md': [
+      '# Roadmap',
+      '',
+      '## Phase 0. Foundation',
+      'Status: closed.',
+      '',
+      '## Phase 4. Review, Geometry, And Export',
+      'Status: blocked.',
+      '',
+      '## Phase 5. Camera MVP External Control',
+      'Status: blocked.',
+    ].join('\n'),
+  });
+
+  assert.equal(project.summary.currentPhase, '4 Review, Geometry, And Export');
+  assert.equal(project.phases.find((phase) => phase.id === '4').status, 'blocked');
 });

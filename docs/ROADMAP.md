@@ -142,7 +142,6 @@ When a phase is too large for one iteration, create or update a detailed plan un
 
 | Active change | Execution phase | Related phases | Lifecycle status |
 |---|---|---|---|
-| `canonical-project-state-sources` | P4 | none | in_progress |
 
 ## Capability Spec Step Ownership
 

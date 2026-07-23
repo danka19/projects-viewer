@@ -45,18 +45,19 @@ The scanner SHALL exclude superseded work from live constraints and blocker-deri
 
 ## MODIFIED Requirements
 
-### Requirement: Current phase identity is explicit or null
-The scanner SHALL derive `summary.currentPhase` only from phases parsed from `ROADMAP.md`. It SHALL set that field only when exactly one roadmap phase has `in_progress` lifecycle status and SHALL keep it null for zero or multiple in-progress roadmap phases.
+### Requirement: Current phase identity follows roadmap order
+The scanner SHALL derive `summary.currentPhase` only from phases parsed from `ROADMAP.md`. It SHALL select the first roadmap phase whose lifecycle is not `accepted`, `closed`, `cancelled`, or `superseded`, preserving the selected phase's explicit lifecycle status. It SHALL keep `summary.currentPhase` null only when no unfinished roadmap phase exists.
 
-#### Scenario: One roadmap phase is in progress
-- **WHEN** exactly one phase in `ROADMAP.md` is `in_progress`
-- **THEN** `summary.currentPhase` names that phase
+#### Scenario: First unfinished roadmap phase is blocked
+- **WHEN** all earlier roadmap phases are final and the next phase is explicitly `blocked`
+- **THEN** `summary.currentPhase` names that blocked phase
+- **AND** the phase lifecycle remains `blocked`
 
 #### Scenario: Non-roadmap prose resembles active phase status
 - **WHEN** a plan, audit, archive, or other non-roadmap document contains a phase-like in-progress status
 - **THEN** it does not establish or make ambiguous `summary.currentPhase`
 
-#### Scenario: Current roadmap phase is ambiguous or absent
-- **WHEN** zero or more than one roadmap phase is `in_progress`, or roadmap work is only pending acceptance
+#### Scenario: Roadmap has no unfinished phase
+- **WHEN** every roadmap phase is accepted, closed, cancelled, or superseded
 - **THEN** `summary.currentPhase` is null
-- **AND** downstream presentation surfaces the between-phases or ambiguity state instead of a fabricated current phase
+- **AND** downstream presentation surfaces the completed-roadmap state instead of a fabricated current phase

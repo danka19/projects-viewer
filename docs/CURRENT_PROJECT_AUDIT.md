@@ -80,7 +80,7 @@ Fresh verification evidence:
 | `improve-dashboard-evidence-trust` | `archived` | Accepted requirements are canonical in `dashboard-evidence-trust`; implementation history is archived under `openspec/changes/archive/2026-07-15-improve-dashboard-evidence-trust/`. |
 | Accepted capability specs | `accepted` | Sixteen specs are present under `openspec/specs/`; all completed implementation changes are archived. |
 
-Sequential work: the owner authorized integration of the complete dashboard branch on 2026-07-13, closing timeline task 7.6 and accepting the selectable Specs Canvas. MCP/API hardening, dashboard state/evidence trust, timeline, search/navigation, Specs Canvas, project management, project brief, agent preflight, lifecycle semantics, and Roadmap spec cards are synchronized into accepted specs and archived. No active OpenSpec changes remain; Phase 4 remains `draft` pending separate detailed scope planning.
+Sequential work: the owner authorized integration of the complete dashboard branch on 2026-07-13, closing timeline task 7.6 and accepting the selectable Specs Canvas. MCP/API hardening, dashboard state/evidence trust, timeline, search/navigation, Specs Canvas, project management, project brief, agent preflight, lifecycle semantics, Roadmap spec cards, and canonical project-state sources are synchronized into accepted specs and archived. Phase 4 otherwise remains `draft` pending separate detailed scope planning.
 
 ## Repository Baseline
 
@@ -208,6 +208,18 @@ Sequential work: the owner authorized integration of the complete dashboard bran
 - Explicit exceptions: a change with explicit implementation-final lifecycle evidence may retain 100%; work explicitly documented as requiring no implementation should show `Not applicable`, not 100%.
 - Prohibited inference: absence of tasks by itself must not select `Planning required`, `Not applicable`, or `Complete`; the derived state must preserve and cite source evidence or remain unknown.
 - Status: queued for a separate OpenSpec proposal; no implementation is authorized by this intake record. The existing `fix-lifecycle-status-progress-semantics` change remains the prerequisite integration step.
+
+## Change Intake: Canonical Project-State Sources (2026-07-23)
+
+- Idea: derive live blockers only from `ROADMAP.md`, active OpenSpec changes, and `docs/BUGS.md`; exclude archives, audits, evidence, and plans; treat superseded work as non-live; derive current phase from roadmap order.
+- Source: human owner, including the observed ScanLab `currentPhase: null` result.
+- Type: `bug_fix`, `scope_refinement`, `verification_change`.
+- Decision: `create_openspec_change`, implemented as `canonical-project-state-sources` with P4 ownership.
+- Reason: scanner-derived blocker and phase state is accepted dashboard behavior and propagates to summary, health, reports, and preflight packets; it requires explicit acceptance scenarios rather than an undocumented heuristic edit.
+- Affected specs: `dashboard-state-derivation`, `dashboard-evidence-trust`.
+- Architecture and data contract impact: scanner derivation only; no configured paths, persistence schema, remote behavior, or scanned-project writes change.
+- Verification impact: fixture coverage for source allowlist, non-inference, supersession quality evidence, and ScanLab-style blocked roadmap current phase; real configured-project scan evidence is required.
+- Status: accepted by the owner's direct instruction to finish, merge to `main`, and push after implementation evidence; specs synchronized and change archived on 2026-07-23.
 
 ## Known Risks And Gaps
 

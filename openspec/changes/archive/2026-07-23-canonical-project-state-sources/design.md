@@ -11,7 +11,7 @@ The dashboard uses derived signal groups for health, constraints, summaries, rep
 - Establish a small, deterministic source allowlist for live blockers and constraints.
 - Require explicit current-work blocker language rather than matching `blocked` vocabulary alone.
 - Preserve supersession as non-live evidence and expose a missing replacement only as documentation quality information.
-- Select `summary.currentPhase` from roadmap phases only.
+- Select `summary.currentPhase` from the first unfinished roadmap phase while preserving its lifecycle.
 - Retain source evidence and existing read-only scanner boundaries.
 
 **Non-Goals:**
@@ -40,11 +40,11 @@ Superseded work never enters live constraints or progress eligibility. If it lac
 
 Alternative: promote the missing reference to a blocker. Rejected because documentation incompleteness does not prove current delivery is blocked.
 
-### Filter current phase at summary construction
+### Select current phase from roadmap order at summary construction
 
-Roadmap parsing remains the source of phase lifecycle data; `buildSummary` selects current phase only from roadmap-category phase evidence. This preserves generic document metadata while removing non-roadmap interference from the singular identity.
+Roadmap parsing remains the source of phase lifecycle data. `buildSummary` selects the first non-final roadmap phase in roadmap order, preserving its lifecycle such as `blocked`; only when every roadmap phase is final does it return `null`. This makes an explicitly blocked current phase visible instead of treating its lack of `in_progress` wording as no phase.
 
-Alternative: discard all non-roadmap phases during parsing. Rejected because it would silently reduce other documentation insight and is broader than required.
+Alternative: require exactly one `in_progress` phase. Rejected because roadmap-authoritative projects such as ScanLab can truthfully mark the immediate phase `blocked` before work begins.
 
 ## Risks / Trade-offs
 

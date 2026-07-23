@@ -43,6 +43,16 @@ Projects Viewer SHALL recognize cross-line OpenSpec scenario structure and SHALL
 - **THEN** the scanner continues to evaluate it under the existing trusted blocker rules
 - **AND** the normative-scenario exclusion does not discard that live evidence
 
+### Requirement: Superseded current-source text cannot revive historical constraints
+
+Projects Viewer SHALL preserve superseded wording as non-live context even when it appears in an otherwise canonical current-state source. A missing replacement reference SHALL remain a documentation-quality warning rather than a live blocker or gate.
+
+#### Scenario: Current roadmap retains superseded release text
+
+- **WHEN** `ROADMAP.md` retains a superseded release entry without a replacement reference
+- **THEN** the entry does not enter `signalGroups.realBlockers`, approval gates, review signals, or paused/deferred constraints
+- **AND** any missing-replacement indication is non-live diagnostic evidence
+
 ### Requirement: Next actions require active-work semantics
 
 Projects Viewer SHALL require a next-action candidate to express active work through a structural active-work form and SHALL NOT treat headings, explanatory text, or embedded marker examples as current next actions merely because they contain `next-action` terminology or a marker token.

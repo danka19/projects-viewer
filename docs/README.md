@@ -104,6 +104,7 @@ No active OpenSpec changes remain.
 - `openspec/changes/archive/2026-07-15-add-project-brief-report/`: accepted local advisory project brief/report implementation history.
 - `openspec/changes/archive/2026-07-15-agent-preflight-packet/`: accepted local AI-agent preflight packet implementation history.
 - `openspec/changes/archive/2026-07-15-add-roadmap-spec-cards/`: accepted Roadmap specification-card implementation history.
+- `openspec/changes/archive/2026-07-23-canonical-project-state-sources/`: accepted scanner trust remediation for canonical live blocker sources, quality-only supersession evidence, and roadmap-order current phase derivation.
 - `openspec/changes/archive/2026-07-12-harden-mcp-context-api/`: completed hardening change for canonical project config, compact saved project-id listing, JSON-only API boundaries, MCP response validation, and local API diagnostics. Accepted behavior is synced to `openspec/specs/agent-preflight-packet/`, `openspec/specs/local-project-config/`, and `openspec/specs/mcp-context-api/`.
 
 ## Operations Summary

@@ -15,7 +15,7 @@
 - `docs/archive/**`, `openspec/changes/archive/**`, audits, evidence, and plans never affect live state.
 - Do not infer a blocker from a standalone `blocked` word.
 - Superseded work is ineligible for progress and constraints; a missing replacement is quality evidence only.
-- `summary.currentPhase` is roadmap-derived and remains null unless exactly one roadmap phase is `in_progress`.
+- `summary.currentPhase` is the first unfinished phase in roadmap order and preserves its roadmap lifecycle; it is null only when every roadmap phase is final.
 
 ---
 
@@ -169,38 +169,39 @@ git commit -m "fix: keep superseded evidence advisory"
 - Test: `tests/scan-trust.test.mjs`
 
 **Interfaces:**
-- Produces: `summary.currentPhase` from exactly one `in_progress` phase whose `file` is a roadmap document.
+- Produces: `summary.currentPhase` from the first unfinished phase whose `file` is a roadmap document.
 - Consumes: parsed `acc.phases` and source categories from `docs`.
 
 - [ ] **Step 1: Write failing test**
 
 ```js
-test('ScanLab-style roadmap supplies the only current phase', async () => {
+test('ScanLab-style roadmap selects the first blocked unfinished phase', async () => {
   const project = await scanFixture('scanlab-current-phase', {
     'docs/ROADMAP.md': [
       '# Roadmap', '',
-      '## Phase 2. Data ingestion', '',
-      'Status: in progress.', '',
+      '## Phase 3. Closed work', '', 'Status: closed.', '',
+      '## Phase 4. Review and export', '', 'Status: blocked.', '',
+      '## Phase 5. Later work', '', 'Status: blocked.', '',
     ].join('\n'),
     'docs/plans/legacy.md': '# Phase 9 - Historical\n\nStatus: in progress.\n',
   });
-  assert.equal(project.summary.currentPhase, '2 Data ingestion');
+  assert.equal(project.summary.currentPhase, '4 Review and export');
 });
 ```
 
 - [ ] **Step 2: Run test to verify RED**
 
 Run: `node --test --test-concurrency=1 tests/scan-trust.test.mjs`  
-Expected: FAIL because a non-roadmap phase can currently produce ambiguity and `null`.
+Expected: FAIL because a blocked roadmap phase currently produces `null`.
 
 - [ ] **Step 3: Write minimal implementation and OpenSpec deltas**
 
 ```js
 const roadmapFiles = new Set((docs ?? []).filter((doc) => doc.category === 'roadmap').map((doc) => doc.file));
-const activePhases = acc.phases.filter(
-  (phase) => phase.status === 'in_progress' && roadmapFiles.has(phase.file),
-);
-const currentPhase = activePhases.length === 1 ? activePhases[0] : null;
+const FINAL_PHASE_STATUSES = new Set(['accepted', 'closed', 'cancelled', 'superseded']);
+const currentPhase = acc.phases.find(
+  (phase) => roadmapFiles.has(phase.file) && !FINAL_PHASE_STATUSES.has(phase.status),
+) ?? null;
 ```
 
 Add OpenSpec scenarios that codify the source whitelist, bare-word exclusion, superseded quality warning, and roadmap-only phase derivation.

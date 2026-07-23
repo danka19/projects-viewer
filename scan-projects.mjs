@@ -179,6 +179,7 @@ const BLOCKED_GATED_KEYWORDS = [
   ['requires validation', /\brequires validation\b/i],
   ['cannot continue', /\bcannot continue\b/i],
   ['paused/deferred', /\bpaused\b|on hold|\bdeferred\b|resume later|planned later/i],
+  ['superseded', /\bsuperseded\b/i],
   ['block', /\bblock(?:ed|er|ers|ing|s)?\b/i],
   ['gate', /\bgate(?:d|s|way|keeping)?\b/i],
 ];
@@ -195,6 +196,28 @@ const AGENT_RULE_PATH_RE =
   /(^|\/)(agents?|claude)\.md$|(^|\/)(\.claude|skills|\.skills|prompts|documentation-rules|agent-rules)(\/|$)|(^|\/)docs\/agents?\//i;
 const PROCESS_POLICY_PATH_RE = /(^|\/)docs\/(rules|process|standards|guidelines)\//i;
 const EXAMPLE_TEMPLATE_PATH_RE = /(^|\/)(templates?|examples?)(\/|$)|(^|\/)docs\/(templates?|examples?)\//i;
+const EXPLICIT_CURRENT_BLOCKER_RE =
+  /\b(?:is|are|remains?|stays)\s+blocked\s+(?:by|until)\b|\bcannot continue\b|\bbug prevents progress\b|\bmissing required data\b/i;
+const SUPERSEDED_RE = /\bsuperseded\b/i;
+const REPLACEMENT_REFERENCE_RE = /\b(?:superseded by|replaced by|replacement\s*:|replacement\s+is)\b/i;
+const FINAL_PHASE_STATUSES = new Set(['accepted', 'closed', 'cancelled', 'superseded']);
+
+function isRoadmapSourceFile(file) {
+  return /(^|\/)roadmap\.md$/i.test(file);
+}
+
+function isCanonicalLiveStateSource(doc) {
+  const file = doc.file.toLowerCase();
+  return (
+    isRoadmapSourceFile(file) ||
+    file === 'docs/bugs.md' ||
+    /^openspec\/changes\/(?!archive\/)[^/]+\//.test(file)
+  );
+}
+
+function isExplicitCurrentBlocker(text) {
+  return !/^>/.test(text.trim()) && EXPLICIT_CURRENT_BLOCKER_RE.test(text);
+}
 
 // ------------------------------------------------------------------ walking
 
@@ -602,6 +625,7 @@ function parseDoc(content, doc, acc) {
   const isDecisionFile = doc.category === 'decision';
   const isClaudeFile = fileLower === 'claude.md';
   const isOpenSpecFile = /(^|\/)\.?openspec\//.test(fileLower);
+  const isCanonicalLiveSource = isCanonicalLiveStateSource(doc);
   // Rule, checklist, and template documents describe how to work, not what
   // the project's next action is: never source next-action signals from them.
   const allowNextSignals = pathBias(doc.file) === null && doc.category !== 'audit';
@@ -883,10 +907,33 @@ function parseDoc(content, doc, acc) {
       if (candidate && !acc.seenBlockedGatedCandidates.has(candidateKey)) {
         const isOpenSpecNormativeLine =
           inOpenSpecScenario && /^\s*[-*]\s+\*\*(?:WHEN|THEN|AND)\*\*/i.test(line);
+        const isSupersededWithoutReplacement =
+          SUPERSEDED_RE.test(bulletText) && !REPLACEMENT_REFERENCE_RE.test(bulletText);
         let signal =
-          candidate.includedInProjectStatus && !isCheckedTask && !isOpenSpecNormativeLine
+          candidate.includedInProjectStatus &&
+          isCanonicalLiveSource &&
+          !isCheckedTask &&
+          !isOpenSpecNormativeLine &&
+          !isSupersededWithoutReplacement
             ? classifyWorkSignal(trimmed)
             : null;
+        if (!isCanonicalLiveSource && candidate.includedInProjectStatus) {
+          candidate = {
+            ...candidate,
+            classification: 'process_policy',
+            includedInProjectStatus: false,
+            confidence: 'high',
+            reason: 'source is not a canonical current-state document',
+          };
+        } else if (isSupersededWithoutReplacement) {
+          candidate = {
+            ...candidate,
+            classification: 'process_policy',
+            includedInProjectStatus: false,
+            confidence: 'medium',
+            reason: 'superseded work lacks a replacement reference; quality warning only',
+          };
+        }
         if (isCheckedTask || isOpenSpecNormativeLine) {
           candidate = {
             ...candidate,
@@ -914,6 +961,16 @@ function parseDoc(content, doc, acc) {
             confidence: 'low',
             reason:
               'unchecked plan checkbox with blocker-like wording is treated as a task, not a live blocker',
+          };
+        }
+        if (signal?.group === 'realBlockers' && signal.kind !== 'rejection' && !isExplicitCurrentBlocker(trimmed)) {
+          signal = null;
+          candidate = {
+            ...candidate,
+            classification: 'process_policy',
+            includedInProjectStatus: false,
+            confidence: 'medium',
+            reason: 'blocker wording lacks an explicit current-work obstacle',
           };
         }
         if (candidate.includedInProjectStatus && !signal) {
@@ -1288,11 +1345,11 @@ function computeHealthScore({ coverage, acc, attention, lastModified, status, si
 
 function buildSummary({ acc, coverage, status, lastModified, attention, docs, signalGroups }) {
   const fileCategory = new Map((docs ?? []).map((d) => [d.file, d.category]));
-  // Current phase is an explicit trusted identity: exactly one in-progress
-  // phase. Ambiguity (several in progress) and gates (pending acceptance)
-  // stay null instead of fabricating a current phase.
-  const activePhases = acc.phases.filter((p) => p.status === 'in_progress');
-  const currentPhase = activePhases.length === 1 ? activePhases[0] : null;
+  // The roadmap, not incidental phase-like prose, owns the current phase.
+  // Its first unfinished phase remains current even when explicitly blocked.
+  const currentPhase = acc.phases.find(
+    (phase) => isRoadmapSourceFile(phase.file) && !FINAL_PHASE_STATUSES.has(phase.status),
+  ) ?? null;
 
   // Prefer live planning signals from roadmap docs over checklist meta-text.
   const scoreNext = (t) =>
